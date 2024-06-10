@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3 uid="uid://u1375je75c1f"]
+
+[ext_resource type="PackedScene" uid="uid://xyp0got3c5dp" path="res://scenes/LayoutPanel/LayoutPanel.tscn" id="1_hfx47"]
+
+[node name="Main" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="MenuBar" type="MenuBar" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Project" type="PopupMenu" parent="VBoxContainer/MenuBar"]
+title = "File"
+size = Vector2i(104, 116)
+item_count = 4
+item_0/text = "New ..."
+item_0/id = 2
+item_1/text = "Open ..."
+item_1/id = 3
+item_2/text = "Save"
+item_2/id = 0
+item_3/text = "Save As ..."
+item_3/id = 1
+
+[node name="ProjectTabs" type="TabContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Layout" parent="VBoxContainer/ProjectTabs" instance=ExtResource("1_hfx47")]
+layout_mode = 2
+
+[node name="BOM List" type="VBoxContainer" parent="VBoxContainer/ProjectTabs"]
+visible = false
+layout_mode = 2
