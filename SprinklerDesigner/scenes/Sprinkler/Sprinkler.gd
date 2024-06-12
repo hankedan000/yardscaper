@@ -21,6 +21,18 @@ const BODY_RADIUS_FT = 3.0 / 12.0
 			sweep_deg = 360 - sweep_deg
 		queue_redraw()
 
+@export var manufacturer : String = "" :
+	set(value):
+		manufacturer = value
+
+@export var model : String = "" :
+	set(value):
+		model = value
+
+@export var user_label : String = "" :
+	set(value):
+		user_label = value
+
 var show_min_dist := true :
 	set(value):
 		show_min_dist = value
@@ -55,19 +67,40 @@ func draw_sector(center: Vector2, radius: float, angle_from: float, angle_to: fl
 
 	draw_polygon(points, [color])
 
+func serialize():
+	var position_ft = Utils.px_to_ft_vec(position)
+	return {
+		'position_ft' : [position_ft.x, position_ft.y],
+		'rotation_deg' : int(rotation_degrees),
+		'sweep_deg' : int(sweep_deg),
+		'manufacturer' : manufacturer,
+		'model' : model,
+		'user_label' : user_label
+	}
+
+func deserialize(obj):
+	var pos_ft = obj['position_ft']
+	position = Vector2(Utils.ft_to_px(pos_ft[0]), Utils.ft_to_px(pos_ft[1]))
+	rotation_degrees = obj['rotation_deg']
+	sweep_deg = obj['sweep_deg']
+	manufacturer = obj['manufacturer']
+	model = obj['model']
+	user_label = obj['user_label']
+
 func _draw():
 	var stop_angle = rotation + deg_to_rad(sweep_deg)
 	var water_color = Color.AQUA
 	water_color.a = 0.7
 	var max_radius = Utils.ft_to_px(max_dist_ft)
 	var min_radius = Utils.ft_to_px(min_dist_ft)
+	var center = Vector2()
 	if show_water:
-		draw_sector(global_position, max_radius, rotation, stop_angle, ARC_POINTS, water_color)
+		draw_sector(center, max_radius, rotation, stop_angle, ARC_POINTS, water_color)
 	if show_min_dist:
-		draw_arc(global_position, min_radius, rotation, stop_angle, ARC_POINTS, Color.BLUE, 1.0)
+		draw_arc(center, min_radius, rotation, stop_angle, ARC_POINTS, Color.BLUE, 1.0)
 	if show_max_dist:
-		draw_arc(global_position, max_radius, rotation, stop_angle, ARC_POINTS, Color.RED, 1.0)
+		draw_arc(center, max_radius, rotation, stop_angle, ARC_POINTS, Color.RED, 1.0)
 	if show_indicator:
-		draw_circle(global_position, Utils.ft_to_px(BODY_RADIUS_FT * 2), Color.YELLOW)
+		draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT * 2), Color.YELLOW)
 	# draw body
-	draw_circle(global_position, Utils.ft_to_px(BODY_RADIUS_FT), Color.BLACK)
+	draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT), Color.BLACK)

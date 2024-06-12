@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://u1375je75c1f"]
+[gd_scene load_steps=3 format=3 uid="uid://u1375je75c1f"]
 
+[ext_resource type="Script" path="res://scenes/Main/Main.gd" id="1_bcdjs"]
 [ext_resource type="PackedScene" uid="uid://xyp0got3c5dp" path="res://scenes/LayoutPanel/LayoutPanel.tscn" id="1_hfx47"]
 
 [node name="Main" type="PanelContainer"]
@@ -8,6 +9,23 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_bcdjs")
+
+[node name="OpenDialog" type="FileDialog" parent="."]
+title = "Open a Project"
+size = Vector2i(900, 600)
+ok_button_text = "Select Current Folder"
+mode_overrides_title = false
+file_mode = 2
+access = 2
+
+[node name="SaveAsDialog" type="FileDialog" parent="."]
+title = "Save Project As ..."
+size = Vector2i(900, 600)
+ok_button_text = "Select Current Folder"
+mode_overrides_title = false
+file_mode = 2
+access = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -16,7 +34,7 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="Project" type="PopupMenu" parent="VBoxContainer/MenuBar"]
-title = "File"
+title = "Project"
 size = Vector2i(104, 116)
 item_count = 4
 item_0/text = "New ..."
@@ -38,3 +56,7 @@ layout_mode = 2
 [node name="BOM List" type="VBoxContainer" parent="VBoxContainer/ProjectTabs"]
 visible = false
 layout_mode = 2
+
+[connection signal="dir_selected" from="OpenDialog" to="." method="_on_open_dialog_dir_selected"]
+[connection signal="dir_selected" from="SaveAsDialog" to="." method="_on_save_as_dialog_dir_selected"]
+[connection signal="id_pressed" from="VBoxContainer/MenuBar/Project" to="." method="_on_project_id_pressed"]
