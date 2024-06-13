@@ -1,6 +1,8 @@
 extends Node
 
+signal opened()
 signal sprinkler_changed(sprink, change_type)
+signal has_edits_changed(has_edits)
 
 enum ChangeType {
 	ADD,
@@ -8,35 +10,57 @@ enum ChangeType {
 	MODIFIED
 }
 
+var project_path = ""
 var sprinklers = []
+var has_edits = false :
+	set(value):
+		var old_value = has_edits
+		has_edits = value
+		if old_value != has_edits and not _suppress_self_edit_signals:
+			emit_signal('has_edits_changed', has_edits)
+
+var _suppress_self_edit_signals = false
 
 func reset():
+	_suppress_self_edit_signals = true
 	while not sprinklers.is_empty():
 		remove_sprinkler(sprinklers.front())
+	_suppress_self_edit_signals = false
+	self.has_edits = false
 
-func save(filepath):
+func open(dir: String):
+	var json_filepath = dir.path_join("project.json")
+	var json_file = FileAccess.open(json_filepath, FileAccess.READ)
+	var proj_str = json_file.get_as_text()
+	var json = JSON.new()
+	if json.parse(proj_str) == OK:
+		deserialize(json.data)
+		project_path = dir
+		self.has_edits = false
+		emit_signal('opened')
+	else:
+		printerr("failed to open to '%s'" % [json_filepath])
+		return false
+	return true
+
+func save():
+	return save_as(project_path)
+
+func save_as(dir: String):
 	var proj_str = JSON.stringify(
 		serialize(),
 		" ",  # indent
 		true, # sort_keys
 		true) # full_precision
-	var file = FileAccess.open(filepath, FileAccess.WRITE)
-	if file:
-		file.store_string(proj_str)
-		file.close()
+	var json_filepath = dir.path_join("project.json")
+	var json_file = FileAccess.open(json_filepath, FileAccess.WRITE)
+	if json_file:
+		json_file.store_string(proj_str)
+		json_file.close()
+		project_path = dir
+		self.has_edits = false
 	else:
-		printerr("failed to save to '%s'" % [filepath])
-		return false
-	return true
-
-func load(filepath):
-	var file = FileAccess.open(filepath, FileAccess.READ)
-	var proj_str = file.get_as_text()
-	var json = JSON.new()
-	if json.parse(proj_str) == OK:
-		deserialize(json.data)
-	else:
-		printerr("failed to open to '%s'" % [filepath])
+		printerr("failed to save to '%s'" % [json_filepath])
 		return false
 	return true
 
@@ -44,6 +68,7 @@ func add_sprinkler(sprink: Sprinkler):
 	if not sprinklers.has(sprink):
 		sprinklers.append(sprink)
 		emit_signal('sprinkler_changed', sprink, ChangeType.ADD)
+		self.has_edits = true
 	else:
 		push_warning("sprinkler %s is already added to project. ignoring add." % sprink.name)
 
@@ -51,6 +76,7 @@ func remove_sprinkler(sprink: Sprinkler):
 	if sprinklers.has(sprink):
 		sprinklers.erase(sprink)
 		emit_signal('sprinkler_changed', sprink, ChangeType.REMOVE)
+		self.has_edits = true
 	else:
 		push_warning("sprinkler %s is not in the project. ignoring remove." % sprink.name)
 
@@ -66,8 +92,10 @@ func serialize():
 	}
 
 func deserialize(obj):
+	_suppress_self_edit_signals = true
 	reset()
 	for sprink_ser in obj['sprinklers']:
 		var sprink := Sprinkler.new()
 		sprink.deserialize(sprink_ser)
 		add_sprinkler(sprink)
+	_suppress_self_edit_signals = false
