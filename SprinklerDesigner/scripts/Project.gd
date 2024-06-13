@@ -26,7 +26,7 @@ func reset():
 	while not sprinklers.is_empty():
 		remove_sprinkler(sprinklers.front())
 	_suppress_self_edit_signals = false
-	self.has_edits = false
+	has_edits = false
 
 func open(dir: String):
 	var json_filepath = dir.path_join("project.json")
@@ -36,7 +36,7 @@ func open(dir: String):
 	if json.parse(proj_str) == OK:
 		deserialize(json.data)
 		project_path = dir
-		self.has_edits = false
+		has_edits = false
 		emit_signal('opened')
 	else:
 		printerr("failed to open to '%s'" % [json_filepath])
@@ -58,7 +58,7 @@ func save_as(dir: String):
 		json_file.store_string(proj_str)
 		json_file.close()
 		project_path = dir
-		self.has_edits = false
+		has_edits = false
 	else:
 		printerr("failed to save to '%s'" % [json_filepath])
 		return false
@@ -66,9 +66,10 @@ func save_as(dir: String):
 
 func add_sprinkler(sprink: Sprinkler):
 	if not sprinklers.has(sprink):
+		sprink.connect('moved', _on_sprinkler_moved)
 		sprinklers.append(sprink)
 		emit_signal('sprinkler_changed', sprink, ChangeType.ADD)
-		self.has_edits = true
+		has_edits = true
 	else:
 		push_warning("sprinkler %s is already added to project. ignoring add." % sprink.name)
 
@@ -76,7 +77,7 @@ func remove_sprinkler(sprink: Sprinkler):
 	if sprinklers.has(sprink):
 		sprinklers.erase(sprink)
 		emit_signal('sprinkler_changed', sprink, ChangeType.REMOVE)
-		self.has_edits = true
+		has_edits = true
 	else:
 		push_warning("sprinkler %s is not in the project. ignoring remove." % sprink.name)
 
@@ -99,3 +100,8 @@ func deserialize(obj):
 		sprink.deserialize(sprink_ser)
 		add_sprinkler(sprink)
 	_suppress_self_edit_signals = false
+
+func _on_sprinkler_moved(sprink, from_xy, to_xy):
+	print("sprinkler '%s' moved %s -> %s" % [sprink.name, from_xy, to_xy])
+	emit_signal('sprinkler_changed', sprink, ChangeType.MODIFIED)
+	has_edits = true

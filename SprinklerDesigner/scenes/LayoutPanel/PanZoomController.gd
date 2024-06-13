@@ -33,9 +33,11 @@ func _input(event):
 					_dragging = true
 					_drag_start = event.position
 					_camera_original_position = camera.position
+					Input.set_default_cursor_shape(Input.CURSOR_DRAG)
 				else:
 					# Stop dragging
 					_dragging = false
+					Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 			MOUSE_BUTTON_WHEEL_UP:
 				zoom_in(event.position)
 			MOUSE_BUTTON_WHEEL_DOWN:

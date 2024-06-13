@@ -13,41 +13,116 @@ grow_vertical = 2
 script = ExtResource("1_h3dfu")
 SprinklerScene = ExtResource("2_nuxou")
 
-[node name="Layout" type="VBoxContainer" parent="."]
+[node name="HSplitContainer" type="HSplitContainer" parent="."]
 layout_mode = 2
 
-[node name="LayoutToolbar" type="HBoxContainer" parent="Layout"]
-layout_mode = 2
-
-[node name="AddSprinkler" type="Button" parent="Layout/LayoutToolbar"]
-layout_mode = 2
-text = "+"
-
-[node name="SprinklerProperties" type="HBoxContainer" parent="Layout/LayoutToolbar"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Layout/LayoutToolbar/SprinklerProperties"]
-layout_mode = 2
-text = "rotation: "
-
-[node name="RotationSpinBox" type="SpinBox" parent="Layout/LayoutToolbar/SprinklerProperties"]
-layout_mode = 2
-max_value = 360.0
-suffix = "deg"
-
-[node name="Label2" type="Label" parent="Layout/LayoutToolbar/SprinklerProperties"]
-layout_mode = 2
-text = "sweep: "
-
-[node name="SweepSpinbox" type="SpinBox" parent="Layout/LayoutToolbar/SprinklerProperties"]
-layout_mode = 2
-max_value = 360.0
-
-[node name="World" type="Control" parent="Layout"]
+[node name="PropertiesPanel" type="PanelContainer" parent="HSplitContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ViewportContainer" type="SubViewportContainer" parent="Layout/World"]
+[node name="VBox" type="VBoxContainer" parent="HSplitContainer/PropertiesPanel"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HSplitContainer/PropertiesPanel/VBox"]
+layout_mode = 2
+text = "Properties:"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HSplitContainer/PropertiesPanel/VBox"]
+custom_minimum_size = Vector2(225, 0)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="PropertiesList" type="GridContainer" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 2
+
+[node name="Label" type="Label" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+text = "Label: "
+
+[node name="UserLabelLineEdit" type="LineEdit" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "User-definable label for this sprinkler"
+
+[node name="Label2" type="Label" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+text = "Sweep: "
+
+[node name="SweepSpinBox" type="SpinBox" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+tooltip_text = "Total spray angle or rotor's swept angle"
+max_value = 360.0
+suffix = "deg"
+
+[node name="Label3" type="Label" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+text = "Rotation: "
+
+[node name="RotationSpinBox" type="SpinBox" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+tooltip_text = "Angle sprinkler body"
+max_value = 359.0
+suffix = "deg"
+
+[node name="Label4" type="Label" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+text = "Manufacturer: "
+
+[node name="ManufacturerLineEdit" type="LineEdit" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+
+[node name="Label5" type="Label" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+text = "Model: "
+
+[node name="ModelLineEdit" type="LineEdit" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+
+[node name="Label6" type="Label" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+text = "Min Distance: "
+
+[node name="MinDistanceSpinBox" type="SpinBox" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+editable = false
+suffix = "ft"
+
+[node name="Label7" type="Label" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+text = "Max Distance: "
+
+[node name="MaxDistanceSpinBox" type="SpinBox" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+editable = false
+suffix = "ft"
+
+[node name="Label8" type="Label" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+text = "Distance: "
+
+[node name="DistanceSpinBox" type="SpinBox" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+layout_mode = 2
+suffix = "ft"
+
+[node name="Layout" type="VBoxContainer" parent="HSplitContainer"]
+layout_mode = 2
+
+[node name="LayoutToolbar" type="HBoxContainer" parent="HSplitContainer/Layout"]
+layout_mode = 2
+
+[node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
+layout_mode = 2
+text = "+"
+
+[node name="World" type="Control" parent="HSplitContainer/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="HSplitContainer/Layout/World"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -57,17 +132,17 @@ grow_vertical = 2
 size_flags_vertical = 3
 stretch = true
 
-[node name="Viewport" type="SubViewport" parent="Layout/World/ViewportContainer"]
+[node name="Viewport" type="SubViewport" parent="HSplitContainer/Layout/World/ViewportContainer"]
 transparent_bg = true
 handle_input_locally = false
-size = Vector2i(1280, 685)
+size = Vector2i(1043, 685)
 render_target_update_mode = 4
 
-[node name="PanZoomController" parent="Layout/World/ViewportContainer/Viewport" instance=ExtResource("1_bdy7t")]
+[node name="PanZoomController" parent="HSplitContainer/Layout/World/ViewportContainer/Viewport" instance=ExtResource("1_bdy7t")]
 
-[node name="Camera2D" type="Camera2D" parent="Layout/World/ViewportContainer/Viewport"]
+[node name="Camera2D" type="Camera2D" parent="HSplitContainer/Layout/World/ViewportContainer/Viewport"]
 
-[node name="MousePosLabel" type="Label" parent="Layout/World"]
+[node name="MousePosLabel" type="Label" parent="HSplitContainer/Layout/World"]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -76,6 +151,10 @@ offset_top = -23.0
 offset_right = 40.0
 grow_vertical = 0
 
-[connection signal="pressed" from="Layout/LayoutToolbar/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
-[connection signal="value_changed" from="Layout/LayoutToolbar/SprinklerProperties/RotationSpinBox" to="." method="_on_rotation_spin_box_value_changed"]
-[connection signal="value_changed" from="Layout/LayoutToolbar/SprinklerProperties/SweepSpinbox" to="." method="_on_sweep_spinbox_value_changed"]
+[connection signal="text_submitted" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/UserLabelLineEdit" to="." method="_on_user_label_line_edit_text_submitted"]
+[connection signal="value_changed" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/SweepSpinBox" to="." method="_on_sweep_spin_box_value_changed"]
+[connection signal="value_changed" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/RotationSpinBox" to="." method="_on_rotation_spin_box_value_changed"]
+[connection signal="text_submitted" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/ManufacturerLineEdit" to="." method="_on_manufacturer_line_edit_text_submitted"]
+[connection signal="text_submitted" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/ModelLineEdit" to="." method="_on_model_line_edit_text_submitted"]
+[connection signal="value_changed" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/DistanceSpinBox" to="." method="_on_distance_spin_box_value_changed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
