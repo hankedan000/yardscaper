@@ -5,47 +5,98 @@ signal moved(sprink, from_xy, to_xy)
 
 const ARC_POINTS = 32
 const BODY_RADIUS_FT = 3.0 / 12.0
+const DEFAULT_MIN_DIST_FT = 8.0
+const DEFAULT_MAX_DIST_FT = 14.0
+const DEFAULT_MIN_SWEEP_DEG = 0.0
+const DEFAULT_MAX_SWEEP_DEG = 360.0
 
-@export var min_dist_ft := 7.0 :
+func is_set(value: float):
+	return not is_nan(value)
+
+var min_dist_ft : float = NAN :
+	get:
+		if is_set(min_dist_ft):
+			return min_dist_ft
+		if _head_info:
+			return _head_info['min_dist_ft']
+		return DEFAULT_MIN_DIST_FT
 	set(value):
 		min_dist_ft = value
 		queue_redraw()
 
-@export var max_dist_ft := 14.0 :
+var max_dist_ft : float = NAN :
+	get:
+		if is_set(max_dist_ft):
+			return max_dist_ft
+		if _head_info:
+			return _head_info['max_dist_ft']
+		return DEFAULT_MAX_DIST_FT
 	set(value):
 		max_dist_ft = value
 		queue_redraw()
 
-@export var dist_ft := max_dist_ft :
+var dist_ft : float = NAN :
+	get:
+		if is_set(dist_ft):
+			return dist_ft
+		return max_dist_ft
 	set(value):
 		dist_ft = value
 		queue_redraw()
 
-@export var sweep_deg : int = 360 :
+var min_sweep_deg : float = NAN :
+	get:
+		if is_set(min_sweep_deg):
+			return min_sweep_deg
+		if _head_info:
+			return _head_info['min_sweep_deg']
+		return DEFAULT_MIN_SWEEP_DEG
+	set(value):
+		min_sweep_deg = value
+		queue_redraw()
+
+var max_sweep_deg : float = NAN :
+	get:
+		if is_set(max_sweep_deg):
+			return max_sweep_deg
+		if _head_info:
+			return _head_info['max_sweep_deg']
+		return DEFAULT_MAX_SWEEP_DEG
+	set(value):
+		max_sweep_deg = value
+		queue_redraw()
+
+var sweep_deg : float = NAN :
+	get:
+		if is_set(sweep_deg):
+			return sweep_deg
+		return max_sweep_deg
 	set(value):
 		sweep_deg = int(round(value)) % 361
 		if sweep_deg < 0:
 			sweep_deg = 360 - sweep_deg
 		queue_redraw()
 
-@export var manufacturer : String = "" :
+var manufacturer : String = "" :
 	set(value):
 		manufacturer = value
+		_head_info = TheSprinklerDb.get_head_info(manufacturer, model)
 
-@export var model : String = "" :
+var model : String = "" :
 	set(value):
 		model = value
+		_head_info = TheSprinklerDb.get_head_info(manufacturer, model)
 
-@export var user_label : String = "" :
+var user_label : String = "" :
 	set(value):
 		user_label = value
 
-var show_min_dist := true :
+var show_min_dist := false :
 	set(value):
 		show_min_dist = value
 		queue_redraw()
 
-var show_max_dist := true :
+var show_max_dist := false :
 	set(value):
 		show_max_dist = value
 		queue_redraw()
@@ -61,6 +112,7 @@ var show_indicator := false :
 		queue_redraw()
 
 var _pos_at_move_start_xy = null
+var _head_info = null
 
 func moving() -> bool:
 	return _pos_at_move_start_xy != null

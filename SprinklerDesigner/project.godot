@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Utils="*res://scripts/Utils.gd"
 TheProject="*res://scripts/Project.gd"
+TheSprinklerDb="*res://scripts/SprinklerDB.gd"
 
 [display]
 

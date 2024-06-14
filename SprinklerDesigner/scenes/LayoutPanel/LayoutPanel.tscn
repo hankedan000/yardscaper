@@ -83,6 +83,7 @@ text = "Model: "
 layout_mode = 2
 
 [node name="Label6" type="Label" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+modulate = Color(0.161111, 0.18994, 1, 1)
 layout_mode = 2
 text = "Min Distance: "
 
@@ -92,6 +93,7 @@ editable = false
 suffix = "ft"
 
 [node name="Label7" type="Label" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList"]
+modulate = Color(1, 0.186899, 0.216748, 1)
 layout_mode = 2
 text = "Max Distance: "
 
@@ -116,7 +118,12 @@ layout_mode = 2
 
 [node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
-text = "+"
+text = "Add"
+
+[node name="RemoveSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
+layout_mode = 2
+disabled = true
+text = "Remove"
 
 [node name="World" type="Control" parent="HSplitContainer/Layout"]
 layout_mode = 2
@@ -158,3 +165,4 @@ grow_vertical = 0
 [connection signal="text_submitted" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/ModelLineEdit" to="." method="_on_model_line_edit_text_submitted"]
 [connection signal="value_changed" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/DistanceSpinBox" to="." method="_on_distance_spin_box_value_changed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/RemoveSprinkler" to="." method="_on_remove_sprinkler_pressed"]

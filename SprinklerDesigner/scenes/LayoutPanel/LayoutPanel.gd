@@ -15,6 +15,8 @@ extends PanelContainer
 @onready var pan_zoom_ctrl            := $HSplitContainer/Layout/World/ViewportContainer/Viewport/PanZoomController
 @onready var mouse_pos_label          := $HSplitContainer/Layout/World/MousePosLabel
 
+@onready var remove_sprinkler_button  := $HSplitContainer/Layout/LayoutToolbar/RemoveSprinkler
+
 @export var SprinklerScene : PackedScene = null
 
 enum Mode {
@@ -30,14 +32,18 @@ var selected_sprinkler : Sprinkler = null :
 		# release indicator for selectr spinkler
 		if selected_sprinkler:
 			selected_sprinkler.show_indicator = false
+			selected_sprinkler.show_min_dist = false
+			selected_sprinkler.show_max_dist = false
 		
-		# set to null first so property pane signals don't edit the previously
-		# selected sprinkler while we're loading in the new properties into
-		# the pane
+		# set to null first so property pane signals doesn't edit the
+		# previously selected sprinkler while we're loading in the new
+		# properties into the pane
 		selected_sprinkler = null
 		
 		if sprink:
 			sprink.show_indicator = true
+			sprink.show_min_dist = true
+			sprink.show_max_dist = true
 			user_label_lineedit.text = sprink.user_label
 			rot_spinbox.value = sprink.rotation_degrees
 			sweep_spinbox.value = sprink.sweep_deg
@@ -51,6 +57,7 @@ var selected_sprinkler : Sprinkler = null :
 		
 		selected_sprinkler = sprink
 		properties_list.visible = selected_sprinkler != null
+		remove_sprinkler_button.disabled = selected_sprinkler == null
 
 var _held_sprinkler : Sprinkler = null
 
@@ -135,6 +142,11 @@ func _on_add_sprinkler_pressed():
 	sprinkler_to_add.position = _global_xy_to_pos_in_world(get_global_mouse_position())
 	world_viewport.add_child(sprinkler_to_add)
 	mode = Mode.AddSprinkler
+
+func _on_remove_sprinkler_pressed():
+	if selected_sprinkler:
+		TheProject.remove_sprinkler(selected_sprinkler)
+		selected_sprinkler = null
 
 func _on_project_sprinkler_changed(sprink, change_type):
 	var sprink_in_world = sprink.get_parent() == world_viewport
