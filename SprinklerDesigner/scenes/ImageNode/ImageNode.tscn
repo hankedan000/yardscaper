@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://d3cwej23wp4gk"]
+
+[ext_resource type="Script" path="res://scenes/ImageNode/ImageNode.gd" id="1_6j5x1"]
+
+[node name="ImageNode" type="Node2D"]
+script = ExtResource("1_6j5x1")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0

@@ -1,7 +1,9 @@
 extends Node
 
 signal opened()
+signal closed()
 signal sprinkler_changed(sprink, change_type)
+signal image_changed(img, change_type)
 signal has_edits_changed(has_edits)
 
 enum ChangeType {
@@ -10,8 +12,11 @@ enum ChangeType {
 	MODIFIED
 }
 
+var ImageNodeScene : PackedScene = preload("res://scenes/ImageNode/ImageNode.tscn")
+
 var project_path = ""
 var sprinklers = []
+var images = []
 var has_edits = false :
 	set(value):
 		var old_value = has_edits
@@ -27,6 +32,10 @@ func reset():
 		remove_sprinkler(sprinklers.front())
 	_suppress_self_edit_signals = false
 	has_edits = false
+	emit_signal('closed')
+
+func is_opened() -> bool:
+	return len(project_path) > 0
 
 func open(dir: String):
 	var json_filepath = dir.path_join("project.json")
@@ -34,8 +43,8 @@ func open(dir: String):
 	var proj_str = json_file.get_as_text()
 	var json = JSON.new()
 	if json.parse(proj_str) == OK:
-		deserialize(json.data)
 		project_path = dir
+		deserialize(json.data)
 		has_edits = false
 		emit_signal('opened')
 	else:
@@ -62,6 +71,15 @@ func save_as(dir: String):
 	else:
 		printerr("failed to save to '%s'" % [json_filepath])
 		return false
+	
+	# create image directory
+	var img_dir = get_img_dir()
+	if DirAccess.dir_exists_absolute(img_dir):
+		pass # nothing to make
+	elif DirAccess.make_dir_absolute(img_dir) != OK:
+		printerr("failed to create img dir in '%s'" % [img_dir])
+		return false
+	
 	return true
 
 func add_sprinkler(sprink: Sprinkler):
@@ -81,27 +99,72 @@ func remove_sprinkler(sprink: Sprinkler):
 	else:
 		push_warning("sprinkler %s is not in the project. ignoring remove." % sprink.name)
 
+func get_img_dir():
+	if len(project_path) == 0:
+		push_error("need to set project_path first before you can add images")
+	return project_path.path_join("imgs")
+
+func load_image(filename: String):
+	var img_path = get_img_dir().path_join(filename)
+	return Image.load_from_file(img_path)
+
+func add_image(path: String) -> bool:
+	var filename = path.get_file()
+	# make sure we don't already have an image with that name imported
+	for img in images:
+		if filename == img.filename:
+			push_warning("image with filename '%s' already imported" % filename)
+			return false
+	
+	# copy image into project directories img dir
+	var img_path = get_img_dir().path_join(filename)
+	if DirAccess.copy_absolute(path, img_path) != OK:
+		push_warning("failed to copy '%s' to '%s'" % [path, img_path])
+		return false
+	var img = Image.load_from_file(img_path)
+	if not (img is Image):
+		push_warning("failed to load image '%s'" % [img_path])
+		return false
+	
+	# load image and create a new ImageNode
+	var img_node : ImageNode = ImageNodeScene.instantiate()
+	img_node.filename = filename
+	images.append(img_node)
+	emit_signal('image_changed', img_node, ChangeType.ADD)
+	has_edits = true
+	return true
+
 func serialize():
-	# serialize all sprinkler objecs
+	# serialize all sprinkler objects
 	var sprinklers_ser = []
 	for sprink in sprinklers:
 		sprinklers_ser.append(sprink.serialize())
 	
+	# serialize all image objects
+	var images_ser = []
+	for img in images:
+		images_ser.append(img.serialize())
+	
 	# return final serialized object
 	return {
-		'sprinklers' : sprinklers_ser
+		'sprinklers' : sprinklers_ser,
+		'images' : images_ser
 	}
 
 func deserialize(obj):
 	_suppress_self_edit_signals = true
 	reset()
-	for sprink_ser in obj['sprinklers']:
+	for sprink_ser in Utils.dict_get(obj, 'sprinklers', []):
 		var sprink := Sprinkler.new()
 		sprink.deserialize(sprink_ser)
 		add_sprinkler(sprink)
+	for img_ser in Utils.dict_get(obj, 'images', []):
+		var img_node := ImageNodeScene.instantiate()
+		img_node.deserialize(img_ser)
+		images.append(img_node)
+		emit_signal('image_changed', img_node, ChangeType.ADD)
 	_suppress_self_edit_signals = false
 
 func _on_sprinkler_moved(sprink, from_xy, to_xy):
-	print("sprinkler '%s' moved %s -> %s" % [sprink.name, from_xy, to_xy])
 	emit_signal('sprinkler_changed', sprink, ChangeType.MODIFIED)
 	has_edits = true

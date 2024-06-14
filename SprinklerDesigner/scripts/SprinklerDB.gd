@@ -270,13 +270,13 @@ func get_manufacturer_db(manufacturer: String):
 	return null
 
 func get_head_models(manufacturer: String):
-	var manu_db : Dictionary = get_manufacturer_db(manufacturer)
-	if manu_db:
+	var manu_db = get_manufacturer_db(manufacturer)
+	if manu_db is Dictionary:
 		return manu_db['heads'].keys()
 	return null
 
 func get_head_info(manufacturer: String, head_model: String):
-	var manu_db : Dictionary = get_manufacturer_db(manufacturer)
-	if manu_db and head_model in manu_db['heads']:
+	var manu_db = get_manufacturer_db(manufacturer)
+	if manu_db is Dictionary and head_model in manu_db['heads']:
 		return manu_db['heads'][head_model]
 	return null

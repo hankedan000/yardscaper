@@ -13,6 +13,14 @@ grow_vertical = 2
 script = ExtResource("1_h3dfu")
 SprinklerScene = ExtResource("2_nuxou")
 
+[node name="ImgDialog" type="FileDialog" parent="."]
+title = "Import an Image"
+size = Vector2i(900, 600)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.jpg", "*.png", "*.bmp", "*.jpeg")
+
 [node name="HSplitContainer" type="HSplitContainer" parent="."]
 layout_mode = 2
 
@@ -118,7 +126,13 @@ layout_mode = 2
 
 [node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
-text = "Add"
+text = "Add Sprinkler"
+
+[node name="AddImage" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
+layout_mode = 2
+tooltip_text = "Add image to project. Project needs to be saved before you can add images."
+disabled = true
+text = "Add Image"
 
 [node name="RemoveSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
@@ -158,6 +172,7 @@ offset_top = -23.0
 offset_right = 40.0
 grow_vertical = 0
 
+[connection signal="file_selected" from="ImgDialog" to="." method="_on_img_dialog_file_selected"]
 [connection signal="text_submitted" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/UserLabelLineEdit" to="." method="_on_user_label_line_edit_text_submitted"]
 [connection signal="value_changed" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/SweepSpinBox" to="." method="_on_sweep_spin_box_value_changed"]
 [connection signal="value_changed" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/RotationSpinBox" to="." method="_on_rotation_spin_box_value_changed"]
@@ -165,4 +180,5 @@ grow_vertical = 0
 [connection signal="text_submitted" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/ModelLineEdit" to="." method="_on_model_line_edit_text_submitted"]
 [connection signal="value_changed" from="HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/DistanceSpinBox" to="." method="_on_distance_spin_box_value_changed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddImage" to="." method="_on_add_image_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/RemoveSprinkler" to="." method="_on_remove_sprinkler_pressed"]

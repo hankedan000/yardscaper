@@ -1,5 +1,7 @@
 extends PanelContainer
 
+@onready var img_dialog               := $ImgDialog
+
 @onready var properties_list          := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList
 @onready var user_label_lineedit      := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/UserLabelLineEdit
 @onready var rot_spinbox              := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/RotationSpinBox
@@ -9,6 +11,8 @@ extends PanelContainer
 @onready var min_dist_spinbox         := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/MinDistanceSpinBox
 @onready var max_dist_spinbox         := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/MaxDistanceSpinBox
 @onready var dist_spinbox             := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/DistanceSpinBox
+
+@onready var add_img_button           := $HSplitContainer/Layout/LayoutToolbar/AddImage
 
 @onready var world_viewport_container := $HSplitContainer/Layout/World/ViewportContainer
 @onready var world_viewport           := $HSplitContainer/Layout/World/ViewportContainer/Viewport
@@ -62,7 +66,10 @@ var selected_sprinkler : Sprinkler = null :
 var _held_sprinkler : Sprinkler = null
 
 func _ready():
-	TheProject.sprinkler_changed.connect(_on_project_sprinkler_changed)
+	TheProject.sprinkler_changed.connect(_on_TheProject_sprinkler_changed)
+	TheProject.image_changed.connect(_on_TheProject_image_changed)
+	TheProject.opened.connect(_on_TheProject_opened)
+	TheProject.closed.connect(_on_TheProject_closed)
 	properties_list.visible = false
 	
 func _input(event):
@@ -88,10 +95,6 @@ func _input(event):
 					_held_sprinkler.start_move()
 				_held_sprinkler.position = pos_in_world_px
 
-func _is_over_sprinkler(pos_in_world_px: Vector2, sprink: Sprinkler) -> bool:
-	var dist_px = (sprink.position - pos_in_world_px).length()
-	return dist_px <= Utils.ft_to_px(sprink.max_dist_ft)
-
 func _handle_left_click(click_pos: Vector2):
 	# ignore clicks that are outside the world viewpoint
 	if not _is_point_over_world(click_pos):
@@ -102,21 +105,29 @@ func _handle_left_click(click_pos: Vector2):
 			var pos_in_world_px = _global_xy_to_pos_in_world(click_pos)
 			var smallest_dist_px = null
 			var nearest_sprink = null
+			var selected_image = null
 			for child in world_viewport.get_children():
 				if child is Sprinkler:
 					var dist_px = (child.position - pos_in_world_px).length()
-					if dist_px > Utils.ft_to_px(child.max_dist_ft):
+					if dist_px > Utils.ft_to_px(child.dist_ft):
 						continue
 					
 					if not nearest_sprink or (nearest_sprink and dist_px <= smallest_dist_px):
 						smallest_dist_px = dist_px
 						nearest_sprink = child
+				elif child is ImageNode:
+					var img_rect = Rect2(child.position, child.get_img_size())
+					if img_rect.has_point(pos_in_world_px):
+						selected_image = child
 			
 			if nearest_sprink != null and selected_sprinkler == nearest_sprink:
 				_held_sprinkler = selected_sprinkler
 				Input.set_default_cursor_shape(Input.CURSOR_MOVE)
-			else:
+			elif nearest_sprink:
 				selected_sprinkler = nearest_sprink
+			elif selected_image:
+				# TODO handle image selection logic
+				pass
 		Mode.AddSprinkler:
 			TheProject.add_sprinkler(sprinkler_to_add)
 			sprinkler_to_add = null
@@ -143,12 +154,15 @@ func _on_add_sprinkler_pressed():
 	world_viewport.add_child(sprinkler_to_add)
 	mode = Mode.AddSprinkler
 
+func _on_add_image_pressed():
+	img_dialog.popup_centered()
+
 func _on_remove_sprinkler_pressed():
 	if selected_sprinkler:
 		TheProject.remove_sprinkler(selected_sprinkler)
 		selected_sprinkler = null
 
-func _on_project_sprinkler_changed(sprink, change_type):
+func _on_TheProject_sprinkler_changed(sprink, change_type):
 	var sprink_in_world = sprink.get_parent() == world_viewport
 	match change_type:
 		TheProject.ChangeType.ADD:
@@ -157,6 +171,22 @@ func _on_project_sprinkler_changed(sprink, change_type):
 		TheProject.ChangeType.REMOVE:
 			if sprink_in_world:
 				world_viewport.remove_child(sprink)
+
+func _on_TheProject_image_changed(img_node, change_type):
+	var img_in_world = img_node.get_parent() == world_viewport
+	match change_type:
+		TheProject.ChangeType.ADD:
+			if not img_in_world:
+				world_viewport.add_child(img_node)
+		TheProject.ChangeType.REMOVE:
+			if img_in_world:
+				world_viewport.remove_child(img_node)
+
+func _on_TheProject_opened():
+	add_img_button.disabled = false
+
+func _on_TheProject_closed():
+	add_img_button.disabled = true
 
 func _on_user_label_line_edit_text_submitted(new_text):
 	if selected_sprinkler:
@@ -181,3 +211,6 @@ func _on_model_line_edit_text_submitted(new_text):
 func _on_distance_spin_box_value_changed(value):
 	if selected_sprinkler:
 		selected_sprinkler.dist_ft = value
+
+func _on_img_dialog_file_selected(path):
+	TheProject.add_image(path)
