@@ -19,7 +19,7 @@ extends PanelContainer
 @onready var pan_zoom_ctrl            := $HSplitContainer/Layout/World/ViewportContainer/Viewport/PanZoomController
 @onready var mouse_pos_label          := $HSplitContainer/Layout/World/MousePosLabel
 
-@onready var remove_sprinkler_button  := $HSplitContainer/Layout/LayoutToolbar/RemoveSprinkler
+@onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/RemoveButton
 
 @export var SprinklerScene : PackedScene = null
 
@@ -31,39 +31,27 @@ enum Mode {
 var mode = Mode.Idle
 var sprinkler_to_add : Sprinkler = null
 
-var selected_sprinkler : Sprinkler = null :
-	set(sprink):
-		# release indicator for selectr spinkler
-		if selected_sprinkler:
-			selected_sprinkler.show_indicator = false
-			selected_sprinkler.show_min_dist = false
-			selected_sprinkler.show_max_dist = false
+var selected_obj = null :
+	set(obj):
+		if obj == selected_obj:
+			return # ignore duplicate sets
 		
-		# set to null first so property pane signals doesn't edit the
-		# previously selected sprinkler while we're loading in the new
-		# properties into the pane
-		selected_sprinkler = null
+		print("selected_obj = %s" % [obj])
+		if selected_obj != null:
+			_on_release_selected_obj(selected_obj)
+			selected_obj = null
 		
-		if sprink:
-			sprink.show_indicator = true
-			sprink.show_min_dist = true
-			sprink.show_max_dist = true
-			user_label_lineedit.text = sprink.user_label
-			rot_spinbox.value = sprink.rotation_degrees
-			sweep_spinbox.value = sprink.sweep_deg
-			manufacturer_lineedit.text = sprink.manufacturer
-			model_lineedit.text = sprink.model
-			min_dist_spinbox.value = sprink.min_dist_ft
-			max_dist_spinbox.value = sprink.max_dist_ft
-			dist_spinbox.min_value = min_dist_spinbox.value
-			dist_spinbox.max_value = max_dist_spinbox.value
-			dist_spinbox.value = sprink.dist_ft
+		if obj is Sprinkler:
+			_on_sprinkler_selected(obj)
+		elif obj is ImageNode:
+			_on_img_node_selected(obj)
 		
-		selected_sprinkler = sprink
-		properties_list.visible = selected_sprinkler != null
-		remove_sprinkler_button.disabled = selected_sprinkler == null
+		selected_obj = obj
+		remove_button.disabled = selected_obj == null
 
-var _held_sprinkler : Sprinkler = null
+# MoveableNode2D that's held during a drag/move operation
+var _held_objs = []
+var _mouse_move_start_pos_px = null
 
 func _ready():
 	TheProject.sprinkler_changed.connect(_on_TheProject_sprinkler_changed)
@@ -90,10 +78,8 @@ func _input(event):
 			
 			if sprinkler_to_add:
 				sprinkler_to_add.position = pos_in_world_px
-			elif _held_sprinkler:
-				if not _held_sprinkler.moving():
-					_held_sprinkler.start_move()
-				_held_sprinkler.position = pos_in_world_px
+			elif len(_held_objs) > 0:
+				_handle_held_obj_move(pos_in_world_px)
 
 func _handle_left_click(click_pos: Vector2):
 	# ignore clicks that are outside the world viewpoint
@@ -105,7 +91,7 @@ func _handle_left_click(click_pos: Vector2):
 			var pos_in_world_px = _global_xy_to_pos_in_world(click_pos)
 			var smallest_dist_px = null
 			var nearest_sprink = null
-			var selected_image = null
+			var clicked_image = null
 			for child in world_viewport.get_children():
 				if child is Sprinkler:
 					var dist_px = (child.position - pos_in_world_px).length()
@@ -118,27 +104,74 @@ func _handle_left_click(click_pos: Vector2):
 				elif child is ImageNode:
 					var img_rect = Rect2(child.position, child.get_img_size())
 					if img_rect.has_point(pos_in_world_px):
-						selected_image = child
+						clicked_image = child
 			
-			if nearest_sprink != null and selected_sprinkler == nearest_sprink:
-				_held_sprinkler = selected_sprinkler
-				Input.set_default_cursor_shape(Input.CURSOR_MOVE)
-			elif nearest_sprink:
-				selected_sprinkler = nearest_sprink
-			elif selected_image:
-				# TODO handle image selection logic
-				pass
+			var next_select_obj = null
+			if nearest_sprink:
+				next_select_obj = nearest_sprink
+			elif clicked_image:
+				next_select_obj = clicked_image
+			selected_obj = next_select_obj
+			
+			if selected_obj != null and selected_obj == next_select_obj:
+				_add_held_object(selected_obj)
 		Mode.AddSprinkler:
 			TheProject.add_sprinkler(sprinkler_to_add)
 			sprinkler_to_add = null
 			mode = Mode.Idle
 
 func _handle_left_click_release():
-	if _held_sprinkler:
-		if _held_sprinkler.moving():
-			_held_sprinkler.finish_move()
-		_held_sprinkler = null
+	if len(_held_objs) > 0:
+		for held_obj in _held_objs:
+			if held_obj is MoveableNode2D and held_obj.moving():
+				held_obj.finish_move()
+		_held_objs = []
+		_mouse_move_start_pos_px = null
 		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
+func _handle_held_obj_move(mouse_pos_in_world_px):
+	if _mouse_move_start_pos_px == null:
+		_mouse_move_start_pos_px = mouse_pos_in_world_px
+		Input.set_default_cursor_shape(Input.CURSOR_MOVE)
+	var delta_px = mouse_pos_in_world_px - _mouse_move_start_pos_px
+	
+	for held_obj in _held_objs:
+		if held_obj is MoveableNode2D:
+			if not held_obj.moving():
+				held_obj.start_move()
+			held_obj.update_move(delta_px)
+
+func _add_held_object(obj):
+	if obj not in _held_objs:
+		_held_objs.append(obj)
+
+func _on_release_selected_obj(obj):
+	if obj is Sprinkler:
+		obj.show_indicator = false
+		obj.show_min_dist = false
+		obj.show_max_dist = false
+	elif obj is ImageNode:
+		obj.show_indicator = false
+
+func _on_sprinkler_selected(sprink: Sprinkler):
+	sprink.show_indicator = true
+	sprink.show_min_dist = true
+	sprink.show_max_dist = true
+	user_label_lineedit.text = sprink.user_label
+	rot_spinbox.value = sprink.rotation_degrees
+	sweep_spinbox.value = sprink.sweep_deg
+	manufacturer_lineedit.text = sprink.manufacturer
+	model_lineedit.text = sprink.model
+	min_dist_spinbox.value = sprink.min_dist_ft
+	max_dist_spinbox.value = sprink.max_dist_ft
+	dist_spinbox.min_value = min_dist_spinbox.value
+	dist_spinbox.max_value = max_dist_spinbox.value
+	dist_spinbox.value = sprink.dist_ft
+	
+	properties_list.visible = true
+
+func _on_img_node_selected(img_node: ImageNode):
+	img_node.show_indicator = true
 
 func _is_point_over_world(global_pos: Vector2) -> bool:
 	return world_viewport_container.get_global_rect().has_point(global_pos)
@@ -157,10 +190,12 @@ func _on_add_sprinkler_pressed():
 func _on_add_image_pressed():
 	img_dialog.popup_centered()
 
-func _on_remove_sprinkler_pressed():
-	if selected_sprinkler:
-		TheProject.remove_sprinkler(selected_sprinkler)
-		selected_sprinkler = null
+func _on_remove_button_pressed():
+	if selected_obj is Sprinkler:
+		TheProject.remove_sprinkler(selected_obj)
+	elif selected_obj is ImageNode:
+		TheProject.remove_image(selected_obj)
+	selected_obj = null
 
 func _on_TheProject_sprinkler_changed(sprink, change_type):
 	var sprink_in_world = sprink.get_parent() == world_viewport
@@ -189,28 +224,28 @@ func _on_TheProject_closed():
 	add_img_button.disabled = true
 
 func _on_user_label_line_edit_text_submitted(new_text):
-	if selected_sprinkler:
-		selected_sprinkler.user_label = new_text
+	if selected_obj is Sprinkler:
+		selected_obj.user_label = new_text
 
 func _on_sweep_spin_box_value_changed(sweep_deg):
-	if selected_sprinkler:
-		selected_sprinkler.sweep_deg = sweep_deg
+	if selected_obj is Sprinkler:
+		selected_obj.sweep_deg = sweep_deg
 
 func _on_rotation_spin_box_value_changed(rot_deg):
-	if selected_sprinkler:
-		selected_sprinkler.rotation_degrees = rot_deg
+	if selected_obj is Sprinkler:
+		selected_obj.rotation_degrees = rot_deg
 
 func _on_manufacturer_line_edit_text_submitted(new_text):
-	if selected_sprinkler:
-		selected_sprinkler.manufacturer = new_text
+	if selected_obj is Sprinkler:
+		selected_obj.manufacturer = new_text
 
 func _on_model_line_edit_text_submitted(new_text):
-	if selected_sprinkler:
-		selected_sprinkler.model = new_text
+	if selected_obj is Sprinkler:
+		selected_obj.model = new_text
 
 func _on_distance_spin_box_value_changed(value):
-	if selected_sprinkler:
-		selected_sprinkler.dist_ft = value
+	if selected_obj is Sprinkler:
+		selected_obj.dist_ft = value
 
 func _on_img_dialog_file_selected(path):
 	TheProject.add_image(path)

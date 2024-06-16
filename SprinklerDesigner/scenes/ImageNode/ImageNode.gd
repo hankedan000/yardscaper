@@ -1,4 +1,4 @@
-extends Node2D
+extends MoveableNode2D
 class_name ImageNode
 
 @onready var texture_rect := $TextureRect
@@ -10,6 +10,10 @@ func _ready():
 		var img = TheProject.load_image(filename)
 		if img is Image:
 			texture_rect.texture = ImageTexture.create_from_image(img)
+
+func _draw():
+	if show_indicator:
+		draw_rect(Rect2(Vector2(), get_img_size()), Color.YELLOW, false, 4)
 
 func get_img_size() -> Vector2:
 	return texture_rect.size

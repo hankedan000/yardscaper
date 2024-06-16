@@ -1,7 +1,5 @@
-extends Node2D
+extends MoveableNode2D
 class_name Sprinkler
-
-signal moved(sprink, from_xy, to_xy)
 
 const ARC_POINTS = 32
 const BODY_RADIUS_FT = 3.0 / 12.0
@@ -106,37 +104,7 @@ var show_water := true :
 		show_water = value
 		queue_redraw()
 
-var show_indicator := false :
-	set(value):
-		show_indicator = value
-		queue_redraw()
-
-var _pos_at_move_start_xy = null
 var _head_info = null
-
-func moving() -> bool:
-	return _pos_at_move_start_xy != null
-
-func start_move():
-	if moving():
-		push_warning("sprinkler move was already started. starting another one.")
-	_pos_at_move_start_xy = position
-
-func finish_move():
-	if not moving():
-		push_warning("sprinkler move was never started")
-		return
-	
-	emit_signal("moved", self, _pos_at_move_start_xy, position)
-	_pos_at_move_start_xy = null
-
-func cancel_move():
-	if not moving:
-		push_warning("sprinkler move was never started")
-		return
-	
-	position = _pos_at_move_start_xy
-	_pos_at_move_start_xy = null
 
 func draw_sector(center: Vector2, radius: float, angle_from: float, angle_to: float, n_points: int, color: Color):
 	if n_points <= 2:

@@ -20,7 +20,7 @@ func _ready():
 	TheProject.connect('opened', _on_TheProject_opened)
 	TheProject.connect('has_edits_changed', _on_TheProject_has_edits_changed)
 	_update_window_title()
-
+	
 func _notification(what):
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		_close_requested = true
