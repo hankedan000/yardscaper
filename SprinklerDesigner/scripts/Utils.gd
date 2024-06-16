@@ -37,3 +37,15 @@ func create_shortcut(letter: Key, ctrl: bool = false, shift: bool = false, alt: 
 	shortcut.events = [ input_event ]
 
 	return shortcut
+
+func world_to_global_px(px: float, zoom_factor: float) -> float:
+	return px * zoom_factor
+
+func global_to_world_px(px: float, zoom_factor: float) -> float:
+	return px / zoom_factor
+
+func world_to_global_size_px(size: Vector2, zoom: Vector2) -> Vector2:
+	return Vector2(size.x * zoom.x, size.y * zoom.y)
+
+func global_to_world_size_px(size: Vector2, zoom: Vector2) -> Vector2:
+	return Vector2(size.x / zoom.x, size.y / zoom.y)

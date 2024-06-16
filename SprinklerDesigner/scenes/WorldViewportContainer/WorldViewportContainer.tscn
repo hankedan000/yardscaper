@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://dqfod1mptbtve"]
+
+[ext_resource type="Script" path="res://scenes/WorldViewportContainer/WorldViewportContainer.gd" id="1_6kpm8"]
+[ext_resource type="PackedScene" uid="uid://dvfn3vnt35gw7" path="res://scenes/LayoutPanel/PanZoomController.tscn" id="1_bty5q"]
+
+[node name="ViewportContainer" type="SubViewportContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+stretch = true
+script = ExtResource("1_6kpm8")
+
+[node name="Viewport" type="SubViewport" parent="."]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
+
+[node name="PanZoomController" parent="Viewport" instance=ExtResource("1_bty5q")]
+
+[node name="Camera2D" type="Camera2D" parent="Viewport"]

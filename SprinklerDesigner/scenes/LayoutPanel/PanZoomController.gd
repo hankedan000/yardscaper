@@ -14,13 +14,18 @@ func _ready():
 	# Connect mouse events
 	set_process_input(true)
 
-func get_xy_position_in_world(pos):
+# local position within viwport to world position
+func local_pos_to_world(pos_local: Vector2) -> Vector2:
 	var camera := get_viewport().get_camera_2d()
-	var pos_rel_screen_center = pos - get_viewport_rect().size / 2.0
-	var pos_in_world = camera.position
-	pos_in_world.x += pos_rel_screen_center.x * (1.0 / camera.zoom.x)
-	pos_in_world.y += pos_rel_screen_center.y * (1.0 / camera.zoom.y)
-	return pos_in_world
+	var pos_rel_screen_center = pos_local - get_viewport_rect().size / 2.0
+	return camera.position + Utils.global_to_world_size_px(pos_rel_screen_center, camera.zoom)
+
+# world position within viwport to local position
+func world_pos_to_local(pos_world: Vector2) -> Vector2:
+	var camera := get_viewport().get_camera_2d()
+	var offset_from_camera_world = pos_world - camera.position
+	var viewport_rect_size = get_viewport().get_visible_rect().size
+	return viewport_rect_size / 2.0 + Utils.world_to_global_size_px(offset_from_camera_world, camera.zoom)
 
 func _input(event):
 	var camera := get_viewport().get_camera_2d()
@@ -58,9 +63,9 @@ func zoom_out(mouse_pos: Vector2) -> void:
 func _do_zoom(mouse_pos, zoom_speed):
 	var camera = get_viewport().get_camera_2d()
 	var new_zoom = clamp(camera.zoom.x * (1 + zoom_speed), MIN_ZOOM, MAX_ZOOM)
-	var mouse_pos_old = get_xy_position_in_world(mouse_pos)
+	var mouse_pos_old = local_pos_to_world(mouse_pos)
 	camera.zoom = Vector2(new_zoom, new_zoom)
 	# Adjust camera position to keep the mouse position fixed
-	var mouse_pos_new = get_xy_position_in_world(mouse_pos)
+	var mouse_pos_new = local_pos_to_world(mouse_pos)
 	var camera_offset = mouse_pos_old - mouse_pos_new
 	camera.position += camera_offset

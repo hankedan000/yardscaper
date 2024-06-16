@@ -14,9 +14,7 @@ extends PanelContainer
 
 @onready var add_img_button           := $HSplitContainer/Layout/LayoutToolbar/AddImage
 
-@onready var world_viewport_container := $HSplitContainer/Layout/World/ViewportContainer
-@onready var world_viewport           := $HSplitContainer/Layout/World/ViewportContainer/Viewport
-@onready var pan_zoom_ctrl            := $HSplitContainer/Layout/World/ViewportContainer/Viewport/PanZoomController
+@onready var world_container          := $HSplitContainer/Layout/World/ViewportContainer
 @onready var mouse_pos_label          := $HSplitContainer/Layout/World/MousePosLabel
 
 @onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/RemoveButton
@@ -92,7 +90,7 @@ func _handle_left_click(click_pos: Vector2):
 			var smallest_dist_px = null
 			var nearest_sprink = null
 			var clicked_image = null
-			for child in world_viewport.get_children():
+			for child in world_container.viewport.get_children():
 				if child is Sprinkler:
 					var dist_px = (child.position - pos_in_world_px).length()
 					if dist_px > Utils.ft_to_px(child.dist_ft):
@@ -174,17 +172,17 @@ func _on_img_node_selected(img_node: ImageNode):
 	img_node.show_indicator = true
 
 func _is_point_over_world(global_pos: Vector2) -> bool:
-	return world_viewport_container.get_global_rect().has_point(global_pos)
+	return world_container.get_global_rect().has_point(global_pos)
 
 func _global_xy_to_pos_in_world(global_pos: Vector2) -> Vector2:
-	var pos_rel_to_world = global_pos - world_viewport_container.global_position
-	return pan_zoom_ctrl.get_xy_position_in_world(pos_rel_to_world)
+	var pos_rel_to_world = global_pos - world_container.global_position
+	return world_container.pan_zoom_ctrl.local_pos_to_world(pos_rel_to_world)
 
 func _on_add_sprinkler_pressed():
 	sprinkler_to_add = SprinklerScene.instantiate()
 	sprinkler_to_add.user_label = "Sprinkler%d" % TheProject.sprinklers.size()
 	sprinkler_to_add.position = _global_xy_to_pos_in_world(get_global_mouse_position())
-	world_viewport.add_child(sprinkler_to_add)
+	world_container.viewport.add_child(sprinkler_to_add)
 	mode = Mode.AddSprinkler
 
 func _on_add_image_pressed():
@@ -198,14 +196,14 @@ func _on_remove_button_pressed():
 	selected_obj = null
 
 func _on_TheProject_node_changed(obj, change_type, args):
-	var obj_in_world = obj.get_parent() == world_viewport
+	var obj_in_world = obj.get_parent() == world_container.viewport
 	match change_type:
 		TheProject.ChangeType.ADD:
 			if not obj_in_world:
-				world_viewport.add_child(obj)
+				world_container.viewport.add_child(obj)
 		TheProject.ChangeType.REMOVE:
 			if obj_in_world:
-				world_viewport.remove_child(obj)
+				world_container.viewport.remove_child(obj)
 		TheProject.ChangeType.PROP_EDIT:
 			var prop = args[0]
 			var old_value = args[1]
@@ -248,3 +246,6 @@ func _on_distance_spin_box_value_changed(value):
 
 func _on_img_dialog_file_selected(path):
 	TheProject.add_image(path)
+
+func _on_show_grid_checkbox_toggled(toggled_on):
+	world_container.show_grid = toggled_on

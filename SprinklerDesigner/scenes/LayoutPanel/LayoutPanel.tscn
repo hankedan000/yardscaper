@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://xyp0got3c5dp"]
 
-[ext_resource type="PackedScene" uid="uid://dvfn3vnt35gw7" path="res://scenes/LayoutPanel/PanZoomController.tscn" id="1_bdy7t"]
 [ext_resource type="Script" path="res://scenes/LayoutPanel/LayoutPanel.gd" id="1_h3dfu"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/Sprinkler/Sprinkler.tscn" id="2_nuxou"]
+[ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/WorldViewportContainer/WorldViewportContainer.tscn" id="3_g54tn"]
 
 [node name="LayoutPanel" type="PanelContainer"]
 anchors_preset = 15
@@ -14,7 +14,7 @@ script = ExtResource("1_h3dfu")
 SprinklerScene = ExtResource("2_nuxou")
 
 [node name="ImgDialog" type="FileDialog" parent="."]
-title = "Import an Image"
+title = "Open a File"
 size = Vector2i(900, 600)
 ok_button_text = "Open"
 file_mode = 0
@@ -139,29 +139,17 @@ layout_mode = 2
 disabled = true
 text = "Remove"
 
+[node name="ShowGridCheckbox" type="CheckBox" parent="HSplitContainer/Layout/LayoutToolbar"]
+layout_mode = 2
+button_pressed = true
+text = "Show Grid"
+
 [node name="World" type="Control" parent="HSplitContainer/Layout"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ViewportContainer" type="SubViewportContainer" parent="HSplitContainer/Layout/World"]
+[node name="ViewportContainer" parent="HSplitContainer/Layout/World" instance=ExtResource("3_g54tn")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_vertical = 3
-stretch = true
-
-[node name="Viewport" type="SubViewport" parent="HSplitContainer/Layout/World/ViewportContainer"]
-transparent_bg = true
-handle_input_locally = false
-size = Vector2i(1043, 685)
-render_target_update_mode = 4
-
-[node name="PanZoomController" parent="HSplitContainer/Layout/World/ViewportContainer/Viewport" instance=ExtResource("1_bdy7t")]
-
-[node name="Camera2D" type="Camera2D" parent="HSplitContainer/Layout/World/ViewportContainer/Viewport"]
 
 [node name="MousePosLabel" type="Label" parent="HSplitContainer/Layout/World"]
 layout_mode = 1
@@ -182,3 +170,4 @@ grow_vertical = 0
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddImage" to="." method="_on_add_image_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/RemoveButton" to="." method="_on_remove_button_pressed"]
+[connection signal="toggled" from="HSplitContainer/Layout/LayoutToolbar/ShowGridCheckbox" to="." method="_on_show_grid_checkbox_toggled"]
