@@ -7,11 +7,28 @@ enum ProjectMenuIDs {
 	SaveAs = 1
 }
 
+enum EditMenuIDs {
+	Undo = 0,
+	Redo = 1
+}
+
 @onready var open_dialog := $OpenDialog
 @onready var save_as_dialog := $SaveAsDialog
-@onready var unsaved_changes_dialog = $UnsavedChangesDialog
+@onready var unsaved_changes_dialog := $UnsavedChangesDialog
+@onready var proj_menu := $VBoxContainer/MenuBar/Project
+@onready var edit_menu := $VBoxContainer/MenuBar/Edit
+@onready var proj_tabs := $VBoxContainer/ProjectTabs
+@onready var layout_tab := $VBoxContainer/ProjectTabs/Layout
 
 var _close_requested = false # set true if window close was requested
+var _active_undo_redo_ctrl : UndoRedoController = null:
+	set(value):
+		if _active_undo_redo_ctrl:
+			_active_undo_redo_ctrl.history_changed.disconnect(_on_undo_redo_ctrl_history_changed)
+		if value is UndoRedoController:
+			value.history_changed.connect(_on_undo_redo_ctrl_history_changed)
+		_active_undo_redo_ctrl = value
+		_update_undo_redo_enabled(_active_undo_redo_ctrl)
 
 func _ready():
 	# manage window close request ourselve so we can ask to save before closing
@@ -21,6 +38,26 @@ func _ready():
 	TheProject.connect('has_edits_changed', _on_TheProject_has_edits_changed)
 	_update_window_title()
 	
+	# set save menu item shortcut to Ctrl + S
+	_set_menu_item_shortcut(
+		proj_menu, ProjectMenuIDs.Save,
+		Utils.create_shortcut(KEY_S, true))
+	# set save_as menu item shortcut to Ctrl + Shift + S
+	_set_menu_item_shortcut(
+		proj_menu, ProjectMenuIDs.SaveAs,
+		Utils.create_shortcut(KEY_S, true, true))
+	# set undo menu item shortcut to Ctrl + Z
+	_set_menu_item_shortcut(
+		edit_menu, EditMenuIDs.Undo,
+		Utils.create_shortcut(KEY_Z, true))
+	# set redo menu item shortcut to Ctrl + Shift + Z
+	_set_menu_item_shortcut(
+		edit_menu, EditMenuIDs.Redo,
+		Utils.create_shortcut(KEY_Z, true, true))
+	
+	# trick to get undo/redo history active from startup
+	_on_project_tabs_tab_changed(proj_tabs.current_tab)
+
 func _notification(what):
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		_close_requested = true
@@ -28,6 +65,9 @@ func _notification(what):
 			unsaved_changes_dialog.popup_centered()
 		else:
 			get_tree().quit() # nothing to save, so quit now!
+
+func _set_menu_item_shortcut(menu: PopupMenu, id: int, shortcut: Shortcut):
+	menu.set_item_shortcut(menu.get_item_index(id), shortcut)
 
 func _update_window_title():
 	const BASE_TITLE = "Sprinkler Designer"
@@ -40,6 +80,15 @@ func _update_window_title():
 
 func _request_save_as():
 	_on_project_id_pressed(ProjectMenuIDs.SaveAs)
+
+func _update_undo_redo_enabled(undo_redo_ctrl):
+	var undo_disabled = true
+	var redo_disabled = true
+	if undo_redo_ctrl is UndoRedoController:
+		undo_disabled = not undo_redo_ctrl.has_undo()
+		redo_disabled = not undo_redo_ctrl.has_redo()
+	edit_menu.set_item_disabled(edit_menu.get_item_index(EditMenuIDs.Undo), undo_disabled)
+	edit_menu.set_item_disabled(edit_menu.get_item_index(EditMenuIDs.Redo), redo_disabled)
 
 func _on_project_id_pressed(id):
 	match id:
@@ -82,3 +131,28 @@ func _on_unsaved_changes_dialog_cancel():
 
 func _on_unsaved_changes_dialog_discard():
 	get_tree().quit()
+
+func _on_project_tabs_tab_changed(tab):
+	var tab_title = proj_tabs.get_tab_title(tab)
+	var next_undo_redo_ctrl = null
+	match tab_title:
+		"Layout":
+			next_undo_redo_ctrl = layout_tab.undo_redo_ctrl
+		"BOM List":
+			pass
+		_:
+			push_warning("unsupported tab title '%s' in _on_project_tabs_tab_changed()" % [tab_title])
+	
+	_active_undo_redo_ctrl = next_undo_redo_ctrl
+
+func _on_undo_redo_ctrl_history_changed():
+	_update_undo_redo_enabled(_active_undo_redo_ctrl)
+
+func _on_edit_id_pressed(id):
+	match id:
+		EditMenuIDs.Undo:
+			_active_undo_redo_ctrl.undo()
+		EditMenuIDs.Redo:
+			_active_undo_redo_ctrl.redo()
+		_:
+			push_warning("unhandled press event for edit menu id %d" % [id])

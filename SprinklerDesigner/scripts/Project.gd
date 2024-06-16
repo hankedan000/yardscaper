@@ -2,14 +2,13 @@ extends Node
 
 signal opened()
 signal closed()
-signal sprinkler_changed(sprink, change_type)
-signal image_changed(img, change_type)
+signal node_changed(node, change_type, args)
 signal has_edits_changed(has_edits)
 
 enum ChangeType {
 	ADD,
 	REMOVE,
-	MODIFIED
+	PROP_EDIT
 }
 
 var ImageNodeScene : PackedScene = preload("res://scenes/ImageNode/ImageNode.tscn")
@@ -84,9 +83,9 @@ func save_as(dir: String):
 
 func add_sprinkler(sprink: Sprinkler):
 	if not sprinklers.has(sprink):
-		sprink.connect('moved', _on_sprinkler_moved)
+		sprink.connect('moved', _on_node_moved)
 		sprinklers.append(sprink)
-		emit_signal('sprinkler_changed', sprink, ChangeType.ADD)
+		emit_signal('node_changed', sprink, ChangeType.ADD, [])
 		has_edits = true
 	else:
 		push_warning("sprinkler %s is already added to project. ignoring add." % sprink.name)
@@ -94,7 +93,7 @@ func add_sprinkler(sprink: Sprinkler):
 func remove_sprinkler(sprink: Sprinkler):
 	if sprinklers.has(sprink):
 		sprinklers.erase(sprink)
-		emit_signal('sprinkler_changed', sprink, ChangeType.REMOVE)
+		emit_signal('node_changed', sprink, ChangeType.REMOVE, [])
 		has_edits = true
 	else:
 		push_warning("sprinkler %s is not in the project. ignoring remove." % sprink.name)
@@ -129,10 +128,14 @@ func add_image(path: String) -> bool:
 	# load image and create a new ImageNode
 	var img_node : ImageNode = ImageNodeScene.instantiate()
 	img_node.filename = filename
-	images.append(img_node)
-	emit_signal('image_changed', img_node, ChangeType.ADD)
+	_add_image(img_node)
 	has_edits = true
 	return true
+
+func _add_image(img_node):
+	img_node.connect('moved', _on_node_moved)
+	images.append(img_node)
+	emit_signal('node_changed', img_node, ChangeType.ADD, [])
 
 func serialize():
 	# serialize all sprinkler objects
@@ -161,10 +164,13 @@ func deserialize(obj):
 	for img_ser in Utils.dict_get(obj, 'images', []):
 		var img_node := ImageNodeScene.instantiate()
 		img_node.deserialize(img_ser)
-		images.append(img_node)
-		emit_signal('image_changed', img_node, ChangeType.ADD)
+		_add_image(img_node)
 	_suppress_self_edit_signals = false
 
-func _on_sprinkler_moved(sprink, from_xy, to_xy):
-	emit_signal('sprinkler_changed', sprink, ChangeType.MODIFIED)
+func _on_node_moved(node, from_xy, to_xy):
+	emit_signal(
+		'node_changed',
+		node,
+		ChangeType.PROP_EDIT,
+		['position', from_xy, to_xy])
 	has_edits = true

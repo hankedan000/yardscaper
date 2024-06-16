@@ -23,3 +23,17 @@ func dict_get(dict: Dictionary, key: Variant, default_value=null):
 	if dict.has(key):
 		return dict[key]
 	return default_value
+
+func create_shortcut(letter: Key, ctrl: bool = false, shift: bool = false, alt: bool = false) -> Shortcut:
+	var shortcut = Shortcut.new()
+
+	var input_event = InputEventKey.new()
+
+	input_event.keycode = letter
+	input_event.ctrl_pressed = ctrl
+	input_event.shift_pressed = shift
+	input_event.alt_pressed = alt
+
+	shortcut.events = [ input_event ]
+
+	return shortcut

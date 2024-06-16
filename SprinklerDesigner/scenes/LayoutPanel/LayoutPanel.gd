@@ -30,6 +30,7 @@ enum Mode {
 
 var mode = Mode.Idle
 var sprinkler_to_add : Sprinkler = null
+var undo_redo_ctrl := UndoRedoController.new()
 
 var selected_obj = null :
 	set(obj):
@@ -54,8 +55,7 @@ var _held_objs = []
 var _mouse_move_start_pos_px = null
 
 func _ready():
-	TheProject.sprinkler_changed.connect(_on_TheProject_sprinkler_changed)
-	TheProject.image_changed.connect(_on_TheProject_image_changed)
+	TheProject.node_changed.connect(_on_TheProject_node_changed)
 	TheProject.opened.connect(_on_TheProject_opened)
 	TheProject.closed.connect(_on_TheProject_closed)
 	properties_list.visible = false
@@ -197,27 +197,26 @@ func _on_remove_button_pressed():
 		TheProject.remove_image(selected_obj)
 	selected_obj = null
 
-func _on_TheProject_sprinkler_changed(sprink, change_type):
-	var sprink_in_world = sprink.get_parent() == world_viewport
+func _on_TheProject_node_changed(obj, change_type, args):
+	var obj_in_world = obj.get_parent() == world_viewport
 	match change_type:
 		TheProject.ChangeType.ADD:
-			if not sprink_in_world:
-				world_viewport.add_child(sprink)
+			if not obj_in_world:
+				world_viewport.add_child(obj)
 		TheProject.ChangeType.REMOVE:
-			if sprink_in_world:
-				world_viewport.remove_child(sprink)
-
-func _on_TheProject_image_changed(img_node, change_type):
-	var img_in_world = img_node.get_parent() == world_viewport
-	match change_type:
-		TheProject.ChangeType.ADD:
-			if not img_in_world:
-				world_viewport.add_child(img_node)
-		TheProject.ChangeType.REMOVE:
-			if img_in_world:
-				world_viewport.remove_child(img_node)
+			if obj_in_world:
+				world_viewport.remove_child(obj)
+		TheProject.ChangeType.PROP_EDIT:
+			var prop = args[0]
+			var old_value = args[1]
+			var new_value = args[2]
+			undo_redo_ctrl.push_undo_op(
+				UndoRedoController.PropEditUndoRedoOperation.new(
+					obj, prop, old_value, new_value)
+			)
 
 func _on_TheProject_opened():
+	undo_redo_ctrl.reset()
 	add_img_button.disabled = false
 
 func _on_TheProject_closed():

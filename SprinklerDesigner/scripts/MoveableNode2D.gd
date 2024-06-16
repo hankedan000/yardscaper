@@ -10,7 +10,7 @@ var show_indicator := false :
 
 var _pos_at_move_start = null
 
-func has_point(pos: Vector2):
+func has_point(_pos: Vector2):
 	push_error("subclass for '%s' should override has_point()" % [name])
 
 func moving() -> bool:
