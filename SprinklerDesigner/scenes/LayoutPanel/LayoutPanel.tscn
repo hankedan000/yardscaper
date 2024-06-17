@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=7 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/LayoutPanel/LayoutPanel.gd" id="1_h3dfu"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/Sprinkler/Sprinkler.tscn" id="2_nuxou"]
+[ext_resource type="Texture2D" uid="uid://bumt4lc5f8gm2" path="res://assets/icons/Add.svg" id="3_ashny"]
 [ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/WorldViewportContainer/WorldViewportContainer.tscn" id="3_g54tn"]
+[ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="4_15auh"]
+[ext_resource type="Texture2D" uid="uid://covc7nfq44by2" path="res://assets/icons/GridToggle.svg" id="4_xhgqy"]
 
 [node name="LayoutPanel" type="PanelContainer"]
 anchors_preset = 15
@@ -126,23 +129,32 @@ layout_mode = 2
 
 [node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
+tooltip_text = "Add sprinkler"
 text = "Add Sprinkler"
+icon = ExtResource("3_ashny")
 
 [node name="AddImage" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
 tooltip_text = "Add image to project. Project needs to be saved before you can add images."
 disabled = true
 text = "Add Image"
+icon = ExtResource("3_ashny")
 
 [node name="RemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
+tooltip_text = "Remove item"
 disabled = true
-text = "Remove"
+icon = ExtResource("4_15auh")
 
-[node name="ShowGridCheckbox" type="CheckBox" parent="HSplitContainer/Layout/LayoutToolbar"]
+[node name="VSeparator" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
+
+[node name="ShowGridButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
+layout_mode = 2
+tooltip_text = "Toggle grid visibility"
+toggle_mode = true
 button_pressed = true
-text = "Show Grid"
+icon = ExtResource("4_xhgqy")
 
 [node name="World" type="Control" parent="HSplitContainer/Layout"]
 layout_mode = 2
@@ -170,4 +182,4 @@ grow_vertical = 0
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddImage" to="." method="_on_add_image_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/RemoveButton" to="." method="_on_remove_button_pressed"]
-[connection signal="toggled" from="HSplitContainer/Layout/LayoutToolbar/ShowGridCheckbox" to="." method="_on_show_grid_checkbox_toggled"]
+[connection signal="toggled" from="HSplitContainer/Layout/LayoutToolbar/ShowGridButton" to="." method="_on_show_grid_checkbox_toggled"]
