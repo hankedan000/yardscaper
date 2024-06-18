@@ -37,17 +37,21 @@ func is_opened() -> bool:
 	return len(project_path) > 0
 
 func open(dir: String):
+	if len(dir) == 0:
+		return false
+	elif not DirAccess.dir_exists_absolute(dir):
+		push_error("project dir '%s' doesn't exist" % [dir])
+		return false
+	
 	var json_filepath = dir.path_join("project.json")
-	var json_file = FileAccess.open(json_filepath, FileAccess.READ)
-	var proj_str = json_file.get_as_text()
-	var json = JSON.new()
-	if json.parse(proj_str) == OK:
+	var ser_data = Utils.from_json_file(json_filepath)
+	if ser_data:
+		Globals.add_recent_project(dir)
 		project_path = dir
-		deserialize(json.data)
+		deserialize(ser_data)
 		has_edits = false
 		emit_signal('opened')
 	else:
-		printerr("failed to open to '%s'" % [json_filepath])
 		return false
 	return true
 
@@ -55,20 +59,12 @@ func save():
 	return save_as(project_path)
 
 func save_as(dir: String):
-	var proj_str = JSON.stringify(
-		serialize(),
-		" ",  # indent
-		true, # sort_keys
-		true) # full_precision
 	var json_filepath = dir.path_join("project.json")
-	var json_file = FileAccess.open(json_filepath, FileAccess.WRITE)
-	if json_file:
-		json_file.store_string(proj_str)
-		json_file.close()
+	if Utils.to_json_file(serialize(), json_filepath):
+		Globals.add_recent_project(dir)
 		project_path = dir
 		has_edits = false
 	else:
-		printerr("failed to save to '%s'" % [json_filepath])
 		return false
 	
 	# create image directory

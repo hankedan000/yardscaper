@@ -1,158 +1,28 @@
 extends PanelContainer
+class_name Main
 
-enum ProjectMenuIDs {
-	New = 2,
-	Open = 3,
-	Save = 0,
-	SaveAs = 1
-}
+@export var ProjectEditorScene : PackedScene = null
+@export var BootMenuScene      : PackedScene = null
 
-enum EditMenuIDs {
-	Undo = 0,
-	Redo = 1
-}
-
-@onready var open_dialog := $OpenDialog
-@onready var save_as_dialog := $SaveAsDialog
-@onready var unsaved_changes_dialog := $UnsavedChangesDialog
-@onready var proj_menu := $VBoxContainer/MenuBar/Project
-@onready var edit_menu := $VBoxContainer/MenuBar/Edit
-@onready var proj_tabs := $VBoxContainer/ProjectTabs
-@onready var layout_tab := $VBoxContainer/ProjectTabs/Layout
-
-var _close_requested = false # set true if window close was requested
-var _active_undo_redo_ctrl : UndoRedoController = null:
-	set(value):
-		if _active_undo_redo_ctrl:
-			_active_undo_redo_ctrl.history_changed.disconnect(_on_undo_redo_ctrl_history_changed)
-		if value is UndoRedoController:
-			value.history_changed.connect(_on_undo_redo_ctrl_history_changed)
-		_active_undo_redo_ctrl = value
-		_update_undo_redo_enabled(_active_undo_redo_ctrl)
+var root_scene : Node = null
 
 func _ready():
-	# manage window close request ourselve so we can ask to save before closing
-	get_tree().set_auto_accept_quit(false)
-	
-	TheProject.connect('opened', _on_TheProject_opened)
-	TheProject.connect('has_edits_changed', _on_TheProject_has_edits_changed)
-	_update_window_title()
-	
-	# set save menu item shortcut to Ctrl + S
-	_set_menu_item_shortcut(
-		proj_menu, ProjectMenuIDs.Save,
-		Utils.create_shortcut(KEY_S, true))
-	# set save_as menu item shortcut to Ctrl + Shift + S
-	_set_menu_item_shortcut(
-		proj_menu, ProjectMenuIDs.SaveAs,
-		Utils.create_shortcut(KEY_S, true, true))
-	# set undo menu item shortcut to Ctrl + Z
-	_set_menu_item_shortcut(
-		edit_menu, EditMenuIDs.Undo,
-		Utils.create_shortcut(KEY_Z, true))
-	# set redo menu item shortcut to Ctrl + Shift + Z
-	_set_menu_item_shortcut(
-		edit_menu, EditMenuIDs.Redo,
-		Utils.create_shortcut(KEY_Z, true, true))
-	
-	# trick to get undo/redo history active from startup
-	_on_project_tabs_tab_changed(proj_tabs.current_tab)
+	open_boot_menu()
 
-func _notification(what):
-	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		_close_requested = true
-		if TheProject.has_edits:
-			unsaved_changes_dialog.popup_centered()
-		else:
-			get_tree().quit() # nothing to save, so quit now!
+func open_boot_menu():
+	_release_root_scene()
+	root_scene = BootMenuScene.instantiate()
+	add_child(root_scene)
+	if root_scene is BootMenu:
+		root_scene.popup_centered()
 
-func _set_menu_item_shortcut(menu: PopupMenu, id: int, shortcut: Shortcut):
-	menu.set_item_shortcut(menu.get_item_index(id), shortcut)
+func open_project_editor(project_path: String):
+	_release_root_scene()
+	root_scene = ProjectEditorScene.instantiate()
+	add_child(root_scene)
+	TheProject.open(project_path)
 
-func _update_window_title():
-	const BASE_TITLE = "Sprinkler Designer"
-	var project_path = TheProject.project_path
-	var title = BASE_TITLE
-	if len(project_path) > 0:
-		var has_edits_label = "* " if TheProject.has_edits else ""
-		title = "%s %s- %s" % [project_path.get_file(), has_edits_label, BASE_TITLE]
-	DisplayServer.window_set_title(title)
-
-func _request_save_as():
-	_on_project_id_pressed(ProjectMenuIDs.SaveAs)
-
-func _update_undo_redo_enabled(undo_redo_ctrl):
-	var undo_disabled = true
-	var redo_disabled = true
-	if undo_redo_ctrl is UndoRedoController:
-		undo_disabled = not undo_redo_ctrl.has_undo()
-		redo_disabled = not undo_redo_ctrl.has_redo()
-	edit_menu.set_item_disabled(edit_menu.get_item_index(EditMenuIDs.Undo), undo_disabled)
-	edit_menu.set_item_disabled(edit_menu.get_item_index(EditMenuIDs.Redo), redo_disabled)
-
-func _on_project_id_pressed(id):
-	match id:
-		ProjectMenuIDs.New:
-			TheProject.reset()
-		ProjectMenuIDs.Open:
-			open_dialog.popup_centered()
-		ProjectMenuIDs.Save:
-			TheProject.save()
-		ProjectMenuIDs.SaveAs:
-			save_as_dialog.popup_centered()
-
-func _on_save_as_dialog_dir_selected(dir: String):
-	if TheProject.save_as(dir):
-		# 'save as' can be requested if user hasn't saved a new project yet, 
-		# but requested to close the window. this is where the final close
-		# gets performed.
-		if _close_requested:
-			get_tree().quit()
-
-func _on_open_dialog_dir_selected(dir):
-	TheProject.open(dir)
-
-func _on_TheProject_opened():
-	_update_window_title()
-
-func _on_TheProject_has_edits_changed(_has_edits):
-	_update_window_title()
-
-func _on_unsaved_changes_dialog_save():
-	if len(TheProject.project_path) > 0:
-		TheProject.save()
-		get_tree().quit()
-	else:
-		# need to request user where to save project to
-		_request_save_as()
-
-func _on_unsaved_changes_dialog_cancel():
-	_close_requested = false
-
-func _on_unsaved_changes_dialog_discard():
-	get_tree().quit()
-
-func _on_project_tabs_tab_changed(tab):
-	var tab_title = proj_tabs.get_tab_title(tab)
-	var next_undo_redo_ctrl = null
-	match tab_title:
-		"Layout":
-			next_undo_redo_ctrl = layout_tab.undo_redo_ctrl
-		"BOM List":
-			pass
-		_:
-			push_warning("unsupported tab title '%s' in _on_project_tabs_tab_changed()" % [tab_title])
-	
-	_active_undo_redo_ctrl = next_undo_redo_ctrl
-
-func _on_undo_redo_ctrl_history_changed():
-	_update_undo_redo_enabled(_active_undo_redo_ctrl)
-
-func _on_edit_id_pressed(id):
-	match id:
-		EditMenuIDs.Undo:
-			_active_undo_redo_ctrl.undo()
-		EditMenuIDs.Redo:
-			_active_undo_redo_ctrl.redo()
-		_:
-			push_warning("unhandled press event for edit menu id %d" % [id])
+func _release_root_scene():
+	if root_scene:
+		remove_child(root_scene)
+		root_scene.queue_free()

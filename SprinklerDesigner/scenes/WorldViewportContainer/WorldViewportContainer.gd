@@ -104,7 +104,7 @@ func _draw_horz_lines(start_y: float, step: float, width: float, n_lines: int, c
 			color,
 			line_width)
 
-func _process(delta):
+func _process(_delta):
 	var curr_pos := camera2d.global_position
 	var curr_zoom := camera2d.zoom
 	var delta_pos := curr_pos - _prev_global_pos
