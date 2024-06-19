@@ -3,6 +3,7 @@ extends PanelContainer
 @onready var img_dialog               := $ImgDialog
 
 @onready var sprink_prop_list         := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/SprinklerPropertiesList
+@onready var img_prop_list            := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/ImageNodePropertiesList
 
 @onready var add_img_button           := $HSplitContainer/Layout/LayoutToolbar/AddImage
 
@@ -53,6 +54,7 @@ func _ready():
 	TheProject.opened.connect(_on_TheProject_opened)
 	TheProject.closed.connect(_on_TheProject_closed)
 	sprink_prop_list.visible = false
+	img_prop_list.visible = false
 	undo_redo_ctrl.before_a_do.connect(_on_undo_redo_ctrl_before_a_do)
 	undo_redo_ctrl.after_a_do.connect(_on_undo_redo_ctrl_after_a_do)
 	
@@ -98,7 +100,7 @@ func _handle_left_click(click_pos: Vector2):
 						smallest_dist_px = dist_px
 						nearest_sprink = child
 				elif child is ImageNode:
-					var img_rect = Rect2(child.position, child.get_img_size())
+					var img_rect = Rect2(child.position, child.img_size_px())
 					if img_rect.has_point(pos_in_world_px):
 						clicked_image = child
 			
@@ -146,8 +148,10 @@ func _on_release_selected_obj(obj):
 		obj.show_indicator = false
 		obj.show_min_dist = false
 		obj.show_max_dist = false
+		sprink_prop_list.visible = false
 	elif obj is ImageNode:
 		obj.show_indicator = false
+		img_prop_list.visible = false
 
 func _on_sprinkler_selected(sprink: Sprinkler):
 	sprink_prop_list.sprinkler = sprink
@@ -157,7 +161,9 @@ func _on_sprinkler_selected(sprink: Sprinkler):
 	sprink_prop_list.visible = true
 
 func _on_img_node_selected(img_node: ImageNode):
+	img_prop_list.img_node = img_node
 	img_node.show_indicator = true
+	img_prop_list.visible = true
 
 func _is_point_over_world(global_pos: Vector2) -> bool:
 	return world_container.get_global_rect().has_point(global_pos)
