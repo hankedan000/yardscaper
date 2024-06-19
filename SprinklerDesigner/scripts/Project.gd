@@ -79,7 +79,8 @@ func save_as(dir: String):
 
 func add_sprinkler(sprink: Sprinkler):
 	if not sprinklers.has(sprink):
-		sprink.connect('moved', _on_node_moved)
+		sprink.moved.connect(_on_node_moved)
+		sprink.property_changed.connect(_on_node_property_changed.bind(sprink))
 		sprinklers.append(sprink)
 		emit_signal('node_changed', sprink, ChangeType.ADD, [])
 		has_edits = true
@@ -129,7 +130,8 @@ func add_image(path: String) -> bool:
 	return true
 
 func _add_image(img_node):
-	img_node.connect('moved', _on_node_moved)
+	img_node.moved.connect(_on_node_moved)
+	img_node.property_changed.connect(_on_node_property_changed.bind(img_node))
 	images.append(img_node)
 	emit_signal('node_changed', img_node, ChangeType.ADD, [])
 
@@ -162,6 +164,14 @@ func deserialize(obj):
 		img_node.deserialize(img_ser)
 		_add_image(img_node)
 	_suppress_self_edit_signals = false
+
+func _on_node_property_changed(property, from, to, node):
+	emit_signal(
+		'node_changed',
+		node,
+		ChangeType.PROP_EDIT,
+		[property, from, to])
+	has_edits = true
 
 func _on_node_moved(node, from_xy, to_xy):
 	emit_signal(

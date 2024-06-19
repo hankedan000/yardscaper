@@ -19,7 +19,10 @@ var min_dist_ft : float = NAN :
 			return _head_info['min_dist_ft']
 		return DEFAULT_MIN_DIST_FT
 	set(value):
+		var old_value = min_dist_ft
 		min_dist_ft = value
+		if old_value != min_dist_ft:
+			emit_signal('property_changed', 'min_dist_ft', old_value, min_dist_ft)
 		queue_redraw()
 
 var max_dist_ft : float = NAN :
@@ -30,7 +33,10 @@ var max_dist_ft : float = NAN :
 			return _head_info['max_dist_ft']
 		return DEFAULT_MAX_DIST_FT
 	set(value):
+		var old_value = max_dist_ft
 		max_dist_ft = value
+		if old_value != max_dist_ft:
+			emit_signal('property_changed', 'max_dist_ft', old_value, max_dist_ft)
 		queue_redraw()
 
 var dist_ft : float = NAN :
@@ -39,7 +45,10 @@ var dist_ft : float = NAN :
 			return dist_ft
 		return max_dist_ft
 	set(value):
+		var old_value = dist_ft
 		dist_ft = value
+		if old_value != dist_ft:
+			emit_signal('property_changed', 'dist_ft', old_value, dist_ft)
 		queue_redraw()
 
 var min_sweep_deg : float = NAN :
@@ -50,7 +59,10 @@ var min_sweep_deg : float = NAN :
 			return _head_info['min_sweep_deg']
 		return DEFAULT_MIN_SWEEP_DEG
 	set(value):
+		var old_value = min_sweep_deg
 		min_sweep_deg = value
+		if old_value != min_sweep_deg:
+			emit_signal('property_changed', 'min_sweep_deg', old_value, min_sweep_deg)
 		queue_redraw()
 
 var max_sweep_deg : float = NAN :
@@ -61,7 +73,10 @@ var max_sweep_deg : float = NAN :
 			return _head_info['max_sweep_deg']
 		return DEFAULT_MAX_SWEEP_DEG
 	set(value):
+		var old_value = max_sweep_deg
 		max_sweep_deg = value
+		if old_value != max_sweep_deg:
+			emit_signal('property_changed', 'max_sweep_deg', old_value, max_sweep_deg)
 		queue_redraw()
 
 var sweep_deg : float = NAN :
@@ -70,9 +85,12 @@ var sweep_deg : float = NAN :
 			return sweep_deg
 		return max_sweep_deg
 	set(value):
+		var old_value = sweep_deg
 		sweep_deg = int(round(value)) % 361
 		if sweep_deg < 0:
 			sweep_deg = 360 - sweep_deg
+		if old_value != sweep_deg:
+			emit_signal('property_changed', 'sweep_deg', old_value, sweep_deg)
 		queue_redraw()
 
 var manufacturer : String = "" :
@@ -82,12 +100,18 @@ var manufacturer : String = "" :
 
 var model : String = "" :
 	set(value):
+		var old_value = model
 		model = value
+		if old_value != model:
+			emit_signal('property_changed', 'model', old_value, model)
 		_head_info = TheSprinklerDb.get_head_info(manufacturer, model)
 
 var user_label : String = "" :
 	set(value):
+		var old_value = user_label
 		user_label = value
+		if old_value != user_label:
+			emit_signal('property_changed', 'user_label', old_value, user_label)
 
 var show_min_dist := false :
 	set(value):

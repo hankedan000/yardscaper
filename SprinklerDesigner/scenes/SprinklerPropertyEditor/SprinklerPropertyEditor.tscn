@@ -1,0 +1,87 @@
+[gd_scene load_steps=2 format=3 uid="uid://co2gtkorldd8j"]
+
+[ext_resource type="Script" path="res://scenes/SprinklerPropertyEditor/SprinklerPropertyEditor.gd" id="1_s53uy"]
+
+[node name="SprinklerPropertiesList" type="GridContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 2
+script = ExtResource("1_s53uy")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Label: "
+
+[node name="UserLabelLineEdit" type="LineEdit" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "User-definable label for this sprinkler"
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 2
+text = "Sweep: "
+
+[node name="SweepSpinBox" type="SpinBox" parent="."]
+layout_mode = 2
+tooltip_text = "Total spray angle or rotor's swept angle"
+max_value = 360.0
+suffix = "deg"
+
+[node name="Label3" type="Label" parent="."]
+layout_mode = 2
+text = "Rotation: "
+
+[node name="RotationSpinBox" type="SpinBox" parent="."]
+layout_mode = 2
+tooltip_text = "Angle sprinkler body"
+max_value = 359.0
+suffix = "deg"
+
+[node name="Label4" type="Label" parent="."]
+layout_mode = 2
+text = "Manufacturer: "
+
+[node name="ManufacturerLineEdit" type="LineEdit" parent="."]
+layout_mode = 2
+
+[node name="Label5" type="Label" parent="."]
+layout_mode = 2
+text = "Model: "
+
+[node name="ModelLineEdit" type="LineEdit" parent="."]
+layout_mode = 2
+
+[node name="Label6" type="Label" parent="."]
+modulate = Color(0.161111, 0.18994, 1, 1)
+layout_mode = 2
+text = "Min Distance: "
+
+[node name="MinDistanceSpinBox" type="SpinBox" parent="."]
+layout_mode = 2
+editable = false
+suffix = "ft"
+
+[node name="Label7" type="Label" parent="."]
+modulate = Color(1, 0.186899, 0.216748, 1)
+layout_mode = 2
+text = "Max Distance: "
+
+[node name="MaxDistanceSpinBox" type="SpinBox" parent="."]
+layout_mode = 2
+editable = false
+suffix = "ft"
+
+[node name="Label8" type="Label" parent="."]
+layout_mode = 2
+text = "Distance: "
+
+[node name="DistanceSpinBox" type="SpinBox" parent="."]
+layout_mode = 2
+suffix = "ft"
+
+[connection signal="text_submitted" from="UserLabelLineEdit" to="." method="_on_user_label_line_edit_text_submitted"]
+[connection signal="value_changed" from="SweepSpinBox" to="." method="_on_sweep_spin_box_value_changed"]
+[connection signal="value_changed" from="RotationSpinBox" to="." method="_on_rotation_spin_box_value_changed"]
+[connection signal="text_submitted" from="ManufacturerLineEdit" to="." method="_on_manufacturer_line_edit_text_submitted"]
+[connection signal="text_submitted" from="ModelLineEdit" to="." method="_on_model_line_edit_text_submitted"]
+[connection signal="value_changed" from="DistanceSpinBox" to="." method="_on_distance_spin_box_value_changed"]

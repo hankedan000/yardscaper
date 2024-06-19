@@ -1,6 +1,7 @@
 extends Node2D
 class_name MoveableNode2D
 
+signal property_changed(sprink, property, from, to)
 signal moved(sprink, from_xy, to_xy)
 
 var show_indicator := false :

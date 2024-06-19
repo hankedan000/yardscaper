@@ -2,15 +2,7 @@ extends PanelContainer
 
 @onready var img_dialog               := $ImgDialog
 
-@onready var properties_list          := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList
-@onready var user_label_lineedit      := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/UserLabelLineEdit
-@onready var rot_spinbox              := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/RotationSpinBox
-@onready var sweep_spinbox            := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/SweepSpinBox
-@onready var manufacturer_lineedit    := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/ManufacturerLineEdit
-@onready var model_lineedit           := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/ModelLineEdit
-@onready var min_dist_spinbox         := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/MinDistanceSpinBox
-@onready var max_dist_spinbox         := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/MaxDistanceSpinBox
-@onready var dist_spinbox             := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/PropertiesList/DistanceSpinBox
+@onready var sprink_prop_list         := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/SprinklerPropertiesList
 
 @onready var add_img_button           := $HSplitContainer/Layout/LayoutToolbar/AddImage
 
@@ -35,7 +27,6 @@ var selected_obj = null :
 		if obj == selected_obj:
 			return # ignore duplicate sets
 		
-		print("selected_obj = %s" % [obj])
 		if selected_obj != null:
 			_on_release_selected_obj(selected_obj)
 			selected_obj = null
@@ -52,11 +43,18 @@ var selected_obj = null :
 var _held_objs = []
 var _mouse_move_start_pos_px = null
 
+# ignore property changes while inside of an undo/redo operation.
+# we don't want to cyclically re-add an undo operation that will
+# redo what we just undid... so many words!
+var _ignore_while_in_undo_redo = false
+
 func _ready():
 	TheProject.node_changed.connect(_on_TheProject_node_changed)
 	TheProject.opened.connect(_on_TheProject_opened)
 	TheProject.closed.connect(_on_TheProject_closed)
-	properties_list.visible = false
+	sprink_prop_list.visible = false
+	undo_redo_ctrl.before_a_do.connect(_on_undo_redo_ctrl_before_a_do)
+	undo_redo_ctrl.after_a_do.connect(_on_undo_redo_ctrl_after_a_do)
 	
 func _input(event):
 	if event is InputEventMouseButton:
@@ -152,21 +150,11 @@ func _on_release_selected_obj(obj):
 		obj.show_indicator = false
 
 func _on_sprinkler_selected(sprink: Sprinkler):
+	sprink_prop_list.sprinkler = sprink
 	sprink.show_indicator = true
 	sprink.show_min_dist = true
 	sprink.show_max_dist = true
-	user_label_lineedit.text = sprink.user_label
-	rot_spinbox.value = sprink.rotation_degrees
-	sweep_spinbox.value = sprink.sweep_deg
-	manufacturer_lineedit.text = sprink.manufacturer
-	model_lineedit.text = sprink.model
-	min_dist_spinbox.value = sprink.min_dist_ft
-	max_dist_spinbox.value = sprink.max_dist_ft
-	dist_spinbox.min_value = min_dist_spinbox.value
-	dist_spinbox.max_value = max_dist_spinbox.value
-	dist_spinbox.value = sprink.dist_ft
-	
-	properties_list.visible = true
+	sprink_prop_list.visible = true
 
 func _on_img_node_selected(img_node: ImageNode):
 	img_node.show_indicator = true
@@ -205,13 +193,14 @@ func _on_TheProject_node_changed(obj, change_type, args):
 			if obj_in_world:
 				world_container.viewport.remove_child(obj)
 		TheProject.ChangeType.PROP_EDIT:
-			var prop = args[0]
-			var old_value = args[1]
-			var new_value = args[2]
-			undo_redo_ctrl.push_undo_op(
-				UndoRedoController.PropEditUndoRedoOperation.new(
-					obj, prop, old_value, new_value)
-			)
+			if not _ignore_while_in_undo_redo:
+				var prop = args[0]
+				var old_value = args[1]
+				var new_value = args[2]
+				undo_redo_ctrl.push_undo_op(
+					UndoRedoController.PropEditUndoRedoOperation.new(
+						obj, prop, old_value, new_value)
+				)
 
 func _on_TheProject_opened():
 	undo_redo_ctrl.reset()
@@ -220,32 +209,14 @@ func _on_TheProject_opened():
 func _on_TheProject_closed():
 	add_img_button.disabled = true
 
-func _on_user_label_line_edit_text_submitted(new_text):
-	if selected_obj is Sprinkler:
-		selected_obj.user_label = new_text
-
-func _on_sweep_spin_box_value_changed(sweep_deg):
-	if selected_obj is Sprinkler:
-		selected_obj.sweep_deg = sweep_deg
-
-func _on_rotation_spin_box_value_changed(rot_deg):
-	if selected_obj is Sprinkler:
-		selected_obj.rotation_degrees = rot_deg
-
-func _on_manufacturer_line_edit_text_submitted(new_text):
-	if selected_obj is Sprinkler:
-		selected_obj.manufacturer = new_text
-
-func _on_model_line_edit_text_submitted(new_text):
-	if selected_obj is Sprinkler:
-		selected_obj.model = new_text
-
-func _on_distance_spin_box_value_changed(value):
-	if selected_obj is Sprinkler:
-		selected_obj.dist_ft = value
-
 func _on_img_dialog_file_selected(path):
 	TheProject.add_image(path)
 
 func _on_show_grid_checkbox_toggled(toggled_on):
 	world_container.show_grid = toggled_on
+
+func _on_undo_redo_ctrl_before_a_do(_is_undo):
+	_ignore_while_in_undo_redo = true
+
+func _on_undo_redo_ctrl_after_a_do(_is_undo):
+	_ignore_while_in_undo_redo = false
