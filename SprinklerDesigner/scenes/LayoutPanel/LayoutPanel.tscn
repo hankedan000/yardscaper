@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=12 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/LayoutPanel/LayoutPanel.gd" id="1_h3dfu"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/Sprinkler/Sprinkler.tscn" id="2_nuxou"]
@@ -8,6 +8,13 @@
 [ext_resource type="PackedScene" uid="uid://bujgf1ym2asal" path="res://scenes/ImageNodePropertyEditor/ImageNodePropertyEditor.tscn" id="4_5fxwu"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="4_15auh"]
 [ext_resource type="Texture2D" uid="uid://covc7nfq44by2" path="res://assets/icons/GridToggle.svg" id="4_xhgqy"]
+[ext_resource type="PackedScene" uid="uid://c7ey0qd3m5ads" path="res://scenes/ObjectsList/ObjectsList.tscn" id="5_wvxvo"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_31l3s"]
+bg_color = Color(0.180392, 0.180392, 0.180392, 0.705882)
+
+[sub_resource type="Theme" id="Theme_kss1b"]
+Label/styles/normal = SubResource("StyleBoxFlat_31l3s")
 
 [node name="LayoutPanel" type="PanelContainer"]
 anchors_preset = 15
@@ -29,27 +36,23 @@ filters = PackedStringArray("*.jpg", "*.png", "*.bmp", "*.jpeg")
 [node name="HSplitContainer" type="HSplitContainer" parent="."]
 layout_mode = 2
 
-[node name="PropertiesPanel" type="PanelContainer" parent="HSplitContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="VBox" type="VBoxContainer" parent="HSplitContainer/PropertiesPanel"]
+[node name="LeftPane" type="TabContainer" parent="HSplitContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HSplitContainer/PropertiesPanel/VBox"]
-layout_mode = 2
-text = "Properties:"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="HSplitContainer/PropertiesPanel/VBox"]
+[node name="Properties" type="ScrollContainer" parent="HSplitContainer/LeftPane"]
 custom_minimum_size = Vector2(225, 0)
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="SprinklerPropertiesList" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer" instance=ExtResource("3_ymlas")]
+[node name="SprinklerPropertiesList" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("3_ymlas")]
 layout_mode = 2
 
-[node name="ImageNodePropertiesList" parent="HSplitContainer/PropertiesPanel/VBox/ScrollContainer" instance=ExtResource("4_5fxwu")]
+[node name="ImageNodePropertiesList" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("4_5fxwu")]
+layout_mode = 2
+
+[node name="Objects" parent="HSplitContainer/LeftPane" instance=ExtResource("5_wvxvo")]
+visible = false
 layout_mode = 2
 
 [node name="Layout" type="VBoxContainer" parent="HSplitContainer"]
@@ -102,6 +105,7 @@ anchor_bottom = 1.0
 offset_top = -23.0
 offset_right = 40.0
 grow_vertical = 0
+theme = SubResource("Theme_kss1b")
 
 [connection signal="file_selected" from="ImgDialog" to="." method="_on_img_dialog_file_selected"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]

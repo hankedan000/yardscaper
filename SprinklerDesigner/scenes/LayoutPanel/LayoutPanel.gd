@@ -2,15 +2,14 @@ extends PanelContainer
 
 @onready var img_dialog               := $ImgDialog
 
-@onready var sprink_prop_list         := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/SprinklerPropertiesList
-@onready var img_prop_list            := $HSplitContainer/PropertiesPanel/VBox/ScrollContainer/ImageNodePropertiesList
+@onready var sprink_prop_list         := $HSplitContainer/LeftPane/Properties/SprinklerPropertiesList
+@onready var img_prop_list            := $HSplitContainer/LeftPane/Properties/ImageNodePropertiesList
+@onready var objects_list             := $HSplitContainer/LeftPane/Objects
 
 @onready var add_img_button           := $HSplitContainer/Layout/LayoutToolbar/AddImage
-
+@onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/RemoveButton
 @onready var world_container          := $HSplitContainer/Layout/World/ViewportContainer
 @onready var mouse_pos_label          := $HSplitContainer/Layout/World/MousePosLabel
-
-@onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/RemoveButton
 
 @export var SprinklerScene : PackedScene = null
 
@@ -55,6 +54,7 @@ func _ready():
 	TheProject.closed.connect(_on_TheProject_closed)
 	sprink_prop_list.visible = false
 	img_prop_list.visible = false
+	objects_list.world = world_container
 	undo_redo_ctrl.before_a_do.connect(_on_undo_redo_ctrl_before_a_do)
 	undo_redo_ctrl.after_a_do.connect(_on_undo_redo_ctrl_after_a_do)
 	
@@ -90,7 +90,7 @@ func _handle_left_click(click_pos: Vector2):
 			var smallest_dist_px = null
 			var nearest_sprink = null
 			var clicked_image = null
-			for child in world_container.viewport.get_children():
+			for child in world_container.objects.get_children():
 				if child is Sprinkler:
 					var dist_px = (child.position - pos_in_world_px).length()
 					if dist_px > Utils.ft_to_px(child.dist_ft):
@@ -176,7 +176,7 @@ func _on_add_sprinkler_pressed():
 	sprinkler_to_add = SprinklerScene.instantiate()
 	sprinkler_to_add.user_label = "Sprinkler%d" % TheProject.sprinklers.size()
 	sprinkler_to_add.position = _global_xy_to_pos_in_world(get_global_mouse_position())
-	world_container.viewport.add_child(sprinkler_to_add)
+	world_container.objects.add_child(sprinkler_to_add)
 	mode = Mode.AddSprinkler
 
 func _on_add_image_pressed():
@@ -190,14 +190,14 @@ func _on_remove_button_pressed():
 	selected_obj = null
 
 func _on_TheProject_node_changed(obj, change_type, args):
-	var obj_in_world = obj.get_parent() == world_container.viewport
+	var obj_in_world = obj in world_container.objects.get_children()
 	match change_type:
 		TheProject.ChangeType.ADD:
 			if not obj_in_world:
-				world_container.viewport.add_child(obj)
+				world_container.objects.add_child(obj)
 		TheProject.ChangeType.REMOVE:
 			if obj_in_world:
-				world_container.viewport.remove_child(obj)
+				world_container.objects.remove_child(obj)
 		TheProject.ChangeType.PROP_EDIT:
 			if not _ignore_while_in_undo_redo:
 				var prop = args[0]

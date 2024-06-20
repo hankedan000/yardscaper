@@ -1,10 +1,12 @@
 extends SubViewportContainer
+class_name WorldViewportContainer
 
 const MAJOR_LINE_WIDTH := 1
 const ORIGIN_VERT_COLOR := Color.LIME_GREEN
 const ORIGIN_HORZ_COLOR := Color.INDIAN_RED
 
 @onready var viewport      : Viewport = $Viewport
+@onready var objects       := $Viewport/Objects
 @onready var pan_zoom_ctrl := $Viewport/PanZoomController
 @onready var camera2d      : Camera2D = $Viewport/Camera2D
 

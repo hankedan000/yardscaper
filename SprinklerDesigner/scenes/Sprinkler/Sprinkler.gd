@@ -147,6 +147,7 @@ func draw_sector(center: Vector2, radius: float, angle_from: float, angle_to: fl
 func serialize():
 	var position_ft = Utils.px_to_ft_vec(position)
 	return {
+		'class_name' : 'Sprinkler',
 		'position_ft' : [position_ft.x, position_ft.y],
 		'rotation_deg' : int(rotation_degrees),
 		'dist_ft' : dist_ft,
