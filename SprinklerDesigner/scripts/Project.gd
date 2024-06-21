@@ -11,7 +11,7 @@ enum ChangeType {
 	PROP_EDIT
 }
 
-var ImageNodeScene : PackedScene = preload("res://scenes/ImageNode/ImageNode.tscn")
+const ImageNodeScene : PackedScene = preload("res://scenes/world_objects/ImageNode/ImageNode.tscn")
 
 var project_path = ""
 var objects = []

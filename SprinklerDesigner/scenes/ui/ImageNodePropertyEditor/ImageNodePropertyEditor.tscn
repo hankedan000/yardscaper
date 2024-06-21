@@ -1,12 +1,12 @@
 [gd_scene load_steps=2 format=3 uid="uid://bujgf1ym2asal"]
 
-[ext_resource type="Script" path="res://scenes/ImageNodePropertyEditor/ImageNodePropertyEditor.gd" id="1_kek36"]
+[ext_resource type="Script" path="res://scenes/ui/ImageNodePropertyEditor/ImageNodePropertyEditor.gd" id="1_kmjym"]
 
 [node name="ImageNodePropertiesList" type="GridContainer"]
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 2
-script = ExtResource("1_kek36")
+script = ExtResource("1_kmjym")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 2

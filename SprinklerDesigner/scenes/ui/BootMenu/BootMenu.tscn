@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cqfa5mme82onl"]
 
-[ext_resource type="Script" path="res://scenes/BootMenu/BootMenu.gd" id="1_a8g1b"]
+[ext_resource type="Script" path="res://scenes/ui/BootMenu/BootMenu.gd" id="1_a8g1b"]
 
 [node name="BootMenu" type="Window"]
 title = "Sprinkler Designer"

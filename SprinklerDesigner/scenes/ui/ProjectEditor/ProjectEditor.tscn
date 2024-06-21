@@ -1,9 +1,9 @@
 [gd_scene load_steps=5 format=3 uid="uid://u1375je75c1f"]
 
 [ext_resource type="Theme" uid="uid://b7bms6qoy7yfq" path="res://assets/themes/MainTheme.tres" id="1_m3fdf"]
-[ext_resource type="Script" path="res://scenes/ProjectEditor/ProjectEditor.gd" id="2_rxefj"]
-[ext_resource type="PackedScene" uid="uid://dfag2aakh64er" path="res://scenes/UnsavedChangesDialog/UnsavedChangesDialog.tscn" id="3_vhjcs"]
-[ext_resource type="PackedScene" uid="uid://xyp0got3c5dp" path="res://scenes/LayoutPanel/LayoutPanel.tscn" id="4_3cv8w"]
+[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/ProjectEditor.gd" id="2_rxefj"]
+[ext_resource type="PackedScene" uid="uid://dfag2aakh64er" path="res://scenes/ui/UnsavedChangesDialog/UnsavedChangesDialog.tscn" id="3_fwduj"]
+[ext_resource type="PackedScene" uid="uid://xyp0got3c5dp" path="res://scenes/ui/LayoutPanel/LayoutPanel.tscn" id="4_3cv8w"]
 
 [node name="Main" type="PanelContainer"]
 anchors_preset = 15
@@ -30,7 +30,7 @@ mode_overrides_title = false
 file_mode = 2
 access = 2
 
-[node name="UnsavedChangesDialog" parent="." instance=ExtResource("3_vhjcs")]
+[node name="UnsavedChangesDialog" parent="." instance=ExtResource("3_fwduj")]
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2

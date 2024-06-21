@@ -1,12 +1,12 @@
 [gd_scene load_steps=2 format=3 uid="uid://co2gtkorldd8j"]
 
-[ext_resource type="Script" path="res://scenes/SprinklerPropertyEditor/SprinklerPropertyEditor.gd" id="1_s53uy"]
+[ext_resource type="Script" path="res://scenes/ui/SprinklerPropertyEditor/SprinklerPropertyEditor.gd" id="1_0j0oi"]
 
 [node name="SprinklerPropertiesList" type="GridContainer"]
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 2
-script = ExtResource("1_s53uy")
+script = ExtResource("1_0j0oi")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 2

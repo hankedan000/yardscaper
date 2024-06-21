@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://g5yh8tb0v6bk"]
 
-[ext_resource type="Script" path="res://scenes/Sprinkler/Sprinkler.gd" id="1_u6dch"]
+[ext_resource type="Script" path="res://scenes/world_objects/Sprinkler/Sprinkler.gd" id="1_u6dch"]
 
 [node name="Sprinkler" type="Node2D"]
 script = ExtResource("1_u6dch")
