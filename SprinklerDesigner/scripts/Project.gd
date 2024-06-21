@@ -14,8 +14,7 @@ enum ChangeType {
 var ImageNodeScene : PackedScene = preload("res://scenes/ImageNode/ImageNode.tscn")
 
 var project_path = ""
-var sprinklers = []
-var images = []
+var objects = []
 var has_edits = false :
 	set(value):
 		var old_value = has_edits
@@ -27,8 +26,8 @@ var _suppress_self_edit_signals = false
 
 func reset():
 	_suppress_self_edit_signals = true
-	while not sprinklers.is_empty():
-		remove_sprinkler(sprinklers.front())
+	while not objects.is_empty():
+		remove_object(objects.front())
 	_suppress_self_edit_signals = false
 	has_edits = false
 	emit_signal('closed')
@@ -77,23 +76,40 @@ func save_as(dir: String):
 	
 	return true
 
-func add_sprinkler(sprink: Sprinkler):
-	if not sprinklers.has(sprink):
-		sprink.moved.connect(_on_node_moved)
-		sprink.property_changed.connect(_on_node_property_changed.bind(sprink))
-		sprinklers.append(sprink)
-		emit_signal('node_changed', sprink, ChangeType.ADD, [])
-		has_edits = true
-	else:
-		push_warning("sprinkler %s is already added to project. ignoring add." % sprink.name)
+func get_subclass_count(subclass: String):
+	var count = 0
+	for obj in objects:
+		if obj.get_subclass() == subclass:
+			count += 1
+	return count
 
-func remove_sprinkler(sprink: Sprinkler):
-	if sprinklers.has(sprink):
-		sprinklers.erase(sprink)
-		emit_signal('node_changed', sprink, ChangeType.REMOVE, [])
-		has_edits = true
-	else:
-		push_warning("sprinkler %s is not in the project. ignoring remove." % sprink.name)
+func add_object(obj: WorldObject):
+	if objects.has(obj):
+		push_warning("obj '%s' is already added to project. ignoring add." % obj.name)
+		return
+	
+	# connect signal handlers
+	obj.property_changed.connect(_on_node_property_changed.bind(obj))
+	if obj is MoveableNode2D:
+		obj.moved.connect(_on_node_moved)
+	objects.append(obj)
+	emit_signal('node_changed', obj, ChangeType.ADD, [])
+	has_edits = true
+
+func remove_object(obj: WorldObject):
+	if not objects.has(obj):
+		push_warning("obj '%s' is not in the project. ignoring remove." % obj.name)
+		return
+	
+	objects.erase(obj)
+	
+	# disconnect signal handlers
+	obj.property_changed.disconnect(_on_node_property_changed)
+	if obj is MoveableNode2D:
+		obj.moved.disconnect(_on_node_moved)
+	
+	emit_signal('node_changed', obj, ChangeType.REMOVE, [])
+	has_edits = true
 
 func get_img_dir():
 	if len(project_path) == 0:
@@ -104,11 +120,14 @@ func load_image(filename: String):
 	var img_path = get_img_dir().path_join(filename)
 	return Image.load_from_file(img_path)
 
+func get_unique_name(subclass: String):
+	return '%s%d' % [subclass, get_subclass_count(subclass)]
+
 func add_image(path: String) -> bool:
 	var filename = path.get_file()
 	# make sure we don't already have an image with that name imported
-	for img in images:
-		if filename == img.filename:
+	for obj in objects:
+		if obj is ImageNode and obj.filename == filename:
 			push_warning("image with filename '%s' already imported" % filename)
 			return false
 	
@@ -125,44 +144,34 @@ func add_image(path: String) -> bool:
 	# load image and create a new ImageNode
 	var img_node : ImageNode = ImageNodeScene.instantiate()
 	img_node.filename = filename
-	_add_image(img_node)
+	img_node.user_label = get_unique_name('ImageNode')
+	add_object(img_node)
 	has_edits = true
 	return true
 
-func _add_image(img_node):
-	img_node.moved.connect(_on_node_moved)
-	img_node.property_changed.connect(_on_node_property_changed.bind(img_node))
-	images.append(img_node)
-	emit_signal('node_changed', img_node, ChangeType.ADD, [])
-
 func serialize():
-	# serialize all sprinkler objects
-	var sprinklers_ser = []
-	for sprink in sprinklers:
-		sprinklers_ser.append(sprink.serialize())
+	# serialize all objects
+	var objects_ser = []
+	for obj in objects:
+		objects_ser.append(obj.serialize())
 	
-	# serialize all image objects
-	var images_ser = []
-	for img in images:
-		images_ser.append(img.serialize())
-	
-	# return final serialized object
 	return {
-		'sprinklers' : sprinklers_ser,
-		'images' : images_ser
+		'objects' : objects_ser
 	}
 
 func deserialize(obj):
 	_suppress_self_edit_signals = true
 	reset()
-	for sprink_ser in Utils.dict_get(obj, 'sprinklers', []):
-		var sprink := Sprinkler.new()
-		sprink.deserialize(sprink_ser)
-		add_sprinkler(sprink)
-	for img_ser in Utils.dict_get(obj, 'images', []):
-		var img_node := ImageNodeScene.instantiate()
-		img_node.deserialize(img_ser)
-		_add_image(img_node)
+	for obj_ser in Utils.dict_get(obj, 'objects', []):
+		match obj_ser['subclass']:
+			'Sprinkler':
+				var sprink := Sprinkler.new()
+				sprink.deserialize(obj_ser)
+				add_object(sprink)
+			'ImageNode':
+				var img_node := ImageNodeScene.instantiate()
+				img_node.deserialize(obj_ser)
+				add_object(img_node)
 	_suppress_self_edit_signals = false
 
 func _on_node_property_changed(property, from, to, node):

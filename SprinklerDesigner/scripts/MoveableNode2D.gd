@@ -1,7 +1,6 @@
-extends Node2D
+extends WorldObject
 class_name MoveableNode2D
 
-signal property_changed(sprink, property, from, to)
 signal moved(sprink, from_xy, to_xy)
 
 var show_indicator := false :
@@ -10,6 +9,9 @@ var show_indicator := false :
 		queue_redraw()
 
 var _pos_at_move_start = null
+
+func get_subclass() -> String:
+	return "MoveableNode2D"
 
 func has_point(_pos: Vector2):
 	push_error("subclass for '%s' should override has_point()" % [name])

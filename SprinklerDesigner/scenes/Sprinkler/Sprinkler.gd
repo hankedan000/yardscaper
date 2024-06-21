@@ -106,13 +106,6 @@ var model : String = "" :
 			emit_signal('property_changed', 'model', old_value, model)
 		_head_info = TheSprinklerDb.get_head_info(manufacturer, model)
 
-var user_label : String = "" :
-	set(value):
-		var old_value = user_label
-		user_label = value
-		if old_value != user_label:
-			emit_signal('property_changed', 'user_label', old_value, user_label)
-
 var show_min_dist := false :
 	set(value):
 		show_min_dist = value
@@ -144,27 +137,22 @@ func draw_sector(center: Vector2, radius: float, angle_from: float, angle_to: fl
 
 	draw_polygon(points, [color])
 
+func get_subclass() -> String:
+	return "Sprinkler"
+
 func serialize():
-	var position_ft = Utils.px_to_ft_vec(position)
-	return {
-		'class_name' : 'Sprinkler',
-		'position_ft' : [position_ft.x, position_ft.y],
-		'rotation_deg' : int(rotation_degrees),
-		'dist_ft' : dist_ft,
-		'sweep_deg' : int(sweep_deg),
-		'manufacturer' : manufacturer,
-		'model' : model,
-		'user_label' : user_label
-	}
+	var obj = super.serialize()
+	obj['dist_ft'] = dist_ft
+	obj['sweep_deg'] = int(sweep_deg)
+	obj['manufacturer'] = manufacturer
+	obj['model'] = model
+	return obj
 
 func deserialize(obj):
-	var pos_ft = obj['position_ft']
-	position = Vector2(Utils.ft_to_px(pos_ft[0]), Utils.ft_to_px(pos_ft[1]))
-	rotation_degrees = obj['rotation_deg']
+	super.deserialize(obj)
 	sweep_deg = obj['sweep_deg']
 	manufacturer = obj['manufacturer']
 	model = obj['model']
-	user_label = obj['user_label']
 	dist_ft = Utils.dict_get(obj, 'dist_ft', max_dist_ft)
 
 func _draw():

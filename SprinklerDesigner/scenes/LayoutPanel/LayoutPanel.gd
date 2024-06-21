@@ -114,7 +114,7 @@ func _handle_left_click(click_pos: Vector2):
 			if selected_obj != null and selected_obj == next_select_obj:
 				_add_held_object(selected_obj)
 		Mode.AddSprinkler:
-			TheProject.add_sprinkler(sprinkler_to_add)
+			TheProject.add_object(sprinkler_to_add)
 			sprinkler_to_add = null
 			mode = Mode.Idle
 
@@ -174,7 +174,7 @@ func _global_xy_to_pos_in_world(global_pos: Vector2) -> Vector2:
 
 func _on_add_sprinkler_pressed():
 	sprinkler_to_add = SprinklerScene.instantiate()
-	sprinkler_to_add.user_label = "Sprinkler%d" % TheProject.sprinklers.size()
+	sprinkler_to_add.user_label = TheProject.get_unique_name('Sprinkler')
 	sprinkler_to_add.position = _global_xy_to_pos_in_world(get_global_mouse_position())
 	world_container.objects.add_child(sprinkler_to_add)
 	mode = Mode.AddSprinkler

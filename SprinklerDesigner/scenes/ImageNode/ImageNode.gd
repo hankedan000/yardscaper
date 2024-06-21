@@ -5,13 +5,6 @@ class_name ImageNode
 
 var filename : String = ""
 
-var user_label : String = "" :
-	set(value):
-		var old_value = user_label
-		user_label = value
-		if old_value != user_label:
-			emit_signal('property_changed', 'user_label', old_value, user_label)
-
 var width_ft : float = 0:
 	set(value):
 		var old_value = width_ft
@@ -52,21 +45,18 @@ func _draw():
 func img_size_px() -> Vector2:
 	return texture_rect.size
 
+func get_subclass() -> String:
+	return "ImageNode"
+
 func serialize():
-	var position_ft = Utils.px_to_ft_vec(position)
-	return {
-		'class_name' : 'ImageNode',
-		'filename' : filename,
-		'user_label' : user_label,
-		'position_ft' : [position_ft.x, position_ft.y],
-		'width_ft' : width_ft,
-		'height_ft' : height_ft
-	}
+	var obj = super.serialize()
+	obj['filename'] = filename
+	obj['width_ft'] = width_ft
+	obj['height_ft'] = height_ft
+	return obj
 
 func deserialize(obj):
+	super.deserialize(obj)
 	filename = obj['filename']
-	user_label = obj['user_label']
-	var pos_ft = obj['position_ft']
-	position = Vector2(Utils.ft_to_px(pos_ft[0]), Utils.ft_to_px(pos_ft[1]))
 	width_ft = Utils.dict_get(obj, 'width_ft', 0)
 	height_ft = Utils.dict_get(obj, 'height_ft', 0)
