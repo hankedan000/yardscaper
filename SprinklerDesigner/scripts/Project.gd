@@ -150,10 +150,12 @@ func add_image(path: String) -> bool:
 	return true
 
 func serialize():
-	# serialize all objects
+	# serialize all objects base on order they appear in world
 	var objects_ser = []
-	for obj in objects:
-		objects_ser.append(obj.serialize())
+	if len(objects) > 0:
+		var world : WorldViewportContainer = objects[0].world
+		for obj in world.objects.get_children():
+			objects_ser.append(obj.serialize())
 	
 	return {
 		'objects' : objects_ser

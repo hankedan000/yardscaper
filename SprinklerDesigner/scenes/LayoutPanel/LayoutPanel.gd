@@ -55,6 +55,7 @@ func _ready():
 	sprink_prop_list.visible = false
 	img_prop_list.visible = false
 	objects_list.world = world_container
+	world_container.world_object_moved.connect(_on_world_object_moved)
 	undo_redo_ctrl.before_a_do.connect(_on_undo_redo_ctrl_before_a_do)
 	undo_redo_ctrl.after_a_do.connect(_on_undo_redo_ctrl_after_a_do)
 	
@@ -220,6 +221,37 @@ func _on_img_dialog_file_selected(path):
 
 func _on_show_grid_checkbox_toggled(toggled_on):
 	world_container.show_grid = toggled_on
+
+class WorldObjectMovedUndoRedoOperation:
+	extends UndoRedoController.UndoRedoOperation
+	
+	var _world : WorldViewportContainer = null
+	var _from_idx = 0
+	var _to_idx = 0
+	
+	func _init(world: WorldViewportContainer, from_idx: int, to_idx: int):
+		_world = world
+		_from_idx = from_idx
+		_to_idx = to_idx
+	
+	func undo() -> bool:
+		return _world.move_world_object(_to_idx, _from_idx)
+		
+	func redo() -> bool:
+		return _world.move_world_object(_from_idx, _to_idx)
+		
+	func pretty_str() -> String:
+		return str({
+			'from_idx' : _from_idx,
+			'_to_idx': _to_idx
+		})
+
+func _on_world_object_moved(from_idx: int, to_idx: int):
+	if _ignore_while_in_undo_redo:
+		return
+	undo_redo_ctrl.push_undo_op(WorldObjectMovedUndoRedoOperation.new(
+		world_container, from_idx, to_idx))
+	TheProject.has_edits = true
 
 func _on_undo_redo_ctrl_before_a_do(_is_undo):
 	_ignore_while_in_undo_redo = true

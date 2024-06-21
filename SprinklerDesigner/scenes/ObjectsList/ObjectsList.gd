@@ -57,13 +57,8 @@ func _shift_object(dir):
 	if from_idx < 0:
 		return # nothing to shift
 	
-	if world:
-		var to_idx = from_idx + dir
-		var object_count = world.objects.get_child_count()
-		if to_idx < 0 or to_idx >= object_count:
-			return # can't shift off the end of list
-		var obj = world.objects.get_child(from_idx)
-		world.objects.move_child(obj, to_idx)
+	var to_idx = from_idx + dir
+	if world and world.move_world_object(from_idx, to_idx):
 		grid.get_child(to_idx).grab_focus()
 
 func _on_world_child_entered_tree(_node: Node):

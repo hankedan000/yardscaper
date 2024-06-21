@@ -3,12 +3,23 @@ class_name WorldObject
 
 signal property_changed(obj, property, from, to)
 
+var world : WorldViewportContainer = null
+
 var user_label : String = "" :
 	set(value):
 		var old_value = user_label
 		user_label = value
 		if old_value != user_label:
 			emit_signal('property_changed', 'user_label', old_value, user_label)
+
+func _ready():
+	# locate our parent WorldViewportContainer
+	var parent = get_parent()
+	while parent != null:
+		if parent is WorldViewportContainer:
+			world = parent
+			break
+		parent = parent.get_parent()
 
 func get_subclass() -> String:
 	return "WorldObject"

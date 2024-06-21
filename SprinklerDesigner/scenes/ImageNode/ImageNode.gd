@@ -26,6 +26,7 @@ var height_ft : float = 0:
 			queue_redraw()
 
 func _ready():
+	super._ready()
 	if TheProject.is_opened():
 		var img = TheProject.load_image(filename)
 		if img is Image:
