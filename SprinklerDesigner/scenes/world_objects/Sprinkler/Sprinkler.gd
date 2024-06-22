@@ -22,8 +22,9 @@ var min_dist_ft : float = NAN :
 		var old_value = min_dist_ft
 		min_dist_ft = value
 		if old_value != min_dist_ft:
+			_cap_values()
+			queue_redraw()
 			emit_signal('property_changed', 'min_dist_ft', old_value, min_dist_ft)
-		queue_redraw()
 
 var max_dist_ft : float = NAN :
 	get:
@@ -36,8 +37,9 @@ var max_dist_ft : float = NAN :
 		var old_value = max_dist_ft
 		max_dist_ft = value
 		if old_value != max_dist_ft:
+			_cap_values()
+			queue_redraw()
 			emit_signal('property_changed', 'max_dist_ft', old_value, max_dist_ft)
-		queue_redraw()
 
 var dist_ft : float = NAN :
 	get:
@@ -48,8 +50,9 @@ var dist_ft : float = NAN :
 		var old_value = dist_ft
 		dist_ft = value
 		if old_value != dist_ft:
+			_cap_values()
+			queue_redraw()
 			emit_signal('property_changed', 'dist_ft', old_value, dist_ft)
-		queue_redraw()
 
 var min_sweep_deg : float = NAN :
 	get:
@@ -62,8 +65,9 @@ var min_sweep_deg : float = NAN :
 		var old_value = min_sweep_deg
 		min_sweep_deg = value
 		if old_value != min_sweep_deg:
+			_cap_values()
+			queue_redraw()
 			emit_signal('property_changed', 'min_sweep_deg', old_value, min_sweep_deg)
-		queue_redraw()
 
 var max_sweep_deg : float = NAN :
 	get:
@@ -76,8 +80,9 @@ var max_sweep_deg : float = NAN :
 		var old_value = max_sweep_deg
 		max_sweep_deg = value
 		if old_value != max_sweep_deg:
+			_cap_values()
+			queue_redraw()
 			emit_signal('property_changed', 'max_sweep_deg', old_value, max_sweep_deg)
-		queue_redraw()
 
 var sweep_deg : float = NAN :
 	get:
@@ -90,21 +95,29 @@ var sweep_deg : float = NAN :
 		if sweep_deg < 0:
 			sweep_deg = 360 - sweep_deg
 		if old_value != sweep_deg:
+			_cap_values()
+			queue_redraw()
 			emit_signal('property_changed', 'sweep_deg', old_value, sweep_deg)
-		queue_redraw()
 
 var manufacturer : String = "" :
 	set(value):
+		var old_value = manufacturer
 		manufacturer = value
 		_head_info = TheSprinklerDb.get_head_info(manufacturer, model)
+		if old_value != manufacturer:
+			_cap_values()
+			queue_redraw()
+			emit_signal('property_changed', 'manufacturer', old_value, manufacturer)
 
 var model : String = "" :
 	set(value):
 		var old_value = model
 		model = value
-		if old_value != model:
-			emit_signal('property_changed', 'model', old_value, model)
 		_head_info = TheSprinklerDb.get_head_info(manufacturer, model)
+		if old_value != model:
+			_cap_values()
+			queue_redraw()
+			emit_signal('property_changed', 'model', old_value, model)
 
 var show_min_dist := false :
 	set(value):
@@ -175,3 +188,14 @@ func _draw():
 		draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT * 2), indic_color)
 	# draw body
 	draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT), Color.BLACK)
+
+func _cap_values():
+	if dist_ft < min_dist_ft:
+		dist_ft = min_dist_ft
+	elif dist_ft > max_dist_ft:
+		dist_ft = max_dist_ft
+	
+	if sweep_deg < min_sweep_deg:
+		sweep_deg = min_sweep_deg
+	elif sweep_deg > max_sweep_deg:
+		sweep_deg = max_sweep_deg

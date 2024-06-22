@@ -3,8 +3,8 @@ extends GridContainer
 @onready var user_label_lineedit      := $UserLabelLineEdit
 @onready var rot_spinbox              := $RotationSpinBox
 @onready var sweep_spinbox            := $SweepSpinBox
-@onready var manufacturer_lineedit    := $ManufacturerLineEdit
-@onready var model_lineedit           := $ModelLineEdit
+@onready var manu_option              := $ManufacturerOption
+@onready var model_option             := $ModelOption
 @onready var min_dist_spinbox         := $MinDistanceSpinBox
 @onready var max_dist_spinbox         := $MaxDistanceSpinBox
 @onready var dist_spinbox             := $DistanceSpinBox
@@ -27,6 +27,9 @@ var sprinkler : Sprinkler = null:
 var _ui_needs_sync = false
 var _ignore_internal_edits = false
 
+func _ready():
+	_update_ui_from_sprinkler_db()
+
 func _process(_delta):
 	if _ui_needs_sync:
 		_sync_ui()
@@ -34,23 +37,50 @@ func _process(_delta):
 func queue_ui_sync():
 	_ui_needs_sync = true
 
+# update manufactuer/model information from sprinkler database
+func _update_ui_from_sprinkler_db():
+	manu_option.clear()
+	manu_option.add_item("") # default 'none' option
+	for manu in TheSprinklerDb.get_manufacturers():
+		manu_option.add_item(manu)
+	_update_model_options(manu_option.get_item_text(manu_option.selected))
+	queue_ui_sync()
+
+# update model options based on the manufacturer
+func _update_model_options(manufacturer: String):
+	model_option.clear()
+	model_option.add_item("") # default 'none' option
+	for model in TheSprinklerDb.get_head_models(manufacturer):
+		model_option.add_item(model)
+	queue_ui_sync()
+
+# synchronize UI elements to existing properties of the sprinkler
 func _sync_ui():
-	_ui_needs_sync = false
 	if sprinkler == null:
+		_ui_needs_sync = false
 		return
 	
 	_ignore_internal_edits = true
 	user_label_lineedit.text = sprinkler.user_label
 	rot_spinbox.value = sprinkler.rotation_degrees
 	sweep_spinbox.value = sprinkler.sweep_deg
-	manufacturer_lineedit.text = sprinkler.manufacturer
-	model_lineedit.text = sprinkler.model
+	_sync_option_to_text(manu_option, sprinkler.manufacturer)
+	_update_model_options(sprinkler.manufacturer)
+	_sync_option_to_text(model_option, sprinkler.model)
 	min_dist_spinbox.value = sprinkler.min_dist_ft
 	max_dist_spinbox.value = sprinkler.max_dist_ft
 	dist_spinbox.min_value = min_dist_spinbox.value
 	dist_spinbox.max_value = max_dist_spinbox.value
 	dist_spinbox.value = sprinkler.dist_ft
 	_ignore_internal_edits = false
+	_ui_needs_sync = false
+
+func _sync_option_to_text(option_button: OptionButton, text: String):
+	for idx in range(option_button.item_count):
+		if option_button.get_item_text(idx) == text:
+			option_button.selected = idx
+			return
+	option_button.selected = 0
 
 func _on_user_label_line_edit_text_submitted(new_text):
 	if sprinkler is Sprinkler and not _ignore_internal_edits:
@@ -64,13 +94,16 @@ func _on_rotation_spin_box_value_changed(rot_deg):
 	if sprinkler is Sprinkler and not _ignore_internal_edits:
 		sprinkler.rotation_degrees = rot_deg
 
-func _on_manufacturer_line_edit_text_submitted(new_text):
+func _on_manufacturer_option_item_selected(index):
+	print("manufacturer selected")
+	var manufacturer = manu_option.get_item_text(index)
+	_update_model_options(manufacturer)
 	if sprinkler is Sprinkler and not _ignore_internal_edits:
-		sprinkler.manufacturer = new_text
+		sprinkler.manufacturer = manufacturer
 
-func _on_model_line_edit_text_submitted(new_text):
+func _on_model_option_item_selected(index):
 	if sprinkler is Sprinkler and not _ignore_internal_edits:
-		sprinkler.model = new_text
+		sprinkler.model = model_option.get_item_text(index)
 
 func _on_distance_spin_box_value_changed(value):
 	if sprinkler is Sprinkler and not _ignore_internal_edits:

@@ -183,6 +183,8 @@ func _on_release_selected_obj(obj):
 	elif obj is ImageNode:
 		obj.picked = false
 		img_prop_list.visible = false
+	elif obj is DistanceMeasurement:
+		obj.picked = false
 
 func _on_sprinkler_selected(sprink: Sprinkler):
 	sprink_prop_list.sprinkler = sprink

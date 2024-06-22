@@ -26,7 +26,7 @@ func _draw():
 	
 	# update position/shape of the collision rectangle
 	# probably not the best place to do this, but convenient and efficient
-	var midpoint = midpoint()
+	var midpoint = mid_point()
 	var delta_vec = point_b - point_a
 	_coll_rect.size.x = delta_vec.length()
 	_coll_rect.size.y = 10
@@ -53,7 +53,7 @@ func _draw():
 		16, # font_size
 		color)
 
-func midpoint() -> Vector2:
+func mid_point() -> Vector2:
 	return point_a + ((point_b - point_a) / 2.0)
 
 func dist_px() -> float:
