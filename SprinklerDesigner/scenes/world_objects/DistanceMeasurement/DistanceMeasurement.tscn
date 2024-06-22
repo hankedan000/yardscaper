@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://db8wvn8xh27x0"]
+[gd_scene load_steps=3 format=3 uid="uid://db8wvn8xh27x0"]
 
-[ext_resource type="Script" path="res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.gd" id="1_skq7c"]
+[ext_resource type="PackedScene" uid="uid://crvi868egg0lg" path="res://scenes/world_objects/PickableNode2D/PickableNode2D.tscn" id="1_gjd6h"]
+[ext_resource type="Script" path="res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.gd" id="2_skq7c"]
 
-[node name="DistanceMeasurement" type="Node2D"]
-script = ExtResource("1_skq7c")
+[node name="DistanceMeasurement" instance=ExtResource("1_gjd6h")]
+script = ExtResource("2_skq7c")

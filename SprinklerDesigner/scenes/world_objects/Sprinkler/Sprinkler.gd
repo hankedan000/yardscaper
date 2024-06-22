@@ -169,7 +169,9 @@ func _draw():
 		draw_arc(center, min_radius, 0, stop_angle, ARC_POINTS, Color.RED, 1.0)
 	if show_max_dist:
 		draw_arc(center, max_radius, 0, stop_angle, ARC_POINTS, Color.LIME_GREEN, 1.0)
-	if show_indicator:
-		draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT * 2), Color.YELLOW)
+	# draw indicator circle
+	if picked or hovering:
+		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
+		draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT * 2), indic_color)
 	# draw body
 	draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT), Color.BLACK)

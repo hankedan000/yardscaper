@@ -38,10 +38,18 @@ func _ready():
 			else:
 				texture_rect.size.x = Utils.ft_to_px(width_ft)
 				texture_rect.size.y = Utils.ft_to_px(height_ft)
+	
+	# change pick shape to a rectangle (default is ellipse)
+	var rect_shape := RectangleShape2D.new()
+	rect_shape.size = texture_rect.size
+	pick_coll_shape.shape = rect_shape
+	pick_area.position = texture_rect.size / 2.0
 
 func _draw():
-	if show_indicator:
-		draw_rect(Rect2(Vector2(), img_size_px()), Color.YELLOW, false, 4)
+	# draw indicator box
+	if picked or hovering:
+		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
+		draw_rect(Rect2(Vector2(), img_size_px()), indic_color, false, 4)
 
 func img_size_px() -> Vector2:
 	return texture_rect.size

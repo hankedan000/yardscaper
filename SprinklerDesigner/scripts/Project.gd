@@ -11,7 +11,9 @@ enum ChangeType {
 	PROP_EDIT
 }
 
+const SprinklerScene : PackedScene = preload("res://scenes/world_objects/Sprinkler/Sprinkler.tscn")
 const ImageNodeScene : PackedScene = preload("res://scenes/world_objects/ImageNode/ImageNode.tscn")
+const DistanceMeasurmentScene : PackedScene = preload("res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn")
 
 var project_path = ""
 var objects = []
@@ -167,7 +169,7 @@ func deserialize(obj):
 	for obj_ser in Utils.dict_get(obj, 'objects', []):
 		match obj_ser['subclass']:
 			'Sprinkler':
-				var sprink := Sprinkler.new()
+				var sprink := SprinklerScene.instantiate()
 				sprink.deserialize(obj_ser)
 				add_object(sprink)
 			'ImageNode':
@@ -175,7 +177,7 @@ func deserialize(obj):
 				img_node.deserialize(obj_ser)
 				add_object(img_node)
 			'DistanceMeasurement':
-				var dist := DistanceMeasurement.new()
+				var dist := DistanceMeasurmentScene.instantiate()
 				dist.deserialize(obj_ser)
 				add_object(dist)
 			_:

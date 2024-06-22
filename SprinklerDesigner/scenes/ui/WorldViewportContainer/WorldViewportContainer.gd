@@ -11,6 +11,7 @@ const ORIGIN_HORZ_COLOR := Color.INDIAN_RED
 @onready var objects       := $Viewport/Objects
 @onready var pan_zoom_ctrl := $Viewport/PanZoomController
 @onready var camera2d      : Camera2D = $Viewport/Camera2D
+@onready var cursor        := $Viewport/Cursor
 
 var show_grid = true:
 	set(value):
@@ -137,3 +138,7 @@ func _process(_delta):
 		queue_redraw()
 	_prev_global_pos = curr_pos
 	_prev_zoom = curr_zoom
+	
+	var mouse_pos = get_local_mouse_position()
+	var pos_in_world = pan_zoom_ctrl.local_pos_to_world(mouse_pos)
+	cursor.position = pos_in_world

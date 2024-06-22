@@ -2,6 +2,8 @@ extends Node
 
 var main : Main = null
 
+const HOVER_COLOR := Color.DARK_TURQUOISE
+const SELECT_COLOR := Color.DARK_ORANGE
 const MAX_RECENT_PROJECT = 10
 const RECENT_PROJECTS_PATH = "user://recent_project.json"
 

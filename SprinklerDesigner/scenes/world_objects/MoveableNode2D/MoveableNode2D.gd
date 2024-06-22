@@ -1,12 +1,7 @@
-extends WorldObject
+extends PickableNode2D
 class_name MoveableNode2D
 
 signal moved(sprink, from_xy, to_xy)
-
-var show_indicator := false :
-	set(value):
-		show_indicator = value
-		queue_redraw()
 
 var _pos_at_move_start = null
 

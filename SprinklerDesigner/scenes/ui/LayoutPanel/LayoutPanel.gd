@@ -46,6 +46,10 @@ var selected_obj = null :
 			_on_sprinkler_selected(obj)
 		elif obj is ImageNode:
 			_on_img_node_selected(obj)
+		elif obj is DistanceMeasurement:
+			_on_dist_measurement_selected(obj)
+		else:
+			push_warning("unsupported select for obj '%s'" % obj)
 		
 		selected_obj = obj
 		remove_button.disabled = selected_obj == null
@@ -53,6 +57,8 @@ var selected_obj = null :
 # MoveableNode2D that's held during a drag/move operation
 var _held_objs = []
 var _mouse_move_start_pos_px = null
+# object that would be selected next if LEFT mouse button were pressed
+var _hovered_obj = null
 
 # ignore property changes while inside of an undo/redo operation.
 # we don't want to cyclically re-add an undo operation that will
@@ -89,12 +95,35 @@ func _input(event):
 			var y_pretty = Utils.pretty_dist(pos_in_world_ft.y)
 			mouse_pos_label.text = "%s, %s" % [x_pretty, y_pretty]
 			
+			var nearest_pickable = _nearest_pickable_obj(pos_in_world_px)
+			if nearest_pickable != _hovered_obj:
+				# transition 'hovering' status from one object to the next
+				if _hovered_obj:
+					_hovered_obj.hovering = false
+				if nearest_pickable:
+					nearest_pickable.hovering = true
+				_hovered_obj = nearest_pickable
+			
 			if sprinkler_to_add:
 				sprinkler_to_add.position = pos_in_world_px
 			elif dist_meas_to_add and mode == Mode.AddDistMeasureB:
 				dist_meas_to_add.point_b = pos_in_world_px
 			elif len(_held_objs) > 0:
 				_handle_held_obj_move(pos_in_world_px)
+
+func _nearest_pickable_obj(pos_in_world: Vector2):
+	var smallest_dist_px = null
+	var nearest_pick_area = null
+	var cursor : Area2D = world_container.cursor
+	for pick_area in cursor.get_overlapping_areas():
+		var dist_px = pick_area.global_position.distance_to(pos_in_world)
+		if smallest_dist_px == null or dist_px < smallest_dist_px:
+			smallest_dist_px = dist_px
+			nearest_pick_area = pick_area
+	
+	if nearest_pick_area:
+		return nearest_pick_area.get_parent()
+	return null
 
 func _handle_left_click(click_pos: Vector2):
 	# ignore clicks that are outside the world viewpoint
@@ -104,31 +133,8 @@ func _handle_left_click(click_pos: Vector2):
 	var pos_in_world_px = _global_xy_to_pos_in_world(click_pos)
 	match mode:
 		Mode.Idle:
-			var smallest_dist_px = null
-			var nearest_sprink = null
-			var clicked_image = null
-			for child in world_container.objects.get_children():
-				if child is Sprinkler:
-					var dist_px = (child.position - pos_in_world_px).length()
-					if dist_px > Utils.ft_to_px(child.dist_ft):
-						continue
-					
-					if not nearest_sprink or (nearest_sprink and dist_px <= smallest_dist_px):
-						smallest_dist_px = dist_px
-						nearest_sprink = child
-				elif child is ImageNode:
-					var img_rect = Rect2(child.position, child.img_size_px())
-					if img_rect.has_point(pos_in_world_px):
-						clicked_image = child
-			
-			var next_select_obj = null
-			if nearest_sprink:
-				next_select_obj = nearest_sprink
-			elif clicked_image:
-				next_select_obj = clicked_image
-			selected_obj = next_select_obj
-			
-			if selected_obj != null and selected_obj == next_select_obj:
+			selected_obj = _hovered_obj
+			if selected_obj:
 				_add_held_object(selected_obj)
 		Mode.AddSprinkler:
 			TheProject.add_object(sprinkler_to_add)
@@ -170,25 +176,28 @@ func _add_held_object(obj):
 
 func _on_release_selected_obj(obj):
 	if obj is Sprinkler:
-		obj.show_indicator = false
+		obj.picked = false
 		obj.show_min_dist = false
 		obj.show_max_dist = false
 		sprink_prop_list.visible = false
 	elif obj is ImageNode:
-		obj.show_indicator = false
+		obj.picked = false
 		img_prop_list.visible = false
 
 func _on_sprinkler_selected(sprink: Sprinkler):
 	sprink_prop_list.sprinkler = sprink
-	sprink.show_indicator = true
+	sprink.picked = true
 	sprink.show_min_dist = true
 	sprink.show_max_dist = true
 	sprink_prop_list.visible = true
 
 func _on_img_node_selected(img_node: ImageNode):
 	img_prop_list.img_node = img_node
-	img_node.show_indicator = true
+	img_node.picked = true
 	img_prop_list.visible = true
+
+func _on_dist_measurement_selected(meas: DistanceMeasurement):
+	meas.picked = true
 
 func _is_point_over_world(global_pos: Vector2) -> bool:
 	return world_container.get_global_rect().has_point(global_pos)

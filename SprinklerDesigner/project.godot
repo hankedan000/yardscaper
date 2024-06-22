@@ -26,3 +26,8 @@ Globals="*res://scripts/Globals.gd"
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
+
+[layer_names]
+
+2d_physics/layer_1="Cursor"
+2d_physics/layer_2="WorldObjects"

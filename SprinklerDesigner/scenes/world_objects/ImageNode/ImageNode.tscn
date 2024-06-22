@@ -1,10 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://d3cwej23wp4gk"]
+[gd_scene load_steps=3 format=3 uid="uid://d3cwej23wp4gk"]
 
-[ext_resource type="Script" path="res://scenes/world_objects/ImageNode/ImageNode.gd" id="1_dfkcr"]
+[ext_resource type="PackedScene" uid="uid://crvi868egg0lg" path="res://scenes/world_objects/PickableNode2D/PickableNode2D.tscn" id="1_r5s32"]
+[ext_resource type="Script" path="res://scenes/world_objects/ImageNode/ImageNode.gd" id="2_dfkcr"]
 
-[node name="ImageNode" type="Node2D"]
-script = ExtResource("1_dfkcr")
+[node name="ImageNode" instance=ExtResource("1_r5s32")]
+script = ExtResource("2_dfkcr")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="TextureRect" type="TextureRect" parent="." index="0"]
 offset_right = 50.0
 offset_bottom = 50.0
