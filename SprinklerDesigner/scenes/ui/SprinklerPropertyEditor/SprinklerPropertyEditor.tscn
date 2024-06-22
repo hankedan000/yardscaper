@@ -52,7 +52,7 @@ text = "Model: "
 layout_mode = 2
 
 [node name="Label6" type="Label" parent="."]
-modulate = Color(0.161111, 0.18994, 1, 1)
+modulate = Color(1, 0.188235, 0.215686, 1)
 layout_mode = 2
 text = "Min Distance: "
 
@@ -62,7 +62,7 @@ editable = false
 suffix = "ft"
 
 [node name="Label7" type="Label" parent="."]
-modulate = Color(1, 0.186899, 0.216748, 1)
+modulate = Color(0.39, 1, 0.4205, 1)
 layout_mode = 2
 text = "Max Distance: "
 

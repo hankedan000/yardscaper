@@ -157,8 +157,8 @@ func deserialize(obj):
 
 func _draw():
 	var stop_angle = deg_to_rad(sweep_deg)
-	var water_color = Color.AQUA
-	water_color.a = 0.7
+	var water_color = Color.DODGER_BLUE
+	water_color.a = 0.5
 	var max_radius = Utils.ft_to_px(max_dist_ft)
 	var min_radius = Utils.ft_to_px(min_dist_ft)
 	var dist_radius = Utils.ft_to_px(dist_ft)
@@ -166,9 +166,9 @@ func _draw():
 	if show_water:
 		draw_sector(center, dist_radius, 0, stop_angle, ARC_POINTS, water_color)
 	if show_min_dist:
-		draw_arc(center, min_radius, 0, stop_angle, ARC_POINTS, Color.BLUE, 1.0)
+		draw_arc(center, min_radius, 0, stop_angle, ARC_POINTS, Color.RED, 1.0)
 	if show_max_dist:
-		draw_arc(center, max_radius, 0, stop_angle, ARC_POINTS, Color.RED, 1.0)
+		draw_arc(center, max_radius, 0, stop_angle, ARC_POINTS, Color.LIME_GREEN, 1.0)
 	if show_indicator:
 		draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT * 2), Color.YELLOW)
 	# draw body

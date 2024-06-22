@@ -38,6 +38,7 @@ layout_mode = 2
 
 [node name="LeftPane" type="TabContainer" parent="HSplitContainer"]
 layout_mode = 2
+tab_focus_mode = 0
 
 [node name="Properties" type="ScrollContainer" parent="HSplitContainer/LeftPane"]
 custom_minimum_size = Vector2(225, 0)
@@ -49,6 +50,7 @@ horizontal_scroll_mode = 0
 layout_mode = 2
 
 [node name="ImageNodePropertiesList" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("4_legmd")]
+visible = false
 layout_mode = 2
 
 [node name="Objects" parent="HSplitContainer/LeftPane" instance=ExtResource("5_p3ckg")]
@@ -64,19 +66,29 @@ layout_mode = 2
 [node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
 tooltip_text = "Add sprinkler"
+focus_mode = 0
 text = "Add Sprinkler"
 icon = ExtResource("6_58poj")
 
 [node name="AddImage" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
 tooltip_text = "Add image to project. Project needs to be saved before you can add images."
+focus_mode = 0
 disabled = true
 text = "Add Image"
+icon = ExtResource("6_58poj")
+
+[node name="AddDistMeasure" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
+layout_mode = 2
+tooltip_text = "Add a distance measurement"
+focus_mode = 0
+text = "Add Dist."
 icon = ExtResource("6_58poj")
 
 [node name="RemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
 tooltip_text = "Remove item"
+focus_mode = 0
 disabled = true
 icon = ExtResource("7_nx6cf")
 
@@ -86,6 +98,7 @@ layout_mode = 2
 [node name="ShowGridButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
 tooltip_text = "Toggle grid visibility"
+focus_mode = 0
 toggle_mode = true
 button_pressed = true
 icon = ExtResource("8_uxbpy")
@@ -110,5 +123,6 @@ theme = SubResource("Theme_kss1b")
 [connection signal="file_selected" from="ImgDialog" to="." method="_on_img_dialog_file_selected"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddImage" to="." method="_on_add_image_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddDistMeasure" to="." method="_on_add_dist_measure_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/RemoveButton" to="." method="_on_remove_button_pressed"]
 [connection signal="toggled" from="HSplitContainer/Layout/LayoutToolbar/ShowGridButton" to="." method="_on_show_grid_checkbox_toggled"]

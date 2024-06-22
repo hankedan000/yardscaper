@@ -6,7 +6,9 @@ extends PanelContainer
 @onready var img_prop_list            := $HSplitContainer/LeftPane/Properties/ImageNodePropertiesList
 @onready var objects_list             := $HSplitContainer/LeftPane/Objects
 
+@onready var add_sprink_button           := $HSplitContainer/Layout/LayoutToolbar/AddSprinkler
 @onready var add_img_button           := $HSplitContainer/Layout/LayoutToolbar/AddImage
+@onready var add_dist_button           := $HSplitContainer/Layout/LayoutToolbar/AddDistMeasure
 @onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/RemoveButton
 @onready var world_container          := $HSplitContainer/Layout/World/ViewportContainer
 @onready var mouse_pos_label          := $HSplitContainer/Layout/World/MousePosLabel
@@ -15,11 +17,20 @@ extends PanelContainer
 
 enum Mode {
 	Idle,
-	AddSprinkler
+	AddSprinkler,
+	AddDistMeasureA,
+	AddDistMeasureB
 }
 
-var mode = Mode.Idle
+var mode = Mode.Idle:
+	set(value):
+		var adds_disabled = value != Mode.Idle
+		add_sprink_button.disabled = adds_disabled
+		add_img_button.disabled = adds_disabled
+		add_dist_button.disabled = adds_disabled
+		mode = value
 var sprinkler_to_add : Sprinkler = null
+var dist_meas_to_add : DistanceMeasurement = null
 var undo_redo_ctrl := UndoRedoController.new()
 
 var selected_obj = null :
@@ -59,6 +70,9 @@ func _ready():
 	undo_redo_ctrl.before_a_do.connect(_on_undo_redo_ctrl_before_a_do)
 	undo_redo_ctrl.after_a_do.connect(_on_undo_redo_ctrl_after_a_do)
 	
+	# add shortcuts
+	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
+	
 func _input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
@@ -77,6 +91,8 @@ func _input(event):
 			
 			if sprinkler_to_add:
 				sprinkler_to_add.position = pos_in_world_px
+			elif dist_meas_to_add and mode == Mode.AddDistMeasureB:
+				dist_meas_to_add.point_b = pos_in_world_px
 			elif len(_held_objs) > 0:
 				_handle_held_obj_move(pos_in_world_px)
 
@@ -85,9 +101,9 @@ func _handle_left_click(click_pos: Vector2):
 	if not _is_point_over_world(click_pos):
 		return
 		
+	var pos_in_world_px = _global_xy_to_pos_in_world(click_pos)
 	match mode:
 		Mode.Idle:
-			var pos_in_world_px = _global_xy_to_pos_in_world(click_pos)
 			var smallest_dist_px = null
 			var nearest_sprink = null
 			var clicked_image = null
@@ -117,6 +133,14 @@ func _handle_left_click(click_pos: Vector2):
 		Mode.AddSprinkler:
 			TheProject.add_object(sprinkler_to_add)
 			sprinkler_to_add = null
+			mode = Mode.Idle
+		Mode.AddDistMeasureA:
+			dist_meas_to_add.point_a = pos_in_world_px
+			mode = Mode.AddDistMeasureB
+		Mode.AddDistMeasureB:
+			dist_meas_to_add.point_b = pos_in_world_px
+			TheProject.add_object(dist_meas_to_add)
+			dist_meas_to_add = null
 			mode = Mode.Idle
 
 func _handle_left_click_release():
@@ -183,11 +207,14 @@ func _on_add_sprinkler_pressed():
 func _on_add_image_pressed():
 	img_dialog.popup_centered()
 
+func _on_add_dist_measure_pressed():
+	dist_meas_to_add = DistanceMeasurement.new()
+	dist_meas_to_add.user_label = TheProject.get_unique_name('DistanceMeasurement')
+	world_container.objects.add_child(dist_meas_to_add)
+	mode = Mode.AddDistMeasureA
+
 func _on_remove_button_pressed():
-	if selected_obj is Sprinkler:
-		TheProject.remove_sprinkler(selected_obj)
-	elif selected_obj is ImageNode:
-		TheProject.remove_image(selected_obj)
+	TheProject.remove_object(selected_obj)
 	selected_obj = null
 
 func _on_TheProject_node_changed(obj, change_type, args):

@@ -174,6 +174,12 @@ func deserialize(obj):
 				var img_node := ImageNodeScene.instantiate()
 				img_node.deserialize(obj_ser)
 				add_object(img_node)
+			'DistanceMeasurement':
+				var dist := DistanceMeasurement.new()
+				dist.deserialize(obj_ser)
+				add_object(dist)
+			_:
+				push_warning("unimplemented subclass '%s' deserialization" % [obj_ser['subclass']])
 	_suppress_self_edit_signals = false
 
 func _on_node_property_changed(property, from, to, node):

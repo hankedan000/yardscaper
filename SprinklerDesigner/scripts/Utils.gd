@@ -76,3 +76,9 @@ func from_json_file(filepath: String):
 		return json.data
 	push_error("failed to parse JSON object from str '%s'" % [obj_str])
 	return null
+
+func vect2_to_pair(vec: Vector2) -> Array:
+	return [vec.x, vec.y]
+
+func pair_to_vect2(pair: Array) -> Vector2:
+	return Vector2(pair[0], pair[1])

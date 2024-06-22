@@ -64,6 +64,8 @@ item_1/disabled = true
 [node name="ProjectTabs" type="TabContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+tab_alignment = 1
+tab_focus_mode = 0
 
 [node name="Layout" parent="VBoxContainer/ProjectTabs" instance=ExtResource("4_3cv8w")]
 layout_mode = 2
