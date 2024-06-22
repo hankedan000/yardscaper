@@ -120,9 +120,13 @@ offset_right = 40.0
 grow_vertical = 0
 theme = SubResource("Theme_kss1b")
 
+[node name="PreferenceUpdateTimer" type="Timer" parent="."]
+autostart = true
+
 [connection signal="file_selected" from="ImgDialog" to="." method="_on_img_dialog_file_selected"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddImage" to="." method="_on_add_image_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddDistMeasure" to="." method="_on_add_dist_measure_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/RemoveButton" to="." method="_on_remove_button_pressed"]
 [connection signal="toggled" from="HSplitContainer/Layout/LayoutToolbar/ShowGridButton" to="." method="_on_show_grid_checkbox_toggled"]
+[connection signal="timeout" from="PreferenceUpdateTimer" to="." method="_on_preference_update_timer_timeout"]

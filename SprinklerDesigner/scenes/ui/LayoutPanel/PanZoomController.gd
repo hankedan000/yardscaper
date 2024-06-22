@@ -10,10 +10,6 @@ const ZOOM_SPEED = 0.1
 const MIN_ZOOM = 0.1
 const MAX_ZOOM = 3.0
 
-func _ready():
-	# Connect mouse events
-	set_process_input(true)
-
 # local position within viwport to world position
 func local_pos_to_world(pos_local: Vector2) -> Vector2:
 	var camera := get_viewport().get_camera_2d()

@@ -61,6 +61,7 @@ func _ready():
 
 func _notification(what):
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		TheProject.save_preferences()
 		_close_requested = true
 		if TheProject.has_edits:
 			unsaved_changes_dialog.popup_centered()

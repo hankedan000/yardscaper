@@ -23,6 +23,7 @@ var has_edits = false :
 		has_edits = value
 		if old_value != has_edits and not _suppress_self_edit_signals:
 			emit_signal('has_edits_changed', has_edits)
+var layout_pref := LayoutPreferences.new()
 
 var _suppress_self_edit_signals = false
 
@@ -51,13 +52,25 @@ func open(dir: String):
 		project_path = dir
 		deserialize(ser_data)
 		has_edits = false
-		emit_signal('opened')
 	else:
 		return false
+	
+	# load layout preferences
+	var layout_pref_filepath = dir.path_join('layout_pref.json')
+	var layout_pref_data = Utils.from_json_file(layout_pref_filepath)
+	if layout_pref_data:
+		layout_pref.deserialize(layout_pref_data)
+		
+	emit_signal('opened')
 	return true
 
 func save():
 	return save_as(project_path)
+
+func save_preferences():
+	# save layout preferences
+	var layout_pref_filepath = project_path.path_join('layout_pref.json')
+	Utils.to_json_file(layout_pref.serialize(), layout_pref_filepath)
 
 func save_as(dir: String):
 	var json_filepath = dir.path_join("project.json")
@@ -67,6 +80,8 @@ func save_as(dir: String):
 		has_edits = false
 	else:
 		return false
+		
+	save_preferences()
 	
 	# create image directory
 	var img_dir = get_img_dir()

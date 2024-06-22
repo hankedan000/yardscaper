@@ -6,10 +6,11 @@ extends PanelContainer
 @onready var img_prop_list            := $HSplitContainer/LeftPane/Properties/ImageNodePropertiesList
 @onready var objects_list             := $HSplitContainer/LeftPane/Objects
 
-@onready var add_sprink_button           := $HSplitContainer/Layout/LayoutToolbar/AddSprinkler
+@onready var add_sprink_button        := $HSplitContainer/Layout/LayoutToolbar/AddSprinkler
 @onready var add_img_button           := $HSplitContainer/Layout/LayoutToolbar/AddImage
-@onready var add_dist_button           := $HSplitContainer/Layout/LayoutToolbar/AddDistMeasure
+@onready var add_dist_button          := $HSplitContainer/Layout/LayoutToolbar/AddDistMeasure
 @onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/RemoveButton
+@onready var show_grid_button         := $HSplitContainer/Layout/LayoutToolbar/ShowGridButton
 @onready var world_container          := $HSplitContainer/Layout/World/ViewportContainer
 @onready var mouse_pos_label          := $HSplitContainer/Layout/World/MousePosLabel
 
@@ -250,6 +251,10 @@ func _on_TheProject_node_changed(obj, change_type, args):
 func _on_TheProject_opened():
 	undo_redo_ctrl.reset()
 	add_img_button.disabled = false
+	print("TheProject.layout_pref.show_grid: %s" % TheProject.layout_pref.show_grid)
+	show_grid_button.button_pressed = TheProject.layout_pref.show_grid
+	world_container.camera2d.position = TheProject.layout_pref.camera_pos
+	world_container.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.layout_pref.zoom
 
 func _on_TheProject_closed():
 	add_img_button.disabled = true
@@ -259,6 +264,7 @@ func _on_img_dialog_file_selected(path):
 
 func _on_show_grid_checkbox_toggled(toggled_on):
 	world_container.show_grid = toggled_on
+	TheProject.layout_pref.show_grid = toggled_on
 
 class WorldObjectMovedUndoRedoOperation:
 	extends UndoRedoController.UndoRedoOperation
@@ -296,3 +302,7 @@ func _on_undo_redo_ctrl_before_a_do(_is_undo):
 
 func _on_undo_redo_ctrl_after_a_do(_is_undo):
 	_ignore_while_in_undo_redo = false
+
+func _on_preference_update_timer_timeout():
+	TheProject.layout_pref.camera_pos = world_container.camera2d.position
+	TheProject.layout_pref.zoom = world_container.camera2d.zoom.x
