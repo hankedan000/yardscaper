@@ -80,38 +80,6 @@ func _ready():
 	
 	# add shortcuts
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
-	
-func _input(event):
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			if event.pressed:
-				_handle_left_click(event.global_position)
-			else:
-				_handle_left_click_release()
-	elif event is InputEventMouseMotion:
-		var evt_global_pos = event.global_position
-		if _is_point_over_world(evt_global_pos):
-			var pos_in_world_px = _global_xy_to_pos_in_world(evt_global_pos)
-			var pos_in_world_ft = Utils.px_to_ft_vec(pos_in_world_px)
-			var x_pretty = Utils.pretty_dist(pos_in_world_ft.x)
-			var y_pretty = Utils.pretty_dist(pos_in_world_ft.y)
-			mouse_pos_label.text = "%s, %s" % [x_pretty, y_pretty]
-			
-			var nearest_pickable = _nearest_pickable_obj(pos_in_world_px)
-			if nearest_pickable != _hovered_obj:
-				# transition 'hovering' status from one object to the next
-				if _hovered_obj:
-					_hovered_obj.hovering = false
-				if nearest_pickable:
-					nearest_pickable.hovering = true
-				_hovered_obj = nearest_pickable
-			
-			if sprinkler_to_add:
-				sprinkler_to_add.position = pos_in_world_px
-			elif dist_meas_to_add and mode == Mode.AddDistMeasureB:
-				dist_meas_to_add.point_b = pos_in_world_px
-			elif len(_held_objs) > 0:
-				_handle_held_obj_move(pos_in_world_px)
 
 func _nearest_pickable_obj(pos_in_world: Vector2):
 	var smallest_dist_px = null
@@ -307,3 +275,35 @@ func _on_undo_redo_ctrl_after_a_do(_is_undo):
 func _on_preference_update_timer_timeout():
 	TheProject.layout_pref.camera_pos = world_container.camera2d.position
 	TheProject.layout_pref.zoom = world_container.camera2d.zoom.x
+
+func _on_viewport_container_gui_input(event):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_handle_left_click(event.global_position)
+			else:
+				_handle_left_click_release()
+	elif event is InputEventMouseMotion:
+		var evt_global_pos = event.global_position
+		if _is_point_over_world(evt_global_pos):
+			var pos_in_world_px = _global_xy_to_pos_in_world(evt_global_pos)
+			var pos_in_world_ft = Utils.px_to_ft_vec(pos_in_world_px)
+			var x_pretty = Utils.pretty_dist(pos_in_world_ft.x)
+			var y_pretty = Utils.pretty_dist(pos_in_world_ft.y)
+			mouse_pos_label.text = "%s, %s" % [x_pretty, y_pretty]
+			
+			var nearest_pickable = _nearest_pickable_obj(pos_in_world_px)
+			if nearest_pickable != _hovered_obj:
+				# transition 'hovering' status from one object to the next
+				if _hovered_obj:
+					_hovered_obj.hovering = false
+				if nearest_pickable:
+					nearest_pickable.hovering = true
+				_hovered_obj = nearest_pickable
+			
+			if sprinkler_to_add:
+				sprinkler_to_add.position = pos_in_world_px
+			elif dist_meas_to_add and mode == Mode.AddDistMeasureB:
+				dist_meas_to_add.point_b = pos_in_world_px
+			elif len(_held_objs) > 0:
+				_handle_held_obj_move(pos_in_world_px)
