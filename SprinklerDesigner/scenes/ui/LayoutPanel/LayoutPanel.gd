@@ -14,6 +14,7 @@ extends PanelContainer
 @onready var world_container          := $HSplitContainer/Layout/World/ViewportContainer
 @onready var mouse_pos_label          := $HSplitContainer/Layout/World/MousePosLabel
 
+@export var DistanceMeasurementScene : PackedScene = null
 @export var SprinklerScene : PackedScene = null
 
 enum Mode {
@@ -220,7 +221,7 @@ func _on_add_image_pressed():
 	img_dialog.popup_centered()
 
 func _on_add_dist_measure_pressed():
-	dist_meas_to_add = DistanceMeasurement.new()
+	dist_meas_to_add = DistanceMeasurementScene.instantiate()
 	dist_meas_to_add.user_label = TheProject.get_unique_name('DistanceMeasurement')
 	world_container.objects.add_child(dist_meas_to_add)
 	mode = Mode.AddDistMeasureA

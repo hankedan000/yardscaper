@@ -1,7 +1,8 @@
-[gd_scene load_steps=12 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=13 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/world_objects/Sprinkler/Sprinkler.tscn" id="2_16d6l"]
+[ext_resource type="PackedScene" uid="uid://db8wvn8xh27x0" path="res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn" id="2_rmdn3"]
 [ext_resource type="PackedScene" uid="uid://co2gtkorldd8j" path="res://scenes/ui/SprinklerPropertyEditor/SprinklerPropertyEditor.tscn" id="3_itpjk"]
 [ext_resource type="PackedScene" uid="uid://bujgf1ym2asal" path="res://scenes/ui/ImageNodePropertyEditor/ImageNodePropertyEditor.tscn" id="4_legmd"]
 [ext_resource type="PackedScene" uid="uid://c7ey0qd3m5ads" path="res://scenes/ui/ObjectsList/ObjectsList.tscn" id="5_p3ckg"]
@@ -23,6 +24,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_o5pl2")
+DistanceMeasurementScene = ExtResource("2_rmdn3")
 SprinklerScene = ExtResource("2_16d6l")
 
 [node name="ImgDialog" type="FileDialog" parent="."]

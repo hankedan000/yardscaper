@@ -13,7 +13,7 @@ enum ChangeType {
 
 const SprinklerScene : PackedScene = preload("res://scenes/world_objects/Sprinkler/Sprinkler.tscn")
 const ImageNodeScene : PackedScene = preload("res://scenes/world_objects/ImageNode/ImageNode.tscn")
-const DistanceMeasurmentScene : PackedScene = preload("res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn")
+const DistanceMeasurementScene : PackedScene = preload("res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn")
 
 var project_path = ""
 var objects = []
@@ -192,7 +192,7 @@ func deserialize(obj):
 				img_node.deserialize(obj_ser)
 				add_object(img_node)
 			'DistanceMeasurement':
-				var dist := DistanceMeasurmentScene.instantiate()
+				var dist := DistanceMeasurementScene.instantiate()
 				dist.deserialize(obj_ser)
 				add_object(dist)
 			_:
