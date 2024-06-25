@@ -95,7 +95,6 @@ func _on_rotation_spin_box_value_changed(rot_deg):
 		sprinkler.rotation_degrees = rot_deg
 
 func _on_manufacturer_option_item_selected(index):
-	print("manufacturer selected")
 	var manufacturer = manu_option.get_item_text(index)
 	_update_model_options(manufacturer)
 	if sprinkler is Sprinkler and not _ignore_internal_edits:

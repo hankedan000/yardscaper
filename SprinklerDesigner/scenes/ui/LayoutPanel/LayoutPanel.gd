@@ -220,7 +220,6 @@ func _on_TheProject_node_changed(obj, change_type, args):
 func _on_TheProject_opened():
 	undo_redo_ctrl.reset()
 	add_img_button.disabled = false
-	print("TheProject.layout_pref.show_grid: %s" % TheProject.layout_pref.show_grid)
 	show_grid_button.button_pressed = TheProject.layout_pref.show_grid
 	world_container.camera2d.position = TheProject.layout_pref.camera_pos
 	world_container.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.layout_pref.zoom

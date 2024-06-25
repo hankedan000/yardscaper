@@ -88,7 +88,7 @@ func save_as(dir: String):
 	if DirAccess.dir_exists_absolute(img_dir):
 		pass # nothing to make
 	elif DirAccess.make_dir_absolute(img_dir) != OK:
-		printerr("failed to create img dir in '%s'" % [img_dir])
+		push_error("failed to create img dir in '%s'" % [img_dir])
 		return false
 	
 	return true
