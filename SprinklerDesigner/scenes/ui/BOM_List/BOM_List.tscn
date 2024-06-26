@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://y61v2o6rd0mg"]
+[gd_scene load_steps=3 format=3 uid="uid://y61v2o6rd0mg"]
 
 [ext_resource type="Script" path="res://scenes/ui/BOM_List/BOM_List.gd" id="1_50r5y"]
+[ext_resource type="PackedScene" uid="uid://brcgdlt72ia6w" path="res://addons/tablepager/TablePager.tscn" id="2_g6oa1"]
 
 [node name="BOM_List" type="PanelContainer"]
 anchors_preset = 15
@@ -10,12 +11,5 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_50r5y")
 
-[node name="ItemList" type="ItemList" parent="."]
+[node name="TablePager" parent="." instance=ExtResource("2_g6oa1")]
 layout_mode = 2
-focus_mode = 0
-item_count = 3
-max_columns = 3
-same_column_width = true
-item_0/text = "Manufacturer"
-item_1/text = "Model"
-item_2/text = "Count"
