@@ -11,6 +11,13 @@ const DEFAULT_MAX_SWEEP_DEG = 360.0
 func is_set(value: float):
 	return not is_nan(value)
 
+var zone : int = 1 :
+	set(value):
+		var old_value = zone
+		zone = value
+		if old_value != zone:
+			emit_signal('property_changed', 'zone', old_value, zone)
+
 var min_dist_ft : float = NAN :
 	get:
 		if is_set(min_dist_ft):
@@ -159,6 +166,7 @@ func serialize():
 	obj['sweep_deg'] = int(sweep_deg)
 	obj['manufacturer'] = manufacturer
 	obj['model'] = model
+	obj['zone'] = zone
 	return obj
 
 func deserialize(obj):
@@ -167,6 +175,7 @@ func deserialize(obj):
 	manufacturer = obj['manufacturer']
 	model = obj['model']
 	dist_ft = Utils.dict_get(obj, 'dist_ft', max_dist_ft)
+	zone = Utils.dict_get(obj, 'zone', 1)
 
 func _draw():
 	var stop_angle = deg_to_rad(sweep_deg)

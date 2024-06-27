@@ -1,6 +1,7 @@
 extends GridContainer
 
 @onready var user_label_lineedit      := $UserLabelLineEdit
+@onready var zone_spinbox             := $ZoneSpinBox
 @onready var rot_spinbox              := $RotationSpinBox
 @onready var sweep_spinbox            := $SweepSpinBox
 @onready var manu_option              := $ManufacturerOption
@@ -62,6 +63,7 @@ func _sync_ui():
 	
 	_ignore_internal_edits = true
 	user_label_lineedit.text = sprinkler.user_label
+	zone_spinbox.value = sprinkler.zone
 	rot_spinbox.value = sprinkler.rotation_degrees
 	sweep_spinbox.value = sprinkler.sweep_deg
 	_sync_option_to_text(manu_option, sprinkler.manufacturer)
@@ -85,6 +87,10 @@ func _sync_option_to_text(option_button: OptionButton, text: String):
 func _on_user_label_line_edit_text_submitted(new_text):
 	if sprinkler is Sprinkler and not _ignore_internal_edits:
 		sprinkler.user_label = new_text
+
+func _on_zone_spin_box_value_changed(value):
+	if sprinkler is Sprinkler and not _ignore_internal_edits:
+		sprinkler.zone = value
 
 func _on_sweep_spin_box_value_changed(sweep_deg):
 	if sprinkler is Sprinkler and not _ignore_internal_edits:
