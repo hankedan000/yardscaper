@@ -1,0 +1,119 @@
+[gd_scene load_steps=3 format=3 uid="uid://dtgjpudmf5pva"]
+
+[ext_resource type="Script" path="res://scenes/ui/ExportToImageDialog/ExportToImageDialog.gd" id="1_ftjp4"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_60scr"]
+
+[node name="ExportToImageDialog" type="Window"]
+title = "Export To Image"
+size = Vector2i(600, 200)
+script = ExtResource("1_ftjp4")
+
+[node name="FileDialog" type="FileDialog" parent="."]
+title = "Select Image File"
+size = Vector2i(900, 600)
+mode_overrides_title = false
+access = 2
+filters = PackedStringArray("*.jpg", "*.png", "*.webp")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="ViewSelection" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/ViewSelection"]
+layout_mode = 2
+text = "View: "
+
+[node name="CurrentViewCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/ViewSelection"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Export image of the currently visible view."
+focus_mode = 0
+button_pressed = true
+button_group = SubResource("ButtonGroup_60scr")
+text = "Current"
+
+[node name="FullViewCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/ViewSelection"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Export image with a view fit to show all objects.
+(not supported yet)"
+focus_mode = 0
+disabled = true
+button_group = SubResource("ButtonGroup_60scr")
+text = "Full"
+
+[node name="ZoneViewCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/ViewSelection"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Export image with a view fit to show all objects in a particular zone.
+(not supported yet)"
+focus_mode = 0
+disabled = true
+button_group = SubResource("ButtonGroup_60scr")
+text = "Zone"
+
+[node name="ZoneSelection" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/ZoneSelection"]
+layout_mode = 2
+text = "Zone: "
+
+[node name="ZoneSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/ZoneSelection"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FileSelection" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/FileSelection"]
+layout_mode = 2
+text = "File: "
+
+[node name="FileLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/FileSelection"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BrowseButton" type="Button" parent="MarginContainer/VBoxContainer/FileSelection"]
+layout_mode = 2
+text = "Browse"
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonBar" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/ButtonBar"]
+layout_mode = 2
+text = "Cancel
+"
+
+[node name="ExportButton" type="Button" parent="MarginContainer/VBoxContainer/ButtonBar"]
+layout_mode = 2
+text = "Export"
+
+[connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]
+[connection signal="toggled" from="MarginContainer/VBoxContainer/ViewSelection/ZoneViewCheckBox" to="." method="_on_zone_view_check_box_toggled"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/FileSelection/BrowseButton" to="." method="_on_browse_button_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ButtonBar/CancelButton" to="." method="_on_cancel_button_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/ButtonBar/ExportButton" to="." method="_on_export_button_pressed"]

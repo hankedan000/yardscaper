@@ -10,6 +10,12 @@ const RECENT_PROJECTS_PATH = "user://recent_project.json"
 # most recent is at the front, oldest at the back
 var _recent_projects = []
 
+enum ViewOptions {
+	Current,
+	Full,
+	Zone
+}
+
 func _ready():
 	for c in get_tree().root.get_children():
 		if c is Main:

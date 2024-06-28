@@ -5,7 +5,8 @@ enum ProjectMenuIDs {
 	New = 2,
 	Open = 3,
 	Save = 0,
-	SaveAs = 1
+	SaveAs = 1,
+	ExportToImage = 4
 }
 
 enum EditMenuIDs {
@@ -16,6 +17,7 @@ enum EditMenuIDs {
 @onready var open_dialog := $OpenDialog
 @onready var save_as_dialog := $SaveAsDialog
 @onready var unsaved_changes_dialog := $UnsavedChangesDialog
+@onready var export_to_img_dialog := $ExportToImageDialog
 @onready var proj_menu := $VBoxContainer/MenuBar/Project
 @onready var edit_menu := $VBoxContainer/MenuBar/Edit
 @onready var proj_tabs := $VBoxContainer/ProjectTabs
@@ -102,6 +104,8 @@ func _on_project_id_pressed(id):
 			TheProject.save()
 		ProjectMenuIDs.SaveAs:
 			save_as_dialog.popup_centered()
+		ProjectMenuIDs.ExportToImage:
+			export_to_img_dialog.popup_centered()
 
 func _on_save_as_dialog_dir_selected(dir: String):
 	if TheProject.save_as(dir):
@@ -158,3 +162,23 @@ func _on_edit_id_pressed(id):
 			_active_undo_redo_ctrl.redo()
 		_:
 			push_warning("unhandled press event for edit menu id %d" % [id])
+
+func _on_export_to_image_dialog_export(view_opt, _zone: int, filepath: String):
+	var img = null
+	match view_opt:
+		Globals.ViewOptions.Current:
+			img = layout_tab.world_container.get_image_of_current_view()
+		_:
+			push_warning("unsupported view export option '%s'" % Globals.ViewOptions.keys()[view_opt])
+			return
+	
+	if img is Image:
+		var ext = filepath.get_extension().to_lower()
+		if ext == 'png':
+			img.save_png(filepath)
+		elif ext in ['jpg', 'jpeg']:
+			img.save_jpg(filepath)
+		elif ext == 'webp':
+			img.save_webp(filepath)
+		else:
+			push_warning("unsupported image file extension '%s'" % ext)

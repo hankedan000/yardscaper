@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://u1375je75c1f"]
+[gd_scene load_steps=7 format=3 uid="uid://u1375je75c1f"]
 
 [ext_resource type="Theme" uid="uid://b7bms6qoy7yfq" path="res://assets/themes/MainTheme.tres" id="1_m3fdf"]
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/ProjectEditor.gd" id="2_rxefj"]
 [ext_resource type="PackedScene" uid="uid://dfag2aakh64er" path="res://scenes/ui/UnsavedChangesDialog/UnsavedChangesDialog.tscn" id="3_fwduj"]
 [ext_resource type="PackedScene" uid="uid://xyp0got3c5dp" path="res://scenes/ui/LayoutPanel/LayoutPanel.tscn" id="4_3cv8w"]
+[ext_resource type="PackedScene" uid="uid://dtgjpudmf5pva" path="res://scenes/ui/ExportToImageDialog/ExportToImageDialog.tscn" id="4_h12le"]
 [ext_resource type="PackedScene" uid="uid://y61v2o6rd0mg" path="res://scenes/ui/BOM_List/BOM_List.tscn" id="5_qt3l6"]
 
 [node name="Main" type="PanelContainer"]
@@ -33,6 +34,9 @@ access = 2
 
 [node name="UnsavedChangesDialog" parent="." instance=ExtResource("3_fwduj")]
 
+[node name="ExportToImageDialog" parent="." instance=ExtResource("4_h12le")]
+visible = false
+
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
 
@@ -42,7 +46,7 @@ layout_mode = 2
 [node name="Project" type="PopupMenu" parent="VBoxContainer/MenuBar"]
 title = "Project"
 size = Vector2i(104, 116)
-item_count = 4
+item_count = 5
 item_0/text = "New ..."
 item_0/id = 2
 item_1/text = "Open ..."
@@ -51,6 +55,8 @@ item_2/text = "Save"
 item_2/id = 0
 item_3/text = "Save As ..."
 item_3/id = 1
+item_4/text = "Export to Image..."
+item_4/id = 4
 
 [node name="Edit" type="PopupMenu" parent="VBoxContainer/MenuBar"]
 title = "Edit"
@@ -72,6 +78,7 @@ tab_focus_mode = 0
 layout_mode = 2
 
 [node name="BOM List" parent="VBoxContainer/ProjectTabs" instance=ExtResource("5_qt3l6")]
+visible = false
 layout_mode = 2
 
 [connection signal="dir_selected" from="OpenDialog" to="." method="_on_open_dialog_dir_selected"]
@@ -79,6 +86,7 @@ layout_mode = 2
 [connection signal="cancel" from="UnsavedChangesDialog" to="." method="_on_unsaved_changes_dialog_cancel"]
 [connection signal="discard" from="UnsavedChangesDialog" to="." method="_on_unsaved_changes_dialog_discard"]
 [connection signal="save" from="UnsavedChangesDialog" to="." method="_on_unsaved_changes_dialog_save"]
+[connection signal="export" from="ExportToImageDialog" to="." method="_on_export_to_image_dialog_export"]
 [connection signal="id_pressed" from="VBoxContainer/MenuBar/Project" to="." method="_on_project_id_pressed"]
 [connection signal="id_pressed" from="VBoxContainer/MenuBar/Edit" to="." method="_on_edit_id_pressed"]
 [connection signal="tab_changed" from="VBoxContainer/ProjectTabs" to="." method="_on_project_tabs_tab_changed"]

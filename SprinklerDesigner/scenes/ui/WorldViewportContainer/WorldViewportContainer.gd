@@ -49,6 +49,9 @@ func move_world_object(from_idx: int, to_idx: int) -> bool:
 	emit_signal('world_object_moved', from_idx, to_idx)
 	return true
 
+func get_image_of_current_view() -> Image:
+	return viewport.get_texture().get_image()
+
 func _draw():
 	if show_grid:
 		_draw_grid(major_spacing_ft, major_line_color, MAJOR_LINE_WIDTH)
