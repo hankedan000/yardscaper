@@ -1,6 +1,7 @@
 extends Node
 
 signal opened()
+signal saved()
 signal closed()
 signal node_changed(node, change_type, args)
 signal has_edits_changed(has_edits)
@@ -91,6 +92,7 @@ func save_as(dir: String):
 		push_error("failed to create img dir in '%s'" % [img_dir])
 		return false
 	
+	emit_signal('saved')
 	return true
 
 func get_subclass_count(subclass: String):

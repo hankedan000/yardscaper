@@ -70,6 +70,7 @@ var _ignore_while_in_undo_redo = false
 func _ready():
 	TheProject.node_changed.connect(_on_TheProject_node_changed)
 	TheProject.opened.connect(_on_TheProject_opened)
+	TheProject.saved.connect(_on_TheProject_saved)
 	TheProject.closed.connect(_on_TheProject_closed)
 	sprink_prop_list.visible = false
 	img_prop_list.visible = false
@@ -223,6 +224,9 @@ func _on_TheProject_opened():
 	show_grid_button.button_pressed = TheProject.layout_pref.show_grid
 	world_container.camera2d.position = TheProject.layout_pref.camera_pos
 	world_container.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.layout_pref.zoom
+
+func _on_TheProject_saved():
+	add_img_button.disabled = false
 
 func _on_TheProject_closed():
 	add_img_button.disabled = true
