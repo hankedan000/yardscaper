@@ -163,6 +163,8 @@ func get_subclass() -> String:
 func serialize():
 	var obj = super.serialize()
 	obj['dist_ft'] = dist_ft
+	obj['min_dist_ft'] = min_dist_ft
+	obj['max_dist_ft'] = max_dist_ft
 	obj['sweep_deg'] = int(sweep_deg)
 	obj['manufacturer'] = manufacturer
 	obj['model'] = model
@@ -175,6 +177,8 @@ func deserialize(obj):
 	manufacturer = obj['manufacturer']
 	model = obj['model']
 	dist_ft = Utils.dict_get(obj, 'dist_ft', max_dist_ft)
+	min_dist_ft = Utils.dict_get(obj, 'min_dist_ft', min_dist_ft)
+	max_dist_ft = Utils.dict_get(obj, 'max_dist_ft', max_dist_ft)
 	zone = Utils.dict_get(obj, 'zone', 1)
 
 func _draw():

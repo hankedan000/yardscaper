@@ -114,5 +114,13 @@ func _on_distance_spin_box_value_changed(value):
 	if sprinkler is Sprinkler and not _ignore_internal_edits:
 		sprinkler.dist_ft = value
 
+func _on_min_distance_spin_box_value_changed(value):
+	if sprinkler is Sprinkler and not _ignore_internal_edits:
+		sprinkler.min_dist_ft = value
+
+func _on_max_distance_spin_box_value_changed(value):
+	if sprinkler is Sprinkler and not _ignore_internal_edits:
+		sprinkler.max_dist_ft = value
+
 func _on_sprinkler_property_changed(_property, _from, _to):
 	queue_ui_sync()
