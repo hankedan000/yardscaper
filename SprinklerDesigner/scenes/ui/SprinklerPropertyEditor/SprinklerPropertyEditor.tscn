@@ -43,7 +43,8 @@ text = "Rotation: "
 [node name="RotationSpinBox" type="SpinBox" parent="."]
 layout_mode = 2
 tooltip_text = "Angle sprinkler body"
-max_value = 359.0
+min_value = -360.0
+max_value = 360.0
 suffix = "deg"
 
 [node name="Label4" type="Label" parent="."]
