@@ -82,6 +82,11 @@ func _ready():
 	# add shortcuts
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
 
+func _input(event):
+	if event is InputEventKey:
+		if event.keycode == KEY_ESCAPE:
+			_cancel_mode() # will only cancel if possible
+
 func _nearest_pickable_obj(pos_in_world: Vector2):
 	var smallest_dist_px = null
 	var nearest_pick_area = null
@@ -113,6 +118,7 @@ func _handle_left_click(click_pos: Vector2):
 			mode = Mode.Idle
 		Mode.AddDistMeasureA:
 			dist_meas_to_add.point_a = pos_in_world_px
+			dist_meas_to_add.point_b = pos_in_world_px
 			mode = Mode.AddDistMeasureB
 		Mode.AddDistMeasureB:
 			dist_meas_to_add.point_b = pos_in_world_px
@@ -140,6 +146,24 @@ func _handle_held_obj_move(mouse_pos_in_world_px):
 			if not held_obj.moving():
 				held_obj.start_move()
 			held_obj.update_move(delta_px)
+
+func _cancel_mode():
+	if mode == Mode.AddSprinkler:
+		_cancel_add_sprinkler()
+	elif mode in [Mode.AddDistMeasureA, Mode.AddDistMeasureB]:
+		_cancel_add_distance()
+
+func _cancel_add_distance():
+	if dist_meas_to_add:
+		dist_meas_to_add.queue_free()
+		dist_meas_to_add = null
+		mode = Mode.Idle
+
+func _cancel_add_sprinkler():
+	if sprinkler_to_add:
+		sprinkler_to_add.queue_free()
+		sprinkler_to_add = null
+		mode = Mode.Idle
 
 func _add_held_object(obj):
 	if obj not in _held_objs:
@@ -281,11 +305,14 @@ func _on_preference_update_timer_timeout():
 
 func _on_viewport_container_gui_input(event):
 	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			if event.pressed:
-				_handle_left_click(event.global_position)
-			else:
-				_handle_left_click_release()
+		match event.button_index:
+			MOUSE_BUTTON_LEFT:
+				if event.pressed:
+					_handle_left_click(event.global_position)
+				else:
+					_handle_left_click_release()
+			MOUSE_BUTTON_RIGHT:
+				_cancel_mode() # will only cancel if possible
 	elif event is InputEventMouseMotion:
 		var evt_global_pos = event.global_position
 		if _is_point_over_world(evt_global_pos):
@@ -295,14 +322,16 @@ func _on_viewport_container_gui_input(event):
 			var y_pretty = Utils.pretty_dist(pos_in_world_ft.y)
 			mouse_pos_label.text = "%s, %s" % [x_pretty, y_pretty]
 			
-			var nearest_pickable = _nearest_pickable_obj(pos_in_world_px)
-			if nearest_pickable != _hovered_obj:
-				# transition 'hovering' status from one object to the next
-				if _hovered_obj:
-					_hovered_obj.hovering = false
-				if nearest_pickable:
-					nearest_pickable.hovering = true
-				_hovered_obj = nearest_pickable
+			# detect which object mouse is hovering over
+			if mode == Mode.Idle:
+				var nearest_pickable = _nearest_pickable_obj(pos_in_world_px)
+				if nearest_pickable != _hovered_obj:
+					# transition 'hovering' status from one object to the next
+					if _hovered_obj:
+						_hovered_obj.hovering = false
+					if nearest_pickable:
+						nearest_pickable.hovering = true
+					_hovered_obj = nearest_pickable
 			
 			if sprinkler_to_add:
 				sprinkler_to_add.position = pos_in_world_px
