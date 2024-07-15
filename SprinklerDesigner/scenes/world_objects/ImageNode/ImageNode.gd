@@ -51,6 +51,9 @@ func _draw():
 		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
 		draw_rect(Rect2(Vector2(), img_size_px()), indic_color, false, 4)
 
+func get_global_center() -> Vector2:
+	return global_position + (img_size_px() / 2.0)
+
 func img_size_px() -> Vector2:
 	return texture_rect.size
 

@@ -102,7 +102,11 @@ func _nearest_pickable_obj(pos_in_world: Vector2):
 	var nearest_pick_area = null
 	var cursor : Area2D = world_container.cursor
 	for pick_area in cursor.get_overlapping_areas():
-		var dist_px = pick_area.global_position.distance_to(pos_in_world)
+		var obj_center = pick_area.global_position
+		var pick_parent = pick_area.get_parent()
+		if pick_parent is PickableNode2D:
+			obj_center = pick_parent.get_global_center()
+		var dist_px = obj_center.distance_to(pos_in_world)
 		if smallest_dist_px == null or dist_px < smallest_dist_px:
 			smallest_dist_px = dist_px
 			nearest_pick_area = pick_area

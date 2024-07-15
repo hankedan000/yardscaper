@@ -60,6 +60,41 @@ func remove_point(idx: int):
 func point_count() -> int:
 	return poly.polygon.size()
 
+func get_closed_points() -> PackedVector2Array:
+	var points = poly.polygon # returns a copy
+	if points.size() >= 1:
+		points.append(points[0])
+	return points
+
+# math is from https://www.omnicalculator.com/math/centroid
+func get_area_px() -> float:
+	var area = 0.0
+	var points = get_closed_points()
+	var n = points.size()
+	for i in range(n - 1):
+		var p1 = points[i]
+		var p2 = points[i+1]
+		area += ((p1.x * p2.y) - (p2.x * p1.y))
+	return area / 2.0
+
+# math is from https://www.omnicalculator.com/math/centroid
+func get_centroid_px() -> Vector2:
+	var c = Vector2()
+	var points = get_closed_points()
+	var n = points.size()
+	for i in range(n - 1):
+		var p1 = points[i]
+		var p2 = points[i+1]
+		var t = ((p1.x * p2.y) - (p2.x * p1.y))
+		c.x += (p1.x + p2.x) * t
+		c.y += (p1.y + p2.y) * t
+	return c / (6.0 * get_area_px())
+
+func get_global_center() -> Vector2:
+	if point_count() == 0:
+		return poly.global_position
+	return poly.global_position + get_centroid_px()
+
 func get_subclass() -> String:
 	return "PolygonNode"
 

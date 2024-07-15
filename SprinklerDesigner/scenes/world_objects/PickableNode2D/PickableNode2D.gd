@@ -7,6 +7,9 @@ class_name PickableNode2D
 var hovering : bool = false : set = set_hovering
 var picked : bool = false : set = set_picked
 
+func get_global_center() -> Vector2:
+	return global_position
+
 func set_hovering(value: bool):
 	hovering = value
 	queue_redraw()
