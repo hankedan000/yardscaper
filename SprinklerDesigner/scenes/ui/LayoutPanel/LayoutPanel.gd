@@ -357,10 +357,11 @@ func _on_viewport_container_gui_input(event):
 	if event is InputEventMouseButton:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
-				if event.pressed:
-					_handle_left_click(event.global_position)
-				else:
-					_handle_left_click_release()
+				if ! event.alt_pressed: # let pan take precedence (alt + click + drag)
+					if event.pressed:
+						_handle_left_click(event.global_position)
+					else:
+						_handle_left_click_release()
 			MOUSE_BUTTON_RIGHT:
 				_cancel_mode() # will only cancel if possible
 	elif event is InputEventMouseMotion:

@@ -1,7 +1,5 @@
 extends Node2D
 
-var pan_button = MOUSE_BUTTON_MIDDLE
-
 var _dragging = false
 var _drag_start = Vector2.ZERO
 var _camera_original_position = Vector2.ZERO
@@ -23,27 +21,32 @@ func world_pos_to_local(pos_world: Vector2) -> Vector2:
 	var viewport_rect_size = get_viewport().get_visible_rect().size
 	return viewport_rect_size / 2.0 + Utils.world_to_global_size_px(offset_from_camera_world, camera.zoom)
 
+func _do_pan_logic(event: InputEventMouseButton, camera_pos: Vector2):
+	if event.pressed:
+		# Start dragging
+		_dragging = true
+		_drag_start = event.position
+		_camera_original_position = camera_pos
+		Input.set_default_cursor_shape(Input.CURSOR_DRAG)
+	else:
+		# Stop dragging
+		_dragging = false
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
 func _input(event):
 	var camera := get_viewport().get_camera_2d()
 	if event is InputEventMouseButton:
 		# Check if left mouse button is pressed
 		match event.button_index:
-			pan_button:
-				if event.pressed:
-					# Start dragging
-					_dragging = true
-					_drag_start = event.position
-					_camera_original_position = camera.position
-					Input.set_default_cursor_shape(Input.CURSOR_DRAG)
-				else:
-					# Stop dragging
-					_dragging = false
-					Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+			MOUSE_BUTTON_MIDDLE:
+				_do_pan_logic(event, camera.position)
+			MOUSE_BUTTON_LEFT:
+				if event.alt_pressed:
+					_do_pan_logic(event, camera.position)
 			MOUSE_BUTTON_WHEEL_UP:
 				zoom_in(event.position)
 			MOUSE_BUTTON_WHEEL_DOWN:
 				zoom_out(event.position)
-
 	elif event is InputEventMouseMotion:
 		if _dragging:
 			# Calculate drag distance and offset camera accordingly
