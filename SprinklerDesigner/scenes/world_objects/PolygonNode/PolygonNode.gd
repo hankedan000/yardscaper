@@ -6,12 +6,21 @@ const PERIMETER_WIDTH = 2
 @onready var poly := $Polygon2D
 @onready var coll_poly := $PickArea/CollisionPolygon2D
 
+var color := Color.MEDIUM_AQUAMARINE:
+	set(value):
+		var old_value = color
+		color = value
+		if old_value != color:
+			emit_signal('property_changed', 'color', old_value, color)
+		queue_redraw()
+
 var _is_ready = false
 
 func _ready():
 	_is_ready = true
 
 func _draw():
+	poly.color = color
 	if picked or hovering:
 		var perim_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
 		var first_point = null
@@ -67,7 +76,7 @@ func get_closed_points() -> PackedVector2Array:
 	return points
 
 # math is from https://www.omnicalculator.com/math/centroid
-func get_area_px() -> float:
+func get_signed_area_px() -> float:
 	var area = 0.0
 	var points = get_closed_points()
 	var n = points.size()
@@ -88,7 +97,14 @@ func get_centroid_px() -> Vector2:
 		var t = ((p1.x * p2.y) - (p2.x * p1.y))
 		c.x += (p1.x + p2.x) * t
 		c.y += (p1.y + p2.y) * t
-	return c / (6.0 * get_area_px())
+	return c / (6.0 * get_signed_area_px())
+
+func get_area_px() -> float:
+	return abs(get_signed_area_px())
+
+func get_area_ft() -> float:
+	var px_per_ft = Utils.ft_to_px(1.0)
+	return get_area_px() / (px_per_ft * px_per_ft)
 
 func get_global_center() -> Vector2:
 	if point_count() == 0:
@@ -104,6 +120,7 @@ func serialize():
 	for point in poly.polygon:
 		points_ft.append(Utils.vect2_to_pair(Utils.px_to_ft_vec(point)))
 	obj['points_ft'] = points_ft
+	obj['color'] = color.to_html(true) # with alpha = true
 	return obj
 
 func deserialize(obj):
@@ -111,3 +128,4 @@ func deserialize(obj):
 	var points_ft = Utils.dict_get(obj, 'points_ft', [])
 	for point in points_ft:
 		add_point(Utils.ft_to_px_vec(Utils.pair_to_vect2(point)))
+	color = Utils.dict_get(obj, 'color', color)

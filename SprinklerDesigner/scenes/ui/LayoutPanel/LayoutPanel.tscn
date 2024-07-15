@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=15 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/world_objects/Sprinkler/Sprinkler.tscn" id="2_16d6l"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://c7ey0qd3m5ads" path="res://scenes/ui/ObjectsList/ObjectsList.tscn" id="5_p3ckg"]
 [ext_resource type="Texture2D" uid="uid://bumt4lc5f8gm2" path="res://assets/icons/Add.svg" id="6_58poj"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="7_nx6cf"]
+[ext_resource type="PackedScene" uid="uid://0w6g4f1p5gwe" path="res://scenes/ui/PolygonNodePropertyEditor/PolygonNodePropertyEditor.tscn" id="7_u58qy"]
 [ext_resource type="Texture2D" uid="uid://covc7nfq44by2" path="res://assets/icons/GridToggle.svg" id="8_uxbpy"]
 [ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/ui/WorldViewportContainer/WorldViewportContainer.tscn" id="9_xrpqu"]
 
@@ -53,6 +54,10 @@ size_flags_vertical = 3
 layout_mode = 2
 
 [node name="ImageNodePropertiesList" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("4_legmd")]
+visible = false
+layout_mode = 2
+
+[node name="PolygonNodePropertiesList" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("7_u58qy")]
 visible = false
 layout_mode = 2
 

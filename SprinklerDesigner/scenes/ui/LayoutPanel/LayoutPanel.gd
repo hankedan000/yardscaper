@@ -4,6 +4,7 @@ extends PanelContainer
 
 @onready var sprink_prop_list         := $HSplitContainer/LeftPane/Properties/SprinklerPropertiesList
 @onready var img_prop_list            := $HSplitContainer/LeftPane/Properties/ImageNodePropertiesList
+@onready var poly_prop_list           := $HSplitContainer/LeftPane/Properties/PolygonNodePropertiesList
 @onready var objects_list             := $HSplitContainer/LeftPane/Objects
 
 @onready var add_sprink_button        := $HSplitContainer/Layout/LayoutToolbar/AddSprinkler
@@ -84,6 +85,7 @@ func _ready():
 	TheProject.closed.connect(_on_TheProject_closed)
 	sprink_prop_list.visible = false
 	img_prop_list.visible = false
+	poly_prop_list.visible = false
 	objects_list.world = world_container
 	world_container.world_object_moved.connect(_on_world_object_moved)
 	undo_redo_ctrl.before_a_do.connect(_on_undo_redo_ctrl_before_a_do)
@@ -211,6 +213,7 @@ func _on_release_selected_obj(obj):
 		obj.picked = false
 	elif obj is PolygonNode:
 		obj.picked = false
+		poly_prop_list.visible = false
 	elif obj != null:
 		push_warning("unsupported release for obj '%s'" % obj)
 
@@ -230,7 +233,9 @@ func _on_dist_measurement_selected(meas: DistanceMeasurement):
 	meas.picked = true
 
 func _on_polygon_selected(poly: PolygonNode):
+	poly_prop_list.poly_node = poly
 	poly.picked = true
+	poly_prop_list.visible = true
 
 func _is_point_over_world(global_pos: Vector2) -> bool:
 	return world_container.get_global_rect().has_point(global_pos)
