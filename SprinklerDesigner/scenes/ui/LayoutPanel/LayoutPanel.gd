@@ -9,19 +9,22 @@ extends PanelContainer
 @onready var add_sprink_button        := $HSplitContainer/Layout/LayoutToolbar/AddSprinkler
 @onready var add_img_button           := $HSplitContainer/Layout/LayoutToolbar/AddImage
 @onready var add_dist_button          := $HSplitContainer/Layout/LayoutToolbar/AddDistMeasure
+@onready var add_poly_button          := $HSplitContainer/Layout/LayoutToolbar/AddPolygon
 @onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/RemoveButton
 @onready var show_grid_button         := $HSplitContainer/Layout/LayoutToolbar/ShowGridButton
 @onready var world_container          := $HSplitContainer/Layout/World/ViewportContainer
 @onready var mouse_pos_label          := $HSplitContainer/Layout/World/MousePosLabel
 
-@export var DistanceMeasurementScene : PackedScene = null
 @export var SprinklerScene : PackedScene = null
+@export var DistanceMeasurementScene : PackedScene = null
+@export var PolygonScene : PackedScene = null
 
 enum Mode {
 	Idle,
 	AddSprinkler,
 	AddDistMeasureA,
-	AddDistMeasureB
+	AddDistMeasureB,
+	AddPolygon
 }
 
 var mode = Mode.Idle:
@@ -30,10 +33,15 @@ var mode = Mode.Idle:
 		add_sprink_button.disabled = adds_disabled
 		add_img_button.disabled = adds_disabled
 		add_dist_button.disabled = adds_disabled
+		add_poly_button.disabled = adds_disabled
 		mode = value
 var sprinkler_to_add : Sprinkler = null
 var dist_meas_to_add : DistanceMeasurement = null
+var poly_to_add : PolygonNode = null
 var undo_redo_ctrl := UndoRedoController.new()
+
+# vars for editing PolygonNode points
+var poly_edit_point_idx = 0
 
 var selected_obj = null :
 	set(obj):
@@ -50,7 +58,9 @@ var selected_obj = null :
 			_on_img_node_selected(obj)
 		elif obj is DistanceMeasurement:
 			_on_dist_measurement_selected(obj)
-		else:
+		elif obj is PolygonNode:
+			_on_polygon_selected(obj)
+		elif obj != null:
 			push_warning("unsupported select for obj '%s'" % obj)
 		
 		selected_obj = obj
@@ -125,6 +135,10 @@ func _handle_left_click(click_pos: Vector2):
 			TheProject.add_object(dist_meas_to_add)
 			dist_meas_to_add = null
 			mode = Mode.Idle
+		Mode.AddPolygon:
+			poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
+			poly_to_add.add_point(pos_in_world_px)
+			poly_edit_point_idx = poly_to_add.point_count() - 1
 
 func _handle_left_click_release():
 	if len(_held_objs) > 0:
@@ -152,6 +166,8 @@ func _cancel_mode():
 		_cancel_add_sprinkler()
 	elif mode in [Mode.AddDistMeasureA, Mode.AddDistMeasureB]:
 		_cancel_add_distance()
+	elif mode == Mode.AddPolygon:
+		_cancel_add_polygon()
 
 func _cancel_add_distance():
 	if dist_meas_to_add:
@@ -163,6 +179,15 @@ func _cancel_add_sprinkler():
 	if sprinkler_to_add:
 		sprinkler_to_add.queue_free()
 		sprinkler_to_add = null
+		mode = Mode.Idle
+
+func _cancel_add_polygon():
+	if poly_to_add:
+		if poly_edit_point_idx < poly_to_add.point_count():
+			poly_to_add.remove_point(poly_edit_point_idx)
+		poly_to_add.picked = false
+		TheProject.add_object(poly_to_add)
+		poly_to_add = null
 		mode = Mode.Idle
 
 func _add_held_object(obj):
@@ -180,6 +205,10 @@ func _on_release_selected_obj(obj):
 		img_prop_list.visible = false
 	elif obj is DistanceMeasurement:
 		obj.picked = false
+	elif obj is PolygonNode:
+		obj.picked = false
+	elif obj != null:
+		push_warning("unsupported release for obj '%s'" % obj)
 
 func _on_sprinkler_selected(sprink: Sprinkler):
 	sprink_prop_list.sprinkler = sprink
@@ -195,6 +224,9 @@ func _on_img_node_selected(img_node: ImageNode):
 
 func _on_dist_measurement_selected(meas: DistanceMeasurement):
 	meas.picked = true
+
+func _on_polygon_selected(poly: PolygonNode):
+	poly.picked = true
 
 func _is_point_over_world(global_pos: Vector2) -> bool:
 	return world_container.get_global_rect().has_point(global_pos)
@@ -219,6 +251,15 @@ func _on_add_dist_measure_pressed():
 	world_container.objects.add_child(dist_meas_to_add)
 	mode = Mode.AddDistMeasureA
 
+func _on_add_polygon_pressed():
+	poly_to_add = PolygonScene.instantiate()
+	poly_to_add.user_label = TheProject.get_unique_name('PolygonNode')
+	poly_to_add.picked = true
+	poly_to_add.add_point(Vector2())
+	poly_edit_point_idx = 0
+	world_container.objects.add_child(poly_to_add)
+	mode = Mode.AddPolygon
+	
 func _on_remove_button_pressed():
 	TheProject.remove_object(selected_obj)
 	selected_obj = null
@@ -337,5 +378,8 @@ func _on_viewport_container_gui_input(event):
 				sprinkler_to_add.position = pos_in_world_px
 			elif dist_meas_to_add and mode == Mode.AddDistMeasureB:
 				dist_meas_to_add.point_b = pos_in_world_px
+			elif poly_to_add:
+				if poly_edit_point_idx < poly_to_add.point_count():
+					poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
 			elif len(_held_objs) > 0:
 				_handle_held_obj_move(pos_in_world_px)

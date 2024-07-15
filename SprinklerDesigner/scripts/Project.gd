@@ -15,6 +15,7 @@ enum ChangeType {
 const SprinklerScene : PackedScene = preload("res://scenes/world_objects/Sprinkler/Sprinkler.tscn")
 const ImageNodeScene : PackedScene = preload("res://scenes/world_objects/ImageNode/ImageNode.tscn")
 const DistanceMeasurementScene : PackedScene = preload("res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn")
+const PolygonNodeScene : PackedScene = preload("res://scenes/world_objects/PolygonNode/PolygonNode.tscn")
 
 var project_path = ""
 var objects = []
@@ -197,6 +198,10 @@ func deserialize(obj):
 				var dist := DistanceMeasurementScene.instantiate()
 				dist.deserialize(obj_ser)
 				add_object(dist)
+			'PolygonNode':
+				var poly := PolygonNodeScene.instantiate()
+				poly.deserialize(obj_ser)
+				add_object(poly)
 			_:
 				push_warning("unimplemented subclass '%s' deserialization" % [obj_ser['subclass']])
 	_suppress_self_edit_signals = false
