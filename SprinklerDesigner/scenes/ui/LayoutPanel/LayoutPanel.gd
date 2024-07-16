@@ -268,10 +268,46 @@ func _on_add_polygon_pressed():
 	poly_edit_point_idx = 0
 	world_container.objects.add_child(poly_to_add)
 	mode = Mode.AddPolygon
+
+class WorldObjectRemoveUndoRedoOperation:
+	extends UndoRedoController.UndoRedoOperation
 	
+	var _world : WorldViewportContainer = null
+	var _from_idx = 0
+	var _ser_obj = null
+	
+	func _init(world: WorldViewportContainer, from_idx: int, obj: WorldObject):
+		_world = world
+		_from_idx = from_idx
+		_ser_obj = obj.serialize()
+	
+	func undo() -> bool:
+		var wobj = TheProject.instance_world_obj(_ser_obj)
+		if wobj is WorldObject:
+			TheProject.add_object(wobj)
+			wobj.set_order_in_world(_from_idx)
+			return true
+		return false
+		
+	func redo() -> bool:
+		var wobj = _world.objects.get_child(_from_idx)
+		TheProject.remove_object(wobj)
+		return true
+		
+	func pretty_str() -> String:
+		return str({
+			'_from_idx' : _from_idx,
+			'_ser_obj': _ser_obj
+		})
+
 func _on_remove_button_pressed():
-	TheProject.remove_object(selected_obj)
-	selected_obj = null
+	if selected_obj is WorldObject:
+		undo_redo_ctrl.push_undo_op(WorldObjectRemoveUndoRedoOperation.new(
+			world_container,
+			selected_obj.get_order_in_world(),
+			selected_obj))
+		TheProject.remove_object(selected_obj)
+		selected_obj = null
 
 func _on_TheProject_node_changed(obj, change_type, args):
 	var obj_in_world = obj in world_container.objects.get_children()

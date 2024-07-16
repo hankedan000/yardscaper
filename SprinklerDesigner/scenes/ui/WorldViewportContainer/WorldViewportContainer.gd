@@ -49,6 +49,12 @@ func move_world_object(from_idx: int, to_idx: int) -> bool:
 	emit_signal('world_object_moved', from_idx, to_idx)
 	return true
 
+# move a world object to another draw order index
+# @return -1 if obj doesn't exist, else the object's order index
+func get_object_order_idx(obj: WorldObject) -> int:
+	var children = objects.get_children()
+	return children.find(obj, 0)
+
 func get_image_of_current_view() -> Image:
 	return viewport.get_texture().get_image()
 

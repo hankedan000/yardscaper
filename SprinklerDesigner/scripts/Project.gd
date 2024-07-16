@@ -184,27 +184,28 @@ func serialize():
 func deserialize(obj):
 	_suppress_self_edit_signals = true
 	reset()
-	for obj_ser in Utils.dict_get(obj, 'objects', []):
-		match obj_ser['subclass']:
-			'Sprinkler':
-				var sprink := SprinklerScene.instantiate()
-				sprink.deserialize(obj_ser)
-				add_object(sprink)
-			'ImageNode':
-				var img_node := ImageNodeScene.instantiate()
-				img_node.deserialize(obj_ser)
-				add_object(img_node)
-			'DistanceMeasurement':
-				var dist := DistanceMeasurementScene.instantiate()
-				dist.deserialize(obj_ser)
-				add_object(dist)
-			'PolygonNode':
-				var poly := PolygonNodeScene.instantiate()
-				poly.deserialize(obj_ser)
-				add_object(poly)
-			_:
-				push_warning("unimplemented subclass '%s' deserialization" % [obj_ser['subclass']])
+	for ser_obj in Utils.dict_get(obj, 'objects', []):
+		var wobj = instance_world_obj(ser_obj)
+		if wobj:
+			add_object(wobj)
 	_suppress_self_edit_signals = false
+
+func instance_world_obj(ser_obj: Dictionary) -> WorldObject:
+	var wobj = null
+	match ser_obj['subclass']:
+		'Sprinkler':
+			wobj = SprinklerScene.instantiate()
+		'ImageNode':
+			wobj = ImageNodeScene.instantiate()
+		'DistanceMeasurement':
+			wobj = DistanceMeasurementScene.instantiate()
+		'PolygonNode':
+			wobj = PolygonNodeScene.instantiate()
+		_:
+			push_warning("unimplemented subclass '%s' deserialization" % [ser_obj['subclass']])
+	if wobj:
+		wobj.deserialize(ser_obj)
+	return wobj
 
 func _on_node_property_changed(property, from, to, node):
 	emit_signal(

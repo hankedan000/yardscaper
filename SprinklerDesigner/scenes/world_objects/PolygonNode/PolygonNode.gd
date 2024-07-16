@@ -14,11 +14,6 @@ var color := Color.MEDIUM_AQUAMARINE:
 			emit_signal('property_changed', 'color', old_value, color)
 		queue_redraw()
 
-var _is_ready = false
-
-func _ready():
-	_is_ready = true
-
 func _draw():
 	poly.color = color
 	if picked or hovering:

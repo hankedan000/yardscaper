@@ -4,6 +4,7 @@ class_name WorldObject
 signal property_changed(obj, property, from, to)
 
 var world : WorldViewportContainer = null
+var _is_ready = false
 
 var user_label : String = "" :
 	set(value):
@@ -20,9 +21,25 @@ func _ready():
 			world = parent
 			break
 		parent = parent.get_parent()
+	_is_ready = true
 
 func get_subclass() -> String:
 	return "WorldObject"
+
+func get_order_in_world() -> int:
+	if ! _is_ready:
+		await _ready
+	if ! world:
+		push_error("object isn't in a world")
+		return -1
+	return world.get_object_order_idx(self)
+
+func set_order_in_world(to_idx: int):
+	var from_idx = await get_order_in_world()
+	if from_idx < 0:
+		push_error("unable to get object's from_idx")
+		return
+	world.move_world_object(from_idx, to_idx)
 
 func serialize():
 	return {
