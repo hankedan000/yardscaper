@@ -245,6 +245,277 @@ const BUILTIN_DB = {
 							]
 						}
 					]
+				},
+				'5000' : {
+					'min_dist_ft' : 25.0,
+					'max_dist_ft' : 50.0,
+					'min_sweep_deg' : 40.0,
+					'max_sweep_deg' : 360.0,
+					'compatible_bodies' : ['5004', '5006', '5012'],
+					'flow_characteristics' : [
+						{
+							'nozzle' : '1.5',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 33     , 1.12    , false],
+								[ 35       , 34     , 1.35    , false],
+								[ 45       , 35     , 1.54    , false],
+								[ 55       , 35     , 1.71    , false],
+								[ 65       , 34     , 1.86    , false]
+							]
+						},
+						{
+							'nozzle' : '2.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 35     , 1.50    , false],
+								[ 35       , 36     , 1.81    , false],
+								[ 45       , 37     , 2.07    , false],
+								[ 55       , 37     , 2.30    , false],
+								[ 65       , 35     , 2.52    , false]
+							]
+						},
+						{
+							'nozzle' : '2.5',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 35     , 1.81    , false],
+								[ 35       , 37     , 2.17    , false],
+								[ 45       , 37     , 2.51    , false],
+								[ 55       , 37     , 2.76    , false],
+								[ 65       , 37     , 3.01    , false]
+							]
+						},
+						{
+							'nozzle' : '3.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 36     , 2.26    , false],
+								[ 35       , 38     , 2.71    , false],
+								[ 45       , 40     , 3.09    , false],
+								[ 55       , 40     , 3.47    , false],
+								[ 65       , 40     , 3.78    , false]
+							]
+						},
+						{
+							'nozzle' : '4.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 37     , 2.91    , false],
+								[ 35       , 40     , 3.50    , false],
+								[ 45       , 42     , 4.01    , false],
+								[ 55       , 42     , 4.44    , false],
+								[ 65       , 42     , 4.83    , false]
+							]
+						},
+						{
+							'nozzle' : '5.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 39     , 3.72    , false],
+								[ 35       , 41     , 4.47    , false],
+								[ 45       , 45     , 5.09    , false],
+								[ 55       , 45     , 5.66    , false],
+								[ 65       , 45     , 6.16    , false]
+							]
+						},
+						{
+							'nozzle' : '6.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 39     , 4.25    , false],
+								[ 35       , 43     , 5.23    , false],
+								[ 45       , 46     , 6.01    , false],
+								[ 55       , 47     , 6.63    , false],
+								[ 65       , 48     , 7.22    , false]
+							]
+						},
+						{
+							'nozzle' : '8.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 36     , 5.90    , false],
+								[ 35       , 43     , 7.06    , false],
+								[ 45       , 47     , 8.03    , false],
+								[ 55       , 50     , 8.86    , false],
+								[ 65       , 50     , 9.63    , false]
+							]
+						},
+						{
+							'nozzle' : '1.0LA',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 25     , 0.76    , false],
+								[ 35       , 28     , 0.92    , false],
+								[ 45       , 29     , 1.05    , false],
+								[ 55       , 29     , 1.17    , false],
+								[ 65       , 29     , 1.27    , false]
+							]
+						},
+						{
+							'nozzle' : '1.5LA',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 27     , 1.15    , false],
+								[ 35       , 30     , 1.38    , false],
+								[ 45       , 31     , 1.58    , false],
+								[ 55       , 31     , 1.76    , false],
+								[ 65       , 31     , 1.92    , false]
+							]
+						},
+						{
+							'nozzle' : '2.0LA',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 29     , 1.47    , false],
+								[ 35       , 31     , 1.77    , false],
+								[ 45       , 32     , 2.02    , false],
+								[ 55       , 33     , 2.24    , false],
+								[ 65       , 33     , 2.45    , false]
+							]
+						},
+						{
+							'nozzle' : '3.0LA',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 29     , 2.23    , false],
+								[ 35       , 33     , 2.68    , false],
+								[ 45       , 35     , 3.07    , false],
+								[ 55       , 36     , 3.41    , false],
+								[ 65       , 36     , 3.72    , false]
+							]
+						},
+
+					]
+				},
+				'5000PRS' : {
+					'min_dist_ft' : 25.0,
+					'max_dist_ft' : 47.0,
+					'min_sweep_deg' : 40.0,
+					'max_sweep_deg' : 360.0,
+					'compatible_bodies' : ['5004', '5006', '5012'],
+					'flow_characteristics' : [
+						{
+							'nozzle' : '1.5',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 33     , 1.12    , false],
+								[ 35       , 34     , 1.35    , false],
+								[ 45       , 35     , 1.54    , false],
+								[ 55       , 35     , 1.59    , false]
+							]
+						},
+						{
+							'nozzle' : '2.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 35     , 1.50    , false],
+								[ 35       , 36     , 1.81    , false],
+								[ 45       , 37     , 2.07    , false],
+								[ 55       , 37     , 2.14    , false]
+							]
+						},
+						{
+							'nozzle' : '2.5',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 35     , 1.81    , false],
+								[ 35       , 37     , 2.17    , false],
+								[ 45       , 37     , 2.51    , false],
+								[ 55       , 37     , 2.60    , false]
+							]
+						},
+						{
+							'nozzle' : '3.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 36     , 2.26    , false],
+								[ 35       , 38     , 2.71    , false],
+								[ 45       , 40     , 3.09    , false],
+								[ 55       , 40     , 3.20    , false]
+							]
+						},
+						{
+							'nozzle' : '4.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 37     , 2.91    , false],
+								[ 35       , 40     , 3.50    , false],
+								[ 45       , 42     , 4.01    , false],
+								[ 55       , 42     , 4.15    , false]
+							]
+						},
+						{
+							'nozzle' : '5.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 39     , 3.72    , false],
+								[ 35       , 41     , 4.47    , false],
+								[ 45       , 45     , 5.09    , false],
+								[ 55       , 45     , 5.27    , false]
+							]
+						},
+						{
+							'nozzle' : '6.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 39     , 4.25    , false],
+								[ 35       , 43     , 5.23    , false],
+								[ 45       , 46     , 6.01    , false],
+								[ 55       , 46     , 6.22    , false]
+							]
+						},
+						{
+							'nozzle' : '8.0',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 36     , 5.90    , false],
+								[ 35       , 43     , 7.06    , false],
+								[ 45       , 47     , 8.03    , false],
+								[ 55       , 47     , 8.31    , false]
+							]
+						},
+						{
+							'nozzle' : '1.0LA',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 25     , 0.76    , false],
+								[ 35       , 28     , 0.92    , false],
+								[ 45       , 29     , 1.05    , false],
+								[ 55       , 29     , 1.09    , false]
+							]
+						},
+						{
+							'nozzle' : '1.5LA',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 27     , 1.15    , false],
+								[ 35       , 30     , 1.38    , false],
+								[ 45       , 31     , 1.58    , false],
+								[ 55       , 31     , 1.64    , false]
+							]
+						},
+						{
+							'nozzle' : '2.0LA',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 29     , 1.47    , false],
+								[ 35       , 31     , 1.77    , false],
+								[ 45       , 32     , 2.02    , false],
+								[ 55       , 32     , 2.09    , false]
+							]
+						},
+						{
+							'nozzle' : '3.0LA',
+							'data' : [
+								# press_psi, dist_ft, flow_gpm, optimal
+								[ 25       , 29     , 2.23    , false],
+								[ 35       , 33     , 2.68    , false],
+								[ 45       , 35     , 3.07    , false],
+								[ 55       , 35     , 3.18    , false]
+							]
+						}
+					]
 				}
 			}
 		}
