@@ -17,6 +17,20 @@ layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "User-definable label for this sprinkler"
 
+[node name="Label4" type="Label" parent="."]
+layout_mode = 2
+text = "Manufacturer: "
+
+[node name="ManufacturerOption" type="OptionButton" parent="."]
+layout_mode = 2
+
+[node name="Label5" type="Label" parent="."]
+layout_mode = 2
+text = "Model: "
+
+[node name="ModelOption" type="OptionButton" parent="."]
+layout_mode = 2
+
 [node name="Label9" type="Label" parent="."]
 layout_mode = 2
 text = "Zone: "
@@ -47,20 +61,6 @@ min_value = -360.0
 max_value = 360.0
 suffix = "deg"
 
-[node name="Label4" type="Label" parent="."]
-layout_mode = 2
-text = "Manufacturer: "
-
-[node name="ManufacturerOption" type="OptionButton" parent="."]
-layout_mode = 2
-
-[node name="Label5" type="Label" parent="."]
-layout_mode = 2
-text = "Model: "
-
-[node name="ModelOption" type="OptionButton" parent="."]
-layout_mode = 2
-
 [node name="Label6" type="Label" parent="."]
 modulate = Color(1, 0.188235, 0.215686, 1)
 layout_mode = 2
@@ -88,11 +88,11 @@ layout_mode = 2
 suffix = "ft"
 
 [connection signal="text_submitted" from="UserLabelLineEdit" to="." method="_on_user_label_line_edit_text_submitted"]
+[connection signal="item_selected" from="ManufacturerOption" to="." method="_on_manufacturer_option_item_selected"]
+[connection signal="item_selected" from="ModelOption" to="." method="_on_model_option_item_selected"]
 [connection signal="value_changed" from="ZoneSpinBox" to="." method="_on_zone_spin_box_value_changed"]
 [connection signal="value_changed" from="SweepSpinBox" to="." method="_on_sweep_spin_box_value_changed"]
 [connection signal="value_changed" from="RotationSpinBox" to="." method="_on_rotation_spin_box_value_changed"]
-[connection signal="item_selected" from="ManufacturerOption" to="." method="_on_manufacturer_option_item_selected"]
-[connection signal="item_selected" from="ModelOption" to="." method="_on_model_option_item_selected"]
 [connection signal="value_changed" from="MinDistanceSpinBox" to="." method="_on_min_distance_spin_box_value_changed"]
 [connection signal="value_changed" from="MaxDistanceSpinBox" to="." method="_on_max_distance_spin_box_value_changed"]
 [connection signal="value_changed" from="DistanceSpinBox" to="." method="_on_distance_spin_box_value_changed"]
