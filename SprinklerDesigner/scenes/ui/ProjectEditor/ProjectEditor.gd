@@ -14,10 +14,15 @@ enum EditMenuIDs {
 	Redo = 1
 }
 
+enum HelpMenuIDs {
+	About = 0
+}
+
 @onready var open_dialog := $OpenDialog
 @onready var save_as_dialog := $SaveAsDialog
 @onready var unsaved_changes_dialog := $UnsavedChangesDialog
 @onready var export_to_img_dialog := $ExportToImageDialog
+@onready var about_dialog := $AboutDialog
 @onready var proj_menu := $VBoxContainer/MenuBar/Project
 @onready var edit_menu := $VBoxContainer/MenuBar/Edit
 @onready var proj_tabs := $VBoxContainer/ProjectTabs
@@ -163,6 +168,11 @@ func _on_edit_id_pressed(id):
 		_:
 			push_warning("unhandled press event for edit menu id %d" % [id])
 
+func _on_help_id_pressed(id):
+	match id:
+		HelpMenuIDs.About:
+			about_dialog.popup_centered()
+	
 func _on_export_to_image_dialog_export(view_opt, _zone: int, filepath: String):
 	var img = null
 	match view_opt:

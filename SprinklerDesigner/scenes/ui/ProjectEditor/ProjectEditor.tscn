@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://u1375je75c1f"]
+[gd_scene load_steps=9 format=3 uid="uid://u1375je75c1f"]
 
 [ext_resource type="Theme" uid="uid://b7bms6qoy7yfq" path="res://assets/themes/MainTheme.tres" id="1_m3fdf"]
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/ProjectEditor.gd" id="2_rxefj"]
@@ -6,8 +6,31 @@
 [ext_resource type="PackedScene" uid="uid://xyp0got3c5dp" path="res://scenes/ui/LayoutPanel/LayoutPanel.tscn" id="4_3cv8w"]
 [ext_resource type="PackedScene" uid="uid://dtgjpudmf5pva" path="res://scenes/ui/ExportToImageDialog/ExportToImageDialog.tscn" id="4_h12le"]
 [ext_resource type="PackedScene" uid="uid://y61v2o6rd0mg" path="res://scenes/ui/BOM_List/BOM_List.tscn" id="5_qt3l6"]
+[ext_resource type="Texture2D" uid="uid://h0ug1cx5m5aj" path="res://assets/icons/grass_128.png" id="5_y37na"]
 
-[node name="Main" type="PanelContainer"]
+[sub_resource type="GDScript" id="GDScript_bcc41"]
+script/source = "@tool
+extends Window
+
+@onready var name_label := $VBoxContainer/NameLabel
+@onready var ver_label := $VBoxContainer/VersionLabel
+@onready var source_link := $VBoxContainer/SourceLink
+
+func _ready():
+	var app_name = ProjectSettings.get_setting(\"application/config/name\")
+	name_label.text = app_name
+	var app_ver = ProjectSettings.get_setting(\"application/config/version\")
+	ver_label.text = \"Version: %s\" % app_ver
+	source_link.meta_clicked.connect(_on_source_link_meta_clicked)
+
+func _on_source_link_meta_clicked(meta):
+	OS.shell_open(meta)
+
+func _on_close_requested():
+	hide()
+"
+
+[node name="ProjectEditor" type="PanelContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -36,6 +59,41 @@ access = 2
 
 [node name="ExportToImageDialog" parent="." instance=ExtResource("4_h12le")]
 visible = false
+
+[node name="AboutDialog" type="Window" parent="."]
+title = "About"
+initial_position = 1
+size = Vector2i(500, 250)
+visible = false
+script = SubResource("GDScript_bcc41")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="AboutDialog"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="AboutDialog/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("5_y37na")
+
+[node name="NameLabel" type="Label" parent="AboutDialog/VBoxContainer"]
+layout_mode = 2
+text = "Sprinkler Designer"
+horizontal_alignment = 1
+
+[node name="VersionLabel" type="Label" parent="AboutDialog/VBoxContainer"]
+layout_mode = 2
+text = "Version: X.Y.Z"
+horizontal_alignment = 1
+
+[node name="SourceLink" type="RichTextLabel" parent="AboutDialog/VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[center][url=\"https://github.com/hankedan000/sprinkler_designer\"]github.com/hankedan000/sprinkler_designer[/url][/center]"
+fit_content = true
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -68,6 +126,12 @@ item_1/text = "Redo"
 item_1/id = 1
 item_1/disabled = true
 
+[node name="Help" type="PopupMenu" parent="VBoxContainer/MenuBar"]
+title = "Help"
+item_count = 1
+item_0/text = "About ..."
+item_0/id = 0
+
 [node name="ProjectTabs" type="TabContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -87,6 +151,8 @@ layout_mode = 2
 [connection signal="discard" from="UnsavedChangesDialog" to="." method="_on_unsaved_changes_dialog_discard"]
 [connection signal="save" from="UnsavedChangesDialog" to="." method="_on_unsaved_changes_dialog_save"]
 [connection signal="export" from="ExportToImageDialog" to="." method="_on_export_to_image_dialog_export"]
+[connection signal="close_requested" from="AboutDialog" to="AboutDialog" method="_on_close_requested"]
 [connection signal="id_pressed" from="VBoxContainer/MenuBar/Project" to="." method="_on_project_id_pressed"]
 [connection signal="id_pressed" from="VBoxContainer/MenuBar/Edit" to="." method="_on_edit_id_pressed"]
+[connection signal="id_pressed" from="VBoxContainer/MenuBar/Help" to="." method="_on_help_id_pressed"]
 [connection signal="tab_changed" from="VBoxContainer/ProjectTabs" to="." method="_on_project_tabs_tab_changed"]
