@@ -1,7 +1,7 @@
-extends Window
+extends PanelContainer
 class_name BootMenu
 
-@onready var previous_projects := $PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects
+@onready var previous_projects := $VBoxContainer/ScrollContainer/PreviousProjects
 
 func _ready():
 	while previous_projects.get_child_count() > 0:

@@ -14,6 +14,7 @@ config/name="Sprinkler Designer"
 config/version="1.0.0"
 run/main_scene="res://Main.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
+boot_splash/show_image=false
 config/icon="res://assets/icons/grass_128.png"
 
 [autoload]
@@ -25,8 +26,8 @@ Globals="*res://scripts/Globals.gd"
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=720
+window/size/viewport_width=600
+window/size/viewport_height=400
 
 [layer_names]
 

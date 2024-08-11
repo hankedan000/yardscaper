@@ -2,11 +2,11 @@ extends PanelContainer
 class_name ProjectEditor
 
 enum ProjectMenuIDs {
-	New = 2,
 	Open = 3,
 	Save = 0,
 	SaveAs = 1,
-	ExportToImage = 4
+	ExportToImage = 4,
+	QuitToProjectList = 5
 }
 
 enum EditMenuIDs {
@@ -16,6 +16,12 @@ enum EditMenuIDs {
 
 enum HelpMenuIDs {
 	About = 0
+}
+
+enum CloseType {
+	None        = 0,
+	ProjectList = 1, # close project and goto project list window
+	Application = 2  # close application entirely
 }
 
 @onready var open_dialog := $OpenDialog
@@ -28,7 +34,7 @@ enum HelpMenuIDs {
 @onready var proj_tabs := $VBoxContainer/ProjectTabs
 @onready var layout_tab := $VBoxContainer/ProjectTabs/Layout
 
-var _close_requested = false # set true if window close was requested
+var _requested_close_type = CloseType.None
 var _active_undo_redo_ctrl : UndoRedoController = null:
 	set(value):
 		if _active_undo_redo_ctrl:
@@ -66,14 +72,27 @@ func _ready():
 	# trick to get undo/redo history active from startup
 	_on_project_tabs_tab_changed(proj_tabs.current_tab)
 
+func _request_close(type: CloseType):
+	TheProject.save_preferences()
+	_requested_close_type = type
+	if TheProject.has_edits:
+		unsaved_changes_dialog.popup_centered()
+	else:
+		_do_close(type)
+
+func _do_close(type: CloseType):
+	match type:
+		CloseType.None:
+			pass # nothing to do
+		CloseType.ProjectList:
+			TheProject.reset()
+			Globals.main.open_boot_menu()
+		CloseType.Application:
+			get_tree().quit()
+
 func _notification(what):
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		TheProject.save_preferences()
-		_close_requested = true
-		if TheProject.has_edits:
-			unsaved_changes_dialog.popup_centered()
-		else:
-			get_tree().quit() # nothing to save, so quit now!
+		_request_close(CloseType.Application)
 
 func _set_menu_item_shortcut(menu: PopupMenu, id: int, shortcut: Shortcut):
 	menu.set_item_shortcut(menu.get_item_index(id), shortcut)
@@ -101,8 +120,6 @@ func _update_undo_redo_enabled(undo_redo_ctrl):
 
 func _on_project_id_pressed(id):
 	match id:
-		ProjectMenuIDs.New:
-			TheProject.reset()
 		ProjectMenuIDs.Open:
 			open_dialog.popup_centered()
 		ProjectMenuIDs.Save:
@@ -111,14 +128,15 @@ func _on_project_id_pressed(id):
 			save_as_dialog.popup_centered()
 		ProjectMenuIDs.ExportToImage:
 			export_to_img_dialog.popup_centered()
+		ProjectMenuIDs.QuitToProjectList:
+			_request_close(CloseType.ProjectList)
 
 func _on_save_as_dialog_dir_selected(dir: String):
 	if TheProject.save_as(dir):
 		# 'save as' can be requested if user hasn't saved a new project yet, 
 		# but requested to close the window. this is where the final close
 		# gets performed.
-		if _close_requested:
-			get_tree().quit()
+		_do_close(_requested_close_type)
 
 func _on_open_dialog_dir_selected(dir):
 	TheProject.open(dir)
@@ -132,16 +150,16 @@ func _on_TheProject_has_edits_changed(_has_edits):
 func _on_unsaved_changes_dialog_save():
 	if len(TheProject.project_path) > 0:
 		TheProject.save()
-		get_tree().quit()
+		_do_close(_requested_close_type)
 	else:
 		# need to request user where to save project to
 		_request_save_as()
 
 func _on_unsaved_changes_dialog_cancel():
-	_close_requested = false
+	_requested_close_type = CloseType.None
 
 func _on_unsaved_changes_dialog_discard():
-	get_tree().quit()
+	_do_close(_requested_close_type)
 
 func _on_project_tabs_tab_changed(tab):
 	var tab_title = proj_tabs.get_tab_title(tab)

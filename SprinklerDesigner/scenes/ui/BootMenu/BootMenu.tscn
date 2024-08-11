@@ -2,111 +2,103 @@
 
 [ext_resource type="Script" path="res://scenes/ui/BootMenu/BootMenu.gd" id="1_a8g1b"]
 
-[node name="BootMenu" type="Window"]
-title = "Sprinkler Designer"
-position = Vector2i(0, 36)
-size = Vector2i(800, 450)
-script = ExtResource("1_a8g1b")
-
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="BootMenu" type="PanelContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_a8g1b")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
 
-[node name="NewProjectButton" type="Button" parent="PanelContainer/VBoxContainer"]
+[node name="NewProjectButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
 text = "New Project"
 alignment = 0
 
-[node name="OpenProjectButton" type="Button" parent="PanelContainer/VBoxContainer"]
+[node name="OpenProjectButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
 text = "Open Project ..."
 alignment = 0
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 text = "Previous Projects:"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="PreviousProjects" type="VBoxContainer" parent="PanelContainer/VBoxContainer/ScrollContainer"]
+[node name="PreviousProjects" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button2" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button2" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button3" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button3" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button4" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button4" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button5" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button5" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button6" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button6" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button7" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button7" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button8" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button8" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button9" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button9" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button10" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button10" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button11" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button11" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button12" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button12" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button13" type="Button" parent="PanelContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button13" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
-
-[connection signal="pressed" from="PanelContainer/VBoxContainer/NewProjectButton" to="." method="_on_new_project_button_pressed"]
-[connection signal="pressed" from="PanelContainer/VBoxContainer/OpenProjectButton" to="." method="_on_open_project_button_pressed"]
