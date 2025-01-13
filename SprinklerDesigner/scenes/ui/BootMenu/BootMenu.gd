@@ -2,6 +2,7 @@ extends PanelContainer
 class_name BootMenu
 
 @onready var previous_projects := $VBoxContainer/ScrollContainer/PreviousProjects
+@onready var open_project_dialog := $OpenProjectDialog
 
 func _ready():
 	while previous_projects.get_child_count() > 0:
@@ -18,7 +19,10 @@ func _on_new_project_button_pressed():
 	Globals.main.open_project_editor("")
 
 func _on_open_project_button_pressed():
-	pass # Replace with function body.
+	open_project_dialog.popup_centered()
 
-func _on_recent_project_pressed(project_path):
+func _on_recent_project_pressed(project_path: String):
 	Globals.main.open_project_editor(project_path)
+
+func _on_open_project_dialog_dir_selected(dir: String) -> void:
+	Globals.main.open_project_editor(dir)

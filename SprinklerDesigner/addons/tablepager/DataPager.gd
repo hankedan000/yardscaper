@@ -127,4 +127,3 @@ func GetPageDataSorted(columnKey: String, sortOrder: EnumSortOrder) -> Array[Dic
 	_sortColumnOrder = sortOrder
 	_pageIndexCurrent = 0
 	return GetPageDataCurrent()
-
