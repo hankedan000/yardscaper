@@ -2,20 +2,20 @@ extends PanelContainer
 class_name ProjectEditor
 
 enum ProjectMenuIDs {
-	Open = 3,
-	Save = 0,
-	SaveAs = 1,
+	Open = 1,
+	Save = 2,
+	SaveAs = 3,
 	ExportToImage = 4,
 	QuitToProjectList = 5
 }
 
 enum EditMenuIDs {
-	Undo = 0,
-	Redo = 1
+	Undo = 1,
+	Redo = 2
 }
 
 enum HelpMenuIDs {
-	About = 0
+	About = 1
 }
 
 enum CloseType {

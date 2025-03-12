@@ -19,19 +19,36 @@ var poly_node : PolygonNode = null:
 		
 		poly_node = obj
 
+var _ui_needs_sync = false
+var _ignore_internal_edits = false
+
+func _process(_delta):
+	if _ui_needs_sync:
+		_sync_ui_to_properties(poly_node)
+
+func queue_ui_sync():
+	_ui_needs_sync = true
+
 func _sync_ui_to_properties(node: PolygonNode):
+	if node == null:
+		_ui_needs_sync = false
+		return
+	
+	_ignore_internal_edits = true
 	user_label_lineedit.text = node.user_label
 	color_picker.color = node.color
 	area_lineedit.text = "%0.0f sq. ft" % node.get_area_ft()
+	_ignore_internal_edits = false
+	_ui_needs_sync = false
 
 func _on_poly_node_property_changed(_property, _old_value, _new_value):
 	if poly_node is PolygonNode:
-		_sync_ui_to_properties(poly_node)
+		queue_ui_sync()
 
-func _on_user_label_line_edit_text_changed(new_text):
-	if poly_node is PolygonNode:
+func _on_user_label_line_edit_text_submitted(new_text: String) -> void:
+	if poly_node is PolygonNode and not _ignore_internal_edits:
 		poly_node.user_label = new_text
 
 func _on_color_picker_color_changed(color):
-	if poly_node is PolygonNode:
+	if poly_node is PolygonNode and not _ignore_internal_edits:
 		poly_node.color = color

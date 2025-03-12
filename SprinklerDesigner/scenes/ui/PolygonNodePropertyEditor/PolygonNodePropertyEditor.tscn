@@ -36,5 +36,5 @@ size_flags_horizontal = 3
 tooltip_text = "Total spray angle or rotor's swept angle"
 editable = false
 
-[connection signal="text_changed" from="UserLabelLineEdit" to="." method="_on_user_label_line_edit_text_changed"]
+[connection signal="text_submitted" from="UserLabelLineEdit" to="." method="_on_user_label_line_edit_text_submitted"]
 [connection signal="color_changed" from="ColorPicker" to="." method="_on_color_picker_color_changed"]

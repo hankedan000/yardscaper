@@ -106,11 +106,11 @@ title = "Project"
 size = Vector2i(104, 116)
 item_count = 5
 item_0/text = "Open ..."
-item_0/id = 3
+item_0/id = 1
 item_1/text = "Save"
-item_1/id = 0
+item_1/id = 2
 item_2/text = "Save As ..."
-item_2/id = 1
+item_2/id = 3
 item_3/text = "Export to Image..."
 item_3/id = 4
 item_4/text = "Quit to Project List"
@@ -120,30 +120,33 @@ item_4/id = 5
 title = "Edit"
 item_count = 2
 item_0/text = "Undo"
-item_0/id = 0
+item_0/id = 1
 item_0/disabled = true
 item_1/text = "Redo"
-item_1/id = 1
+item_1/id = 2
 item_1/disabled = true
 
 [node name="Help" type="PopupMenu" parent="VBoxContainer/MenuBar"]
 title = "Help"
 item_count = 1
 item_0/text = "About ..."
-item_0/id = 0
+item_0/id = 1
 
 [node name="ProjectTabs" type="TabContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 tab_alignment = 1
+current_tab = 0
 tab_focus_mode = 0
 
 [node name="Layout" parent="VBoxContainer/ProjectTabs" instance=ExtResource("4_3cv8w")]
 layout_mode = 2
+metadata/_tab_index = 0
 
 [node name="BOM List" parent="VBoxContainer/ProjectTabs" instance=ExtResource("5_qt3l6")]
 visible = false
 layout_mode = 2
+metadata/_tab_index = 1
 
 [connection signal="dir_selected" from="OpenDialog" to="." method="_on_open_dialog_dir_selected"]
 [connection signal="dir_selected" from="SaveAsDialog" to="." method="_on_save_as_dialog_dir_selected"]
