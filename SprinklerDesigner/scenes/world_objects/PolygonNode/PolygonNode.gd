@@ -5,6 +5,7 @@ const PERIMETER_WIDTH = 2
 
 @onready var poly := $Polygon2D
 @onready var coll_poly := $PickArea/CollisionPolygon2D
+@onready var label := $Label
 
 var color := Color.MEDIUM_AQUAMARINE:
 	set(value):
@@ -29,6 +30,25 @@ func _draw():
 		if prev_point && first_point:
 			draw_line(prev_point, first_point, perim_color, PERIMETER_WIDTH)
 
+func _update_label():
+	label.visible = point_count() > 2
+	if not label.visible:
+		return
+	
+	label.text = "%s\n(%0.2f sq. ft)" % [user_label, get_area_ft()]
+	
+	# compute bounding box size of the new label's text string
+	var font : Font = label.get_theme_font("font")
+	var font_size : int = label.get_theme_font_size("font_size")
+	var text_size := font.get_multiline_string_size(
+		label.text,
+		HORIZONTAL_ALIGNMENT_CENTER,
+		-1,
+		font_size)
+	
+	# position the label in center of the polygon
+	label.global_position = get_global_center() - (text_size / 2.0)
+
 func add_point(point: Vector2):
 	if ! _is_ready:
 		await ready
@@ -38,11 +58,13 @@ func add_point(point: Vector2):
 	new_points.append(point)
 	poly.polygon = new_points
 	coll_poly.polygon = new_points
+	_update_label()
 	queue_redraw()
 
 func set_point(idx: int, point: Vector2):
 	poly.polygon[idx] = point
 	coll_poly.polygon[idx] = point
+	_update_label()
 	queue_redraw()
 
 func insert_point(at_idx: int, point: Vector2):
@@ -50,6 +72,7 @@ func insert_point(at_idx: int, point: Vector2):
 	new_points.insert_at(at_idx, point)
 	poly.polygon = new_points
 	coll_poly.polygon = new_points
+	_update_label()
 	queue_redraw()
 
 func remove_point(idx: int):
@@ -59,6 +82,7 @@ func remove_point(idx: int):
 	new_points.remove_at(idx)
 	poly.polygon = new_points
 	coll_poly.polygon = new_points
+	_update_label()
 	queue_redraw()
 
 func point_count() -> int:
