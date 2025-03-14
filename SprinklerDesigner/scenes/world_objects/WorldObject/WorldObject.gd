@@ -3,6 +3,8 @@ class_name WorldObject
 
 signal property_changed(obj, property, from, to)
 
+@onready var info_label : Label = $InfoLabel
+
 var world : WorldViewportContainer = null
 var _is_ready = false
 
@@ -41,15 +43,28 @@ func set_order_in_world(to_idx: int):
 		return
 	world.move_world_object(from_idx, to_idx)
 
+func get_info_label_visible() -> bool:
+	return info_label.visible
+
+func set_info_label_visible(visible: bool) -> void:
+	var old_value = info_label.visible
+	info_label.visible = visible
+	if old_value != info_label.visible:
+		emit_signal('property_changed', 'info_label.visible', old_value, info_label.visible)
+
 func serialize():
 	return {
 		'subclass' : get_subclass(),
 		'position_ft' : Utils.vect2_to_pair(Utils.px_to_ft_vec(position)),
 		'rotation_deg' : int(rotation_degrees),
-		'user_label' : user_label
+		'user_label' : user_label,
+		'info_label.visible': info_label.visible
 	}
 
 func deserialize(obj):
+	if ! _is_ready:
+		await ready
 	position = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj['position_ft']))
 	rotation_degrees = obj['rotation_deg']
 	user_label = obj['user_label']
+	info_label.visible = Utils.dict_get(obj, 'info_label.visible', false)

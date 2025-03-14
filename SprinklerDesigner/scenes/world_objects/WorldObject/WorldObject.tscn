@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://yvp357wae8et"]
+
+[ext_resource type="Script" path="res://scenes/world_objects/WorldObject/WorldObject.gd" id="1_480ks"]
+
+[node name="WorldObject" type="Node2D"]
+script = ExtResource("1_480ks")
+
+[node name="InfoLabel" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+text = "World Object"

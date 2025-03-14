@@ -17,10 +17,4 @@ disabled = true
 z_index = -1
 color = Color(0.157437, 0.863281, 0.542127, 1)
 
-[node name="Label" type="Label" parent="." index="2"]
-offset_right = 40.0
-offset_bottom = 23.0
-text = "Polygon Object
-(1234.56sqft)"
-
 [connection signal="area_entered" from="PickArea" to="." method="_on_pick_area_area_entered"]
