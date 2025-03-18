@@ -11,9 +11,16 @@ grow_vertical = 2
 script = ExtResource("1_a8g1b")
 
 [node name="OpenProjectDialog" type="FileDialog" parent="."]
-title = "Open a Project"
+title = "Open a Directory"
 ok_button_text = "Select Current Folder"
 dialog_hide_on_ok = true
+file_mode = 2
+access = 2
+use_native_dialog = true
+
+[node name="NewProjectDialog" type="FileDialog" parent="."]
+title = "Select empty directory to create new project ..."
+ok_button_text = "Select Current Folder"
 file_mode = 2
 access = 2
 use_native_dialog = true
@@ -112,5 +119,6 @@ text = "/home/user/Documents/Project1"
 alignment = 0
 
 [connection signal="dir_selected" from="OpenProjectDialog" to="." method="_on_open_project_dialog_dir_selected"]
+[connection signal="dir_selected" from="NewProjectDialog" to="." method="_on_new_project_dialog_dir_selected"]
 [connection signal="pressed" from="VBoxContainer/NewProjectButton" to="." method="_on_new_project_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/OpenProjectButton" to="." method="_on_open_project_button_pressed"]

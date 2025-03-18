@@ -6,6 +6,7 @@
 script = ExtResource("1_480ks")
 
 [node name="InfoLabel" type="Label" parent="."]
+visible = false
 offset_right = 40.0
 offset_bottom = 23.0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)

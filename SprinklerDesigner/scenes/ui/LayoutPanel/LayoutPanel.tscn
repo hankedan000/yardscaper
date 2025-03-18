@@ -46,12 +46,14 @@ layout_mode = 2
 
 [node name="LeftPane" type="TabContainer" parent="HSplitContainer"]
 layout_mode = 2
+current_tab = 0
 tab_focus_mode = 0
 
 [node name="Properties" type="ScrollContainer" parent="HSplitContainer/LeftPane"]
 custom_minimum_size = Vector2(260, 0)
 layout_mode = 2
 size_flags_vertical = 3
+metadata/_tab_index = 0
 
 [node name="SprinklerPropertiesList" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("3_itpjk")]
 layout_mode = 2
@@ -67,6 +69,7 @@ layout_mode = 2
 [node name="Objects" parent="HSplitContainer/LeftPane" instance=ExtResource("5_p3ckg")]
 visible = false
 layout_mode = 2
+metadata/_tab_index = 1
 
 [node name="Layout" type="VBoxContainer" parent="HSplitContainer"]
 layout_mode = 2
@@ -83,10 +86,8 @@ icon = ExtResource("6_58poj")
 
 [node name="AddImage" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
-tooltip_text = "Add image
-Note: Project needs to be saved first."
+tooltip_text = "Add image"
 focus_mode = 0
-disabled = true
 icon = ExtResource("10_7tkh4")
 
 [node name="AddDistMeasure" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]

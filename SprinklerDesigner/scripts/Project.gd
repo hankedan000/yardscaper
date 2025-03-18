@@ -1,4 +1,5 @@
 extends Node
+class_name Project
 
 signal opened()
 signal saved()
@@ -74,7 +75,7 @@ func save_preferences():
 	var layout_pref_filepath = project_path.path_join('layout_pref.json')
 	Utils.to_json_file(layout_pref.serialize(), layout_pref_filepath)
 
-func save_as(dir: String):
+func save_as(dir: String) -> bool:
 	var json_filepath = dir.path_join("project.json")
 	if Utils.to_json_file(serialize(), json_filepath):
 		Globals.add_recent_project(dir)
