@@ -13,7 +13,7 @@ func open_boot_menu():
 	_release_root_scene()
 	root_scene = BootMenuScene.instantiate()
 	add_child(root_scene)
-	get_window().size = Vector2(600,400)
+	get_window().size = Vector2(800,400)
 	get_window().move_to_center()
 
 func open_project_editor(project_path: String):

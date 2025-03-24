@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://dr5hpsc6fcmd0"]
+
+[ext_resource type="Texture2D" uid="uid://brm0dlmrdhjqa" path="res://assets/icons/StatusSuccess.svg" id="1_c23ca"]
+[ext_resource type="Script" path="res://scenes/ui/StatusIcon/StatusIcon.gd" id="1_i42i6"]
+[ext_resource type="Texture2D" uid="uid://pxpjmm2ntwvy" path="res://assets/icons/StatusWarning.svg" id="3_fvpsx"]
+[ext_resource type="Texture2D" uid="uid://ctpfvnk2xko2c" path="res://assets/icons/StatusError.svg" id="4_oij2e"]
+
+[node name="StatusIcon" type="Control"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 3
+anchor_right = 0.05
+anchor_bottom = 0.08
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_i42i6")
+SuccessTexture = ExtResource("1_c23ca")
+WarningTexture = ExtResource("3_fvpsx")
+ErrorTexture = ExtResource("4_oij2e")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_c23ca")

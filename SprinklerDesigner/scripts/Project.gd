@@ -76,6 +76,8 @@ func save_preferences():
 	Utils.to_json_file(layout_pref.serialize(), layout_pref_filepath)
 
 func save_as(dir: String) -> bool:
+	if DirAccess.make_dir_recursive_absolute(dir) != OK:
+		return false
 	var json_filepath = dir.path_join("project.json")
 	if Utils.to_json_file(serialize(), json_filepath):
 		Globals.add_recent_project(dir)

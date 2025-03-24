@@ -1,0 +1,119 @@
+[gd_scene load_steps=6 format=3 uid="uid://cojeq6ah4kvjj"]
+
+[ext_resource type="Theme" uid="uid://b7bms6qoy7yfq" path="res://assets/themes/MainTheme.tres" id="1_5kpy6"]
+[ext_resource type="Texture2D" uid="uid://bsdi85ji5cbjt" path="res://assets/icons/FolderCreate.svg" id="2_jijt3"]
+[ext_resource type="Script" path="res://scenes/ui/CreateProjectDialog/CreateProjectDialog.gd" id="2_stvum"]
+[ext_resource type="PackedScene" uid="uid://dr5hpsc6fcmd0" path="res://scenes/ui/StatusIcon/StatusIcon.tscn" id="3_8qet5"]
+[ext_resource type="Texture2D" uid="uid://bn2moa7a5e8ks" path="res://assets/icons/FolderBrowse.svg" id="4_3cmjo"]
+
+[node name="CreateProjectDialog" type="Window"]
+title = "Create Project"
+initial_position = 4
+size = Vector2i(600, 230)
+unresizable = true
+always_on_top = true
+theme = ExtResource("1_5kpy6")
+script = ExtResource("2_stvum")
+
+[node name="BrowseDialog" type="FileDialog" parent="."]
+title = "Open a Directory"
+initial_position = 4
+size = Vector2i(510, 180)
+ok_button_text = "Select Current Folder"
+file_mode = 2
+access = 2
+use_native_dialog = true
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Project Name:"
+
+[node name="ProjectNameLineEdit" type="LineEdit" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Project Path:"
+
+[node name="Control" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CreateFolderCheckButton" type="CheckButton" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Create Folder"
+icon = ExtResource("2_jijt3")
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ProjectPathLineEdit" type="LineEdit" parent="PanelContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatusIcon" parent="PanelContainer/VBoxContainer/HBoxContainer2" instance=ExtResource("3_8qet5")]
+layout_mode = 2
+
+[node name="BrowseButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+text = "Browse"
+icon = ExtResource("4_3cmjo")
+
+[node name="StatusTextLabel" type="Label" parent="PanelContainer/VBoxContainer"]
+modulate = Color(0.517647, 1, 0.52549, 1)
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_vertical = 3
+text = "The project folder fill be automatically created.
+HelloWorld"
+horizontal_alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Control" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+text = "Cancel"
+
+[node name="Control2" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CreateButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+text = "Create & Edit"
+
+[node name="Control3" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="dir_selected" from="BrowseDialog" to="." method="_on_browse_dialog_dir_selected"]
+[connection signal="text_changed" from="PanelContainer/VBoxContainer/ProjectNameLineEdit" to="." method="_on_project_name_line_edit_text_changed"]
+[connection signal="toggled" from="PanelContainer/VBoxContainer/HBoxContainer/CreateFolderCheckButton" to="." method="_on_create_folder_check_button_toggled"]
+[connection signal="text_changed" from="PanelContainer/VBoxContainer/HBoxContainer2/ProjectPathLineEdit" to="." method="_on_project_path_line_edit_text_changed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer2/BrowseButton" to="." method="_on_browse_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer3/CancelButton" to="." method="_on_cancel_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer3/CreateButton" to="." method="_on_create_button_pressed"]

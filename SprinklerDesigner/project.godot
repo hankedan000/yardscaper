@@ -26,8 +26,9 @@ Globals="*res://scripts/Globals.gd"
 
 [display]
 
-window/size/viewport_width=600
+window/size/viewport_width=800
 window/size/viewport_height=400
+window/subwindows/embed_subwindows=false
 
 [layer_names]
 

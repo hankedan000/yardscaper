@@ -82,3 +82,16 @@ func vect2_to_pair(vec: Vector2) -> Array:
 
 func pair_to_vect2(pair: Array) -> Vector2:
 	return Vector2(pair[0], pair[1])
+
+func is_dir_empty(path: String) -> bool:
+	var dir := DirAccess.open(path)
+	if not dir:
+		return false
+		
+	dir.include_hidden = false
+	dir.include_navigational = false
+	if dir.get_directories().size() > 0:
+		return false
+	elif dir.get_files().size() > 0:
+		return false
+	return true

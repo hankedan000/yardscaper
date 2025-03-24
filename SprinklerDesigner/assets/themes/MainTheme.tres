@@ -1,5 +1,30 @@
-[gd_resource type="Theme" format=3 uid="uid://b7bms6qoy7yfq"]
+[gd_resource type="Theme" load_steps=10 format=3 uid="uid://b7bms6qoy7yfq"]
+
+[ext_resource type="Texture2D" uid="uid://jat5iiamiedo" path="res://assets/icons/GuiToggleOn.svg" id="1_8gcai"]
+[ext_resource type="Texture2D" uid="uid://dn2g1utnsav2y" path="res://assets/icons/GuiToggleOnDisabled.svg" id="2_j7tqy"]
+[ext_resource type="Texture2D" uid="uid://bpdsp5wrama6i" path="res://assets/icons/GuiToggleOnDisabledMirrored.svg" id="3_0jbju"]
+[ext_resource type="Texture2D" uid="uid://dsuphoft7lwtk" path="res://assets/icons/GuiToggleOnMirrored.svg" id="4_ndnxg"]
+[ext_resource type="Texture2D" uid="uid://ki70bh5s7sg2" path="res://assets/icons/GuiToggleOff.svg" id="5_fmn2d"]
+[ext_resource type="Texture2D" uid="uid://b74om7m3u0rv5" path="res://assets/icons/GuiToggleOffDisabled.svg" id="6_r535c"]
+[ext_resource type="Texture2D" uid="uid://bvcrlknkla5mx" path="res://assets/icons/GuiToggleOffDisabledMirrored.svg" id="7_dix7b"]
+[ext_resource type="Texture2D" uid="uid://mi0o1iahu0ro" path="res://assets/icons/GuiToggleOffMirrored.svg" id="8_8frcv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l5g62"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.211765, 0.239216, 0.290196, 1)
 
 [resource]
 Button/colors/font_pressed_color = Color(0, 0.551, 0.87, 1)
 Button/colors/icon_pressed_color = Color(0, 0.552941, 0.870588, 1)
+CheckButton/icons/checked = ExtResource("1_8gcai")
+CheckButton/icons/checked_disabled = ExtResource("2_j7tqy")
+CheckButton/icons/checked_disabled_mirrored = ExtResource("3_0jbju")
+CheckButton/icons/checked_mirrored = ExtResource("4_ndnxg")
+CheckButton/icons/unchecked = ExtResource("5_fmn2d")
+CheckButton/icons/unchecked_disabled = ExtResource("6_r535c")
+CheckButton/icons/unchecked_disabled_mirrored = ExtResource("7_dix7b")
+CheckButton/icons/unchecked_mirrored = ExtResource("8_8frcv")
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_l5g62")

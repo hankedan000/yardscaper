@@ -1,124 +1,134 @@
-[gd_scene load_steps=2 format=3 uid="uid://cqfa5mme82onl"]
+[gd_scene load_steps=5 format=3 uid="uid://cqfa5mme82onl"]
 
 [ext_resource type="Script" path="res://scenes/ui/BootMenu/BootMenu.gd" id="1_a8g1b"]
+[ext_resource type="Theme" uid="uid://b7bms6qoy7yfq" path="res://assets/themes/MainTheme.tres" id="1_h2chn"]
+[ext_resource type="Texture2D" uid="uid://bumt4lc5f8gm2" path="res://assets/icons/Add.svg" id="2_kewc0"]
+[ext_resource type="PackedScene" uid="uid://cojeq6ah4kvjj" path="res://scenes/ui/CreateProjectDialog/CreateProjectDialog.tscn" id="3_nxvso"]
 
 [node name="BootMenu" type="PanelContainer"]
-anchors_preset = 15
-anchor_right = 1.0
+layout_direction = 2
+anchors_preset = -1
+anchor_right = 1.333
 anchor_bottom = 1.0
+offset_right = 0.199951
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_h2chn")
 script = ExtResource("1_a8g1b")
 
 [node name="OpenProjectDialog" type="FileDialog" parent="."]
 title = "Open a Directory"
+size = Vector2i(510, 180)
 ok_button_text = "Select Current Folder"
 dialog_hide_on_ok = true
 file_mode = 2
 access = 2
 use_native_dialog = true
 
-[node name="NewProjectDialog" type="FileDialog" parent="."]
-title = "Select empty directory to create new project ..."
-ok_button_text = "Select Current Folder"
-file_mode = 2
-access = 2
-use_native_dialog = true
+[node name="CreateProjectDialog" parent="." instance=ExtResource("3_nxvso")]
+visible = false
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 
-[node name="NewProjectButton" type="Button" parent="VBoxContainer"]
+[node name="TopHBox" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CreateProjectButton" type="Button" parent="MarginContainer/VBoxContainer/TopHBox"]
 layout_mode = 2
 size_flags_horizontal = 0
-text = "New Project"
+text = "Create"
+icon = ExtResource("2_kewc0")
 alignment = 0
 
-[node name="OpenProjectButton" type="Button" parent="VBoxContainer"]
+[node name="ImportProjectButton" type="Button" parent="MarginContainer/VBoxContainer/TopHBox"]
 layout_mode = 2
 size_flags_horizontal = 0
-text = "Open Project ..."
+text = "Import"
 alignment = 0
 
-[node name="Label" type="Label" parent="VBoxContainer"]
-layout_mode = 2
-text = "Previous Projects:"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="PreviousProjects" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
+[node name="PreviousProjects" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Button" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button2" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button2" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button3" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button3" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button4" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button4" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button5" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button5" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button6" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button6" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button7" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button7" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button8" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button8" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button9" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button9" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button10" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button10" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button11" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button11" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button12" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button12" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
-[node name="Button13" type="Button" parent="VBoxContainer/ScrollContainer/PreviousProjects"]
+[node name="Button13" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/PreviousProjects"]
 layout_mode = 2
 text = "/home/user/Documents/Project1"
 alignment = 0
 
 [connection signal="dir_selected" from="OpenProjectDialog" to="." method="_on_open_project_dialog_dir_selected"]
-[connection signal="dir_selected" from="NewProjectDialog" to="." method="_on_new_project_dialog_dir_selected"]
-[connection signal="pressed" from="VBoxContainer/NewProjectButton" to="." method="_on_new_project_button_pressed"]
-[connection signal="pressed" from="VBoxContainer/OpenProjectButton" to="." method="_on_open_project_button_pressed"]
+[connection signal="create_requested" from="CreateProjectDialog" to="." method="_on_create_project_dialog_create_requested"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/TopHBox/CreateProjectButton" to="." method="_on_create_project_button_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/TopHBox/ImportProjectButton" to="." method="_on_import_project_button_pressed"]
