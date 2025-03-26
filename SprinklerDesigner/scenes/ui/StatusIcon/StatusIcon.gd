@@ -7,6 +7,7 @@ enum StatusType {Success, Warning, Error}
 @export var status : StatusType = StatusType.Success :
 	set(value):
 		status = value
+		await ready
 		match status:
 			StatusType.Success:
 				tex_rect.texture = SuccessTexture

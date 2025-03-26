@@ -2,6 +2,8 @@ extends Node
 
 var main : Main = null
 
+const UNKOWN_VERSION : String = "0.0.0"
+const THIS_VERSION : String = "1.0.0"
 const HOVER_COLOR := Color.DARK_TURQUOISE
 const SELECT_COLOR := Color.DARK_ORANGE
 const MAX_RECENT_PROJECT = 10
@@ -36,11 +38,10 @@ func get_recent_projects():
 	return _recent_projects
 
 func add_recent_project(path: String):
-	if DirAccess.dir_exists_absolute(path):
-		# remove path if it exists so that it will promoted to the front
-		if path in _recent_projects:
-			_recent_projects.erase(path)
-		_recent_projects.push_front(path)
+	# remove path if it exists so that it will promoted to the front
+	if path in _recent_projects:
+		_recent_projects.erase(path)
+	_recent_projects.push_front(path)
 	while len(_recent_projects) > MAX_RECENT_PROJECT:
 		_recent_projects.pop_back()
 	Utils.to_json_file(_recent_projects, RECENT_PROJECTS_PATH)

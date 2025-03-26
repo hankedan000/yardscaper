@@ -19,6 +19,7 @@ const DistanceMeasurementScene : PackedScene = preload("res://scenes/world_objec
 const PolygonNodeScene : PackedScene = preload("res://scenes/world_objects/PolygonNode/PolygonNode.tscn")
 
 var project_path = ""
+var project_name : String = ""
 var objects = []
 var has_edits = false :
 	set(value):
@@ -30,10 +31,11 @@ var layout_pref := LayoutPreferences.new()
 
 var _suppress_self_edit_signals = false
 
-func reset():
+func reset() -> void:
 	_suppress_self_edit_signals = true
 	while not objects.is_empty():
 		remove_object(objects.front())
+	project_name = ""
 	_suppress_self_edit_signals = false
 	has_edits = false
 	emit_signal('closed')
@@ -41,22 +43,35 @@ func reset():
 func is_opened() -> bool:
 	return len(project_path) > 0
 
-func open(dir: String):
-	if len(dir) == 0:
-		return false
-	elif not DirAccess.dir_exists_absolute(dir):
-		push_error("project dir '%s' doesn't exist" % [dir])
+class QuickProjectInfo:
+	var name : String = "Unnamed Project"
+	var version : String = Globals.UNKOWN_VERSION
+	# last modified timestamp (in UNIX time)
+	var last_modified : int = 0
+
+# @param[in] dir - path to the project
+# @return parsed QuickProjectInfo, or null on error
+static func get_quick_info(dir: String) -> QuickProjectInfo:
+	var project_data = _get_project_data(dir)
+	if project_data.is_empty():
+		return null
+	
+	var info := QuickProjectInfo.new()
+	info.name = _get_project_name(project_data, dir)
+	info.version = Utils.dict_get(project_data, VERSION_KEY, Globals.UNKOWN_VERSION)
+	info.last_modified = FileAccess.get_modified_time(_get_project_data_filepath(dir))
+	return info
+
+func open(dir: String) -> bool:
+	var project_data = _get_project_data(dir)
+	if project_data.is_empty():
 		return false
 	
-	var json_filepath = dir.path_join("project.json")
-	var ser_data = Utils.from_json_file(json_filepath)
-	if ser_data:
-		Globals.add_recent_project(dir)
-		project_path = dir
-		deserialize(ser_data)
-		has_edits = false
-	else:
-		return false
+	# open the project data
+	Globals.add_recent_project(dir)
+	project_path = dir
+	deserialize(project_data, dir)
+	has_edits = false
 	
 	# load layout preferences
 	var layout_pref_filepath = dir.path_join('layout_pref.json')
@@ -67,10 +82,10 @@ func open(dir: String):
 	emit_signal('opened')
 	return true
 
-func save():
+func save() -> bool:
 	return save_as(project_path)
 
-func save_preferences():
+func save_preferences() -> void:
 	# save layout preferences
 	var layout_pref_filepath = project_path.path_join('layout_pref.json')
 	Utils.to_json_file(layout_pref.serialize(), layout_pref_filepath)
@@ -99,14 +114,14 @@ func save_as(dir: String) -> bool:
 	emit_signal('saved')
 	return true
 
-func get_subclass_count(subclass: String):
+func get_subclass_count(subclass: String) -> int:
 	var count = 0
 	for obj in objects:
 		if obj.get_subclass() == subclass:
 			count += 1
 	return count
 
-func add_object(obj: WorldObject):
+func add_object(obj: WorldObject) -> void:
 	if objects.has(obj):
 		push_warning("obj '%s' is already added to project. ignoring add." % obj.name)
 		return
@@ -119,7 +134,7 @@ func add_object(obj: WorldObject):
 	emit_signal('node_changed', obj, ChangeType.ADD, [])
 	has_edits = true
 
-func remove_object(obj: WorldObject):
+func remove_object(obj: WorldObject) -> void:
 	if not objects.has(obj):
 		push_warning("obj '%s' is not in the project. ignoring remove." % obj.name)
 		return
@@ -134,16 +149,16 @@ func remove_object(obj: WorldObject):
 	emit_signal('node_changed', obj, ChangeType.REMOVE, [])
 	has_edits = true
 
-func get_img_dir():
+func get_img_dir() -> String:
 	if len(project_path) == 0:
 		push_error("need to set project_path first before you can add images")
 	return project_path.path_join("imgs")
 
-func load_image(filename: String):
+func load_image(filename: String) -> Image:
 	var img_path = get_img_dir().path_join(filename)
 	return Image.load_from_file(img_path)
 
-func get_unique_name(subclass: String):
+func get_unique_name(subclass: String) -> String:
 	return '%s%d' % [subclass, get_subclass_count(subclass)]
 
 func add_image(path: String) -> bool:
@@ -172,6 +187,10 @@ func add_image(path: String) -> bool:
 	has_edits = true
 	return true
 
+const VERSION_KEY := &"version"
+const PROJECT_NAME_KEY := &"project_name"
+const OBJECTS_KEY := &"objects"
+
 func serialize():
 	# serialize all objects base on order they appear in world
 	var objects_ser = []
@@ -181,16 +200,21 @@ func serialize():
 			objects_ser.append(obj.serialize())
 	
 	return {
-		'objects' : objects_ser
+		VERSION_KEY : Globals.THIS_VERSION,
+		OBJECTS_KEY : objects_ser,
+		PROJECT_NAME_KEY : project_name
 	}
 
-func deserialize(obj):
+# @param[in] data - serialized project data
+# @param[in] dir - project directory path
+func deserialize(data: Dictionary, dir: String) -> void:
 	_suppress_self_edit_signals = true
 	reset()
-	for ser_obj in Utils.dict_get(obj, 'objects', []):
+	for ser_obj in Utils.dict_get(data, OBJECTS_KEY, []):
 		var wobj = instance_world_obj(ser_obj)
 		if wobj:
 			add_object(wobj)
+	project_name = _get_project_name(data, dir)
 	_suppress_self_edit_signals = false
 
 func instance_world_obj(ser_obj: Dictionary) -> WorldObject:
@@ -209,6 +233,27 @@ func instance_world_obj(ser_obj: Dictionary) -> WorldObject:
 	if wobj:
 		wobj.deserialize(ser_obj)
 	return wobj
+
+static func _get_project_data_filepath(project_dir: String) -> String:
+	return project_dir.path_join("project.json")
+
+# returns an empty dictionary on error
+static func _get_project_data(dir: String) -> Dictionary:
+	if not DirAccess.dir_exists_absolute(dir):
+		push_error("project dir '%s' doesn't exist" % [dir])
+		return {}
+	
+	return Utils.from_json_file(_get_project_data_filepath(dir))
+
+# @param[in] data - serialized project data
+static func _get_project_name(data: Dictionary, project_dir: String) -> String:
+	var name = Utils.dict_get(data, PROJECT_NAME_KEY, "") as String
+	if name.length() == 0:
+		# try returning project folder name as project name in
+		var parts = project_dir.split("/")
+		if parts.size() > 0:
+			name = parts[-1]
+	return name
 
 func _on_node_property_changed(property, from, to, node):
 	emit_signal(
