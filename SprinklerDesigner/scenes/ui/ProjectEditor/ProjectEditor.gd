@@ -99,11 +99,10 @@ func _set_menu_item_shortcut(menu: PopupMenu, id: int, shortcut: Shortcut):
 
 func _update_window_title():
 	const BASE_TITLE = "Sprinkler Designer"
-	var project_path = TheProject.project_path
 	var title = BASE_TITLE
-	if len(project_path) > 0:
+	if len(TheProject.project_name) > 0:
 		var has_edits_label = "* " if TheProject.has_edits else ""
-		title = "%s %s- %s" % [project_path.get_file(), has_edits_label, BASE_TITLE]
+		title = "%s %s- %s" % [TheProject.project_name, has_edits_label, BASE_TITLE]
 	DisplayServer.window_set_title(title)
 
 func _request_save_as():

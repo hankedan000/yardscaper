@@ -13,6 +13,10 @@ enum ChangeType {
 	PROP_EDIT
 }
 
+const VERSION_KEY := &"version"
+const PROJECT_NAME_KEY := &"project_name"
+const OBJECTS_KEY := &"objects"
+
 const SprinklerScene : PackedScene = preload("res://scenes/world_objects/Sprinkler/Sprinkler.tscn")
 const ImageNodeScene : PackedScene = preload("res://scenes/world_objects/ImageNode/ImageNode.tscn")
 const DistanceMeasurementScene : PackedScene = preload("res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn")
@@ -62,6 +66,18 @@ static func get_quick_info(dir: String) -> QuickProjectInfo:
 	info.last_modified = FileAccess.get_modified_time(_get_project_data_filepath(dir))
 	return info
 
+static func rename_project(dir: String, new_name: String) -> bool:
+	var project_data = _get_project_data(dir)
+	if project_data.is_empty():
+		return false
+	
+	# apply new name
+	project_data[PROJECT_NAME_KEY] = new_name
+	
+	# save modified project data
+	var json_filepath := _get_project_data_filepath(dir)
+	return Utils.to_json_file(project_data, json_filepath)
+
 func open(dir: String) -> bool:
 	var project_data = _get_project_data(dir)
 	if project_data.is_empty():
@@ -93,7 +109,7 @@ func save_preferences() -> void:
 func save_as(dir: String) -> bool:
 	if DirAccess.make_dir_recursive_absolute(dir) != OK:
 		return false
-	var json_filepath = dir.path_join("project.json")
+	var json_filepath = _get_project_data_filepath(dir)
 	if Utils.to_json_file(serialize(), json_filepath):
 		Globals.add_recent_project(dir)
 		project_path = dir
@@ -187,14 +203,10 @@ func add_image(path: String) -> bool:
 	has_edits = true
 	return true
 
-const VERSION_KEY := &"version"
-const PROJECT_NAME_KEY := &"project_name"
-const OBJECTS_KEY := &"objects"
-
 func serialize():
-	# serialize all objects base on order they appear in world
 	var objects_ser = []
 	if len(objects) > 0:
+		# serialize all objects based on order they appear in world
 		var world : WorldViewportContainer = objects[0].world
 		for obj in world.objects.get_children():
 			objects_ser.append(obj.serialize())
@@ -247,13 +259,13 @@ static func _get_project_data(dir: String) -> Dictionary:
 
 # @param[in] data - serialized project data
 static func _get_project_name(data: Dictionary, project_dir: String) -> String:
-	var name = Utils.dict_get(data, PROJECT_NAME_KEY, "") as String
-	if name.length() == 0:
+	var pname = Utils.dict_get(data, PROJECT_NAME_KEY, "") as String
+	if pname.length() == 0:
 		# try returning project folder name as project name in
 		var parts = project_dir.split("/")
 		if parts.size() > 0:
-			name = parts[-1]
-	return name
+			pname = parts[-1]
+	return pname
 
 func _on_node_property_changed(property, from, to, node):
 	emit_signal(

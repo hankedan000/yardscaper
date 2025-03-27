@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://h0ug1cx5m5aj" path="res://assets/icons/grass_128.png" id="1_2td0s"]
 [ext_resource type="Script" path="res://scenes/ui/BootMenu/PreviousProjectItem.gd" id="1_4jem3"]
 [ext_resource type="Texture2D" uid="uid://7k5qn270h1yw" path="res://assets/icons/Load.svg" id="3_vy70r"]
-[ext_resource type="LabelSettings" uid="uid://6m4gdl765t3" path="res://scenes/ui/BootMenu/GreyLabelSettings.tres" id="4_yn2v1"]
+[ext_resource type="LabelSettings" uid="uid://6m4gdl765t3" path="res://assets/themes/GreyLabelSettings.tres" id="4_yn2v1"]
 [ext_resource type="PackedScene" uid="uid://dr5hpsc6fcmd0" path="res://scenes/ui/StatusIcon/StatusIcon.tscn" id="5_dpve2"]
 
 [node name="HBoxContainer" type="HBoxContainer"]
@@ -42,7 +42,7 @@ text = "Project Name"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="SelectButton/HBoxContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 8
 
 [node name="TextureRect" type="TextureRect" parent="SelectButton/HBoxContainer/VBoxContainer/HBoxContainer"]
 modulate = Color(0.490196, 0.490196, 0.490196, 1)

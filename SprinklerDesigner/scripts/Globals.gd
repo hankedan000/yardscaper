@@ -10,7 +10,7 @@ const MAX_RECENT_PROJECT = 10
 const RECENT_PROJECTS_PATH = "user://recent_project.json"
 
 # most recent is at the front, oldest at the back
-var _recent_projects = []
+var _recent_projects : Array[String] = []
 
 enum ViewOptions {
 	Current,
@@ -34,14 +34,18 @@ func _ready():
 			while len(ser_projects) > 0:
 				add_recent_project(ser_projects.pop_back())
 
-func get_recent_projects():
+func get_recent_projects() -> Array[String]:
 	return _recent_projects
 
-func add_recent_project(path: String):
+func add_recent_project(path: String) -> void:
 	# remove path if it exists so that it will promoted to the front
 	if path in _recent_projects:
 		_recent_projects.erase(path)
 	_recent_projects.push_front(path)
 	while len(_recent_projects) > MAX_RECENT_PROJECT:
 		_recent_projects.pop_back()
+	Utils.to_json_file(_recent_projects, RECENT_PROJECTS_PATH)
+
+func remove_recent_project(path: String) -> void:
+	_recent_projects.erase(path)
 	Utils.to_json_file(_recent_projects, RECENT_PROJECTS_PATH)

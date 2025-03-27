@@ -1,15 +1,28 @@
-[gd_scene load_steps=10 format=3 uid="uid://cqfa5mme82onl"]
+[gd_scene load_steps=13 format=3 uid="uid://cqfa5mme82onl"]
 
 [ext_resource type="Script" path="res://scenes/ui/BootMenu/BootMenu.gd" id="1_a8g1b"]
 [ext_resource type="Theme" uid="uid://b7bms6qoy7yfq" path="res://assets/themes/MainTheme.tres" id="1_h2chn"]
 [ext_resource type="Texture2D" uid="uid://bumt4lc5f8gm2" path="res://assets/icons/Add.svg" id="2_kewc0"]
 [ext_resource type="PackedScene" uid="uid://cojeq6ah4kvjj" path="res://scenes/ui/CreateProjectDialog/CreateProjectDialog.tscn" id="3_nxvso"]
 [ext_resource type="PackedScene" uid="uid://84ngs66iblgm" path="res://scenes/ui/BootMenu/PreviousProjectItem.tscn" id="5_jgdj7"]
+[ext_resource type="PackedScene" uid="uid://bk6kkbtfb7bm1" path="res://scenes/ui/BootMenu/RenameProjectDialog.tscn" id="5_jj620"]
 [ext_resource type="Texture2D" uid="uid://7k5qn270h1yw" path="res://assets/icons/Load.svg" id="6_c1bf8"]
 [ext_resource type="Texture2D" uid="uid://dgejlhlde13ed" path="res://assets/icons/Rename.svg" id="7_7snhg"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="8_bs2io"]
+[ext_resource type="LabelSettings" uid="uid://6m4gdl765t3" path="res://assets/themes/GreyLabelSettings.tres" id="10_1eadb"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1je4n"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8iuw1"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.180392, 0.180392, 0.180392, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_do6xm"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
 bg_color = Color(0.180392, 0.180392, 0.180392, 1)
 
 [node name="BootMenu" type="PanelContainer"]
@@ -21,14 +34,17 @@ offset_right = 200.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_h2chn")
+theme_override_styles/panel = SubResource("StyleBoxFlat_8iuw1")
 script = ExtResource("1_a8g1b")
 PreviousItemScene = ExtResource("5_jgdj7")
 
 [node name="OpenProjectDialog" type="FileDialog" parent="."]
 title = "Open a Directory"
+initial_position = 4
 size = Vector2i(510, 180)
 ok_button_text = "Select Current Folder"
 dialog_hide_on_ok = true
+mode_overrides_title = false
 file_mode = 2
 access = 2
 use_native_dialog = true
@@ -36,83 +52,92 @@ use_native_dialog = true
 [node name="CreateProjectDialog" parent="." instance=ExtResource("3_nxvso")]
 visible = false
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 2
-theme_override_constants/margin_left = 5
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 5
-theme_override_constants/margin_bottom = 5
+[node name="RenameProjectDialog" parent="." instance=ExtResource("5_jj620")]
+visible = false
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
 
-[node name="TopHBox" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="MainPanel" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/MainPanel"]
 layout_mode = 2
 
-[node name="CreateProjectButton" type="Button" parent="MarginContainer/VBoxContainer/TopHBox"]
+[node name="TopButtonBar" type="HBoxContainer" parent="VBoxContainer/MainPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="CreateProjectButton" type="Button" parent="VBoxContainer/MainPanel/VBoxContainer/TopButtonBar"]
 layout_mode = 2
 size_flags_horizontal = 0
 text = "Create"
 icon = ExtResource("2_kewc0")
 alignment = 0
 
-[node name="ImportProjectButton" type="Button" parent="MarginContainer/VBoxContainer/TopHBox"]
+[node name="ImportProjectButton" type="Button" parent="VBoxContainer/MainPanel/VBoxContainer/TopButtonBar"]
 layout_mode = 2
 size_flags_horizontal = 0
 text = "Import"
 alignment = 0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MainPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_1je4n")
-
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_do6xm")
 
-[node name="PreviousProjects" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/ScrollContainer"]
+[node name="PreviousProjects" type="VBoxContainer" parent="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PreviousProjectItem" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/ScrollContainer/PreviousProjects" instance=ExtResource("5_jgdj7")]
+[node name="PreviousProjectItem" parent="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/ScrollContainer/PreviousProjects" instance=ExtResource("5_jgdj7")]
 layout_mode = 2
 
-[node name="PreviousProjectItem2" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/ScrollContainer/PreviousProjects" instance=ExtResource("5_jgdj7")]
+[node name="PreviousProjectItem2" parent="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/ScrollContainer/PreviousProjects" instance=ExtResource("5_jgdj7")]
 layout_mode = 2
 
-[node name="PreviousProjectItem3" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/ScrollContainer/PreviousProjects" instance=ExtResource("5_jgdj7")]
+[node name="PreviousProjectItem3" parent="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/ScrollContainer/PreviousProjects" instance=ExtResource("5_jgdj7")]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 
-[node name="OpenButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
+[node name="OpenButton" type="Button" parent="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 text = "Open"
 icon = ExtResource("6_c1bf8")
 
-[node name="RenameButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
+[node name="RenameButton" type="Button" parent="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 text = "Rename"
 icon = ExtResource("7_7snhg")
 
-[node name="RemoveButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
+[node name="RemoveButton" type="Button" parent="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 text = "Remove"
 icon = ExtResource("8_bs2io")
 
+[node name="BottomBar" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="VersionLabel" type="Label" parent="VBoxContainer/BottomBar"]
+layout_mode = 2
+text = "v0.0.0"
+label_settings = ExtResource("10_1eadb")
+
 [connection signal="dir_selected" from="OpenProjectDialog" to="." method="_on_open_project_dialog_dir_selected"]
 [connection signal="create_requested" from="CreateProjectDialog" to="." method="_on_create_project_dialog_create_requested"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/TopHBox/CreateProjectButton" to="." method="_on_create_project_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/TopHBox/ImportProjectButton" to="." method="_on_import_project_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/OpenButton" to="." method="_on_open_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/RenameButton" to="." method="_on_rename_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/RemoveButton" to="." method="_on_remove_button_pressed"]
+[connection signal="project_renamed" from="RenameProjectDialog" to="." method="_on_rename_project_dialog_project_renamed"]
+[connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/TopButtonBar/CreateProjectButton" to="." method="_on_create_project_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/TopButtonBar/ImportProjectButton" to="." method="_on_import_project_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/OpenButton" to="." method="_on_open_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/RenameButton" to="." method="_on_rename_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/RemoveButton" to="." method="_on_remove_button_pressed"]
