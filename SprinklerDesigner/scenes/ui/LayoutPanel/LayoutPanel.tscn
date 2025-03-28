@@ -148,4 +148,5 @@ autostart = true
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/RemoveButton" to="." method="_on_remove_button_pressed"]
 [connection signal="toggled" from="HSplitContainer/Layout/LayoutToolbar/ShowGridButton" to="." method="_on_show_grid_checkbox_toggled"]
 [connection signal="gui_input" from="HSplitContainer/Layout/World/ViewportContainer" to="." method="_on_viewport_container_gui_input"]
+[connection signal="world_object_reordered" from="HSplitContainer/Layout/World/ViewportContainer" to="." method="_on_world_object_reordered"]
 [connection signal="timeout" from="PreferenceUpdateTimer" to="." method="_on_preference_update_timer_timeout"]

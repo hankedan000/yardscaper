@@ -65,7 +65,7 @@ var _within_a_do : bool = false
 func reset() -> void:
 	_undo_stack.clear()
 	_redo_stack.clear()
-	emit_signal('history_changed')
+	history_changed.emit()
 
 func has_undo() -> bool:
 	return _undo_stack.size() > 0
@@ -80,7 +80,7 @@ func push_undo_op(op: UndoRedoOperation) -> OperationBatch:
 	new_batch.push_op(op)
 	_push_batch(_undo_stack, new_batch)
 	_redo_stack.clear()
-	emit_signal('history_changed')
+	history_changed.emit()
 	return new_batch
 
 func undo() -> void:
@@ -91,7 +91,7 @@ func undo() -> void:
 			op.undo()
 		_push_batch(_redo_stack, batch)
 		_within_a_do = false
-		emit_signal('history_changed')
+		history_changed.emit()
 
 func redo() -> void:
 	if has_redo():
@@ -101,7 +101,7 @@ func redo() -> void:
 			op.redo()
 		_push_batch(_undo_stack, batch)
 		_within_a_do = false
-		emit_signal('history_changed')
+		history_changed.emit()
 
 static func _push_batch(stack: Array[OperationBatch], entry: OperationBatch) -> void:
 	stack.push_back(entry)

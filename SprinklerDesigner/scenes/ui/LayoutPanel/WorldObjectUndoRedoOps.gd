@@ -32,7 +32,7 @@ class Remove:
 			'_ser_obj': _ser_obj
 		})
 
-class Moved:
+class Reordered:
 	extends UndoRedoController.UndoRedoOperation
 	
 	var _world : WorldViewportContainer = null
@@ -45,10 +45,10 @@ class Moved:
 		_to_idx = to_idx
 	
 	func undo() -> bool:
-		return _world.move_world_object(_to_idx, _from_idx)
+		return _world.reorder_world_object(_to_idx, _from_idx)
 		
 	func redo() -> bool:
-		return _world.move_world_object(_from_idx, _to_idx)
+		return _world.reorder_world_object(_from_idx, _to_idx)
 		
 	func pretty_str() -> String:
 		return str({

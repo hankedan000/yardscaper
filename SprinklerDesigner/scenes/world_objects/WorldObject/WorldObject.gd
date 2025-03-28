@@ -41,7 +41,7 @@ func set_order_in_world(to_idx: int):
 	if from_idx < 0:
 		push_error("unable to get object's from_idx")
 		return
-	world.move_world_object(from_idx, to_idx)
+	world.reorder_world_object(from_idx, to_idx)
 
 func get_info_label_visible() -> bool:
 	return info_label.visible

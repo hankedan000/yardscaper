@@ -58,7 +58,7 @@ func _shift_object(dir):
 		return # nothing to shift
 	
 	var to_idx = from_idx + dir
-	if world and world.move_world_object(from_idx, to_idx):
+	if world and world.reorder_world_object(from_idx, to_idx):
 		grid.get_child(to_idx).grab_focus()
 
 func _on_world_child_entered_tree(_node: Node):

@@ -60,7 +60,6 @@ func _ready():
 	img_prop_list.visible = false
 	poly_prop_list.visible = false
 	objects_list.world = world_container
-	world_container.world_object_moved.connect(_on_world_object_moved)
 	
 	# add shortcuts
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
@@ -342,8 +341,8 @@ func _on_show_grid_checkbox_toggled(toggled_on):
 	world_container.show_grid = toggled_on
 	TheProject.layout_pref.show_grid = toggled_on
 
-func _on_world_object_moved(from_idx: int, to_idx: int):
-	var undo_op := WorldObjectUndoRedoOps.Moved.new(
+func _on_world_object_reordered(from_idx: int, to_idx: int):
+	var undo_op := WorldObjectUndoRedoOps.Reordered.new(
 		world_container,
 		from_idx,
 		to_idx)

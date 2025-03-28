@@ -1,7 +1,7 @@
 extends SubViewportContainer
 class_name WorldViewportContainer
 
-signal world_object_moved(from_idx: int, to_idx: int)
+signal world_object_reordered(from_idx: int, to_idx: int)
 
 const MAJOR_LINE_WIDTH := 1
 const ORIGIN_VERT_COLOR := Color.LIME_GREEN
@@ -33,7 +33,7 @@ var _prev_global_pos := Vector2()
 
 # move a world object from one position to another
 # @return true if move was applied, false otherwise
-func move_world_object(from_idx: int, to_idx: int) -> bool:
+func reorder_world_object(from_idx: int, to_idx: int) -> bool:
 	var object_count = objects.get_child_count()
 	if from_idx < 0 or from_idx >= object_count:
 		push_error("from_idx (%d) out of range. object_count = %d" % [from_idx, object_count])
@@ -46,7 +46,7 @@ func move_world_object(from_idx: int, to_idx: int) -> bool:
 		return false
 	var obj = objects.get_child(from_idx)
 	objects.move_child(obj, to_idx)
-	emit_signal('world_object_moved', from_idx, to_idx)
+	world_object_reordered.emit(from_idx, to_idx)
 	return true
 
 # move a world object to another draw order index
