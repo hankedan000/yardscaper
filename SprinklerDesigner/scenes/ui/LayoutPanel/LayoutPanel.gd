@@ -44,7 +44,7 @@ var undo_redo_ctrl := UndoRedoController.new()
 # vars for editing PolygonNode points
 var poly_edit_point_idx = 0
 
-var selected_obj = null :
+var selected_obj : WorldObject = null :
 	set(obj):
 		if obj == selected_obj:
 			return # ignore duplicate sets
@@ -72,6 +72,8 @@ var _held_objs = []
 var _mouse_move_start_pos_px = null
 # object that would be selected next if LEFT mouse button were pressed
 var _hovered_obj = null
+# serialized versions of all copied world objects
+var _copied_world_objs : Array[Dictionary] = []
 
 # ignore property changes while inside of an undo/redo operation.
 # we don't want to cyclically re-add an undo operation that will
@@ -93,9 +95,13 @@ func _ready():
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
 
 func _input(event):
-	if event is InputEventKey:
+	if event is InputEventKey and event.is_released():
 		if event.keycode == KEY_ESCAPE:
 			_cancel_mode() # will only cancel if possible
+		elif event.keycode == KEY_C and event.ctrl_pressed:
+			_handle_world_object_copy([selected_obj])
+		elif event.keycode == KEY_V and event.ctrl_pressed:
+			_handle_world_object_paste(_copied_world_objs)
 
 func _nearest_pickable_obj(pos_in_world: Vector2):
 	var smallest_dist_px = null
@@ -164,6 +170,18 @@ func _handle_held_obj_move(mouse_pos_in_world_px):
 			if not held_obj.moving():
 				held_obj.start_move()
 			held_obj.update_move(delta_px)
+
+func _handle_world_object_copy(objs: Array[WorldObject]) -> void:
+	_copied_world_objs.clear()
+	for obj in objs:
+		if obj:
+			_copied_world_objs.push_back(obj.serialize())
+
+func _handle_world_object_paste(copied_data: Array[Dictionary]) -> void:
+	for obj_data in copied_data:
+		var obj := TheProject.instance_world_obj(obj_data)
+		if obj:
+			TheProject.add_object(obj)
 
 func _cancel_mode():
 	if mode == Mode.AddSprinkler:
@@ -302,7 +320,7 @@ func _on_remove_button_pressed():
 	if selected_obj is WorldObject:
 		undo_redo_ctrl.push_undo_op(WorldObjectRemoveUndoRedoOperation.new(
 			world_container,
-			selected_obj.get_order_in_world(),
+			await selected_obj.get_order_in_world(),
 			selected_obj))
 		TheProject.remove_object(selected_obj)
 		selected_obj = null
