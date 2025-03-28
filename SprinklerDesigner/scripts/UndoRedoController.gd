@@ -2,12 +2,6 @@ extends Object
 class_name UndoRedoController
 
 signal history_changed()
-# called right before an undo/redo operation is performed
-# @param is_undo - true if an undo, false if a redo
-signal before_a_do(is_undo)
-# called right after an undo/redo operation is performed
-# @param is_undo - true if an undo, false if a redo
-signal after_a_do(is_undo)
 
 class UndoRedoOperation:
 	extends Object
@@ -55,45 +49,61 @@ class PropEditUndoRedoOperation:
 			"new_value" : str(_new_value),
 			})
 
+class OperationBatch:
+	var _ops : Array[UndoRedoOperation] = []
+	
+	func push_op(op: UndoRedoOperation) -> void:
+		_ops.push_back(op)
+
 const MAX_UNDO_REDO_HISTORY = 100
-var _undo_stack = []
-var _redo_stack = []
+var _undo_stack : Array[OperationBatch] = []
+var _redo_stack : Array[OperationBatch] = []
+# flag used to block recursive operation re-adds while
+# actively undo/redo and operation
+var _within_a_do : bool = false
 
-func reset():
-	_undo_stack = []
-	_redo_stack = []
-	emit_signal('history_changed')
-
-func has_undo() -> bool:
-	return len(_undo_stack) > 0
-
-func has_redo() -> bool:
-	return len(_redo_stack) > 0
-
-func push_undo_op(op: UndoRedoOperation):
-	_push_op(_undo_stack, op)
+func reset() -> void:
+	_undo_stack.clear()
 	_redo_stack.clear()
 	emit_signal('history_changed')
 
-func undo():
+func has_undo() -> bool:
+	return _undo_stack.size() > 0
+
+func has_redo() -> bool:
+	return _redo_stack.size() > 0
+
+func push_undo_op(op: UndoRedoOperation) -> OperationBatch:
+	if _within_a_do:
+		return null # block recursive add while redoing
+	var new_batch := OperationBatch.new()
+	new_batch.push_op(op)
+	_push_batch(_undo_stack, new_batch)
+	_redo_stack.clear()
+	emit_signal('history_changed')
+	return new_batch
+
+func undo() -> void:
 	if has_undo():
-		var op = _undo_stack.pop_back()
-		emit_signal('before_a_do', true) # is_undo = true
-		op.undo()
-		_push_op(_redo_stack, op)
-		emit_signal('after_a_do', true) # is_undo = true
+		_within_a_do = true
+		var batch := _undo_stack.pop_back() as OperationBatch
+		for op in batch._ops:
+			op.undo()
+		_push_batch(_redo_stack, batch)
+		_within_a_do = false
 		emit_signal('history_changed')
 
-func redo():
+func redo() -> void:
 	if has_redo():
-		var op = _redo_stack.pop_back()
-		emit_signal('before_a_do', false) # is_undo = false
-		op.redo()
-		_push_op(_undo_stack, op)
-		emit_signal('after_a_do', false) # is_undo = false
+		_within_a_do = true
+		var batch := _redo_stack.pop_back() as OperationBatch
+		for op in batch._ops:
+			op.redo()
+		_push_batch(_undo_stack, batch)
+		_within_a_do = false
 		emit_signal('history_changed')
 
-func _push_op(stack: Array, entry):
+static func _push_batch(stack: Array[OperationBatch], entry: OperationBatch) -> void:
 	stack.push_back(entry)
 	if len(stack) > MAX_UNDO_REDO_HISTORY:
 		stack.pop_front()

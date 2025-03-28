@@ -22,6 +22,7 @@ extends PanelContainer
 
 enum Mode {
 	Idle,
+	MovingObjects,
 	AddSprinkler,
 	AddDistMeasureA,
 	AddDistMeasureB,
@@ -44,41 +45,13 @@ var undo_redo_ctrl := UndoRedoController.new()
 # vars for editing PolygonNode points
 var poly_edit_point_idx = 0
 
-var selected_obj : WorldObject = null :
-	set(obj):
-		if obj == selected_obj:
-			return # ignore duplicate sets
-		
-		if selected_obj != null:
-			_on_release_selected_obj(selected_obj)
-			selected_obj = null
-		
-		if obj is Sprinkler:
-			_on_sprinkler_selected(obj)
-		elif obj is ImageNode:
-			_on_img_node_selected(obj)
-		elif obj is DistanceMeasurement:
-			_on_dist_measurement_selected(obj)
-		elif obj is PolygonNode:
-			_on_polygon_selected(obj)
-		elif obj != null:
-			push_warning("unsupported select for obj '%s'" % obj)
-		
-		selected_obj = obj
-		remove_button.disabled = selected_obj == null
-
-# MoveableNode2D that's held during a drag/move operation
-var _held_objs = []
+var _selected_objs : Array[PickableNode2D] = []
 var _mouse_move_start_pos_px = null
+var _move_undo_batch : UndoRedoController.OperationBatch = null
 # object that would be selected next if LEFT mouse button were pressed
 var _hovered_obj = null
 # serialized versions of all copied world objects
 var _copied_world_objs : Array[Dictionary] = []
-
-# ignore property changes while inside of an undo/redo operation.
-# we don't want to cyclically re-add an undo operation that will
-# redo what we just undid... so many words!
-var _ignore_while_in_undo_redo = false
 
 func _ready():
 	TheProject.node_changed.connect(_on_TheProject_node_changed)
@@ -88,8 +61,6 @@ func _ready():
 	poly_prop_list.visible = false
 	objects_list.world = world_container
 	world_container.world_object_moved.connect(_on_world_object_moved)
-	undo_redo_ctrl.before_a_do.connect(_on_undo_redo_ctrl_before_a_do)
-	undo_redo_ctrl.after_a_do.connect(_on_undo_redo_ctrl_after_a_do)
 	
 	# add shortcuts
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
@@ -99,7 +70,7 @@ func _input(event):
 		if event.keycode == KEY_ESCAPE:
 			_cancel_mode() # will only cancel if possible
 		elif event.keycode == KEY_C and event.ctrl_pressed:
-			_handle_world_object_copy([selected_obj])
+			_handle_world_object_copy(_selected_objs)
 		elif event.keycode == KEY_V and event.ctrl_pressed:
 			_handle_world_object_paste(_copied_world_objs)
 
@@ -125,13 +96,14 @@ func _handle_left_click(click_pos: Vector2):
 	# ignore clicks that are outside the world viewpoint
 	if not _is_point_over_world(click_pos):
 		return
-		
+	
 	var pos_in_world_px = _global_xy_to_pos_in_world(click_pos)
 	match mode:
 		Mode.Idle:
-			selected_obj = _hovered_obj
-			if selected_obj:
-				_add_held_object(selected_obj)
+			if _hovered_obj:
+				if not Input.is_key_pressed(KEY_CTRL) and _hovered_obj not in _selected_objs:
+					_clear_selected_objects()
+				_add_selected_object(_hovered_obj)
 		Mode.AddSprinkler:
 			TheProject.add_object(sprinkler_to_add)
 			sprinkler_to_add = null
@@ -149,29 +121,37 @@ func _handle_left_click(click_pos: Vector2):
 			poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
 			poly_to_add.add_point(pos_in_world_px)
 			poly_edit_point_idx = poly_to_add.point_count() - 1
+		_:
+			push_warning("unsupported left click for mode '%s'" % Mode.keys()[mode])
 
 func _handle_left_click_release():
-	if len(_held_objs) > 0:
-		for held_obj in _held_objs:
-			if held_obj is MoveableNode2D and held_obj.moving():
-				held_obj.finish_move()
-		_held_objs = []
-		_mouse_move_start_pos_px = null
-		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+	match mode:
+		Mode.Idle:
+			if not Input.is_key_pressed(KEY_CTRL):
+				_clear_selected_objects()
+			if _hovered_obj:
+				_add_selected_object(_hovered_obj)
+		Mode.MovingObjects:
+			for obj in _selected_objs:
+				if obj is MoveableNode2D:
+					obj.finish_move()
+			_move_undo_batch = null
+			_mouse_move_start_pos_px = null
+			Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+			mode = Mode.Idle
 
-func _handle_held_obj_move(mouse_pos_in_world_px):
+func _handle_held_obj_move(mouse_pos_in_world_px: Vector2) -> void:
 	if _mouse_move_start_pos_px == null:
 		_mouse_move_start_pos_px = mouse_pos_in_world_px
 		Input.set_default_cursor_shape(Input.CURSOR_MOVE)
-	var delta_px = mouse_pos_in_world_px - _mouse_move_start_pos_px
 	
-	for held_obj in _held_objs:
-		if held_obj is MoveableNode2D:
-			if not held_obj.moving():
-				held_obj.start_move()
-			held_obj.update_move(delta_px)
+	# apply delta movement vector to all selected movable objects
+	var delta_px = mouse_pos_in_world_px - _mouse_move_start_pos_px
+	for obj in _selected_objs:
+		if obj is MoveableNode2D:
+			obj.update_move(delta_px)
 
-func _handle_world_object_copy(objs: Array[WorldObject]) -> void:
+func _handle_world_object_copy(objs: Array[PickableNode2D]) -> void:
 	_copied_world_objs.clear()
 	for obj in objs:
 		if obj:
@@ -212,46 +192,74 @@ func _cancel_add_polygon():
 		poly_to_add = null
 		mode = Mode.Idle
 
-func _add_held_object(obj):
-	if obj not in _held_objs:
-		_held_objs.append(obj)
+func _clear_selected_objects() -> void:
+	for obj in _selected_objs:
+		_on_release_selected_obj(obj)
+	_selected_objs.clear()
+	remove_button.disabled = true
 
-func _on_release_selected_obj(obj):
+func _add_selected_object(obj: PickableNode2D) -> void:
+	if obj not in _selected_objs:
+		_selected_objs.append(obj)
+	
+	sprink_prop_list.hide()
+	img_prop_list.hide()
+	poly_prop_list.hide()
+	var is_single := _selected_objs.size() == 1
+	if obj is Sprinkler:
+		_on_sprinkler_selected(obj, is_single)
+	elif obj is ImageNode:
+		_on_img_node_selected(obj, is_single)
+	elif obj is DistanceMeasurement:
+		_on_dist_measurement_selected(obj, is_single)
+	elif obj is PolygonNode:
+		_on_polygon_selected(obj, is_single)
+	elif obj != null:
+		push_warning("unsupported selection for obj '%s'" % obj)
+	
+	remove_button.disabled = false
+
+func _remove_selected_object(obj: PickableNode2D) -> void:
+	_on_release_selected_obj(obj)
+	_selected_objs.erase(obj)
+	remove_button.disabled = _selected_objs.is_empty()
+
+func _on_release_selected_obj(obj: PickableNode2D):
 	if obj is Sprinkler:
 		obj.picked = false
 		obj.show_min_dist = false
 		obj.show_max_dist = false
-		sprink_prop_list.visible = false
 	elif obj is ImageNode:
 		obj.picked = false
-		img_prop_list.visible = false
 	elif obj is DistanceMeasurement:
 		obj.picked = false
 	elif obj is PolygonNode:
 		obj.picked = false
-		poly_prop_list.visible = false
 	elif obj != null:
 		push_warning("unsupported release for obj '%s'" % obj)
 
-func _on_sprinkler_selected(sprink: Sprinkler):
-	sprink_prop_list.sprinkler = sprink
+func _on_sprinkler_selected(sprink: Sprinkler, is_single: bool):
 	sprink.picked = true
 	sprink.show_min_dist = true
 	sprink.show_max_dist = true
-	sprink_prop_list.visible = true
+	if is_single:
+		sprink_prop_list.sprinkler = sprink
+		sprink_prop_list.show()
 
-func _on_img_node_selected(img_node: ImageNode):
-	img_prop_list.img_node = img_node
+func _on_img_node_selected(img_node: ImageNode, is_single: bool):
 	img_node.picked = true
-	img_prop_list.visible = true
+	if is_single:
+		img_prop_list.img_node = img_node
+		img_prop_list.show()
 
-func _on_dist_measurement_selected(meas: DistanceMeasurement):
+func _on_dist_measurement_selected(meas: DistanceMeasurement, _is_single: bool):
 	meas.picked = true
 
-func _on_polygon_selected(poly: PolygonNode):
-	poly_prop_list.poly_node = poly
+func _on_polygon_selected(poly: PolygonNode, is_single: bool):
 	poly.picked = true
-	poly_prop_list.visible = true
+	if is_single:
+		poly_prop_list.poly_node = poly
+		poly_prop_list.show()
 
 func _is_point_over_world(global_pos: Vector2) -> bool:
 	return world_container.get_global_rect().has_point(global_pos)
@@ -285,47 +293,16 @@ func _on_add_polygon_pressed():
 	world_container.objects.add_child(poly_to_add)
 	mode = Mode.AddPolygon
 
-class WorldObjectRemoveUndoRedoOperation:
-	extends UndoRedoController.UndoRedoOperation
-	
-	var _world : WorldViewportContainer = null
-	var _from_idx = 0
-	var _ser_obj = null
-	
-	func _init(world: WorldViewportContainer, from_idx: int, obj: WorldObject):
-		_world = world
-		_from_idx = from_idx
-		_ser_obj = obj.serialize()
-	
-	func undo() -> bool:
-		var wobj = TheProject.instance_world_obj(_ser_obj)
-		if wobj is WorldObject:
-			TheProject.add_object(wobj)
-			wobj.set_order_in_world(_from_idx)
-			return true
-		return false
-		
-	func redo() -> bool:
-		var wobj = _world.objects.get_child(_from_idx)
-		TheProject.remove_object(wobj)
-		return true
-		
-	func pretty_str() -> String:
-		return str({
-			'_from_idx' : _from_idx,
-			'_ser_obj': _ser_obj
-		})
-
 func _on_remove_button_pressed():
-	if selected_obj is WorldObject:
-		undo_redo_ctrl.push_undo_op(WorldObjectRemoveUndoRedoOperation.new(
+	for obj in _selected_objs:
+		undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.Remove.new(
 			world_container,
-			await selected_obj.get_order_in_world(),
-			selected_obj))
-		TheProject.remove_object(selected_obj)
-		selected_obj = null
+			await obj.get_order_in_world(),
+			obj))
+		TheProject.remove_object(obj)
+	_clear_selected_objects()
 
-func _on_TheProject_node_changed(obj, change_type, args):
+func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 	var obj_in_world = obj in world_container.objects.get_children()
 	match change_type:
 		TheProject.ChangeType.ADD:
@@ -335,14 +312,22 @@ func _on_TheProject_node_changed(obj, change_type, args):
 			if obj_in_world:
 				world_container.objects.remove_child(obj)
 		TheProject.ChangeType.PROP_EDIT:
-			if not _ignore_while_in_undo_redo:
-				var prop = args[0]
-				var old_value = args[1]
-				var new_value = args[2]
-				undo_redo_ctrl.push_undo_op(
-					UndoRedoController.PropEditUndoRedoOperation.new(
-						obj, prop, old_value, new_value)
-				)
+			var prop_name : String = args[0]
+			var old_value = args[1]
+			var new_value = args[2]
+			var undo_op := UndoRedoController.PropEditUndoRedoOperation.new(
+					obj,
+					prop_name,
+					old_value,
+					new_value)
+			if prop_name == &"position" and mode == Mode.MovingObjects:
+				# batch undo operations for a multi-object move
+				if _move_undo_batch != null:
+					_move_undo_batch.push_op(undo_op)
+				else:
+					_move_undo_batch = undo_redo_ctrl.push_undo_op(undo_op)
+			else:
+				undo_redo_ctrl.push_undo_op(undo_op)
 
 func _on_TheProject_opened():
 	undo_redo_ctrl.reset()
@@ -357,42 +342,13 @@ func _on_show_grid_checkbox_toggled(toggled_on):
 	world_container.show_grid = toggled_on
 	TheProject.layout_pref.show_grid = toggled_on
 
-class WorldObjectMovedUndoRedoOperation:
-	extends UndoRedoController.UndoRedoOperation
-	
-	var _world : WorldViewportContainer = null
-	var _from_idx = 0
-	var _to_idx = 0
-	
-	func _init(world: WorldViewportContainer, from_idx: int, to_idx: int):
-		_world = world
-		_from_idx = from_idx
-		_to_idx = to_idx
-	
-	func undo() -> bool:
-		return _world.move_world_object(_to_idx, _from_idx)
-		
-	func redo() -> bool:
-		return _world.move_world_object(_from_idx, _to_idx)
-		
-	func pretty_str() -> String:
-		return str({
-			'from_idx' : _from_idx,
-			'_to_idx': _to_idx
-		})
-
 func _on_world_object_moved(from_idx: int, to_idx: int):
-	if _ignore_while_in_undo_redo:
-		return
-	undo_redo_ctrl.push_undo_op(WorldObjectMovedUndoRedoOperation.new(
-		world_container, from_idx, to_idx))
+	var undo_op := WorldObjectUndoRedoOps.Moved.new(
+		world_container,
+		from_idx,
+		to_idx)
+	undo_redo_ctrl.push_undo_op(undo_op)
 	TheProject.has_edits = true
-
-func _on_undo_redo_ctrl_before_a_do(_is_undo):
-	_ignore_while_in_undo_redo = true
-
-func _on_undo_redo_ctrl_after_a_do(_is_undo):
-	_ignore_while_in_undo_redo = false
 
 func _on_preference_update_timer_timeout():
 	TheProject.layout_pref.camera_pos = world_container.camera2d.position
@@ -436,5 +392,11 @@ func _on_viewport_container_gui_input(event):
 			elif poly_to_add:
 				if poly_edit_point_idx < poly_to_add.point_count():
 					poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
-			elif len(_held_objs) > 0:
+			elif mode != Mode.MovingObjects and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				for obj in _selected_objs:
+					if obj is MoveableNode2D:
+						obj.start_move()
+						mode = Mode.MovingObjects
+			
+			if mode == Mode.MovingObjects:
 				_handle_held_obj_move(pos_in_world_px)
