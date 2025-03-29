@@ -3,7 +3,6 @@ extends Node
 var main : Main = null
 
 const UNKOWN_VERSION : String = "0.0.0"
-const THIS_VERSION : String = "1.0.0"
 const HOVER_COLOR := Color.DARK_TURQUOISE
 const SELECT_COLOR := Color.DARK_ORANGE
 const MAX_RECENT_PROJECT = 10
@@ -33,6 +32,9 @@ func _ready():
 		if ser_projects is Array:
 			while len(ser_projects) > 0:
 				add_recent_project(ser_projects.pop_back())
+
+func get_app_version() -> String:
+	return ProjectSettings.get_setting("application/config/version")
 
 func get_recent_projects() -> Array[String]:
 	return _recent_projects

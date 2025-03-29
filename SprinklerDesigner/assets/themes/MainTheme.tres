@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=10 format=3 uid="uid://b7bms6qoy7yfq"]
+[gd_resource type="Theme" load_steps=17 format=3 uid="uid://b7bms6qoy7yfq"]
 
 [ext_resource type="Texture2D" uid="uid://jat5iiamiedo" path="res://assets/icons/GuiToggleOn.svg" id="1_8gcai"]
 [ext_resource type="Texture2D" uid="uid://dn2g1utnsav2y" path="res://assets/icons/GuiToggleOnDisabled.svg" id="2_j7tqy"]
@@ -16,6 +16,50 @@ content_margin_right = 4.0
 content_margin_bottom = 4.0
 bg_color = Color(0.211765, 0.239216, 0.290196, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1srxv"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.211765, 0.239216, 0.290196, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2xdqx"]
+content_margin_left = 10.0
+content_margin_right = 10.0
+bg_color = Color(0.145098, 0.168627, 0.203922, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x656s"]
+content_margin_left = 10.0
+content_margin_right = 10.0
+bg_color = Color(0.211765, 0.239216, 0.290196, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.439216, 0.729412, 0.980392, 1)
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ixal6"]
+content_margin_left = 10.0
+content_margin_right = 10.0
+bg_color = Color(0.189002, 0.219651, 0.265625, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lh81x"]
+content_margin_left = 10.0
+content_margin_right = 10.0
+bg_color = Color(0.211765, 0.239216, 0.290196, 1)
+border_width_top = 2
+border_color = Color(0.439216, 0.729412, 0.980392, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ohro0"]
+content_margin_left = 10.0
+content_margin_right = 10.0
+bg_color = Color(0.145098, 0.168627, 0.203922, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ukpn"]
+bg_color = Color(0.145098, 0.168627, 0.203922, 1)
+
 [resource]
 Button/colors/font_pressed_color = Color(0, 0.551, 0.87, 1)
 Button/colors/icon_pressed_color = Color(0, 0.552941, 0.870588, 1)
@@ -28,3 +72,11 @@ CheckButton/icons/unchecked_disabled = ExtResource("6_r535c")
 CheckButton/icons/unchecked_disabled_mirrored = ExtResource("7_dix7b")
 CheckButton/icons/unchecked_mirrored = ExtResource("8_8frcv")
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_l5g62")
+TabContainer/constants/side_margin = 0
+TabContainer/styles/panel = SubResource("StyleBoxFlat_1srxv")
+TabContainer/styles/tab_disabled = SubResource("StyleBoxFlat_2xdqx")
+TabContainer/styles/tab_focus = SubResource("StyleBoxFlat_x656s")
+TabContainer/styles/tab_hovered = SubResource("StyleBoxFlat_ixal6")
+TabContainer/styles/tab_selected = SubResource("StyleBoxFlat_lh81x")
+TabContainer/styles/tab_unselected = SubResource("StyleBoxFlat_ohro0")
+TabContainer/styles/tabbar_background = SubResource("StyleBoxFlat_6ukpn")

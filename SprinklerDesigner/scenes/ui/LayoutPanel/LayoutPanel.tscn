@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=19 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/world_objects/Sprinkler/Sprinkler.tscn" id="2_16d6l"]
@@ -16,6 +16,9 @@
 [ext_resource type="Texture2D" uid="uid://porixx8ktoya" path="res://assets/icons/Hsize.svg" id="11_vji1l"]
 [ext_resource type="Texture2D" uid="uid://dg6r7624m4adj" path="res://assets/icons/Polygon2D.svg" id="12_j86x8"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60egv"]
+bg_color = Color(0.105882, 0.113725, 0.12549, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_31l3s"]
 bg_color = Color(0.180392, 0.180392, 0.180392, 0.705882)
 
@@ -28,6 +31,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_60egv")
 script = ExtResource("1_o5pl2")
 SprinklerScene = ExtResource("2_16d6l")
 DistanceMeasurementScene = ExtResource("2_rmdn3")
@@ -43,6 +47,7 @@ filters = PackedStringArray("*.jpg", "*.png", "*.bmp", "*.jpeg")
 
 [node name="HSplitContainer" type="HSplitContainer" parent="."]
 layout_mode = 2
+theme_override_constants/separation = 0
 
 [node name="LeftPane" type="TabContainer" parent="HSplitContainer"]
 layout_mode = 2
@@ -73,46 +78,50 @@ metadata/_tab_index = 1
 
 [node name="Layout" type="VBoxContainer" parent="HSplitContainer"]
 layout_mode = 2
+theme_override_constants/separation = 0
 
-[node name="LayoutToolbar" type="HBoxContainer" parent="HSplitContainer/Layout"]
+[node name="LayoutToolbar" type="PanelContainer" parent="HSplitContainer/Layout"]
 layout_mode = 2
 
-[node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
+[node name="HBox" type="HBoxContainer" parent="HSplitContainer/Layout/LayoutToolbar"]
+layout_mode = 2
+
+[node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 layout_mode = 2
 tooltip_text = "Add sprinkler"
 focus_mode = 0
 text = "Add Sprinkler"
 icon = ExtResource("6_58poj")
 
-[node name="AddImage" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
+[node name="AddImage" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 layout_mode = 2
 tooltip_text = "Add image"
 focus_mode = 0
 icon = ExtResource("10_7tkh4")
 
-[node name="AddDistMeasure" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
+[node name="AddDistMeasure" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 layout_mode = 2
 tooltip_text = "Add distance measurement"
 focus_mode = 0
 icon = ExtResource("11_vji1l")
 
-[node name="AddPolygon" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
+[node name="AddPolygon" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 layout_mode = 2
 tooltip_text = "Add polygon shape"
 focus_mode = 0
 icon = ExtResource("12_j86x8")
 
-[node name="RemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
+[node name="RemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 layout_mode = 2
 tooltip_text = "Remove item"
 focus_mode = 0
 disabled = true
 icon = ExtResource("7_nx6cf")
 
-[node name="VSeparator" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar"]
+[node name="VSeparator" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 layout_mode = 2
 
-[node name="ShowGridButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar"]
+[node name="ShowGridButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 layout_mode = 2
 tooltip_text = "Toggle grid visibility"
 focus_mode = 0
@@ -141,12 +150,12 @@ theme = SubResource("Theme_kss1b")
 autostart = true
 
 [connection signal="file_selected" from="ImgDialog" to="." method="_on_img_dialog_file_selected"]
-[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
-[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddImage" to="." method="_on_add_image_pressed"]
-[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddDistMeasure" to="." method="_on_add_dist_measure_pressed"]
-[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/AddPolygon" to="." method="_on_add_polygon_pressed"]
-[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/RemoveButton" to="." method="_on_remove_button_pressed"]
-[connection signal="toggled" from="HSplitContainer/Layout/LayoutToolbar/ShowGridButton" to="." method="_on_show_grid_checkbox_toggled"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddImage" to="." method="_on_add_image_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddDistMeasure" to="." method="_on_add_dist_measure_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon" to="." method="_on_add_polygon_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/RemoveButton" to="." method="_on_remove_button_pressed"]
+[connection signal="toggled" from="HSplitContainer/Layout/LayoutToolbar/HBox/ShowGridButton" to="." method="_on_show_grid_checkbox_toggled"]
 [connection signal="gui_input" from="HSplitContainer/Layout/World/ViewportContainer" to="." method="_on_viewport_container_gui_input"]
 [connection signal="world_object_reordered" from="HSplitContainer/Layout/World/ViewportContainer" to="." method="_on_world_object_reordered"]
 [connection signal="timeout" from="PreferenceUpdateTimer" to="." method="_on_preference_update_timer_timeout"]

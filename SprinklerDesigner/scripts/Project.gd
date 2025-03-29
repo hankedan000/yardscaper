@@ -212,7 +212,7 @@ func serialize():
 			objects_ser.append(obj.serialize())
 	
 	return {
-		VERSION_KEY : Globals.THIS_VERSION,
+		VERSION_KEY : Globals.get_app_version(),
 		OBJECTS_KEY : objects_ser,
 		PROJECT_NAME_KEY : project_name
 	}

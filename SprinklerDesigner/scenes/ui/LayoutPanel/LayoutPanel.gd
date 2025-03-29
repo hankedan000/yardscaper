@@ -7,12 +7,12 @@ extends PanelContainer
 @onready var poly_prop_list           := $HSplitContainer/LeftPane/Properties/PolygonNodePropertiesList
 @onready var objects_list             := $HSplitContainer/LeftPane/Objects
 
-@onready var add_sprink_button        := $HSplitContainer/Layout/LayoutToolbar/AddSprinkler
-@onready var add_img_button           := $HSplitContainer/Layout/LayoutToolbar/AddImage
-@onready var add_dist_button          := $HSplitContainer/Layout/LayoutToolbar/AddDistMeasure
-@onready var add_poly_button          := $HSplitContainer/Layout/LayoutToolbar/AddPolygon
-@onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/RemoveButton
-@onready var show_grid_button         := $HSplitContainer/Layout/LayoutToolbar/ShowGridButton
+@onready var add_sprink_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler
+@onready var add_img_button           := $HSplitContainer/Layout/LayoutToolbar/HBox/AddImage
+@onready var add_dist_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/AddDistMeasure
+@onready var add_poly_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon
+@onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/HBox/RemoveButton
+@onready var show_grid_button         := $HSplitContainer/Layout/LayoutToolbar/HBox/ShowGridButton
 @onready var world_container          := $HSplitContainer/Layout/World/ViewportContainer
 @onready var mouse_pos_label          := $HSplitContainer/Layout/World/MousePosLabel
 

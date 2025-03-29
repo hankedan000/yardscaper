@@ -29,7 +29,7 @@ var selected_project_item : PreviousProjectItem = null:
 
 func _ready():
 	_reload_previous_projects()
-	version_label.text = "v%s" % Globals.THIS_VERSION
+	version_label.text = "v%s" % Globals.get_app_version()
 
 func _reload_previous_projects() -> void:
 	selected_project_item = null # make sure button start disabled
