@@ -28,6 +28,7 @@ var selected_project_item : PreviousProjectItem = null:
 		remove_button.disabled = selected_project_item == null
 
 func _ready():
+	DisplayServer.window_set_title("Project Manager - %s" % Globals.get_app_name())
 	_reload_previous_projects()
 	version_label.text = "v%s" % Globals.get_app_version()
 

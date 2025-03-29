@@ -23,8 +23,7 @@ extends Window
 @onready var source_link := $PanelContainer/VBox/SourceLink
 
 func _ready():
-	var app_name = ProjectSettings.get_setting(\"application/config/name\")
-	name_label.text = app_name
+	name_label.text = Globals.get_app_name()
 	ver_label.text = \"Version: %s\" % Globals.get_app_version()
 	source_link.meta_clicked.connect(_on_source_link_meta_clicked)
 
@@ -41,9 +40,9 @@ bg_color = Color(0.105882, 0.113725, 0.12549, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kst3f"]
 
 [node name="ProjectEditor" type="PanelContainer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = -1
+anchor_right = 1.6
+anchor_bottom = 1.8
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_q6kto")

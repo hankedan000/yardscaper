@@ -33,8 +33,11 @@ func _ready():
 			while len(ser_projects) > 0:
 				add_recent_project(ser_projects.pop_back())
 
+func get_app_name() -> String:
+	return ProjectSettings.get_setting("application/config/name") as String
+
 func get_app_version() -> String:
-	return ProjectSettings.get_setting("application/config/version")
+	return ProjectSettings.get_setting("application/config/version") as String
 
 func get_recent_projects() -> Array[String]:
 	return _recent_projects
