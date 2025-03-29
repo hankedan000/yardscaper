@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="splashscreen.svg"
+   inkscape:version="1.4.1-rc (d9e8dc1fe0, 2025-03-10)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.35589576"
+     inkscape:cx="554.93777"
+     inkscape:cy="335.77247"
+     inkscape:window-width="1920"
+     inkscape:window-height="1008"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <rect
+       x="174.20831"
+       y="283.79096"
+       width="741.79023"
+       height="325.93813"
+       id="rect4" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#006df7;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;fill-opacity:1"
+       id="rect1"
+       width="338.66666"
+       height="190.5"
+       x="23.418022"
+       y="59.846054"
+       inkscape:export-filename="../4f8aeec/splashscreen.png"
+       inkscape:export-xdpi="64"
+       inkscape:export-ydpi="64" />
+    <path
+       id="path1"
+       style="fill:#378fff;fill-opacity:1;stroke-width:4.57402;stroke-linecap:round;stroke-linejoin:round"
+       d="M 23.418209 59.845959 L 23.418209 213.26812 A 338.66666 402.8746 0 0 0 106.74387 225.65289 A 338.66666 402.8746 0 0 0 362.08488 87.434973 L 362.08488 59.845959 L 23.418209 59.845959 z " />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,3.7171464,11.894869)"
+       id="text4"
+       style="font-size:96px;line-height:1.25;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect4)"
+       x="-108.98438"
+       y="0"><tspan
+         x="174.20898"
+         y="368.72852"
+         id="tspan2"><tspan
+           style="font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans';text-align:start;text-anchor:start;fill:#ffffff"
+           id="tspan1">Sprinkler </tspan></tspan><tspan
+         x="174.20898"
+         y="488.72852"
+         id="tspan5"><tspan
+           style="font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans';text-align:start;text-anchor:start;fill:#ffffff"
+           id="tspan3">Designer</tspan></tspan></text>
+    <rect
+       style="fill:#000000;fill-opacity:0;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"
+       id="rect5"
+       width="973.89233"
+       height="276.55569"
+       x="-386.58322"
+       y="-581.36169"
+       ry="14.125155" />
+    <rect
+       style="fill:#000000;fill-opacity:0;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"
+       id="rect6"
+       width="11.894869"
+       height="282.50314"
+       x="447.5444"
+       y="-273.58197"
+       ry="5.9474344" />
+  </g>
+</svg>

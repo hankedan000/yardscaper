@@ -7,6 +7,7 @@ class_name Main
 var root_scene : Control = null
 
 func _ready():
+	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
 	open_boot_menu()
 
 func open_boot_menu():
