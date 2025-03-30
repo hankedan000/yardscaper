@@ -51,7 +51,7 @@ func _on_button_pressed() -> void:
 	var delta_ticks_msec = ticks_now_msec - _last_click_ticks_msec
 	if delta_ticks_msec <= DOUBLE_CLICK_TIME_MSEC:
 		if not is_missing:
-			emit_signal("opened", self)
+			opened.emit(self)
 	else:
-		emit_signal("selected", self)
+		selected.emit(self)
 	_last_click_ticks_msec = ticks_now_msec

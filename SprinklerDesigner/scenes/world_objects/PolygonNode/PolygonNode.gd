@@ -11,7 +11,7 @@ var color := Color.MEDIUM_AQUAMARINE:
 		var old_value = color
 		color = value
 		if old_value != color:
-			emit_signal('property_changed', 'color', old_value, color)
+			property_changed.emit('color', old_value, color)
 		queue_redraw()
 
 func _draw():
@@ -53,7 +53,7 @@ func add_point(point: Vector2):
 		await ready
 	# can't do direct append of point onto polygon.
 	# need to assign polygon with edited list of points
-	var new_points = poly.polygon
+	var new_points : PackedVector2Array = poly.polygon
 	new_points.append(point)
 	poly.polygon = new_points
 	coll_poly.polygon = new_points

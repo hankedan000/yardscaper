@@ -10,7 +10,7 @@ var width_ft : float = 0:
 		var old_value = width_ft
 		width_ft = value
 		if old_value != width_ft:
-			emit_signal('property_changed', 'width_ft', old_value, width_ft)
+			property_changed.emit('width_ft', old_value, width_ft)
 		if texture_rect:
 			texture_rect.size.x = Utils.ft_to_px(value)
 			queue_redraw()
@@ -20,7 +20,7 @@ var height_ft : float = 0:
 		var old_value = height_ft
 		height_ft = value
 		if old_value != height_ft:
-			emit_signal('property_changed', 'height_ft', old_value, height_ft)
+			property_changed.emit('height_ft', old_value, height_ft)
 		if texture_rect:
 			texture_rect.size.y = Utils.ft_to_px(value)
 			queue_redraw()

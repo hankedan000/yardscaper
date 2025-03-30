@@ -13,7 +13,7 @@ var user_label : String = "" :
 		var old_value = user_label
 		user_label = value
 		if old_value != user_label:
-			emit_signal('property_changed', 'user_label', old_value, user_label)
+			property_changed.emit('user_label', old_value, user_label)
 
 func _ready():
 	# locate our parent WorldViewportContainer
@@ -30,7 +30,7 @@ func get_subclass() -> String:
 
 func get_order_in_world() -> int:
 	if ! _is_ready:
-		await _ready
+		await ready
 	if ! world:
 		push_error("object isn't in a world")
 		return -1
@@ -46,11 +46,11 @@ func set_order_in_world(to_idx: int):
 func get_info_label_visible() -> bool:
 	return info_label.visible
 
-func set_info_label_visible(visible: bool) -> void:
+func set_info_label_visible(new_visible: bool) -> void:
 	var old_value = info_label.visible
-	info_label.visible = visible
-	if old_value != info_label.visible:
-		emit_signal('property_changed', 'info_label.visible', old_value, info_label.visible)
+	info_label.visible = new_visible
+	if old_value != new_visible:
+		property_changed.emit('info_label.visible', old_value, new_visible)
 
 func serialize():
 	return {

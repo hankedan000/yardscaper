@@ -33,5 +33,5 @@ func finish_move(cancel=false):
 	if cancel:
 		position = _pos_at_move_start
 	else:
-		emit_signal("moved", self, _pos_at_move_start, position)
+		moved.emit(self, _pos_at_move_start, position)
 	_pos_at_move_start = null

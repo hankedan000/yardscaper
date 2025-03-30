@@ -5,13 +5,13 @@ signal discard()
 signal cancel()
 
 func _on_save_button_pressed():
-	emit_signal('save')
+	save.emit()
 
 func _on_discard_button_pressed():
-	emit_signal('discard')
+	discard.emit()
 
 func _on_cancel_button_pressed():
-	emit_signal('cancel')
+	cancel.emit()
 	hide()
 
 func _on_close_requested():

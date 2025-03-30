@@ -12,7 +12,7 @@ signal canceled()
 @onready var file_lineedit := %FileLineEdit
 
 func _on_cancel_button_pressed():
-	emit_signal('canceled')
+	canceled.emit()
 	hide()
 
 func _on_export_button_pressed():
@@ -24,7 +24,7 @@ func _on_export_button_pressed():
 	
 	var zone = zone_spinbox.value
 	var filename = file_lineedit.text
-	emit_signal('export', view_opt, zone, filename)
+	export.emit(view_opt, zone, filename)
 	hide()
 
 func _on_zone_view_check_box_toggled(toggled_on):

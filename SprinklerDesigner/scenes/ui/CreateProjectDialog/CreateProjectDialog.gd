@@ -34,16 +34,16 @@ func _set_status(type: StatusIcon.StatusType, text: String) -> void:
 func _get_project_folder_name() -> String:
 	return (project_path_line_edit.text as String).split("/")[-1]
 
-func _project_name_to_folder_name(name: String) -> String:
-	name = name.replace(" ", "")
-	return name
+func _project_name_to_folder_name(pname: String) -> String:
+	pname = pname.replace(" ", "")
+	return pname
 
 # make sure a project name only contains the following characters
 # a-z, A-Z, 0-9, -, _, ., (, ), [, ], or spaces
-func _is_valid_project_name(name: String) -> bool:
+func _is_valid_project_name(pname: String) -> bool:
 	var regex = RegEx.new()
 	regex.compile("^[a-zA-Z0-9\\-\\_\\.\\(\\)\\[\\] ]+$")
-	if regex.search(name) == null:
+	if regex.search(pname) == null:
 		return false
 	return true
 
@@ -95,10 +95,10 @@ func _update_after_path_change() -> void:
 	
 	create_button.disabled = status_icon.status == StatusIcon.StatusType.Error
 
-func _on_project_name_line_edit_text_changed(new_name: String) -> void:
+func _on_project_name_line_edit_text_changed(_new_name: String) -> void:
 	_update_after_name_change()
 
-func _on_project_path_line_edit_text_changed(new_text: String) -> void:
+func _on_project_path_line_edit_text_changed(_new_text: String) -> void:
 	_update_after_path_change()
 
 func _on_browse_dialog_dir_selected(dir: String) -> void:
@@ -130,5 +130,5 @@ func _on_cancel_button_pressed() -> void:
 	hide()
 
 func _on_create_button_pressed() -> void:
-	emit_signal(&"create_requested", project_name_line_edit.text, project_path_line_edit.text)
+	create_requested.emit(project_name_line_edit.text, project_path_line_edit.text)
 	hide()

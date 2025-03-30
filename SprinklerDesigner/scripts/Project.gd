@@ -30,7 +30,7 @@ var has_edits = false :
 		var old_value = has_edits
 		has_edits = value
 		if old_value != has_edits and not _suppress_self_edit_signals:
-			emit_signal('has_edits_changed', has_edits)
+			has_edits_changed.emit(has_edits)
 var layout_pref := LayoutPreferences.new()
 
 var _suppress_self_edit_signals = false
@@ -42,7 +42,7 @@ func reset() -> void:
 	project_name = ""
 	_suppress_self_edit_signals = false
 	has_edits = false
-	emit_signal('closed')
+	closed.emit()
 
 func is_opened() -> bool:
 	return len(project_path) > 0
@@ -94,8 +94,8 @@ func open(dir: String) -> bool:
 	var layout_pref_data = Utils.from_json_file(layout_pref_filepath)
 	if layout_pref_data:
 		layout_pref.deserialize(layout_pref_data)
-		
-	emit_signal('opened')
+	
+	opened.emit()
 	return true
 
 func save() -> bool:
@@ -127,7 +127,7 @@ func save_as(dir: String) -> bool:
 		push_error("failed to create img dir in '%s'" % [img_dir])
 		return false
 	
-	emit_signal('saved')
+	saved.emit()
 	return true
 
 func get_subclass_count(subclass: String) -> int:
@@ -147,7 +147,7 @@ func add_object(obj: WorldObject) -> void:
 	if obj is MoveableNode2D:
 		obj.moved.connect(_on_node_moved)
 	objects.append(obj)
-	emit_signal('node_changed', obj, ChangeType.ADD, [])
+	node_changed.emit(obj, ChangeType.ADD, [])
 	has_edits = true
 
 func remove_object(obj: WorldObject) -> void:
@@ -162,7 +162,7 @@ func remove_object(obj: WorldObject) -> void:
 	if obj is MoveableNode2D:
 		obj.moved.disconnect(_on_node_moved)
 	
-	emit_signal('node_changed', obj, ChangeType.REMOVE, [])
+	node_changed.emit(obj, ChangeType.REMOVE, [])
 	has_edits = true
 
 func get_img_dir() -> String:
@@ -271,17 +271,9 @@ static func _get_project_name(data: Dictionary, project_dir: String) -> String:
 	return pname
 
 func _on_node_property_changed(property, from, to, node):
-	emit_signal(
-		'node_changed',
-		node,
-		ChangeType.PROP_EDIT,
-		[property, from, to])
+	node_changed.emit(node, ChangeType.PROP_EDIT, [property, from, to])
 	has_edits = true
 
 func _on_node_moved(node, from_xy, to_xy):
-	emit_signal(
-		'node_changed',
-		node,
-		ChangeType.PROP_EDIT,
-		['position', from_xy, to_xy])
+	node_changed.emit(node, ChangeType.PROP_EDIT, ['position', from_xy, to_xy])
 	has_edits = true

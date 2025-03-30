@@ -16,7 +16,7 @@ var zone : int = 1 :
 		var old_value = zone
 		zone = value
 		if old_value != zone:
-			emit_signal('property_changed', 'zone', old_value, zone)
+			property_changed.emit('zone', old_value, zone)
 
 var min_dist_ft : float = NAN :
 	get:
@@ -31,7 +31,7 @@ var min_dist_ft : float = NAN :
 		if old_value != min_dist_ft:
 			_cap_values()
 			queue_redraw()
-			emit_signal('property_changed', 'min_dist_ft', old_value, min_dist_ft)
+			property_changed.emit('min_dist_ft', old_value, min_dist_ft)
 
 var max_dist_ft : float = NAN :
 	get:
@@ -46,7 +46,7 @@ var max_dist_ft : float = NAN :
 		if old_value != max_dist_ft:
 			_cap_values()
 			queue_redraw()
-			emit_signal('property_changed', 'max_dist_ft', old_value, max_dist_ft)
+			property_changed.emit('max_dist_ft', old_value, max_dist_ft)
 
 var dist_ft : float = NAN :
 	get:
@@ -59,7 +59,7 @@ var dist_ft : float = NAN :
 		if old_value != dist_ft:
 			_cap_values()
 			queue_redraw()
-			emit_signal('property_changed', 'dist_ft', old_value, dist_ft)
+			property_changed.emit('dist_ft', old_value, dist_ft)
 
 var min_sweep_deg : float = NAN :
 	get:
@@ -74,7 +74,7 @@ var min_sweep_deg : float = NAN :
 		if old_value != min_sweep_deg:
 			_cap_values()
 			queue_redraw()
-			emit_signal('property_changed', 'min_sweep_deg', old_value, min_sweep_deg)
+			property_changed.emit('min_sweep_deg', old_value, min_sweep_deg)
 
 var max_sweep_deg : float = NAN :
 	get:
@@ -89,7 +89,7 @@ var max_sweep_deg : float = NAN :
 		if old_value != max_sweep_deg:
 			_cap_values()
 			queue_redraw()
-			emit_signal('property_changed', 'max_sweep_deg', old_value, max_sweep_deg)
+			property_changed.emit('max_sweep_deg', old_value, max_sweep_deg)
 
 var sweep_deg : float = NAN :
 	get:
@@ -104,7 +104,7 @@ var sweep_deg : float = NAN :
 		if old_value != sweep_deg:
 			_cap_values()
 			queue_redraw()
-			emit_signal('property_changed', 'sweep_deg', old_value, sweep_deg)
+			property_changed.emit('sweep_deg', old_value, sweep_deg)
 
 var manufacturer : String = "" :
 	set(value):
@@ -114,7 +114,7 @@ var manufacturer : String = "" :
 		if old_value != manufacturer:
 			_cap_values()
 			queue_redraw()
-			emit_signal('property_changed', 'manufacturer', old_value, manufacturer)
+			property_changed.emit('manufacturer', old_value, manufacturer)
 
 var model : String = "" :
 	set(value):
@@ -124,7 +124,7 @@ var model : String = "" :
 		if old_value != model:
 			_cap_values()
 			queue_redraw()
-			emit_signal('property_changed', 'model', old_value, model)
+			property_changed.emit('model', old_value, model)
 
 var show_min_dist := false :
 	set(value):

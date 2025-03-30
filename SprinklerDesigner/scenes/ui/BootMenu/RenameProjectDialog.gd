@@ -16,4 +16,4 @@ func _on_rename_button_pressed() -> void:
 	hide()
 	# rename the project
 	if Project.rename_project(path_line_edit.text, name_line_edit.text):
-		emit_signal("project_renamed")
+		project_renamed.emit()
