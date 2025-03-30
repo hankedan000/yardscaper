@@ -38,6 +38,21 @@ var mode = Mode.Idle:
 		add_dist_button.disabled = adds_disabled
 		add_poly_button.disabled = adds_disabled
 		mode = value
+		match mode:
+			Mode.Idle:
+				Utils.pop_cursor_shape()
+			Mode.Panning:
+				Utils.push_cursor_shape(Input.CURSOR_DRAG)
+			Mode.MovingObjects:
+				Utils.push_cursor_shape(Input.CURSOR_DRAG)
+			Mode.AddSprinkler:
+				Utils.push_cursor_shape(Input.CURSOR_ARROW)
+			Mode.AddDistMeasureA:
+				Utils.push_cursor_shape(Input.CURSOR_ARROW)
+			Mode.AddDistMeasureB:
+				Utils.push_cursor_shape(Input.CURSOR_ARROW)
+			Mode.AddPolygon:
+				Utils.push_cursor_shape(Input.CURSOR_ARROW)
 var sprinkler_to_add : Sprinkler = null
 var dist_meas_to_add : DistanceMeasurement = null
 var poly_to_add : PolygonNode = null
@@ -150,13 +165,11 @@ func _handle_left_click_release():
 					obj.finish_move()
 			_move_undo_batch = null
 			_mouse_move_start_pos_px = null
-			Utils.pop_cursor_shape()
 			mode = Mode.Idle
 
 func _handle_held_obj_move(mouse_pos_in_world_px: Vector2) -> void:
 	if _mouse_move_start_pos_px == null:
 		_mouse_move_start_pos_px = mouse_pos_in_world_px
-		Utils.push_cursor_shape(Input.CURSOR_MOVE)
 	
 	# apply delta movement vector to all selected movable objects
 	var delta_px = mouse_pos_in_world_px - _mouse_move_start_pos_px
@@ -421,7 +434,5 @@ func _on_world_view_gui_input(event: InputEvent):
 func _on_viewport_container_pan_state_changed(panning: bool) -> void:
 	if panning:
 		mode = Mode.Panning
-		Utils.push_cursor_shape(Input.CURSOR_DRAG)
 	else:
 		mode = Mode.Idle
-		Utils.pop_cursor_shape()
