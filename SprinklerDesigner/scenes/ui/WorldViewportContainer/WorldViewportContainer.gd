@@ -48,10 +48,10 @@ var _prev_global_pos := Vector2()
 func reorder_world_object(from_idx: int, to_idx: int) -> bool:
 	var object_count = objects.get_child_count()
 	if from_idx < 0 or from_idx >= object_count:
-		push_error("from_idx (%d) out of range. object_count = %d" % [from_idx, object_count])
+		push_warning("from_idx (%d) out of range. object_count = %d" % [from_idx, object_count])
 		return false
 	elif to_idx < 0 or to_idx >= object_count:
-		push_error("to_idx (%d) out of range. object_count = %d" % [to_idx, object_count])
+		push_warning("to_idx (%d) out of range. object_count = %d" % [to_idx, object_count])
 		return false
 	elif from_idx == to_idx:
 		push_warning("move request does nothing")

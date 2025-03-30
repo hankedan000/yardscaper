@@ -1,9 +1,9 @@
 [gd_scene load_steps=2 format=3 uid="uid://yvp357wae8et"]
 
-[ext_resource type="Script" path="res://scenes/world_objects/WorldObject/WorldObject.gd" id="1_480ks"]
+[ext_resource type="Script" path="res://scenes/world_objects/WorldObject/WorldObject.gd" id="1_2eqnw"]
 
 [node name="WorldObject" type="Node2D"]
-script = ExtResource("1_480ks")
+script = ExtResource("1_2eqnw")
 
 [node name="InfoLabel" type="Label" parent="."]
 visible = false

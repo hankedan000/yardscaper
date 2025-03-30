@@ -243,12 +243,6 @@ func instance_world_obj(ser_obj: Dictionary) -> WorldObject:
 		wobj.deserialize(ser_obj)
 	return wobj
 
-func get_draw_order(world_obj: WorldObject) -> int:
-	for i in range(objects.size()):
-		if world_obj == objects[i]:
-			return i
-	return -1
-
 static func _get_project_data_filepath(project_dir: String) -> String:
 	return project_dir.path_join("project.json")
 

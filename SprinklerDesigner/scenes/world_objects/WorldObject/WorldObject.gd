@@ -34,17 +34,15 @@ func get_subclass() -> String:
 	return "WorldObject"
 
 func get_order_in_world() -> int:
-	if ! _is_ready:
-		await ready
 	if ! world:
-		push_error("object isn't in a world")
+		push_warning("object isn't in a world")
 		return -1
 	return world.get_object_order_idx(self)
 
 func set_order_in_world(to_idx: int):
-	var from_idx = await get_order_in_world()
+	var from_idx = get_order_in_world()
 	if from_idx < 0:
-		push_error("unable to get object's from_idx")
+		push_warning("unable to get object's from_idx")
 		return
 	world.reorder_world_object(from_idx, to_idx)
 

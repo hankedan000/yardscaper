@@ -87,13 +87,25 @@ func _ready():
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
 
 func _input(event):
-	if event is InputEventKey and event.is_released():
+	if event is InputEventKey and event.is_pressed():
 		if event.keycode == KEY_ESCAPE:
 			_cancel_mode() # will only cancel if possible
 		elif event.keycode == KEY_C and event.ctrl_pressed:
 			_handle_world_object_copy(_selected_objs)
 		elif event.keycode == KEY_V and event.ctrl_pressed:
 			_handle_world_object_paste(_copied_world_objs)
+		elif event.keycode == KEY_PAGEUP:
+			var helper := WorldObjectReorderHelper.new(_selected_objs)
+			helper.apply_relative_shift(world_view, +1)
+		elif event.keycode == KEY_PAGEDOWN:
+			var helper := WorldObjectReorderHelper.new(_selected_objs)
+			helper.apply_relative_shift(world_view, -1)
+		elif event.keycode == KEY_END:
+			var helper := WorldObjectReorderHelper.new(_selected_objs)
+			helper.apply_shift_to_bottom(world_view)
+		elif event.keycode == KEY_HOME:
+			var helper := WorldObjectReorderHelper.new(_selected_objs)
+			helper.apply_shift_to_top(world_view)
 
 func _nearest_pickable_obj(pos_in_world: Vector2):
 	var smallest_dist_px = null
@@ -106,7 +118,7 @@ func _nearest_pickable_obj(pos_in_world: Vector2):
 		var draw_order = -1
 		if pick_parent is PickableNode2D:
 			obj_center = pick_parent.get_global_center()
-			draw_order = TheProject.get_draw_order(pick_parent)
+			draw_order = pick_parent.get_order_in_world()
 		var dist_px = obj_center.distance_to(pos_in_world)
 		if draw_order < highest_draw_order:
 			continue
@@ -317,7 +329,7 @@ func _on_remove_button_pressed():
 	for obj in _selected_objs:
 		undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.Remove.new(
 			world_view,
-			await obj.get_order_in_world(),
+			obj.get_order_in_world(),
 			obj))
 		TheProject.remove_object(obj)
 	_clear_selected_objects()
