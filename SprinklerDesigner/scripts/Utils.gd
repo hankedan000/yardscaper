@@ -95,3 +95,19 @@ func is_dir_empty(path: String) -> bool:
 	elif dir.get_files().size() > 0:
 		return false
 	return true
+
+var _prev_cursor_shape : Input.CursorShape = Input.CURSOR_ARROW
+var _curr_cursor_shape : Input.CursorShape = Input.CURSOR_ARROW
+
+func push_cursor_shape(cursor_shape: Input.CursorShape) -> void:
+	if cursor_shape != _curr_cursor_shape:
+		_prev_cursor_shape = _curr_cursor_shape
+		_curr_cursor_shape = cursor_shape
+		Input.set_default_cursor_shape(cursor_shape)
+
+func pop_cursor_shape() -> Input.CursorShape:
+	if _prev_cursor_shape != _curr_cursor_shape:
+		_curr_cursor_shape = _prev_cursor_shape
+		_prev_cursor_shape = Input.CURSOR_ARROW
+		Input.set_default_cursor_shape(_curr_cursor_shape)
+	return _curr_cursor_shape

@@ -2,6 +2,7 @@ extends SubViewportContainer
 class_name WorldViewportContainer
 
 signal world_object_reordered(from_idx: int, to_idx: int)
+signal pan_state_changed(panning: bool)
 
 const MAJOR_LINE_WIDTH := 1
 const ORIGIN_VERT_COLOR := Color.LIME_GREEN
@@ -151,3 +152,6 @@ func _process(_delta):
 	var mouse_pos = get_local_mouse_position()
 	var pos_in_world = pan_zoom_ctrl.local_pos_to_world(mouse_pos)
 	cursor.position = pos_in_world
+
+func _on_pan_zoom_controller_pan_state_changed(panning: bool) -> void:
+	pan_state_changed.emit(panning)

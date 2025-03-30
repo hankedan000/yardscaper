@@ -22,6 +22,7 @@ extends PanelContainer
 
 enum Mode {
 	Idle,
+	Panning,
 	MovingObjects,
 	AddSprinkler,
 	AddDistMeasureA,
@@ -53,7 +54,14 @@ var _hovered_obj = null
 # serialized versions of all copied world objects
 var _copied_world_objs : Array[Dictionary] = []
 
+func _set_all_cursors(ctrl: Control, cursor_shape: CursorShape) -> void:
+	ctrl.set_default_cursor_shape(cursor_shape)
+	for child in ctrl.get_children():
+		if child is Control:
+			_set_all_cursors(child, cursor_shape)
+
 func _ready():
+	set_default_cursor_shape(Control.CURSOR_BUSY)
 	TheProject.node_changed.connect(_on_TheProject_node_changed)
 	TheProject.opened.connect(_on_TheProject_opened)
 	sprink_prop_list.visible = false
@@ -136,13 +144,13 @@ func _handle_left_click_release():
 					obj.finish_move()
 			_move_undo_batch = null
 			_mouse_move_start_pos_px = null
-			Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+			Utils.pop_cursor_shape()
 			mode = Mode.Idle
 
 func _handle_held_obj_move(mouse_pos_in_world_px: Vector2) -> void:
 	if _mouse_move_start_pos_px == null:
 		_mouse_move_start_pos_px = mouse_pos_in_world_px
-		Input.set_default_cursor_shape(Input.CURSOR_MOVE)
+		Utils.push_cursor_shape(Input.CURSOR_MOVE)
 	
 	# apply delta movement vector to all selected movable objects
 	var delta_px = mouse_pos_in_world_px - _mouse_move_start_pos_px
@@ -383,6 +391,10 @@ func _on_viewport_container_gui_input(event):
 					if nearest_pickable:
 						nearest_pickable.hovering = true
 					_hovered_obj = nearest_pickable
+				if nearest_pickable:
+					Utils.push_cursor_shape(Input.CURSOR_POINTING_HAND)
+				else:
+					Utils.pop_cursor_shape()
 			
 			if sprinkler_to_add:
 				sprinkler_to_add.position = pos_in_world_px
@@ -399,3 +411,11 @@ func _on_viewport_container_gui_input(event):
 			
 			if mode == Mode.MovingObjects:
 				_handle_held_obj_move(pos_in_world_px)
+
+func _on_viewport_container_pan_state_changed(panning: bool) -> void:
+	if panning:
+		mode = Mode.Panning
+		Utils.push_cursor_shape(Input.CURSOR_DRAG)
+	else:
+		mode = Mode.Idle
+		Utils.pop_cursor_shape()

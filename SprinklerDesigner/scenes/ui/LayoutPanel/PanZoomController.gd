@@ -1,6 +1,13 @@
 extends Node2D
 
-var _dragging = false
+signal pan_state_changed(panning: bool)
+
+var _dragging : bool = false:
+	set(value):
+		var old_value := _dragging
+		_dragging = value
+		if _dragging != old_value:
+			pan_state_changed.emit(_dragging)
 var _drag_start = Vector2.ZERO
 var _camera_original_position = Vector2.ZERO
 
@@ -27,11 +34,9 @@ func _do_pan_logic(event: InputEventMouseButton, camera_pos: Vector2):
 		_dragging = true
 		_drag_start = event.position
 		_camera_original_position = camera_pos
-		Input.set_default_cursor_shape(Input.CURSOR_DRAG)
 	else:
 		# Stop dragging
 		_dragging = false
-		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 
 func _input(event):
 	var camera := get_viewport().get_camera_2d()

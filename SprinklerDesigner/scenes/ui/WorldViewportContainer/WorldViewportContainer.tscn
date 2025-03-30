@@ -17,7 +17,7 @@ script = ExtResource("1_fywpf")
 
 [node name="Viewport" type="SubViewport" parent="."]
 handle_input_locally = false
-size = Vector2i(800, 400)
+size = Vector2i(711, 400)
 render_target_update_mode = 4
 
 [node name="Objects" type="Node2D" parent="Viewport"]
@@ -32,3 +32,5 @@ collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Viewport/Cursor"]
 shape = SubResource("CircleShape2D_01kq4")
+
+[connection signal="pan_state_changed" from="Viewport/PanZoomController" to="." method="_on_pan_zoom_controller_pan_state_changed"]
