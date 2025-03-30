@@ -46,6 +46,7 @@ visible = false
 [node name="HSplitContainer" type="HSplitContainer" parent="."]
 layout_mode = 2
 theme_override_constants/separation = 0
+theme_override_constants/autohide = 0
 
 [node name="LeftPane" type="TabContainer" parent="HSplitContainer"]
 layout_mode = 2

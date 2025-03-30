@@ -8,6 +8,10 @@ const DEFAULT_MAX_DIST_FT = 14.0
 const DEFAULT_MIN_SWEEP_DEG = 0.0
 const DEFAULT_MAX_SWEEP_DEG = 360.0
 
+const PROP_KEY_ZONE = &"zone"
+const PROP_MIN_SWEEP_DEG = &"min_sweep_deg"
+const PROP_MAX_SWEEP_DEG = &"max_sweep_deg"
+
 func is_set(value: float):
 	return not is_nan(value)
 
@@ -16,14 +20,14 @@ var zone : int = 1 :
 		var old_value = zone
 		zone = value
 		if old_value != zone:
-			property_changed.emit('zone', old_value, zone)
+			property_changed.emit(self, PROP_KEY_ZONE, old_value, zone)
 
 var min_dist_ft : float = NAN :
 	get:
 		if is_set(min_dist_ft):
 			return min_dist_ft
 		if _head_info:
-			return _head_info['min_dist_ft']
+			return _head_info[PROP_KEY_MIN_DIST_FT]
 		return DEFAULT_MIN_DIST_FT
 	set(value):
 		var old_value = min_dist_ft
@@ -31,14 +35,14 @@ var min_dist_ft : float = NAN :
 		if old_value != min_dist_ft:
 			_cap_values()
 			queue_redraw()
-			property_changed.emit('min_dist_ft', old_value, min_dist_ft)
+			property_changed.emit(self, PROP_KEY_MIN_DIST_FT, old_value, min_dist_ft)
 
 var max_dist_ft : float = NAN :
 	get:
 		if is_set(max_dist_ft):
 			return max_dist_ft
 		if _head_info:
-			return _head_info['max_dist_ft']
+			return _head_info[PROP_KEY_MAX_DIST_FT]
 		return DEFAULT_MAX_DIST_FT
 	set(value):
 		var old_value = max_dist_ft
@@ -46,7 +50,7 @@ var max_dist_ft : float = NAN :
 		if old_value != max_dist_ft:
 			_cap_values()
 			queue_redraw()
-			property_changed.emit('max_dist_ft', old_value, max_dist_ft)
+			property_changed.emit(self, PROP_KEY_MAX_DIST_FT, old_value, max_dist_ft)
 
 var dist_ft : float = NAN :
 	get:
@@ -59,14 +63,14 @@ var dist_ft : float = NAN :
 		if old_value != dist_ft:
 			_cap_values()
 			queue_redraw()
-			property_changed.emit('dist_ft', old_value, dist_ft)
+			property_changed.emit(self, PROP_KEY_DIST_FT, old_value, dist_ft)
 
 var min_sweep_deg : float = NAN :
 	get:
 		if is_set(min_sweep_deg):
 			return min_sweep_deg
 		if _head_info:
-			return _head_info['min_sweep_deg']
+			return _head_info[PROP_MIN_SWEEP_DEG]
 		return DEFAULT_MIN_SWEEP_DEG
 	set(value):
 		var old_value = min_sweep_deg
@@ -74,14 +78,14 @@ var min_sweep_deg : float = NAN :
 		if old_value != min_sweep_deg:
 			_cap_values()
 			queue_redraw()
-			property_changed.emit('min_sweep_deg', old_value, min_sweep_deg)
+			property_changed.emit(self, PROP_MIN_SWEEP_DEG, old_value, min_sweep_deg)
 
 var max_sweep_deg : float = NAN :
 	get:
 		if is_set(max_sweep_deg):
 			return max_sweep_deg
 		if _head_info:
-			return _head_info['max_sweep_deg']
+			return _head_info[PROP_MAX_SWEEP_DEG]
 		return DEFAULT_MAX_SWEEP_DEG
 	set(value):
 		var old_value = max_sweep_deg
@@ -89,7 +93,7 @@ var max_sweep_deg : float = NAN :
 		if old_value != max_sweep_deg:
 			_cap_values()
 			queue_redraw()
-			property_changed.emit('max_sweep_deg', old_value, max_sweep_deg)
+			property_changed.emit(self, PROP_MAX_SWEEP_DEG, old_value, max_sweep_deg)
 
 var sweep_deg : float = NAN :
 	get:
@@ -104,7 +108,7 @@ var sweep_deg : float = NAN :
 		if old_value != sweep_deg:
 			_cap_values()
 			queue_redraw()
-			property_changed.emit('sweep_deg', old_value, sweep_deg)
+			property_changed.emit(self, PROP_KEY_SWEEP_DEG, old_value, sweep_deg)
 
 var manufacturer : String = "" :
 	set(value):
@@ -114,7 +118,7 @@ var manufacturer : String = "" :
 		if old_value != manufacturer:
 			_cap_values()
 			queue_redraw()
-			property_changed.emit('manufacturer', old_value, manufacturer)
+			property_changed.emit(self, PROP_KEY_MANUFACTURER, old_value, manufacturer)
 
 var model : String = "" :
 	set(value):
@@ -124,7 +128,7 @@ var model : String = "" :
 		if old_value != model:
 			_cap_values()
 			queue_redraw()
-			property_changed.emit('model', old_value, model)
+			property_changed.emit(self, PROP_KEY_MODEL, old_value, model)
 
 var show_min_dist := false :
 	set(value):
@@ -160,26 +164,33 @@ func draw_sector(center: Vector2, radius: float, angle_from: float, angle_to: fl
 func get_subclass() -> String:
 	return "Sprinkler"
 
+const PROP_KEY_DIST_FT = &"dist_ft"
+const PROP_KEY_MIN_DIST_FT = &"min_dist_ft"
+const PROP_KEY_MAX_DIST_FT = &"max_dist_ft"
+const PROP_KEY_SWEEP_DEG = &"sweep_deg"
+const PROP_KEY_MANUFACTURER = &"manufacturer"
+const PROP_KEY_MODEL = &"model"
+
 func serialize():
 	var obj = super.serialize()
-	obj['dist_ft'] = dist_ft
-	obj['min_dist_ft'] = min_dist_ft
-	obj['max_dist_ft'] = max_dist_ft
-	obj['sweep_deg'] = int(sweep_deg)
-	obj['manufacturer'] = manufacturer
-	obj['model'] = model
-	obj['zone'] = zone
+	obj[PROP_KEY_DIST_FT] = dist_ft
+	obj[PROP_KEY_MIN_DIST_FT] = min_dist_ft
+	obj[PROP_KEY_MAX_DIST_FT] = max_dist_ft
+	obj[PROP_KEY_SWEEP_DEG] = int(sweep_deg)
+	obj[PROP_KEY_MANUFACTURER] = manufacturer
+	obj[PROP_KEY_MODEL] = model
+	obj[PROP_KEY_ZONE] = zone
 	return obj
 
 func deserialize(obj):
 	super.deserialize(obj)
-	sweep_deg = obj['sweep_deg']
-	manufacturer = obj['manufacturer']
-	model = obj['model']
-	dist_ft = Utils.dict_get(obj, 'dist_ft', max_dist_ft)
-	min_dist_ft = Utils.dict_get(obj, 'min_dist_ft', min_dist_ft)
-	max_dist_ft = Utils.dict_get(obj, 'max_dist_ft', max_dist_ft)
-	zone = Utils.dict_get(obj, 'zone', 1)
+	sweep_deg = obj[PROP_KEY_SWEEP_DEG]
+	manufacturer = obj[PROP_KEY_MANUFACTURER]
+	model = obj[PROP_KEY_MODEL]
+	dist_ft = Utils.dict_get(obj, PROP_KEY_DIST_FT, max_dist_ft)
+	min_dist_ft = Utils.dict_get(obj, PROP_KEY_MIN_DIST_FT, min_dist_ft)
+	max_dist_ft = Utils.dict_get(obj, PROP_KEY_MAX_DIST_FT, max_dist_ft)
+	zone = Utils.dict_get(obj, PROP_KEY_ZONE, 1)
 
 func _draw():
 	var stop_angle = deg_to_rad(sweep_deg)

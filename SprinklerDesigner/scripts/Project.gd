@@ -143,7 +143,7 @@ func add_object(obj: WorldObject) -> void:
 		return
 	
 	# connect signal handlers
-	obj.property_changed.connect(_on_node_property_changed.bind(obj))
+	obj.property_changed.connect(_on_node_property_changed)
 	if obj is MoveableNode2D:
 		obj.moved.connect(_on_node_moved)
 	objects.append(obj)
@@ -270,8 +270,8 @@ static func _get_project_name(data: Dictionary, project_dir: String) -> String:
 			pname = parts[-1]
 	return pname
 
-func _on_node_property_changed(property, from, to, node):
-	node_changed.emit(node, ChangeType.PROP_EDIT, [property, from, to])
+func _on_node_property_changed(obj: WorldObject, property_key: StringName, from: Variant, to: Variant) -> void:
+	node_changed.emit(obj, ChangeType.PROP_EDIT, [property_key, from, to])
 	has_edits = true
 
 func _on_node_moved(node, from_xy, to_xy):

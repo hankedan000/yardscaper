@@ -1,6 +1,9 @@
 extends MoveableNode2D
 class_name ImageNode
 
+const PROP_KEY_WIDTH_FT = &"width_ft"
+const PROP_KEY_HEIGHT_FT = &"height_ft"
+
 @onready var texture_rect := $TextureRect
 
 var filename : String = ""
@@ -10,7 +13,7 @@ var width_ft : float = 0:
 		var old_value = width_ft
 		width_ft = value
 		if old_value != width_ft:
-			property_changed.emit('width_ft', old_value, width_ft)
+			property_changed.emit(self, PROP_KEY_WIDTH_FT, old_value, width_ft)
 		if texture_rect:
 			texture_rect.size.x = Utils.ft_to_px(value)
 			queue_redraw()
@@ -20,7 +23,7 @@ var height_ft : float = 0:
 		var old_value = height_ft
 		height_ft = value
 		if old_value != height_ft:
-			property_changed.emit('height_ft', old_value, height_ft)
+			property_changed.emit(self, PROP_KEY_HEIGHT_FT, old_value, height_ft)
 		if texture_rect:
 			texture_rect.size.y = Utils.ft_to_px(value)
 			queue_redraw()
@@ -63,12 +66,12 @@ func get_subclass() -> String:
 func serialize():
 	var obj = super.serialize()
 	obj['filename'] = filename
-	obj['width_ft'] = width_ft
-	obj['height_ft'] = height_ft
+	obj[PROP_KEY_WIDTH_FT] = width_ft
+	obj[PROP_KEY_HEIGHT_FT] = height_ft
 	return obj
 
 func deserialize(obj):
 	super.deserialize(obj)
 	filename = obj['filename']
-	width_ft = Utils.dict_get(obj, 'width_ft', 0)
-	height_ft = Utils.dict_get(obj, 'height_ft', 0)
+	width_ft = Utils.dict_get(obj, PROP_KEY_WIDTH_FT, 0)
+	height_ft = Utils.dict_get(obj, PROP_KEY_HEIGHT_FT, 0)

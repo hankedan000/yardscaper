@@ -3,6 +3,9 @@ class_name PolygonNode
 
 const PERIMETER_WIDTH = 2
 
+const PROP_KEY_COLOR = &"color"
+const PROP_KEY_POINTS_FT = &"points_ft"
+
 @onready var poly := $Polygon2D
 @onready var coll_poly := $PickArea/CollisionPolygon2D
 
@@ -11,7 +14,7 @@ var color := Color.MEDIUM_AQUAMARINE:
 		var old_value = color
 		color = value
 		if old_value != color:
-			property_changed.emit('color', old_value, color)
+			property_changed.emit(self, PROP_KEY_COLOR, old_value, color)
 		queue_redraw()
 
 func _draw():
@@ -137,13 +140,17 @@ func serialize():
 	var points_ft = []
 	for point in poly.polygon:
 		points_ft.append(Utils.vect2_to_pair(Utils.px_to_ft_vec(point)))
-	obj['points_ft'] = points_ft
-	obj['color'] = color.to_html(true) # with alpha = true
+	obj[PROP_KEY_POINTS_FT] = points_ft
+	obj[PROP_KEY_COLOR] = color.to_html(true) # with alpha = true
 	return obj
 
 func deserialize(obj):
 	super.deserialize(obj)
-	var points_ft = Utils.dict_get(obj, 'points_ft', [])
+	var points_ft = Utils.dict_get(obj, PROP_KEY_POINTS_FT, [])
 	for point in points_ft:
 		add_point(Utils.ft_to_px_vec(Utils.pair_to_vect2(point)))
-	color = Utils.dict_get(obj, 'color', color)
+	color = Utils.dict_get(obj, PROP_KEY_COLOR, color)
+
+func _on_property_changed(_obj: WorldObject, property_key: StringName, _from: Variant, _to: Variant) -> void:
+	if is_inside_tree() and property_key == WorldObject.PROP_KEY_USER_LABEL:
+		_update_info_label()

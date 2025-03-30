@@ -41,7 +41,7 @@ func _sync_ui_to_properties(node: PolygonNode):
 	_ignore_internal_edits = false
 	_ui_needs_sync = false
 
-func _on_poly_node_property_changed(_property, _old_value, _new_value):
+func _on_poly_node_property_changed(_obj: WorldObject, _property: StringName, _old_value: Variant, _new_value: Variant) -> void:
 	if poly_node is PolygonNode:
 		queue_ui_sync()
 

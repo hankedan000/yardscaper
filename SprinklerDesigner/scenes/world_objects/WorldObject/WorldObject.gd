@@ -1,7 +1,12 @@
 extends Node2D
 class_name WorldObject
 
-signal property_changed(obj, property, from, to)
+signal property_changed(obj: WorldObject, property_key: StringName, from, to)
+
+const PROP_KEY_POSITION_FT = &"position_ft"
+const PROP_KEY_USER_LABEL = &"user_label"
+const PROP_KEY_ROTATION_DEG = &"rotation_deg"
+const PROP_KEY_INFO_LABEL_VISIBLE = &"info_label.visible"
 
 @onready var info_label : Label = $InfoLabel
 
@@ -13,7 +18,7 @@ var user_label : String = "" :
 		var old_value = user_label
 		user_label = value
 		if old_value != user_label:
-			property_changed.emit('user_label', old_value, user_label)
+			property_changed.emit(self, PROP_KEY_USER_LABEL, old_value, user_label)
 
 func _ready():
 	# locate our parent WorldViewportContainer
@@ -50,21 +55,21 @@ func set_info_label_visible(new_visible: bool) -> void:
 	var old_value = info_label.visible
 	info_label.visible = new_visible
 	if old_value != new_visible:
-		property_changed.emit('info_label.visible', old_value, new_visible)
+		property_changed.emit(self, PROP_KEY_INFO_LABEL_VISIBLE, old_value, new_visible)
 
 func serialize():
 	return {
 		'subclass' : get_subclass(),
-		'position_ft' : Utils.vect2_to_pair(Utils.px_to_ft_vec(position)),
-		'rotation_deg' : int(rotation_degrees),
-		'user_label' : user_label,
-		'info_label.visible': info_label.visible
+		PROP_KEY_POSITION_FT : Utils.vect2_to_pair(Utils.px_to_ft_vec(position)),
+		PROP_KEY_ROTATION_DEG : int(rotation_degrees),
+		PROP_KEY_USER_LABEL : user_label,
+		PROP_KEY_INFO_LABEL_VISIBLE: info_label.visible
 	}
 
 func deserialize(obj):
 	if ! _is_ready:
 		await ready
-	position = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj['position_ft']))
-	rotation_degrees = obj['rotation_deg']
-	user_label = obj['user_label']
-	info_label.visible = Utils.dict_get(obj, 'info_label.visible', false)
+	position = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj[PROP_KEY_POSITION_FT]))
+	rotation_degrees = obj[PROP_KEY_ROTATION_DEG]
+	user_label = obj[PROP_KEY_USER_LABEL]
+	info_label.visible = Utils.dict_get(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)

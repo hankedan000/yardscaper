@@ -16,3 +16,5 @@ shape = null
 disabled = true
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="PickArea" index="1"]
+
+[connection signal="property_changed" from="." to="." method="_on_property_changed"]

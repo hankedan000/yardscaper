@@ -122,5 +122,5 @@ func _on_max_distance_spin_box_value_changed(value):
 	if sprinkler is Sprinkler and not _ignore_internal_edits:
 		sprinkler.max_dist_ft = value
 
-func _on_sprinkler_property_changed(_property, _from, _to):
+func _on_sprinkler_property_changed(_obj: WorldObject, _property: StringName, _from: Variant, _to: Variant) -> void:
 	queue_ui_sync()
