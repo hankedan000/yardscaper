@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://u1375je75c1f"]
+[gd_scene load_steps=10 format=3 uid="uid://u1375je75c1f"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/ProjectEditor.gd" id="2_rxefj"]
 [ext_resource type="PackedScene" uid="uid://dfag2aakh64er" path="res://scenes/ui/UnsavedChangesDialog/UnsavedChangesDialog.tscn" id="3_fwduj"]
@@ -33,9 +33,6 @@ func _on_source_link_meta_clicked(meta):
 func _on_close_requested():
 	hide()
 "
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3ulsh"]
-bg_color = Color(0.105882, 0.113725, 0.12549, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kst3f"]
 
@@ -82,7 +79,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_3ulsh")
 
 [node name="VBox" type="VBoxContainer" parent="AboutDialog/PanelContainer"]
 layout_mode = 2
