@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=18 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/world_objects/Sprinkler/Sprinkler.tscn" id="2_16d6l"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://co2gtkorldd8j" path="res://scenes/ui/SprinklerPropertyEditor/SprinklerPropertyEditor.tscn" id="3_itpjk"]
 [ext_resource type="PackedScene" uid="uid://cmr73cpklqypc" path="res://scenes/world_objects/PolygonNode/PolygonNode.tscn" id="4_85obg"]
 [ext_resource type="PackedScene" uid="uid://bujgf1ym2asal" path="res://scenes/ui/ImageNodePropertyEditor/ImageNodePropertyEditor.tscn" id="4_legmd"]
+[ext_resource type="PackedScene" uid="uid://cn8j4nj6r83we" path="res://scenes/ui/ImageImportWizard/ImageImportWizard.tscn" id="5_3cenq"]
 [ext_resource type="PackedScene" uid="uid://c7ey0qd3m5ads" path="res://scenes/ui/ObjectsList/ObjectsList.tscn" id="5_p3ckg"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="7_nx6cf"]
 [ext_resource type="PackedScene" uid="uid://0w6g4f1p5gwe" path="res://scenes/ui/PolygonNodePropertyEditor/PolygonNodePropertyEditor.tscn" id="7_u58qy"]
@@ -18,12 +19,6 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60egv"]
 bg_color = Color(0.105882, 0.113725, 0.12549, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_31l3s"]
-bg_color = Color(0.180392, 0.180392, 0.180392, 0.705882)
-
-[sub_resource type="Theme" id="Theme_kss1b"]
-Label/styles/normal = SubResource("StyleBoxFlat_31l3s")
 
 [node name="LayoutPanel" type="PanelContainer"]
 anchors_preset = 15
@@ -44,6 +39,9 @@ ok_button_text = "Open"
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.jpg", "*.png", "*.bmp", "*.jpeg")
+
+[node name="ImageImportWizard" parent="." instance=ExtResource("5_3cenq")]
+visible = false
 
 [node name="HSplitContainer" type="HSplitContainer" parent="."]
 layout_mode = 2
@@ -140,34 +138,20 @@ button_pressed = true
 icon = ExtResource("8_uxbpy")
 icon_alignment = 1
 
-[node name="World" type="Control" parent="HSplitContainer/Layout"]
+[node name="WorldView" parent="HSplitContainer/Layout" instance=ExtResource("9_xrpqu")]
 layout_mode = 2
 size_flags_vertical = 3
-
-[node name="ViewportContainer" parent="HSplitContainer/Layout/World" instance=ExtResource("9_xrpqu")]
-layout_mode = 1
-
-[node name="MousePosLabel" type="Label" parent="HSplitContainer/Layout/World"]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -23.0
-offset_right = 40.0
-grow_vertical = 0
-theme = SubResource("Theme_kss1b")
 
 [node name="PreferenceUpdateTimer" type="Timer" parent="."]
 autostart = true
 
 [connection signal="file_selected" from="ImgDialog" to="." method="_on_img_dialog_file_selected"]
+[connection signal="accepted" from="ImageImportWizard" to="." method="_on_image_import_wizard_accepted"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddImage" to="." method="_on_add_image_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddDistMeasure" to="." method="_on_add_dist_measure_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon" to="." method="_on_add_polygon_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/RemoveButton" to="." method="_on_remove_button_pressed"]
 [connection signal="toggled" from="HSplitContainer/Layout/LayoutToolbar/HBox/ShowGridButton" to="." method="_on_show_grid_checkbox_toggled"]
-[connection signal="gui_input" from="HSplitContainer/Layout/World/ViewportContainer" to="." method="_on_viewport_container_gui_input"]
-[connection signal="pan_state_changed" from="HSplitContainer/Layout/World/ViewportContainer" to="." method="_on_viewport_container_pan_state_changed"]
-[connection signal="world_object_reordered" from="HSplitContainer/Layout/World/ViewportContainer" to="." method="_on_world_object_reordered"]
+[connection signal="gui_input" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_view_gui_input"]
 [connection signal="timeout" from="PreferenceUpdateTimer" to="." method="_on_preference_update_timer_timeout"]

@@ -13,8 +13,8 @@ extends PanelContainer
 @onready var add_poly_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon
 @onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/HBox/RemoveButton
 @onready var show_grid_button         := $HSplitContainer/Layout/LayoutToolbar/HBox/ShowGridButton
-@onready var world_container          := $HSplitContainer/Layout/World/ViewportContainer
-@onready var mouse_pos_label          := $HSplitContainer/Layout/World/MousePosLabel
+@onready var world_view               := $HSplitContainer/Layout/WorldView
+@onready var img_import_wizard        := $ImageImportWizard
 
 @export var SprinklerScene : PackedScene = null
 @export var DistanceMeasurementScene : PackedScene = null
@@ -61,13 +61,12 @@ func _set_all_cursors(ctrl: Control, cursor_shape: CursorShape) -> void:
 			_set_all_cursors(child, cursor_shape)
 
 func _ready():
-	set_default_cursor_shape(Control.CURSOR_BUSY)
 	TheProject.node_changed.connect(_on_TheProject_node_changed)
 	TheProject.opened.connect(_on_TheProject_opened)
 	sprink_prop_list.visible = false
 	img_prop_list.visible = false
 	poly_prop_list.visible = false
-	objects_list.world = world_container
+	objects_list.world = world_view
 	
 	# add shortcuts
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
@@ -84,7 +83,7 @@ func _input(event):
 func _nearest_pickable_obj(pos_in_world: Vector2):
 	var smallest_dist_px = null
 	var nearest_pick_area = null
-	var cursor : Area2D = world_container.cursor
+	var cursor : Area2D = world_view.cursor
 	for pick_area in cursor.get_overlapping_areas():
 		var obj_center = pick_area.global_position
 		var pick_parent = pick_area.get_parent()
@@ -104,7 +103,7 @@ func _handle_left_click(click_pos: Vector2):
 	if not _is_point_over_world(click_pos):
 		return
 	
-	var pos_in_world_px = _global_xy_to_pos_in_world(click_pos)
+	var pos_in_world_px = world_view.global_xy_to_pos_in_world(click_pos)
 	match mode:
 		Mode.Idle:
 			if _hovered_obj:
@@ -269,17 +268,13 @@ func _on_polygon_selected(poly: PolygonNode, is_single: bool):
 		poly_prop_list.show()
 
 func _is_point_over_world(global_pos: Vector2) -> bool:
-	return world_container.get_global_rect().has_point(global_pos)
-
-func _global_xy_to_pos_in_world(global_pos: Vector2) -> Vector2:
-	var pos_rel_to_world = global_pos - world_container.global_position
-	return world_container.pan_zoom_ctrl.local_pos_to_world(pos_rel_to_world)
+	return world_view.get_global_rect().has_point(global_pos)
 
 func _on_add_sprinkler_pressed():
 	sprinkler_to_add = SprinklerScene.instantiate()
 	sprinkler_to_add.user_label = TheProject.get_unique_name('Sprinkler')
-	sprinkler_to_add.position = _global_xy_to_pos_in_world(get_global_mouse_position())
-	world_container.objects.add_child(sprinkler_to_add)
+	sprinkler_to_add.position = world_view.global_xy_to_pos_in_world(get_global_mouse_position())
+	world_view.objects.add_child(sprinkler_to_add)
 	mode = Mode.AddSprinkler
 
 func _on_add_image_pressed():
@@ -288,7 +283,7 @@ func _on_add_image_pressed():
 func _on_add_dist_measure_pressed():
 	dist_meas_to_add = DistanceMeasurementScene.instantiate()
 	dist_meas_to_add.user_label = TheProject.get_unique_name('DistanceMeasurement')
-	world_container.objects.add_child(dist_meas_to_add)
+	world_view.objects.add_child(dist_meas_to_add)
 	mode = Mode.AddDistMeasureA
 
 func _on_add_polygon_pressed():
@@ -297,27 +292,27 @@ func _on_add_polygon_pressed():
 	poly_to_add.picked = true
 	poly_to_add.add_point(Vector2())
 	poly_edit_point_idx = 0
-	world_container.objects.add_child(poly_to_add)
+	world_view.objects.add_child(poly_to_add)
 	mode = Mode.AddPolygon
 
 func _on_remove_button_pressed():
 	for obj in _selected_objs:
 		undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.Remove.new(
-			world_container,
+			world_view,
 			await obj.get_order_in_world(),
 			obj))
 		TheProject.remove_object(obj)
 	_clear_selected_objects()
 
 func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
-	var obj_in_world = obj in world_container.objects.get_children()
+	var obj_in_world = obj in world_view.objects.get_children()
 	match change_type:
 		TheProject.ChangeType.ADD:
 			if not obj_in_world:
-				world_container.objects.add_child(obj)
+				world_view.objects.add_child(obj)
 		TheProject.ChangeType.REMOVE:
 			if obj_in_world:
-				world_container.objects.remove_child(obj)
+				world_view.objects.remove_child(obj)
 		TheProject.ChangeType.PROP_EDIT:
 			var prop_name : String = args[0]
 			var old_value = args[1]
@@ -339,29 +334,37 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 func _on_TheProject_opened():
 	undo_redo_ctrl.reset()
 	show_grid_button.button_pressed = TheProject.layout_pref.show_grid
-	world_container.camera2d.position = TheProject.layout_pref.camera_pos
-	world_container.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.layout_pref.zoom
+	world_view.camera2d.position = TheProject.layout_pref.camera_pos
+	world_view.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.layout_pref.zoom
 
 func _on_img_dialog_file_selected(path):
-	TheProject.add_image(path)
+	if img_import_wizard.load_img(path):
+		img_import_wizard.popup_centered()
+
+func _on_image_import_wizard_accepted(img_path: String, size_ft: Vector2) -> void:
+	var new_image := TheProject.add_image(img_path)
+	print(new_image)
+	if new_image:
+		new_image.width_ft = size_ft.x
+		new_image.height_ft = size_ft.y
 
 func _on_show_grid_checkbox_toggled(toggled_on):
-	world_container.show_grid = toggled_on
+	world_view.show_grid = toggled_on
 	TheProject.layout_pref.show_grid = toggled_on
 
 func _on_world_object_reordered(from_idx: int, to_idx: int):
 	var undo_op := WorldObjectUndoRedoOps.Reordered.new(
-		world_container,
+		world_view,
 		from_idx,
 		to_idx)
 	undo_redo_ctrl.push_undo_op(undo_op)
 	TheProject.has_edits = true
 
 func _on_preference_update_timer_timeout():
-	TheProject.layout_pref.camera_pos = world_container.camera2d.position
-	TheProject.layout_pref.zoom = world_container.camera2d.zoom.x
+	TheProject.layout_pref.camera_pos = world_view.camera2d.position
+	TheProject.layout_pref.zoom = world_view.camera2d.zoom.x
 
-func _on_viewport_container_gui_input(event):
+func _on_world_view_gui_input(event: InputEvent):
 	if event is InputEventMouseButton:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
@@ -375,11 +378,7 @@ func _on_viewport_container_gui_input(event):
 	elif event is InputEventMouseMotion:
 		var evt_global_pos = event.global_position
 		if _is_point_over_world(evt_global_pos):
-			var pos_in_world_px = _global_xy_to_pos_in_world(evt_global_pos)
-			var pos_in_world_ft = Utils.px_to_ft_vec(pos_in_world_px)
-			var x_pretty = Utils.pretty_dist(pos_in_world_ft.x)
-			var y_pretty = Utils.pretty_dist(pos_in_world_ft.y)
-			mouse_pos_label.text = "%s, %s" % [x_pretty, y_pretty]
+			var pos_in_world_px = world_view.global_xy_to_pos_in_world(evt_global_pos)
 			
 			# detect which object mouse is hovering over
 			if mode == Mode.Idle:

@@ -177,23 +177,20 @@ func load_image(filename: String) -> Image:
 func get_unique_name(subclass: String) -> String:
 	return '%s%d' % [subclass, get_subclass_count(subclass)]
 
-func add_image(path: String) -> bool:
+func add_image(path: String) -> ImageNode:
+	# try to copy image into project directories img dir
 	var filename = path.get_file()
-	# make sure we don't already have an image with that name imported
-	for obj in objects:
-		if obj is ImageNode and obj.filename == filename:
-			push_warning("image with filename '%s' already imported" % filename)
-			return false
-	
-	# copy image into project directories img dir
 	var img_path = get_img_dir().path_join(filename)
-	if DirAccess.copy_absolute(path, img_path) != OK:
+	if FileAccess.file_exists(img_path):
+		# TODO warn user about importing existing?
+		pass # already exist, so don't copy
+	elif DirAccess.copy_absolute(path, img_path) != OK:
 		push_warning("failed to copy '%s' to '%s'" % [path, img_path])
-		return false
+		return null
 	var img = Image.load_from_file(img_path)
 	if not (img is Image):
 		push_warning("failed to load image '%s'" % [img_path])
-		return false
+		return null
 	
 	# load image and create a new ImageNode
 	var img_node : ImageNode = ImageNodeScene.instantiate()
@@ -201,7 +198,7 @@ func add_image(path: String) -> bool:
 	img_node.user_label = get_unique_name('ImageNode')
 	add_object(img_node)
 	has_edits = true
-	return true
+	return img_node
 
 func serialize():
 	var objects_ser = []

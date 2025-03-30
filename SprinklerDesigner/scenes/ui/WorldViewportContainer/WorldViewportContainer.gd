@@ -1,4 +1,4 @@
-extends SubViewportContainer
+extends Control
 class_name WorldViewportContainer
 
 signal world_object_reordered(from_idx: int, to_idx: int)
@@ -8,15 +8,26 @@ const MAJOR_LINE_WIDTH := 1
 const ORIGIN_VERT_COLOR := Color.LIME_GREEN
 const ORIGIN_HORZ_COLOR := Color.INDIAN_RED
 
-@onready var viewport      : Viewport = $Viewport
-@onready var objects       := $Viewport/Objects
-@onready var pan_zoom_ctrl := $Viewport/PanZoomController
-@onready var camera2d      : Camera2D = $Viewport/Camera2D
-@onready var cursor        := $Viewport/Cursor
+@onready var viewport         : Viewport = $ViewportContainer/Viewport
+@onready var objects          := $ViewportContainer/Viewport/Objects
+@onready var pan_zoom_ctrl    := $ViewportContainer/Viewport/PanZoomController
+@onready var camera2d         : Camera2D = $ViewportContainer/Viewport/Camera2D
+@onready var cursor           := $ViewportContainer/Viewport/Cursor
+@onready var cursor_pos_label : Label = $CursorPositionLabel
 
 var show_grid = true:
 	set(value):
 		show_grid = value
+		queue_redraw()
+
+var show_cursor_position_label = true:
+	set(value):
+		show_cursor_position_label = value
+		cursor_pos_label.visible = value
+
+var show_cursor_crosshairs = false:
+	set(value):
+		show_cursor_crosshairs = value
 		queue_redraw()
 
 var major_spacing_ft : float = 5:
@@ -59,10 +70,16 @@ func get_object_order_idx(obj: WorldObject) -> int:
 func get_image_of_current_view() -> Image:
 	return viewport.get_texture().get_image()
 
+func global_xy_to_pos_in_world(global_pos: Vector2) -> Vector2:
+	var pos_rel_to_world := global_pos - self.global_position
+	return pan_zoom_ctrl.local_pos_to_world(pos_rel_to_world)
+
 func _draw():
 	if show_grid:
 		_draw_grid(major_spacing_ft, major_line_color, MAJOR_LINE_WIDTH)
 		_draw_origin()
+	if show_cursor_crosshairs:
+		_draw_cursor_crosshairs()
 
 func _draw_origin():
 	var origin_pos_local = pan_zoom_ctrl.world_pos_to_local(Vector2(0, 0))
@@ -78,11 +95,29 @@ func _draw_origin():
 	if origin_pos_local.y >= 0 and origin_pos_local.y < visible_rect_size.y:
 		_draw_horz_lines(
 			origin_pos_local.y,  # start_y
-			0.0,                 # step,
+			0.0,                 # step
 			visible_rect_size.x, # width
-			1,                   # n_lines,
+			1,                   # n_lines
 			ORIGIN_HORZ_COLOR,   # color
 			MAJOR_LINE_WIDTH)    # line_width
+
+func _draw_cursor_crosshairs() -> void:
+	var cursor_pos_local := pan_zoom_ctrl.world_pos_to_local(cursor.position) as Vector2
+	var visible_rect_size := viewport.get_visible_rect().size
+	_draw_horz_lines(
+		cursor_pos_local.y, # start_y
+		0.0,                # step
+		visible_rect_size.x,# width
+		1,                  # n_lines
+		Color.WHITE,        # color
+		1)                  # line_width
+	_draw_vert_lines(
+		cursor_pos_local.x, # start_x
+		0.0,                # step
+		visible_rect_size.y,# width
+		1,                  # n_lines
+		Color.WHITE,        # color
+		1)                  # line_width
 
 func _draw_grid(grid_spacing_ft: float, color: Color, line_width: int):
 	var visible_rect_size := viewport.get_visible_rect().size
@@ -155,3 +190,14 @@ func _process(_delta):
 
 func _on_pan_zoom_controller_pan_state_changed(panning: bool) -> void:
 	pan_state_changed.emit(panning)
+
+func _on_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		var pos_in_world_px = global_xy_to_pos_in_world(event.global_position)
+		var pos_in_world_ft = Utils.px_to_ft_vec(pos_in_world_px)
+		var x_pretty = Utils.pretty_dist(pos_in_world_ft.x)
+		var y_pretty = Utils.pretty_dist(pos_in_world_ft.y)
+		cursor_pos_label.text = "%s, %s" % [x_pretty, y_pretty]
+		
+		if show_cursor_crosshairs:
+			queue_redraw()

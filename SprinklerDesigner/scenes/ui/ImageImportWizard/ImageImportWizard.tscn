@@ -1,0 +1,119 @@
+[gd_scene load_steps=5 format=3 uid="uid://cn8j4nj6r83we"]
+
+[ext_resource type="Script" path="res://scenes/ui/ImageImportWizard/ImageImportWizard.gd" id="1_3bvd7"]
+[ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/ui/WorldViewportContainer/WorldViewportContainer.tscn" id="2_sxrle"]
+[ext_resource type="Texture2D" uid="uid://dfapileftgyqj" path="res://assets/icons/EditorControlAnchor.svg" id="4_dmirq"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qhx0g"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.113725, 0.133333, 0.160784, 1)
+
+[node name="ImageImportWizard" type="Window"]
+title = "Image Import Wizard"
+size = Vector2i(1400, 800)
+exclusive = true
+script = ExtResource("1_3bvd7")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_qhx0g")
+
+[node name="HSplitContainer" type="VSplitContainer" parent="PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/HSplitContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/HSplitContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "This tool helps you resize the image into real-world coordinate space."
+
+[node name="HelpLabel" type="Label" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "You'll define 2 reference points, and then specify the real-world distance between them. Click to define the 1st reference point."
+
+[node name="RealDistHBox" type="HBoxContainer" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/RealDistHBox"]
+layout_mode = 2
+text = "Real Distance:"
+
+[node name="RealDistanceSpinBox" type="SpinBox" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/RealDistHBox"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+min_value = 0.01
+max_value = 20000.0
+step = 0.01
+value = 1.0
+suffix = "ft"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="Control" type="Control" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CancelButton" type="Button" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Cancel"
+
+[node name="Control2" type="Control" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ResetButton" type="Button" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Restart"
+
+[node name="Control3" type="Control" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AcceptButton" type="Button" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+disabled = true
+text = "Accept"
+
+[node name="Control4" type="Control" parent="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ViewportContainer" parent="PanelContainer/HSplitContainer" instance=ExtResource("2_sxrle")]
+layout_mode = 2
+
+[node name="RefNodeA" type="Node2D" parent="PanelContainer/HSplitContainer/ViewportContainer"]
+
+[node name="Sprite2D" type="Sprite2D" parent="PanelContainer/HSplitContainer/ViewportContainer/RefNodeA"]
+position = Vector2(-8, -8)
+texture = ExtResource("4_dmirq")
+
+[node name="RefNodeB" type="Node2D" parent="PanelContainer/HSplitContainer/ViewportContainer"]
+
+[node name="Sprite2D" type="Sprite2D" parent="PanelContainer/HSplitContainer/ViewportContainer/RefNodeB"]
+position = Vector2(-8, -8)
+texture = ExtResource("4_dmirq")
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="value_changed" from="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/RealDistHBox/RealDistanceSpinBox" to="." method="_on_real_distance_spin_box_value_changed"]
+[connection signal="pressed" from="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/HBoxContainer/CancelButton" to="." method="_on_cancel_button_pressed"]
+[connection signal="pressed" from="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/HBoxContainer/ResetButton" to="." method="_on_reset_button_pressed"]
+[connection signal="pressed" from="PanelContainer/HSplitContainer/PanelContainer/VBoxContainer/HBoxContainer/AcceptButton" to="." method="_on_accept_button_pressed"]
+[connection signal="gui_input" from="PanelContainer/HSplitContainer/ViewportContainer" to="." method="_on_viewport_container_gui_input"]
