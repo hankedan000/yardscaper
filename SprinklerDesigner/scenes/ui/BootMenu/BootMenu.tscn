@@ -38,10 +38,9 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_8iuw1")
 script = ExtResource("1_a8g1b")
 PreviousItemScene = ExtResource("5_jgdj7")
 
-[node name="OpenProjectDialog" type="FileDialog" parent="."]
-title = "Open a Directory"
+[node name="ImportProjectDialog" type="FileDialog" parent="."]
+title = "Open an Existing Project Directory"
 initial_position = 4
-size = Vector2i(510, 180)
 ok_button_text = "Select Current Folder"
 dialog_hide_on_ok = true
 mode_overrides_title = false
@@ -133,7 +132,7 @@ layout_mode = 2
 text = "v0.0.0"
 label_settings = ExtResource("10_1eadb")
 
-[connection signal="dir_selected" from="OpenProjectDialog" to="." method="_on_open_project_dialog_dir_selected"]
+[connection signal="dir_selected" from="ImportProjectDialog" to="." method="_on_import_project_dialog_dir_selected"]
 [connection signal="create_requested" from="CreateProjectDialog" to="." method="_on_create_project_dialog_create_requested"]
 [connection signal="project_renamed" from="RenameProjectDialog" to="." method="_on_rename_project_dialog_project_renamed"]
 [connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/TopButtonBar/CreateProjectButton" to="." method="_on_create_project_button_pressed"]

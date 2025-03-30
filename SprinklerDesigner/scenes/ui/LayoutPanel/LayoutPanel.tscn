@@ -7,14 +7,14 @@
 [ext_resource type="PackedScene" uid="uid://cmr73cpklqypc" path="res://scenes/world_objects/PolygonNode/PolygonNode.tscn" id="4_85obg"]
 [ext_resource type="PackedScene" uid="uid://bujgf1ym2asal" path="res://scenes/ui/ImageNodePropertyEditor/ImageNodePropertyEditor.tscn" id="4_legmd"]
 [ext_resource type="PackedScene" uid="uid://c7ey0qd3m5ads" path="res://scenes/ui/ObjectsList/ObjectsList.tscn" id="5_p3ckg"]
-[ext_resource type="Texture2D" uid="uid://bumt4lc5f8gm2" path="res://assets/icons/Add.svg" id="6_58poj"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="7_nx6cf"]
 [ext_resource type="PackedScene" uid="uid://0w6g4f1p5gwe" path="res://scenes/ui/PolygonNodePropertyEditor/PolygonNodePropertyEditor.tscn" id="7_u58qy"]
 [ext_resource type="Texture2D" uid="uid://covc7nfq44by2" path="res://assets/icons/GridToggle.svg" id="8_uxbpy"]
+[ext_resource type="Texture2D" uid="uid://b7dml04prcvb" path="res://assets/icons/Water.svg" id="9_t5ctp"]
 [ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/ui/WorldViewportContainer/WorldViewportContainer.tscn" id="9_xrpqu"]
 [ext_resource type="Texture2D" uid="uid://cn15hpoo53btg" path="res://assets/icons/Image.svg" id="10_7tkh4"]
-[ext_resource type="Texture2D" uid="uid://porixx8ktoya" path="res://assets/icons/Hsize.svg" id="11_vji1l"]
-[ext_resource type="Texture2D" uid="uid://dg6r7624m4adj" path="res://assets/icons/Polygon2D.svg" id="12_j86x8"]
+[ext_resource type="Texture2D" uid="uid://cu32v2mhfe8e5" path="res://assets/icons/Ruler.svg" id="11_6kdtp"]
+[ext_resource type="Texture2D" uid="uid://bp0qj22qp5ed7" path="res://assets/icons/PolygonTool.svg" id="12_0ook5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60egv"]
 bg_color = Color(0.105882, 0.113725, 0.12549, 1)
@@ -87,47 +87,58 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add sprinkler"
 focus_mode = 0
-text = "Add Sprinkler"
-icon = ExtResource("6_58poj")
+icon = ExtResource("9_t5ctp")
+icon_alignment = 1
 
 [node name="AddImage" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add image"
 focus_mode = 0
 icon = ExtResource("10_7tkh4")
+icon_alignment = 1
 
 [node name="AddDistMeasure" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add distance measurement"
 focus_mode = 0
-icon = ExtResource("11_vji1l")
+icon = ExtResource("11_6kdtp")
+icon_alignment = 1
 
 [node name="AddPolygon" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add polygon shape"
 focus_mode = 0
-icon = ExtResource("12_j86x8")
+icon = ExtResource("12_0ook5")
+icon_alignment = 1
 
 [node name="RemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Remove item"
 focus_mode = 0
 disabled = true
 icon = ExtResource("7_nx6cf")
+icon_alignment = 1
 
 [node name="VSeparator" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 layout_mode = 2
 
 [node name="ShowGridButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Toggle grid visibility"
 focus_mode = 0
 toggle_mode = true
 button_pressed = true
 icon = ExtResource("8_uxbpy")
+icon_alignment = 1
 
 [node name="World" type="Control" parent="HSplitContainer/Layout"]
 layout_mode = 2

@@ -4,7 +4,7 @@ class_name BootMenu
 @export var PreviousItemScene : PackedScene = null
 
 @onready var previous_projects := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/ScrollContainer/PreviousProjects
-@onready var open_project_dialog := $OpenProjectDialog
+@onready var import_project_dialog := $ImportProjectDialog
 @onready var create_project_dialog := $CreateProjectDialog
 @onready var rename_project_dialog := $RenameProjectDialog
 @onready var open_button := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/OpenButton
@@ -49,7 +49,7 @@ func _on_create_project_button_pressed():
 	create_project_dialog.popup_centered()
 
 func _on_import_project_button_pressed():
-	open_project_dialog.popup_centered()
+	import_project_dialog.popup_centered()
 
 func _on_recent_project_selected(item: PreviousProjectItem):
 	selected_project_item = item
@@ -57,7 +57,8 @@ func _on_recent_project_selected(item: PreviousProjectItem):
 func _on_recent_project_opened(item: PreviousProjectItem):
 	Globals.main.open_project_editor(item.get_project_path())
 
-func _on_open_project_dialog_dir_selected(dir: String) -> void:
+func _on_import_project_dialog_dir_selected(dir: String) -> void:
+	# use get_quick_info() to make sure project is valid
 	if Project.get_quick_info(dir) != null:
 		Globals.add_recent_project(dir)
 		_reload_previous_projects()
