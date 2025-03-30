@@ -125,13 +125,28 @@ func _handle_left_click(click_pos: Vector2):
 	if not _is_point_over_world(click_pos):
 		return
 	
-	var pos_in_world_px = world_view.global_xy_to_pos_in_world(click_pos)
 	match mode:
 		Mode.Idle:
 			if _hovered_obj:
 				if not Input.is_key_pressed(KEY_CTRL) and _hovered_obj not in _selected_objs:
 					_clear_selected_objects()
 				_add_selected_object(_hovered_obj)
+
+func _handle_left_click_release(click_pos: Vector2):
+	var pos_in_world_px = world_view.global_xy_to_pos_in_world(click_pos)
+	match mode:
+		Mode.Idle:
+			if not Input.is_key_pressed(KEY_CTRL):
+				_clear_selected_objects()
+			if _hovered_obj:
+				_add_selected_object(_hovered_obj)
+		Mode.MovingObjects:
+			for obj in _selected_objs:
+				if obj is MoveableNode2D:
+					obj.finish_move()
+			_move_undo_batch = null
+			_mouse_move_start_pos_px = null
+			mode = Mode.Idle
 		Mode.AddSprinkler:
 			TheProject.add_object(sprinkler_to_add)
 			sprinkler_to_add = null
@@ -149,23 +164,6 @@ func _handle_left_click(click_pos: Vector2):
 			poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
 			poly_to_add.add_point(pos_in_world_px)
 			poly_edit_point_idx = poly_to_add.point_count() - 1
-		_:
-			push_warning("unsupported left click for mode '%s'" % Mode.keys()[mode])
-
-func _handle_left_click_release():
-	match mode:
-		Mode.Idle:
-			if not Input.is_key_pressed(KEY_CTRL):
-				_clear_selected_objects()
-			if _hovered_obj:
-				_add_selected_object(_hovered_obj)
-		Mode.MovingObjects:
-			for obj in _selected_objs:
-				if obj is MoveableNode2D:
-					obj.finish_move()
-			_move_undo_batch = null
-			_mouse_move_start_pos_px = null
-			mode = Mode.Idle
 
 func _handle_held_obj_move(mouse_pos_in_world_px: Vector2) -> void:
 	if _mouse_move_start_pos_px == null:
@@ -330,6 +328,9 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 		TheProject.ChangeType.ADD:
 			if not obj_in_world:
 				world_view.objects.add_child(obj)
+			if obj is PickableNode2D:
+				_clear_selected_objects()
+				_add_selected_object(obj)
 		TheProject.ChangeType.REMOVE:
 			if obj_in_world:
 				world_view.objects.remove_child(obj)
@@ -392,7 +393,7 @@ func _on_world_view_gui_input(event: InputEvent):
 					if event.pressed:
 						_handle_left_click(event.global_position)
 					else:
-						_handle_left_click_release()
+						_handle_left_click_release(event.global_position)
 			MOUSE_BUTTON_RIGHT:
 				_cancel_mode() # will only cancel if possible
 	elif event is InputEventMouseMotion:
