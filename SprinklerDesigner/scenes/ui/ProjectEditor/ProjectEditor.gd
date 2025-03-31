@@ -15,7 +15,8 @@ enum EditMenuIDs {
 }
 
 enum HelpMenuIDs {
-	About = 1
+	Help = 1,
+	About = 2
 }
 
 enum CloseType {
@@ -29,6 +30,7 @@ enum CloseType {
 @onready var unsaved_changes_dialog := $UnsavedChangesDialog
 @onready var export_to_img_dialog := $ExportToImageDialog
 @onready var about_dialog := $AboutDialog
+@onready var help_dialog := $HelpDialog
 @onready var proj_menu := $VBoxContainer/MenuBar/Project
 @onready var edit_menu := $VBoxContainer/MenuBar/Edit
 @onready var proj_tabs := $VBoxContainer/ProjectTabs
@@ -186,6 +188,8 @@ func _on_edit_id_pressed(id):
 
 func _on_help_id_pressed(id):
 	match id:
+		HelpMenuIDs.Help:
+			help_dialog.popup_centered()
 		HelpMenuIDs.About:
 			about_dialog.popup_centered()
 	

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://u1375je75c1f"]
+[gd_scene load_steps=11 format=3 uid="uid://u1375je75c1f"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/ProjectEditor.gd" id="2_rxefj"]
 [ext_resource type="PackedScene" uid="uid://dfag2aakh64er" path="res://scenes/ui/UnsavedChangesDialog/UnsavedChangesDialog.tscn" id="3_fwduj"]
@@ -15,8 +15,7 @@ content_margin_bottom = 4.0
 bg_color = Color(0.105882, 0.113725, 0.12549, 1)
 
 [sub_resource type="GDScript" id="GDScript_bcc41"]
-script/source = "@tool
-extends Window
+script/source = "extends Window
 
 @onready var name_label := $PanelContainer/VBox/NameLabel
 @onready var ver_label := $PanelContainer/VBox/VersionLabel
@@ -31,6 +30,13 @@ func _on_source_link_meta_clicked(meta):
 	OS.shell_open(meta)
 
 func _on_close_requested():
+	hide()
+"
+
+[sub_resource type="GDScript" id="GDScript_rj45b"]
+script/source = "extends Window
+
+func _on_close_requested() -> void:
 	hide()
 "
 
@@ -104,6 +110,49 @@ bbcode_enabled = true
 text = "[center][url=\"https://github.com/hankedan000/sprinkler_designer\"]github.com/hankedan000/sprinkler_designer[/url][/center]"
 fit_content = true
 
+[node name="HelpDialog" type="Window" parent="."]
+title = "Help"
+size = Vector2i(600, 400)
+visible = false
+script = SubResource("GDScript_rj45b")
+
+[node name="PanelContainer" type="PanelContainer" parent="HelpDialog"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HelpDialog/PanelContainer"]
+layout_mode = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="HelpDialog/PanelContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "[b]Editor Keyboard Shortcuts[/b]
+[ul]
+Save: Ctrl + S
+Save As: Ctrl + Shift + S
+Undo: Ctrl + Z
+Redo: Ctrl + Shift + Z
+Cancel: Escape
+Delete item: Delete
+Shift item up: Page Up
+Shift item down: Page Down
+Shift item to top: Home
+Shift item to bottom: End
+[/ul]
+
+[b]Editor Mouse Controls[/b]
+[ul]
+Zoom: Mouse Wheel
+Pan: Click Middle Mouse Wheel + Drag
+Select item: Left click
+Multi-select items: Shift + Left Click
+[/ul]"
+
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
 
@@ -137,9 +186,11 @@ item_1/disabled = true
 
 [node name="Help" type="PopupMenu" parent="VBoxContainer/MenuBar"]
 title = "Help"
-item_count = 1
-item_0/text = "About ..."
+item_count = 2
+item_0/text = "Help ..."
 item_0/id = 1
+item_1/text = "About ..."
+item_1/id = 2
 
 [node name="ProjectTabs" type="TabContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -165,6 +216,7 @@ metadata/_tab_index = 1
 [connection signal="save" from="UnsavedChangesDialog" to="." method="_on_unsaved_changes_dialog_save"]
 [connection signal="export" from="ExportToImageDialog" to="." method="_on_export_to_image_dialog_export"]
 [connection signal="close_requested" from="AboutDialog" to="AboutDialog" method="_on_close_requested"]
+[connection signal="close_requested" from="HelpDialog" to="HelpDialog" method="_on_close_requested"]
 [connection signal="id_pressed" from="VBoxContainer/MenuBar/Project" to="." method="_on_project_id_pressed"]
 [connection signal="id_pressed" from="VBoxContainer/MenuBar/Edit" to="." method="_on_edit_id_pressed"]
 [connection signal="id_pressed" from="VBoxContainer/MenuBar/Help" to="." method="_on_help_id_pressed"]
