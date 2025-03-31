@@ -1,5 +1,7 @@
 extends VBoxContainer
 
+@export var ObjectsListButtonScene : PackedScene = null
+
 @onready var grid := $ScrollContainer/ObjectsGrid
 
 var _ui_needs_sync = false
@@ -33,17 +35,16 @@ func _sync_ui():
 	var do_adds = grid.get_child_count() < len(objects)
 	while len(objects) != grid.get_child_count():
 		if do_adds:
-			var new_item := Button.new()
+			var new_item := ObjectsListButtonScene.instantiate()
 			grid.add_child(new_item)
 		else:
 			grid.remove_child(grid.get_child(grid.get_child_count() - 1))
 	
 	# update UI's labels to match names of objects in world
 	for idx in range(len(objects)):
-		var obj = objects[idx]
-		var button : Button = grid.get_child(idx)
-		button.text = obj.user_label
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		var obj := objects[idx] as WorldObject
+		var button := grid.get_child(idx) as ObjectsListButton
+		button.world_object = obj
 
 func _shift_object(dir):
 	var focus_owner = get_viewport().gui_get_focus_owner()

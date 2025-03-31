@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://feb2ad46n08w"]
+
+[ext_resource type="Script" path="res://scenes/ui/ObjectsList/ObjectsListButton.gd" id="1_uy3wa"]
+
+[node name="Button" type="Button"]
+anchors_preset = -1
+anchor_right = 0.211
+anchor_bottom = 0.077
+offset_right = -0.0210114
+offset_bottom = 0.199997
+text = "1234"
+alignment = 0
+script = ExtResource("1_uy3wa")
+
+[connection signal="toggled" from="." to="." method="_on_toggled"]
