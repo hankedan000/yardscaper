@@ -86,6 +86,7 @@ func _ready():
 	img_prop_list.visible = false
 	poly_prop_list.visible = false
 	objects_list.world = world_view
+	img_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
 	
 	# add shortcuts
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)

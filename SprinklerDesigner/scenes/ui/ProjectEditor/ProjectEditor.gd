@@ -193,7 +193,7 @@ func _on_export_to_image_dialog_export(view_opt, _zone: int, filepath: String):
 	var img = null
 	match view_opt:
 		Globals.ViewOptions.Current:
-			img = layout_tab.world_container.get_image_of_current_view()
+			img = layout_tab.world_view.get_image_of_current_view()
 		_:
 			push_warning("unsupported view export option '%s'" % Globals.ViewOptions.keys()[view_opt])
 			return
