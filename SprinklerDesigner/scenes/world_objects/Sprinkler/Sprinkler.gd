@@ -223,3 +223,7 @@ func _cap_values():
 		sweep_deg = min_sweep_deg
 	elif sweep_deg > max_sweep_deg:
 		sweep_deg = max_sweep_deg
+
+func _on_picked_state_changed() -> void:
+	show_min_dist = picked
+	show_max_dist = picked

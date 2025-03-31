@@ -1,10 +1,12 @@
 extends PanelContainer
 
+const MULTI_SELECT_KEY = KEY_SHIFT
+
 @onready var img_dialog               := $ImgDialog
 
-@onready var sprink_prop_list         := $HSplitContainer/LeftPane/Properties/SprinklerPropertiesList
-@onready var img_prop_list            := $HSplitContainer/LeftPane/Properties/ImageNodePropertiesList
-@onready var poly_prop_list           := $HSplitContainer/LeftPane/Properties/PolygonNodePropertiesList
+@onready var sprink_prop_list         : SprinklerPropertyEditor = $HSplitContainer/LeftPane/Properties/SprinklerPropertiesList
+@onready var img_prop_list            : ImageNodePropertyEditor = $HSplitContainer/LeftPane/Properties/ImageNodePropertiesList
+@onready var poly_prop_list           : PolygonNodePropertyEditor = $HSplitContainer/LeftPane/Properties/PolygonNodePropertiesList
 @onready var objects_list             := $HSplitContainer/LeftPane/Objects
 
 @onready var add_sprink_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler
@@ -140,18 +142,24 @@ func _handle_left_click(click_pos: Vector2):
 	match mode:
 		Mode.Idle:
 			if _hovered_obj:
-				if not Input.is_key_pressed(KEY_CTRL) and _hovered_obj not in _selected_objs:
+				if not Input.is_key_pressed(MULTI_SELECT_KEY) and (_hovered_obj not in _selected_objs):
+					# handle corner case where object is newly selected and
+					# we start dragging without releasing yet.
 					_clear_selected_objects()
-				_add_selected_object(_hovered_obj)
+					_add_selected_object(_hovered_obj)
 
 func _handle_left_click_release(click_pos: Vector2):
 	var pos_in_world_px = world_view.global_xy_to_pos_in_world(click_pos)
 	match mode:
 		Mode.Idle:
-			if not Input.is_key_pressed(KEY_CTRL):
-				_clear_selected_objects()
-			if _hovered_obj:
-				_add_selected_object(_hovered_obj)
+			if not Input.is_key_pressed(MULTI_SELECT_KEY):
+				if _hovered_obj == null:
+					_clear_selected_objects()
+			else:
+				if _hovered_obj in _selected_objs:
+					_remove_selected_object(_hovered_obj)
+				elif _hovered_obj not in _selected_objs:
+					_add_selected_object(_hovered_obj)
 		Mode.MovingObjects:
 			for obj in _selected_objs:
 				if obj is MoveableNode2D:
@@ -230,71 +238,45 @@ func _cancel_add_polygon():
 
 func _clear_selected_objects() -> void:
 	for obj in _selected_objs:
-		_on_release_selected_obj(obj)
+		obj.picked = false
 	_selected_objs.clear()
 	remove_button.disabled = true
 
 func _add_selected_object(obj: PickableNode2D) -> void:
-	if obj not in _selected_objs:
-		_selected_objs.append(obj)
-	
-	sprink_prop_list.hide()
-	img_prop_list.hide()
-	poly_prop_list.hide()
-	var is_single := _selected_objs.size() == 1
-	if obj is Sprinkler:
-		_on_sprinkler_selected(obj, is_single)
-	elif obj is ImageNode:
-		_on_img_node_selected(obj, is_single)
-	elif obj is DistanceMeasurement:
-		_on_dist_measurement_selected(obj, is_single)
-	elif obj is PolygonNode:
-		_on_polygon_selected(obj, is_single)
-	elif obj != null:
-		push_warning("unsupported selection for obj '%s'" % obj)
-	
+	if obj == null:
+		return
+	elif obj in _selected_objs:
+		return # don't double add
+	obj.picked = true
+	_selected_objs.append(obj)
+	_update_property_pane()
 	remove_button.disabled = false
 
 func _remove_selected_object(obj: PickableNode2D) -> void:
-	_on_release_selected_obj(obj)
+	obj.picked = false
 	_selected_objs.erase(obj)
 	remove_button.disabled = _selected_objs.is_empty()
+	_update_property_pane()
 
-func _on_release_selected_obj(obj: PickableNode2D):
+func _update_property_pane():
+	sprink_prop_list.hide()
+	img_prop_list.hide()
+	poly_prop_list.hide()
+	
+	if _selected_objs.size() != 1:
+		return
+	
+	var obj = _selected_objs[0]
 	if obj is Sprinkler:
-		obj.picked = false
-		obj.show_min_dist = false
-		obj.show_max_dist = false
-	elif obj is ImageNode:
-		obj.picked = false
-	elif obj is DistanceMeasurement:
-		obj.picked = false
-	elif obj is PolygonNode:
-		obj.picked = false
-	elif obj != null:
-		push_warning("unsupported release for obj '%s'" % obj)
-
-func _on_sprinkler_selected(sprink: Sprinkler, is_single: bool):
-	sprink.picked = true
-	sprink.show_min_dist = true
-	sprink.show_max_dist = true
-	if is_single:
-		sprink_prop_list.sprinkler = sprink
+		sprink_prop_list.sprinkler = obj
 		sprink_prop_list.show()
-
-func _on_img_node_selected(img_node: ImageNode, is_single: bool):
-	img_node.picked = true
-	if is_single:
-		img_prop_list.img_node = img_node
+	elif obj is ImageNode:
+		img_prop_list.img_node = obj
 		img_prop_list.show()
-
-func _on_dist_measurement_selected(meas: DistanceMeasurement, _is_single: bool):
-	meas.picked = true
-
-func _on_polygon_selected(poly: PolygonNode, is_single: bool):
-	poly.picked = true
-	if is_single:
-		poly_prop_list.poly_node = poly
+	elif obj is DistanceMeasurement:
+		pass
+	elif obj is PolygonNode:
+		poly_prop_list.poly_node = obj
 		poly_prop_list.show()
 
 func _is_point_over_world(global_pos: Vector2) -> bool:

@@ -1,4 +1,5 @@
 extends GridContainer
+class_name SprinklerPropertyEditor
 
 @onready var user_label_lineedit      := $UserLabelLineEdit
 @onready var zone_spinbox             := $ZoneSpinBox

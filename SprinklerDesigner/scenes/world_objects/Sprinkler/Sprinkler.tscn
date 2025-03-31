@@ -5,3 +5,5 @@
 
 [node name="Sprinkler" instance=ExtResource("1_j5xd6")]
 script = ExtResource("2_u6dch")
+
+[connection signal="picked_state_changed" from="." to="." method="_on_picked_state_changed"]

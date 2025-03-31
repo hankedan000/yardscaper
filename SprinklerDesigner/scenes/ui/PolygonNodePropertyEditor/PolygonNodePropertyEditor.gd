@@ -1,4 +1,5 @@
 extends GridContainer
+class_name PolygonNodePropertyEditor
 
 @onready var user_label_lineedit := $UserLabelLineEdit
 @onready var color_picker := $ColorPicker

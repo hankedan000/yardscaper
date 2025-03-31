@@ -1,4 +1,5 @@
 extends GridContainer
+class_name ImageNodePropertyEditor
 
 @onready var user_label_lineedit := $UserLabelLineEdit
 @onready var width_spinbox  := $WidthSpinBox
