@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=20 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/world_objects/Sprinkler/Sprinkler.tscn" id="2_16d6l"]
@@ -16,6 +16,8 @@
 [ext_resource type="Texture2D" uid="uid://cn15hpoo53btg" path="res://assets/icons/Image.svg" id="10_7tkh4"]
 [ext_resource type="Texture2D" uid="uid://cu32v2mhfe8e5" path="res://assets/icons/Ruler.svg" id="11_6kdtp"]
 [ext_resource type="Texture2D" uid="uid://bp0qj22qp5ed7" path="res://assets/icons/PolygonTool.svg" id="12_0ook5"]
+[ext_resource type="Texture2D" uid="uid://dvsonuppgtdb7" path="res://assets/icons/Lock.svg" id="16_0llxi"]
+[ext_resource type="Texture2D" uid="uid://b2np3mm4ejoy6" path="res://assets/icons/Unlock.svg" id="17_pwsqd"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60egv"]
 bg_color = Color(0.105882, 0.113725, 0.12549, 1)
@@ -120,7 +122,7 @@ icon_alignment = 1
 [node name="RemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
-tooltip_text = "Remove item"
+tooltip_text = "Remove item(s)."
 focus_mode = 0
 disabled = true
 icon = ExtResource("7_nx6cf")
@@ -139,6 +141,27 @@ button_pressed = true
 icon = ExtResource("8_uxbpy")
 icon_alignment = 1
 
+[node name="VSeparator2" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+layout_mode = 2
+
+[node name="PositionLockButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "Enable position lock on selected object(s)."
+focus_mode = 0
+disabled = true
+icon = ExtResource("16_0llxi")
+icon_alignment = 1
+
+[node name="PositionUnlockButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+visible = false
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "Disable position lock on selected object(s)."
+focus_mode = 0
+icon = ExtResource("17_pwsqd")
+icon_alignment = 1
+
 [node name="WorldView" parent="HSplitContainer/Layout" instance=ExtResource("9_xrpqu")]
 layout_mode = 2
 size_flags_vertical = 3
@@ -154,6 +177,8 @@ autostart = true
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon" to="." method="_on_add_polygon_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/RemoveButton" to="." method="_on_remove_button_pressed"]
 [connection signal="toggled" from="HSplitContainer/Layout/LayoutToolbar/HBox/ShowGridButton" to="." method="_on_show_grid_checkbox_toggled"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionLockButton" to="." method="_on_position_lock_button_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton" to="." method="_on_position_unlock_button_pressed"]
 [connection signal="gui_input" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_view_gui_input"]
 [connection signal="pan_state_changed" from="HSplitContainer/Layout/WorldView" to="." method="_on_viewport_container_pan_state_changed"]
 [connection signal="world_object_reordered" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_object_reordered"]

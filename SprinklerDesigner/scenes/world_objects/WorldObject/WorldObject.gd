@@ -7,8 +7,10 @@ const PROP_KEY_POSITION_FT = &"position_ft"
 const PROP_KEY_USER_LABEL = &"user_label"
 const PROP_KEY_ROTATION_DEG = &"rotation_deg"
 const PROP_KEY_INFO_LABEL_VISIBLE = &"info_label.visible"
+const PROP_KEY_POSITION_LOCKED = &"position_locked"
 
-@onready var info_label : Label = $InfoLabel
+@onready var info_label     : Label = $InfoLabel
+@onready var lock_indicator := $LockIndicator
 
 var world : WorldViewportContainer = null
 var _is_ready = false
@@ -19,6 +21,14 @@ var user_label : String = "" :
 		user_label = value
 		if old_value != user_label:
 			property_changed.emit(self, PROP_KEY_USER_LABEL, old_value, user_label)
+
+var position_locked : bool = false:
+	set(value):
+		var old_value = position_locked
+		position_locked = value
+		lock_indicator.visible = position_locked
+		if old_value != position_locked:
+			property_changed.emit(self, PROP_KEY_POSITION_LOCKED, old_value, position_locked)
 
 func _ready():
 	# locate our parent WorldViewportContainer
@@ -61,7 +71,8 @@ func serialize():
 		PROP_KEY_POSITION_FT : Utils.vect2_to_pair(Utils.px_to_ft_vec(position)),
 		PROP_KEY_ROTATION_DEG : int(rotation_degrees),
 		PROP_KEY_USER_LABEL : user_label,
-		PROP_KEY_INFO_LABEL_VISIBLE: info_label.visible
+		PROP_KEY_INFO_LABEL_VISIBLE : info_label.visible,
+		PROP_KEY_POSITION_LOCKED : position_locked
 	}
 
 func deserialize(obj):
@@ -71,3 +82,4 @@ func deserialize(obj):
 	rotation_degrees = obj[PROP_KEY_ROTATION_DEG]
 	user_label = obj[PROP_KEY_USER_LABEL]
 	info_label.visible = Utils.dict_get(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)
+	position_locked = Utils.dict_get(obj, PROP_KEY_POSITION_LOCKED, false)

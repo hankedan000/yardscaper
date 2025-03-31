@@ -15,6 +15,8 @@ const MULTI_SELECT_KEY = KEY_SHIFT
 @onready var add_poly_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon
 @onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/HBox/RemoveButton
 @onready var show_grid_button         := $HSplitContainer/Layout/LayoutToolbar/HBox/ShowGridButton
+@onready var pos_lock_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/PositionLockButton
+@onready var pos_unlock_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton
 @onready var world_view               := $HSplitContainer/Layout/WorldView
 @onready var img_import_wizard        := $ImageImportWizard
 
@@ -48,13 +50,13 @@ var mode = Mode.Idle:
 			Mode.MovingObjects:
 				Utils.push_cursor_shape(Input.CURSOR_DRAG)
 			Mode.AddSprinkler:
-				Utils.push_cursor_shape(Input.CURSOR_ARROW)
+				Utils.push_cursor_shape(Input.CURSOR_CROSS)
 			Mode.AddDistMeasureA:
-				Utils.push_cursor_shape(Input.CURSOR_ARROW)
+				Utils.push_cursor_shape(Input.CURSOR_CROSS)
 			Mode.AddDistMeasureB:
-				Utils.push_cursor_shape(Input.CURSOR_ARROW)
+				Utils.push_cursor_shape(Input.CURSOR_CROSS)
 			Mode.AddPolygon:
-				Utils.push_cursor_shape(Input.CURSOR_ARROW)
+				Utils.push_cursor_shape(Input.CURSOR_CROSS)
 var sprinkler_to_add : Sprinkler = null
 var dist_meas_to_add : DistanceMeasurement = null
 var poly_to_add : PolygonNode = null
@@ -152,6 +154,7 @@ func _handle_left_click_release(click_pos: Vector2):
 	var pos_in_world_px = world_view.global_xy_to_pos_in_world(click_pos)
 	match mode:
 		Mode.Idle:
+			Utils.pop_cursor_shape()
 			if not Input.is_key_pressed(MULTI_SELECT_KEY):
 				if _hovered_obj == null:
 					_clear_selected_objects()
@@ -240,7 +243,7 @@ func _clear_selected_objects() -> void:
 	for obj in _selected_objs:
 		obj.picked = false
 	_selected_objs.clear()
-	remove_button.disabled = true
+	_update_ui_after_selection_change()
 
 func _add_selected_object(obj: PickableNode2D) -> void:
 	if obj == null:
@@ -249,16 +252,16 @@ func _add_selected_object(obj: PickableNode2D) -> void:
 		return # don't double add
 	obj.picked = true
 	_selected_objs.append(obj)
-	_update_property_pane()
-	remove_button.disabled = false
+	_update_ui_after_selection_change()
 
 func _remove_selected_object(obj: PickableNode2D) -> void:
 	obj.picked = false
 	_selected_objs.erase(obj)
-	remove_button.disabled = _selected_objs.is_empty()
-	_update_property_pane()
+	_update_ui_after_selection_change()
 
-func _update_property_pane():
+func _update_ui_after_selection_change():
+	_update_position_lock_buttons()
+	remove_button.disabled = _selected_objs.is_empty()
 	sprink_prop_list.hide()
 	img_prop_list.hide()
 	poly_prop_list.hide()
@@ -278,6 +281,25 @@ func _update_property_pane():
 	elif obj is PolygonNode:
 		poly_prop_list.poly_node = obj
 		poly_prop_list.show()
+
+func _update_position_lock_buttons():
+	var all_are_locked = true
+	for obj in _selected_objs:
+		if not obj.position_locked:
+			all_are_locked = false
+			break
+	
+	if _selected_objs.is_empty():
+		pos_lock_button.disabled = true
+		pos_lock_button.visible = true
+		pos_unlock_button.visible = false
+	elif all_are_locked:
+		pos_lock_button.visible = false
+		pos_unlock_button.visible = true
+	else:
+		pos_lock_button.disabled = false
+		pos_lock_button.visible = true
+		pos_unlock_button.visible = false
 
 func _is_point_over_world(global_pos: Vector2) -> bool:
 	return world_view.get_global_rect().has_point(global_pos)
@@ -418,10 +440,21 @@ func _on_world_view_gui_input(event: InputEvent):
 				if poly_edit_point_idx < poly_to_add.point_count():
 					poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
 			elif mode != Mode.MovingObjects and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				# check if any selected objects are position locked
+				var any_locked = false
 				for obj in _selected_objs:
-					if obj is MoveableNode2D:
-						obj.start_move()
-						mode = Mode.MovingObjects
+					if obj.position_locked:
+						any_locked = true
+						break
+				
+				# start move operations if no objects are locked
+				if any_locked:
+					Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
+				else:
+					for obj in _selected_objs:
+						if obj is MoveableNode2D:
+							obj.start_move()
+							mode = Mode.MovingObjects
 			
 			if mode == Mode.MovingObjects:
 				_handle_held_obj_move(pos_in_world_px)
@@ -431,3 +464,13 @@ func _on_viewport_container_pan_state_changed(panning: bool) -> void:
 		mode = Mode.Panning
 	else:
 		mode = Mode.Idle
+
+func _on_position_lock_button_pressed() -> void:
+	for obj in _selected_objs:
+		obj.position_locked = true
+	_update_position_lock_buttons()
+
+func _on_position_unlock_button_pressed() -> void:
+	for obj in _selected_objs:
+		obj.position_locked = false
+	_update_position_lock_buttons()
