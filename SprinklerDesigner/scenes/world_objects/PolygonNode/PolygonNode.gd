@@ -1,4 +1,4 @@
-extends MoveableNode2D
+extends WorldObject
 class_name PolygonNode
 
 const PERIMETER_WIDTH = 2
@@ -49,7 +49,7 @@ func _update_info_label():
 		font_size)
 	
 	# position the label in center of the polygon
-	info_label.global_position = get_global_center() - (text_size / 2.0)
+	info_label.global_position = get_visual_center() - (text_size / 2.0)
 
 func add_point(point: Vector2):
 	if ! _is_ready:
@@ -127,7 +127,7 @@ func get_area_ft() -> float:
 	var px_per_ft = Utils.ft_to_px(1.0)
 	return get_area_px() / (px_per_ft * px_per_ft)
 
-func get_global_center() -> Vector2:
+func get_visual_center() -> Vector2:
 	if point_count() == 0:
 		return poly.global_position
 	return poly.global_position + get_centroid_px()

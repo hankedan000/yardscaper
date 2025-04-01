@@ -1,4 +1,4 @@
-extends MoveableNode2D
+extends WorldObject
 class_name ImageNode
 
 const PROP_KEY_WIDTH_FT = &"width_ft"
@@ -54,7 +54,7 @@ func _draw():
 		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
 		draw_rect(Rect2(Vector2(), img_size_px()), indic_color, false, 4)
 
-func get_global_center() -> Vector2:
+func get_visual_center() -> Vector2:
 	return global_position + (img_size_px() / 2.0)
 
 func img_size_px() -> Vector2:

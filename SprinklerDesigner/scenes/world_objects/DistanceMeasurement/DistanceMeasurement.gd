@@ -1,4 +1,4 @@
-extends MoveableNode2D
+extends WorldObject
 class_name DistanceMeasurement
 
 var color := Color.BLACK

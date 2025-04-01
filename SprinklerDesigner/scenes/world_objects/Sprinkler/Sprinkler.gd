@@ -1,4 +1,4 @@
-extends MoveableNode2D
+extends WorldObject
 class_name Sprinkler
 
 const ARC_POINTS = 32

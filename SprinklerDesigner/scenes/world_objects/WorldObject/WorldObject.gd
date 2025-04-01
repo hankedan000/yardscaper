@@ -2,6 +2,8 @@ extends Node2D
 class_name WorldObject
 
 signal property_changed(obj: WorldObject, property_key: StringName, from, to)
+signal picked_state_changed()
+signal moved(obj: WorldObject, from_xy: Vector2, to_xy: Vector2)
 
 const PROP_KEY_POSITION_FT = &"position_ft"
 const PROP_KEY_USER_LABEL = &"user_label"
@@ -9,11 +11,12 @@ const PROP_KEY_ROTATION_DEG = &"rotation_deg"
 const PROP_KEY_INFO_LABEL_VISIBLE = &"info_label.visible"
 const PROP_KEY_POSITION_LOCKED = &"position_locked"
 
-@onready var info_label     : Label = $InfoLabel
-@onready var lock_indicator := $LockIndicator
+@onready var info_label      : Label = $InfoLabel
+@onready var lock_indicator  : Sprite2D = $LockIndicator
+@onready var pick_area       : Area2D = $PickArea
+@onready var pick_coll_shape : CollisionShape2D = $PickArea/CollisionShape2D
 
 var world : WorldViewportContainer = null
-var _is_ready = false
 
 var user_label : String = "" :
 	set(value):
@@ -29,6 +32,22 @@ var position_locked : bool = false:
 		lock_indicator.visible = position_locked
 		if old_value != position_locked:
 			property_changed.emit(self, PROP_KEY_POSITION_LOCKED, old_value, position_locked)
+
+var hovering : bool = false:
+	set(value):
+		hovering = value
+		queue_redraw()
+
+var picked : bool = false:
+	set(value):
+		var old_picked = picked
+		picked = value
+		if old_picked != picked:
+			picked_state_changed.emit()
+			queue_redraw()
+
+var _is_ready = false
+var _pos_at_move_start = null
 
 func _ready():
 	# locate our parent WorldViewportContainer
@@ -64,6 +83,34 @@ func set_info_label_visible(new_visible: bool) -> void:
 	info_label.visible = new_visible
 	if old_value != new_visible:
 		property_changed.emit(self, PROP_KEY_INFO_LABEL_VISIBLE, old_value, new_visible)
+
+func get_visual_center() -> Vector2:
+	return global_position
+
+func moving() -> bool:
+	return _pos_at_move_start != null
+
+func start_move():
+	if moving():
+		push_warning("move was already started. starting another one.")
+	_pos_at_move_start = position
+
+func update_move(delta):
+	if ! moving():
+		push_warning("can't update_move() when not moving")
+		return
+	position = _pos_at_move_start + delta
+
+func finish_move(cancel=false):
+	if not moving():
+		push_warning("move was never started")
+		return
+	
+	if cancel:
+		position = _pos_at_move_start
+	else:
+		moved.emit(self, _pos_at_move_start, position)
+	_pos_at_move_start = null
 
 func serialize():
 	return {

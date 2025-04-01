@@ -65,11 +65,11 @@ var undo_redo_ctrl := UndoRedoController.new()
 # vars for editing PolygonNode points
 var poly_edit_point_idx = 0
 
-var _selected_objs : Array[PickableNode2D] = []
+var _selected_objs : Array[WorldObject] = []
 var _mouse_move_start_pos_px = null
 var _move_undo_batch : UndoRedoController.OperationBatch = null
 # object that would be selected next if LEFT mouse button were pressed
-var _hovered_obj = null
+var _hovered_obj : WorldObject = null
 # serialized versions of all copied world objects
 var _copied_world_objs : Array[Dictionary] = []
 
@@ -112,7 +112,7 @@ func _input(event):
 			var helper := WorldObjectReorderHelper.new(_selected_objs)
 			helper.apply_shift_to_top(world_view)
 
-func _nearest_pickable_obj(pos_in_world: Vector2):
+func _nearest_pickable_obj(pos_in_world: Vector2) -> WorldObject:
 	var smallest_dist_px = null
 	var nearest_pick_area = null
 	var cursor : Area2D = world_view.cursor
@@ -121,8 +121,8 @@ func _nearest_pickable_obj(pos_in_world: Vector2):
 		var obj_center = pick_area.global_position
 		var pick_parent = pick_area.get_parent()
 		var draw_order = -1
-		if pick_parent is PickableNode2D:
-			obj_center = pick_parent.get_global_center()
+		if pick_parent is WorldObject:
+			obj_center = pick_parent.get_visual_center()
 			draw_order = pick_parent.get_order_in_world()
 		var dist_px = obj_center.distance_to(pos_in_world)
 		if draw_order < highest_draw_order:
@@ -134,7 +134,7 @@ func _nearest_pickable_obj(pos_in_world: Vector2):
 		highest_draw_order = draw_order
 	
 	if nearest_pick_area:
-		return nearest_pick_area.get_parent()
+		return nearest_pick_area.get_parent() as WorldObject
 	return null
 
 func _handle_left_click(click_pos: Vector2):
@@ -149,7 +149,7 @@ func _handle_left_click(click_pos: Vector2):
 					# handle corner case where object is newly selected and
 					# we start dragging without releasing yet.
 					_clear_selected_objects()
-					_add_selected_object(_hovered_obj)
+					_hovered_obj.picked = true
 
 func _handle_left_click_release(click_pos: Vector2):
 	var pos_in_world_px = world_view.global_xy_to_pos_in_world(click_pos)
@@ -160,14 +160,10 @@ func _handle_left_click_release(click_pos: Vector2):
 				if _hovered_obj == null:
 					_clear_selected_objects()
 			else:
-				if _hovered_obj in _selected_objs:
-					_remove_selected_object(_hovered_obj)
-				elif _hovered_obj not in _selected_objs:
-					_add_selected_object(_hovered_obj)
+				_hovered_obj.picked = not _hovered_obj.picked
 		Mode.MovingObjects:
 			for obj in _selected_objs:
-				if obj is MoveableNode2D:
-					obj.finish_move()
+				obj.finish_move()
 			_move_undo_batch = null
 			_mouse_move_start_pos_px = null
 			mode = Mode.Idle
@@ -196,10 +192,9 @@ func _handle_held_obj_move(mouse_pos_in_world_px: Vector2) -> void:
 	# apply delta movement vector to all selected movable objects
 	var delta_px = mouse_pos_in_world_px - _mouse_move_start_pos_px
 	for obj in _selected_objs:
-		if obj is MoveableNode2D:
-			obj.update_move(delta_px)
+		obj.update_move(delta_px)
 
-func _handle_world_object_copy(objs: Array[PickableNode2D]) -> void:
+func _handle_world_object_copy(objs: Array[WorldObject]) -> void:
 	_copied_world_objs.clear()
 	for obj in objs:
 		if obj:
@@ -241,22 +236,22 @@ func _cancel_add_polygon():
 		mode = Mode.Idle
 
 func _clear_selected_objects() -> void:
-	for obj in _selected_objs:
+	# make a copy of the list because setting picked to false
+	# will trigger a picked_state_change signal to fire which
+	# ends up modifying the _selected_objs list, and we don't
+	# want that to happen while we're iterating on it.
+	for obj in _selected_objs.duplicate():
 		obj.picked = false
-	_selected_objs.clear()
-	_update_ui_after_selection_change()
 
-func _add_selected_object(obj: PickableNode2D) -> void:
+func _add_selected_object(obj: WorldObject) -> void:
 	if obj == null:
 		return
 	elif obj in _selected_objs:
 		return # don't double add
-	obj.picked = true
 	_selected_objs.append(obj)
 	_update_ui_after_selection_change()
 
-func _remove_selected_object(obj: PickableNode2D) -> void:
-	obj.picked = false
+func _remove_selected_object(obj: WorldObject) -> void:
 	_selected_objs.erase(obj)
 	_update_ui_after_selection_change()
 
@@ -345,9 +340,9 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 		TheProject.ChangeType.ADD:
 			if not obj_in_world:
 				world_view.objects.add_child(obj)
-			if obj is PickableNode2D:
-				_clear_selected_objects()
-				_add_selected_object(obj)
+			obj.picked_state_changed.connect(_on_pickable_object_pick_state_changed.bind(obj))
+			_clear_selected_objects()
+			obj.picked = true
 		TheProject.ChangeType.REMOVE:
 			if obj_in_world:
 				world_view.objects.remove_child(obj)
@@ -398,6 +393,12 @@ func _on_world_object_reordered(from_idx: int, to_idx: int):
 	undo_redo_ctrl.push_undo_op(undo_op)
 	TheProject.has_edits = true
 
+func _on_pickable_object_pick_state_changed(obj: WorldObject) -> void:
+	if obj.picked:
+		_add_selected_object(obj)
+	else:
+		_remove_selected_object(obj)
+
 func _on_preference_update_timer_timeout():
 	TheProject.layout_pref.camera_pos = world_view.camera2d.position
 	TheProject.layout_pref.zoom = world_view.camera2d.zoom.x
@@ -420,7 +421,7 @@ func _on_world_view_gui_input(event: InputEvent):
 			
 			# detect which object mouse is hovering over
 			if mode == Mode.Idle:
-				var nearest_pickable = _nearest_pickable_obj(pos_in_world_px)
+				var nearest_pickable := _nearest_pickable_obj(pos_in_world_px)
 				if nearest_pickable != _hovered_obj:
 					# transition 'hovering' status from one object to the next
 					if _hovered_obj:
@@ -453,9 +454,8 @@ func _on_world_view_gui_input(event: InputEvent):
 					Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
 				else:
 					for obj in _selected_objs:
-						if obj is MoveableNode2D:
-							obj.start_move()
-							mode = Mode.MovingObjects
+						obj.start_move()
+						mode = Mode.MovingObjects
 			
 			if mode == Mode.MovingObjects:
 				_handle_held_obj_move(pos_in_world_px)

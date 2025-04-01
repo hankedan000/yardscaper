@@ -144,8 +144,7 @@ func add_object(obj: WorldObject) -> void:
 	
 	# connect signal handlers
 	obj.property_changed.connect(_on_node_property_changed)
-	if obj is MoveableNode2D:
-		obj.moved.connect(_on_node_moved)
+	obj.moved.connect(_on_node_moved)
 	objects.append(obj)
 	node_changed.emit(obj, ChangeType.ADD, [])
 	has_edits = true
@@ -159,8 +158,7 @@ func remove_object(obj: WorldObject) -> void:
 	
 	# disconnect signal handlers
 	obj.property_changed.disconnect(_on_node_property_changed)
-	if obj is MoveableNode2D:
-		obj.moved.disconnect(_on_node_moved)
+	obj.moved.disconnect(_on_node_moved)
 	
 	node_changed.emit(obj, ChangeType.REMOVE, [])
 	has_edits = true
