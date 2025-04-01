@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://dqfod1mptbtve"]
 
-[ext_resource type="Script" path="res://scenes/ui/WorldViewportContainer/WorldViewportContainer.gd" id="1_fywpf"]
-[ext_resource type="PackedScene" uid="uid://dvfn3vnt35gw7" path="res://scenes/ui/LayoutPanel/PanZoomController.tscn" id="2_tht5a"]
+[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/WorldViewportContainer/WorldViewportContainer.gd" id="1_fywpf"]
+[ext_resource type="PackedScene" uid="uid://dvfn3vnt35gw7" path="res://scenes/ui/ProjectEditor/LayoutPanel/PanZoomController.tscn" id="2_tht5a"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_01kq4"]
 

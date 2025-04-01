@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dfag2aakh64er"]
 
-[ext_resource type="Script" path="res://scenes/ui/UnsavedChangesDialog/UnsavedChangesDialog.gd" id="1_e4o3b"]
+[ext_resource type="Script" path="res://scenes/ui/dialogs/UnsavedChangesDialog/UnsavedChangesDialog.gd" id="1_e4o3b"]
 
 [node name="UnsavedChangesDialog" type="Window"]
 title = "Unsaved changes"

@@ -1,10 +1,10 @@
 [gd_scene load_steps=11 format=3 uid="uid://u1375je75c1f"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/ProjectEditor.gd" id="2_rxefj"]
-[ext_resource type="PackedScene" uid="uid://dfag2aakh64er" path="res://scenes/ui/UnsavedChangesDialog/UnsavedChangesDialog.tscn" id="3_fwduj"]
-[ext_resource type="PackedScene" uid="uid://xyp0got3c5dp" path="res://scenes/ui/LayoutPanel/LayoutPanel.tscn" id="4_3cv8w"]
-[ext_resource type="PackedScene" uid="uid://dtgjpudmf5pva" path="res://scenes/ui/ExportToImageDialog/ExportToImageDialog.tscn" id="4_h12le"]
-[ext_resource type="PackedScene" uid="uid://y61v2o6rd0mg" path="res://scenes/ui/BOM_List/BOM_List.tscn" id="5_qt3l6"]
+[ext_resource type="PackedScene" uid="uid://dfag2aakh64er" path="res://scenes/ui/dialogs/UnsavedChangesDialog/UnsavedChangesDialog.tscn" id="3_fwduj"]
+[ext_resource type="PackedScene" uid="uid://xyp0got3c5dp" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.tscn" id="4_3cv8w"]
+[ext_resource type="PackedScene" uid="uid://dtgjpudmf5pva" path="res://scenes/ui/dialogs/ExportToImageDialog/ExportToImageDialog.tscn" id="4_h12le"]
+[ext_resource type="PackedScene" uid="uid://y61v2o6rd0mg" path="res://scenes/ui/ProjectEditor/BOM_List/BOM_List.tscn" id="5_qt3l6"]
 [ext_resource type="Texture2D" uid="uid://h0ug1cx5m5aj" path="res://assets/icons/grass_128.png" id="5_y37na"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q6kto"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dtgjpudmf5pva"]
 
-[ext_resource type="Script" path="res://scenes/ui/ExportToImageDialog/ExportToImageDialog.gd" id="1_ftjp4"]
+[ext_resource type="Script" path="res://scenes/ui/dialogs/ExportToImageDialog/ExportToImageDialog.gd" id="1_ftjp4"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_60scr"]
 

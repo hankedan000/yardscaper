@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://0w6g4f1p5gwe"]
 
-[ext_resource type="Script" path="res://scenes/ui/PolygonNodePropertyEditor/PolygonNodePropertyEditor.gd" id="1_st6t6"]
+[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/PolygonNodePropertyEditor/PolygonNodePropertyEditor.gd" id="1_st6t6"]
 
 [node name="PolygonNodePropertiesList" type="GridContainer"]
 size_flags_horizontal = 3

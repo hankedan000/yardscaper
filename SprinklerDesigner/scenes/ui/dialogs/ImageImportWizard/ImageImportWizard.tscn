@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://cn8j4nj6r83we"]
 
-[ext_resource type="Script" path="res://scenes/ui/ImageImportWizard/ImageImportWizard.gd" id="1_3bvd7"]
-[ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/ui/WorldViewportContainer/WorldViewportContainer.tscn" id="2_sxrle"]
+[ext_resource type="Script" path="res://scenes/ui/dialogs/ImageImportWizard/ImageImportWizard.gd" id="1_3bvd7"]
+[ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/ui/ProjectEditor/WorldViewportContainer/WorldViewportContainer.tscn" id="2_sxrle"]
 [ext_resource type="Texture2D" uid="uid://dfapileftgyqj" path="res://assets/icons/EditorControlAnchor.svg" id="4_dmirq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qhx0g"]

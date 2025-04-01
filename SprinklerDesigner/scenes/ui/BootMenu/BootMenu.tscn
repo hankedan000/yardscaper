@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scenes/ui/BootMenu/BootMenu.gd" id="1_a8g1b"]
 [ext_resource type="Theme" uid="uid://b7bms6qoy7yfq" path="res://assets/themes/MainTheme.tres" id="1_h2chn"]
 [ext_resource type="Texture2D" uid="uid://bumt4lc5f8gm2" path="res://assets/icons/Add.svg" id="2_kewc0"]
-[ext_resource type="PackedScene" uid="uid://cojeq6ah4kvjj" path="res://scenes/ui/CreateProjectDialog/CreateProjectDialog.tscn" id="3_nxvso"]
+[ext_resource type="PackedScene" uid="uid://cojeq6ah4kvjj" path="res://scenes/ui/dialogs/CreateProjectDialog/CreateProjectDialog.tscn" id="3_nxvso"]
 [ext_resource type="PackedScene" uid="uid://84ngs66iblgm" path="res://scenes/ui/BootMenu/PreviousProjectItem.tscn" id="5_jgdj7"]
 [ext_resource type="PackedScene" uid="uid://bk6kkbtfb7bm1" path="res://scenes/ui/BootMenu/RenameProjectDialog.tscn" id="5_jj620"]
 [ext_resource type="Texture2D" uid="uid://7k5qn270h1yw" path="res://assets/icons/Load.svg" id="6_c1bf8"]

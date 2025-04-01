@@ -1,9 +1,9 @@
 [gd_scene load_steps=5 format=3 uid="uid://c7ey0qd3m5ads"]
 
-[ext_resource type="Script" path="res://scenes/ui/ObjectsList/ObjectsList.gd" id="1_lhcws"]
+[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/ObjectsList/ObjectsList.gd" id="1_lhcws"]
 [ext_resource type="Texture2D" uid="uid://bxfpdstl8w887" path="res://assets/icons/MoveDown.svg" id="2_37ega"]
 [ext_resource type="Texture2D" uid="uid://dlrg0qwf5onb6" path="res://assets/icons/MoveUp.svg" id="3_ygitc"]
-[ext_resource type="PackedScene" uid="uid://feb2ad46n08w" path="res://scenes/ui/ObjectsList/ObjectsListButton.tscn" id="4_e4qp4"]
+[ext_resource type="PackedScene" uid="uid://feb2ad46n08w" path="res://scenes/ui/ProjectEditor/ObjectsList/ObjectsListButton.tscn" id="4_e4qp4"]
 
 [node name="ObjectsList" type="VBoxContainer"]
 custom_minimum_size = Vector2(225, 0)
