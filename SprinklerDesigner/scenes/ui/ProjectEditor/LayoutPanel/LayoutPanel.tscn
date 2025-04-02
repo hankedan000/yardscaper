@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=19 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/world_objects/Sprinkler/Sprinkler.tscn" id="2_16d6l"]
@@ -10,7 +10,6 @@
 [ext_resource type="PackedScene" uid="uid://c7ey0qd3m5ads" path="res://scenes/ui/ProjectEditor/ObjectsList/ObjectsList.tscn" id="5_p3ckg"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="7_nx6cf"]
 [ext_resource type="PackedScene" uid="uid://0w6g4f1p5gwe" path="res://scenes/ui/ProjectEditor/PolygonNodePropertyEditor/PolygonNodePropertyEditor.tscn" id="7_u58qy"]
-[ext_resource type="Texture2D" uid="uid://covc7nfq44by2" path="res://assets/icons/GridToggle.svg" id="8_uxbpy"]
 [ext_resource type="Texture2D" uid="uid://b7dml04prcvb" path="res://assets/icons/Water.svg" id="9_t5ctp"]
 [ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/ui/ProjectEditor/WorldViewportContainer/WorldViewportContainer.tscn" id="9_xrpqu"]
 [ext_resource type="Texture2D" uid="uid://cn15hpoo53btg" path="res://assets/icons/Image.svg" id="10_7tkh4"]
@@ -131,19 +130,6 @@ icon_alignment = 1
 [node name="VSeparator" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 layout_mode = 2
 
-[node name="ShowGridButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
-custom_minimum_size = Vector2(24, 24)
-layout_mode = 2
-tooltip_text = "Toggle grid visibility"
-focus_mode = 0
-toggle_mode = true
-button_pressed = true
-icon = ExtResource("8_uxbpy")
-icon_alignment = 1
-
-[node name="VSeparator2" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
-layout_mode = 2
-
 [node name="PositionLockButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
@@ -162,6 +148,21 @@ focus_mode = 0
 icon = ExtResource("17_pwsqd")
 icon_alignment = 1
 
+[node name="VSeparator2" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+layout_mode = 2
+
+[node name="ViewMenuButton" type="MenuButton" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+layout_mode = 2
+text = "View"
+item_count = 2
+popup/item_0/text = "Show Origin"
+popup/item_0/checkable = 1
+popup/item_0/checked = true
+popup/item_1/text = "Show Grid"
+popup/item_1/checkable = 1
+popup/item_1/checked = true
+popup/item_1/id = 1
+
 [node name="WorldView" parent="HSplitContainer/Layout" instance=ExtResource("9_xrpqu")]
 layout_mode = 2
 size_flags_vertical = 3
@@ -179,7 +180,6 @@ one_shot = true
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddDistMeasure" to="." method="_on_add_dist_measure_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon" to="." method="_on_add_polygon_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/RemoveButton" to="." method="_on_remove_button_pressed"]
-[connection signal="toggled" from="HSplitContainer/Layout/LayoutToolbar/HBox/ShowGridButton" to="." method="_on_show_grid_checkbox_toggled"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionLockButton" to="." method="_on_position_lock_button_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton" to="." method="_on_position_unlock_button_pressed"]
 [connection signal="gui_input" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_view_gui_input"]

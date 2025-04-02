@@ -15,9 +15,9 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 @onready var add_dist_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/AddDistMeasure
 @onready var add_poly_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon
 @onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/HBox/RemoveButton
-@onready var show_grid_button         := $HSplitContainer/Layout/LayoutToolbar/HBox/ShowGridButton
 @onready var pos_lock_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/PositionLockButton
 @onready var pos_unlock_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton
+@onready var view_menu_button         := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton
 @onready var world_view               := $HSplitContainer/Layout/WorldView
 @onready var img_import_wizard        := $ImageImportWizard
 @onready var tooltip_timer            := $ToolTipTimer
@@ -34,6 +34,11 @@ enum Mode {
 	AddDistMeasureA,
 	AddDistMeasureB,
 	AddPolygon
+}
+
+enum ViewMenuIds {
+	ShowOrigin = 0,
+	ShowGrid = 1
 }
 
 var mode = Mode.Idle:
@@ -99,6 +104,9 @@ func _ready():
 	poly_prop_list.visible = false
 	objects_list.world = world_view
 	img_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
+	
+	var view_popup := view_menu_button.get_popup() as PopupMenu
+	view_popup.id_pressed.connect(_on_view_menu_id_pressed)
 	
 	# add shortcuts
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
@@ -378,7 +386,17 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 
 func _on_TheProject_opened():
 	undo_redo_ctrl.reset()
-	show_grid_button.button_pressed = TheProject.layout_pref.show_grid
+	
+	# restore "View" options
+	var view_popup := view_menu_button.get_popup() as PopupMenu
+	var grid_idx := view_popup.get_item_index(ViewMenuIds.ShowGrid)
+	var origin_idx := view_popup.get_item_index(ViewMenuIds.ShowOrigin)
+	view_popup.set_item_checked(grid_idx, TheProject.layout_pref.show_grid)
+	world_view.show_grid = TheProject.layout_pref.show_grid
+	view_popup.set_item_checked(origin_idx, TheProject.layout_pref.show_origin)
+	world_view.show_origin = TheProject.layout_pref.show_origin
+	
+	# restor camera position and zoom level
 	world_view.camera2d.position = TheProject.layout_pref.camera_pos
 	world_view.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.layout_pref.zoom
 
@@ -392,10 +410,6 @@ func _on_image_import_wizard_accepted(img_path: String, size_ft: Vector2) -> voi
 	if new_image:
 		new_image.width_ft = size_ft.x
 		new_image.height_ft = size_ft.y
-
-func _on_show_grid_checkbox_toggled(toggled_on):
-	world_view.show_grid = toggled_on
-	TheProject.layout_pref.show_grid = toggled_on
 
 func _on_world_object_reordered(from_idx: int, to_idx: int):
 	var undo_op := WorldObjectUndoRedoOps.Reordered.new(
@@ -492,3 +506,19 @@ func _on_tool_tip_timer_timeout() -> void:
 	if _hovered_obj and mode == Mode.Idle:
 		var tip_text := "%s" % _hovered_obj.user_label
 		world_view.show_tooltip(tip_text)
+
+func _on_view_menu_id_pressed(id: int) -> void:
+	var view_popup := view_menu_button.get_popup() as PopupMenu
+	var idx := view_popup.get_item_index(id) as int
+	# toggle checked state if item is checkable
+	if view_popup.is_item_checkable(idx):
+		view_popup.toggle_item_checked(idx)
+	
+	var is_checked := view_popup.is_item_checked(idx)
+	match id:
+		ViewMenuIds.ShowOrigin:
+			world_view.show_origin = is_checked
+			TheProject.layout_pref.show_origin = is_checked
+		ViewMenuIds.ShowGrid:
+			world_view.show_grid = is_checked
+			TheProject.layout_pref.show_grid = is_checked

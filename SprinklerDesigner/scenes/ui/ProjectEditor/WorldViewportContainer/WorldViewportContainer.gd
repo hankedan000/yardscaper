@@ -21,6 +21,11 @@ var show_grid = true:
 		show_grid = value
 		queue_redraw()
 
+var show_origin = true:
+	set(value):
+		show_origin = value
+		queue_redraw()
+
 var show_cursor_position_label = true:
 	set(value):
 		show_cursor_position_label = value
@@ -86,6 +91,7 @@ func global_xy_to_pos_in_world(global_pos: Vector2) -> Vector2:
 func _draw():
 	if show_grid:
 		_draw_grid(major_spacing_ft, major_line_color, MAJOR_LINE_WIDTH)
+	if show_origin:
 		_draw_origin()
 	if show_cursor_crosshairs:
 		_draw_cursor_crosshairs()
