@@ -111,3 +111,16 @@ func pop_cursor_shape() -> Input.CursorShape:
 		_prev_cursor_shape = Input.CURSOR_ARROW
 		Input.set_default_cursor_shape(_curr_cursor_shape)
 	return _curr_cursor_shape
+
+func get_label_text_size(label: Label, text: String) -> Vector2:
+	var font := label.get_theme_font(&"font")
+	return font.get_multiline_string_size(
+		text,
+		label.horizontal_alignment,
+		(int)(label.size.x) if label.clip_text else -1, # width
+		label.get_theme_font_size(&"font_size"),
+		-1, # max_lines (unlimited)
+		TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND,
+		label.justification_flags,
+		label.text_direction as TextServer.Direction,
+		TextServer.ORIENTATION_HORIZONTAL)

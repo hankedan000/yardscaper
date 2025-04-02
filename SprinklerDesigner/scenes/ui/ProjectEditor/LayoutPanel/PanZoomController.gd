@@ -1,6 +1,7 @@
 extends Node2D
 
 signal pan_state_changed(panning: bool)
+signal zoom_changed(old_zoom: Vector2, new_zoom: Vector2)
 
 var _dragging : bool = false:
 	set(value):
@@ -28,7 +29,7 @@ func world_pos_to_local(pos_world: Vector2) -> Vector2:
 	var viewport_rect_size = get_viewport().get_visible_rect().size
 	return viewport_rect_size / 2.0 + Utils.world_to_global_size_px(offset_from_camera_world, camera.zoom)
 
-func _do_pan_logic(event: InputEventMouseButton, camera_pos: Vector2):
+func _do_pan_logic(event: InputEventMouseButton, camera_pos: Vector2) -> void:
 	if event.pressed:
 		# Start dragging
 		_dragging = true
@@ -38,7 +39,7 @@ func _do_pan_logic(event: InputEventMouseButton, camera_pos: Vector2):
 		# Stop dragging
 		_dragging = false
 
-func _input(event):
+func _input(event: InputEvent):
 	var camera := get_viewport().get_camera_2d()
 	if event is InputEventMouseButton:
 		# Check if left mouse button is pressed
@@ -64,12 +65,16 @@ func zoom_in(mouse_pos: Vector2) -> void:
 func zoom_out(mouse_pos: Vector2) -> void:
 	_do_zoom(mouse_pos, -ZOOM_SPEED)
 
-func _do_zoom(mouse_pos, zoom_speed):
+# @param[in] mouse_pos - position to ceneter zoom operation around
+# @param[in] zoom_speed - positive zooms in, negative zooms out
+func _do_zoom(mouse_pos: Vector2, zoom_speed: float) -> void:
 	var camera = get_viewport().get_camera_2d()
 	var new_zoom = clamp(camera.zoom.x * (1 + zoom_speed), MIN_ZOOM, MAX_ZOOM)
 	var mouse_pos_old = local_pos_to_world(mouse_pos)
+	var old_zoom := camera.zoom as Vector2
 	camera.zoom = Vector2(new_zoom, new_zoom)
 	# Adjust camera position to keep the mouse position fixed
 	var mouse_pos_new = local_pos_to_world(mouse_pos)
 	var camera_offset = mouse_pos_old - mouse_pos_new
 	camera.position += camera_offset
+	zoom_changed.emit(old_zoom, camera.zoom)

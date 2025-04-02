@@ -169,6 +169,9 @@ size_flags_vertical = 3
 [node name="PreferenceUpdateTimer" type="Timer" parent="."]
 autostart = true
 
+[node name="ToolTipTimer" type="Timer" parent="."]
+one_shot = true
+
 [connection signal="file_selected" from="ImgDialog" to="." method="_on_img_dialog_file_selected"]
 [connection signal="accepted" from="ImageImportWizard" to="." method="_on_image_import_wizard_accepted"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
@@ -183,3 +186,4 @@ autostart = true
 [connection signal="pan_state_changed" from="HSplitContainer/Layout/WorldView" to="." method="_on_viewport_container_pan_state_changed"]
 [connection signal="world_object_reordered" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_object_reordered"]
 [connection signal="timeout" from="PreferenceUpdateTimer" to="." method="_on_preference_update_timer_timeout"]
+[connection signal="timeout" from="ToolTipTimer" to="." method="_on_tool_tip_timer_timeout"]

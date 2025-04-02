@@ -1,9 +1,16 @@
-[gd_scene load_steps=5 format=3 uid="uid://dqfod1mptbtve"]
+[gd_scene load_steps=6 format=3 uid="uid://dqfod1mptbtve"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/WorldViewportContainer/WorldViewportContainer.gd" id="1_fywpf"]
 [ext_resource type="PackedScene" uid="uid://dvfn3vnt35gw7" path="res://scenes/ui/ProjectEditor/LayoutPanel/PanZoomController.tscn" id="2_tht5a"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_01kq4"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_1hpj6"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kmjcj"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.0976562, 0.0976562, 0.0976562, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wvb5t"]
 bg_color = Color(0.199219, 0.199219, 0.199219, 0.431373)
@@ -45,7 +52,19 @@ position = Vector2(20, 20)
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ViewportContainer/Viewport/Cursor"]
-shape = SubResource("CircleShape2D_01kq4")
+shape = SubResource("CircleShape2D_1hpj6")
+
+[node name="ToolTipLabel" type="Label" parent="ViewportContainer/Viewport/Cursor"]
+visible = false
+z_index = 10
+offset_left = 7.0
+offset_top = 10.0
+offset_right = 108.0
+offset_bottom = 49.0
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_kmjcj")
+text = "This is a tooltip.
+I'm on the 2nd line!"
 
 [node name="CursorPositionLabel" type="Label" parent="."]
 z_index = 1

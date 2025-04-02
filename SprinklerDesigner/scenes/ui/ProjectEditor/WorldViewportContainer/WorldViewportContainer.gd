@@ -8,12 +8,13 @@ const MAJOR_LINE_WIDTH := 1
 const ORIGIN_VERT_COLOR := Color.LIME_GREEN
 const ORIGIN_HORZ_COLOR := Color.INDIAN_RED
 
-@onready var viewport         : Viewport = $ViewportContainer/Viewport
-@onready var objects          := $ViewportContainer/Viewport/Objects
-@onready var pan_zoom_ctrl    := $ViewportContainer/Viewport/PanZoomController
-@onready var camera2d         : Camera2D = $ViewportContainer/Viewport/Camera2D
-@onready var cursor           := $ViewportContainer/Viewport/Cursor
-@onready var cursor_pos_label : Label = $CursorPositionLabel
+@onready var viewport          : Viewport = $ViewportContainer/Viewport
+@onready var objects           := $ViewportContainer/Viewport/Objects
+@onready var pan_zoom_ctrl     := $ViewportContainer/Viewport/PanZoomController
+@onready var camera2d          : Camera2D = $ViewportContainer/Viewport/Camera2D
+@onready var cursor            := $ViewportContainer/Viewport/Cursor
+@onready var tooltip_label     : Label = $ViewportContainer/Viewport/Cursor/ToolTipLabel
+@onready var cursor_pos_label  : Label = $CursorPositionLabel
 
 var show_grid = true:
 	set(value):
@@ -42,6 +43,14 @@ var major_line_color : Color = Color.LIGHT_SLATE_GRAY:
 
 var _prev_zoom := Vector2()
 var _prev_global_pos := Vector2()
+
+func show_tooltip(text: String) -> void:
+	tooltip_label.text = text
+	tooltip_label.size = Utils.get_label_text_size(tooltip_label, text)
+	tooltip_label.show()
+
+func hide_tooltip() -> void:
+	tooltip_label.hide()
 
 # move a world object from one position to another
 # @return true if move was applied, false otherwise
@@ -187,6 +196,10 @@ func _process(_delta):
 	var mouse_pos = get_local_mouse_position()
 	var pos_in_world = pan_zoom_ctrl.local_pos_to_world(mouse_pos)
 	cursor.position = pos_in_world
+	# scale the cursor so that it always stays at the same size,
+	# regardless of zoom level.
+	cursor.scale.x = 1.0 / curr_zoom.x
+	cursor.scale.y = 1.0 / curr_zoom.y
 
 func _on_pan_zoom_controller_pan_state_changed(panning: bool) -> void:
 	pan_state_changed.emit(panning)

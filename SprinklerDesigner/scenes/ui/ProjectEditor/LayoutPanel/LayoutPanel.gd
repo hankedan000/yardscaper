@@ -1,6 +1,7 @@
 extends PanelContainer
 
 const MULTI_SELECT_KEY = KEY_SHIFT
+const TOOLTIP_DELAY_DURATION_SEC := 1.0
 
 @onready var img_dialog               := $ImgDialog
 
@@ -19,6 +20,7 @@ const MULTI_SELECT_KEY = KEY_SHIFT
 @onready var pos_unlock_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton
 @onready var world_view               := $HSplitContainer/Layout/WorldView
 @onready var img_import_wizard        := $ImageImportWizard
+@onready var tooltip_timer            := $ToolTipTimer
 
 @export var SprinklerScene : PackedScene = null
 @export var DistanceMeasurementScene : PackedScene = null
@@ -42,6 +44,8 @@ var mode = Mode.Idle:
 		add_dist_button.disabled = adds_disabled
 		add_poly_button.disabled = adds_disabled
 		mode = value
+		if mode != Mode.Idle:
+			world_view.hide_tooltip()
 		match mode:
 			Mode.Idle:
 				Utils.pop_cursor_shape()
@@ -69,7 +73,15 @@ var _selected_objs : Array[WorldObject] = []
 var _mouse_move_start_pos_px = null
 var _move_undo_batch : UndoRedoController.OperationBatch = null
 # object that would be selected next if LEFT mouse button were pressed
-var _hovered_obj : WorldObject = null
+var _hovered_obj : WorldObject = null:
+	set(value):
+		var old_value = _hovered_obj
+		_hovered_obj = value
+		if old_value != _hovered_obj:
+			world_view.hide_tooltip()
+			tooltip_timer.stop()
+			if _hovered_obj:
+				tooltip_timer.start(TOOLTIP_DELAY_DURATION_SEC)
 # serialized versions of all copied world objects
 var _copied_world_objs : Array[Dictionary] = []
 
@@ -475,3 +487,8 @@ func _on_position_unlock_button_pressed() -> void:
 	for obj in _selected_objs:
 		obj.position_locked = false
 	_update_position_lock_buttons()
+
+func _on_tool_tip_timer_timeout() -> void:
+	if _hovered_obj and mode == Mode.Idle:
+		var tip_text := "%s" % _hovered_obj.user_label
+		world_view.show_tooltip(tip_text)
