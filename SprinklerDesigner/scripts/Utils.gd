@@ -124,3 +124,7 @@ func get_label_text_size(label: Label, text: String) -> Vector2:
 		label.justification_flags,
 		label.text_direction as TextServer.Direction,
 		TextServer.ORIENTATION_HORIZONTAL)
+
+func set_item_checked_by_id(popup: PopupMenu, id: int, checked: bool) -> void:
+	var idx := popup.get_item_index(id)
+	popup.set_item_checked(idx, checked)

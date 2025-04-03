@@ -154,7 +154,7 @@ layout_mode = 2
 [node name="ViewMenuButton" type="MenuButton" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 layout_mode = 2
 text = "View"
-item_count = 2
+item_count = 3
 popup/item_0/text = "Show Origin"
 popup/item_0/checkable = 1
 popup/item_0/checked = true
@@ -162,6 +162,27 @@ popup/item_1/text = "Show Grid"
 popup/item_1/checkable = 1
 popup/item_1/checked = true
 popup/item_1/id = 1
+popup/item_2/text = "Objects"
+popup/item_2/id = 2
+
+[node name="ObjectsViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
+size = Vector2i(173, 100)
+item_count = 4
+item_0/text = "Images"
+item_0/checkable = 1
+item_0/checked = true
+item_1/text = "Measurements"
+item_1/checkable = 1
+item_1/checked = true
+item_1/id = 1
+item_2/text = "Polygons"
+item_2/checkable = 1
+item_2/checked = true
+item_2/id = 2
+item_3/text = "Sprinklers"
+item_3/checkable = 1
+item_3/checked = true
+item_3/id = 3
 
 [node name="WorldView" parent="HSplitContainer/Layout" instance=ExtResource("9_xrpqu")]
 layout_mode = 2
@@ -182,6 +203,7 @@ one_shot = true
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/RemoveButton" to="." method="_on_remove_button_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionLockButton" to="." method="_on_position_lock_button_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton" to="." method="_on_position_unlock_button_pressed"]
+[connection signal="id_pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/ObjectsViewPopupMenu" to="." method="_on_objects_view_popup_menu_id_pressed"]
 [connection signal="gui_input" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_view_gui_input"]
 [connection signal="pan_state_changed" from="HSplitContainer/Layout/WorldView" to="." method="_on_viewport_container_pan_state_changed"]
 [connection signal="world_object_reordered" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_object_reordered"]

@@ -18,6 +18,7 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 @onready var pos_lock_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/PositionLockButton
 @onready var pos_unlock_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton
 @onready var view_menu_button         := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton
+@onready var obj_view_popupmenu       := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/ObjectsViewPopupMenu
 @onready var world_view               := $HSplitContainer/Layout/WorldView
 @onready var img_import_wizard        := $ImageImportWizard
 @onready var tooltip_timer            := $ToolTipTimer
@@ -38,7 +39,15 @@ enum Mode {
 
 enum ViewMenuIds {
 	ShowOrigin = 0,
-	ShowGrid = 1
+	ShowGrid = 1,
+	Objects = 2
+}
+
+enum ObjectViewMenuIds {
+	Images = 0,
+	Measurements = 1,
+	Polygons = 2,
+	Sprinklers = 3
 }
 
 var mode = Mode.Idle:
@@ -99,6 +108,7 @@ func _set_all_cursors(ctrl: Control, cursor_shape: CursorShape) -> void:
 func _ready():
 	TheProject.node_changed.connect(_on_TheProject_node_changed)
 	TheProject.opened.connect(_on_TheProject_opened)
+	TheProject.layout_pref.view_show_state_changed.connect(_on_LayoutPref_view_show_state_changed)
 	sprink_prop_list.visible = false
 	img_prop_list.visible = false
 	poly_prop_list.visible = false
@@ -106,10 +116,18 @@ func _ready():
 	img_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
 	
 	var view_popup := view_menu_button.get_popup() as PopupMenu
+	view_popup.hide_on_checkable_item_selection = false
+	obj_view_popupmenu.hide_on_checkable_item_selection = false
 	view_popup.id_pressed.connect(_on_view_menu_id_pressed)
+	# reparent the object view PopupMenu into the View MenuButton
+	obj_view_popupmenu.get_parent().remove_child(obj_view_popupmenu)
+	view_popup.set_item_submenu_node(
+		view_popup.get_item_index(ViewMenuIds.Objects),
+		obj_view_popupmenu)
 	
 	# add shortcuts
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
+	
 
 func _input(event):
 	if event is InputEventKey and event.is_pressed():
@@ -389,16 +407,41 @@ func _on_TheProject_opened():
 	
 	# restore "View" options
 	var view_popup := view_menu_button.get_popup() as PopupMenu
-	var grid_idx := view_popup.get_item_index(ViewMenuIds.ShowGrid)
-	var origin_idx := view_popup.get_item_index(ViewMenuIds.ShowOrigin)
-	view_popup.set_item_checked(grid_idx, TheProject.layout_pref.show_grid)
+	Utils.set_item_checked_by_id(view_popup, ViewMenuIds.ShowGrid, TheProject.layout_pref.show_grid)
 	world_view.show_grid = TheProject.layout_pref.show_grid
-	view_popup.set_item_checked(origin_idx, TheProject.layout_pref.show_origin)
+	Utils.set_item_checked_by_id(view_popup, ViewMenuIds.ShowOrigin, TheProject.layout_pref.show_origin)
 	world_view.show_origin = TheProject.layout_pref.show_origin
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Images, TheProject.layout_pref.show_images)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Measurements, TheProject.layout_pref.show_measurements)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Polygons, TheProject.layout_pref.show_polygons)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Sprinklers, TheProject.layout_pref.show_sprinklers)
 	
 	# restor camera position and zoom level
 	world_view.camera2d.position = TheProject.layout_pref.camera_pos
 	world_view.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.layout_pref.zoom
+
+func _on_LayoutPref_view_show_state_changed(property: StringName, new_value: bool):
+	match property:
+		LayoutPreferences.PROP_KEY_SHOW_GRID:
+			world_view.show_grid = new_value
+		LayoutPreferences.PROP_KEY_SHOW_ORIGIN:
+			world_view.show_origin = new_value
+		LayoutPreferences.PROP_KEY_SHOW_IMAGES:
+			for obj in world_view.objects.get_children():
+				if obj is ImageNode:
+					obj.visible = new_value
+		LayoutPreferences.PROP_KEY_SHOW_MEASUREMENTS:
+			for obj in world_view.objects.get_children():
+				if obj is DistanceMeasurement:
+					obj.visible = new_value
+		LayoutPreferences.PROP_KEY_SHOW_POLYGONS:
+			for obj in world_view.objects.get_children():
+				if obj is PolygonNode:
+					obj.visible = new_value
+		LayoutPreferences.PROP_KEY_SHOW_SPRINKLERS:
+			for obj in world_view.objects.get_children():
+				if obj is Sprinkler:
+					obj.visible = new_value
 
 func _on_img_dialog_file_selected(path):
 	if img_import_wizard.load_img(path):
@@ -522,3 +565,20 @@ func _on_view_menu_id_pressed(id: int) -> void:
 		ViewMenuIds.ShowGrid:
 			world_view.show_grid = is_checked
 			TheProject.layout_pref.show_grid = is_checked
+
+func _on_objects_view_popup_menu_id_pressed(id: int) -> void:
+	var idx := obj_view_popupmenu.get_item_index(id) as int
+	# toggle checked state if item is checkable
+	if obj_view_popupmenu.is_item_checkable(idx):
+		obj_view_popupmenu.toggle_item_checked(idx)
+	
+	var is_checked := obj_view_popupmenu.is_item_checked(idx) as bool
+	match id:
+		ObjectViewMenuIds.Images:
+			TheProject.layout_pref.show_images = is_checked
+		ObjectViewMenuIds.Measurements:
+			TheProject.layout_pref.show_measurements = is_checked
+		ObjectViewMenuIds.Polygons:
+			TheProject.layout_pref.show_polygons = is_checked
+		ObjectViewMenuIds.Sprinklers:
+			TheProject.layout_pref.show_sprinklers = is_checked
