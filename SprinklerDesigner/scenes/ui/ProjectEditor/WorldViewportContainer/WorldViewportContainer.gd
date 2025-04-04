@@ -12,7 +12,7 @@ const ORIGIN_HORZ_COLOR := Color.INDIAN_RED
 @onready var objects           := $ViewportContainer/Viewport/Objects
 @onready var pan_zoom_ctrl     := $ViewportContainer/Viewport/PanZoomController
 @onready var camera2d          : Camera2D = $ViewportContainer/Viewport/Camera2D
-@onready var cursor            := $ViewportContainer/Viewport/Cursor
+@onready var cursor            : Area2D = $ViewportContainer/Viewport/Cursor
 @onready var tooltip_label     : Label = $ViewportContainer/Viewport/Cursor/ToolTipLabel
 @onready var cursor_pos_label  : Label = $CursorPositionLabel
 
@@ -87,6 +87,30 @@ func get_image_of_current_view() -> Image:
 func global_xy_to_pos_in_world(global_pos: Vector2) -> Vector2:
 	var pos_rel_to_world := global_pos - self.global_position
 	return pan_zoom_ctrl.local_pos_to_world(pos_rel_to_world)
+
+func get_pickable_under_cursor() -> WorldObject:
+	var cursor_pos := cursor.position
+	var smallest_dist_px = null
+	var nearest_obj : WorldObject = null
+	var highest_draw_order : int = -1
+	for pick_area in cursor.get_overlapping_areas():
+		var pick_obj := pick_area.get_parent() as WorldObject
+		if not pick_obj:
+			continue
+		elif not pick_obj.visible:
+			continue
+		var obj_center := pick_obj.get_visual_center()
+		var draw_order := pick_obj.get_order_in_world()
+		var dist_px = obj_center.distance_to(cursor_pos)
+		if draw_order < highest_draw_order:
+			continue
+		elif smallest_dist_px and draw_order == highest_draw_order and dist_px > smallest_dist_px:
+			continue
+		nearest_obj = pick_obj
+		smallest_dist_px = dist_px
+		highest_draw_order = draw_order
+	
+	return nearest_obj
 
 func _draw():
 	if show_grid:

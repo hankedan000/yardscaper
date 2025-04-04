@@ -19,7 +19,7 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 @onready var pos_unlock_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton
 @onready var view_menu_button         := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton
 @onready var obj_view_popupmenu       := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/ObjectsViewPopupMenu
-@onready var world_view               := $HSplitContainer/Layout/WorldView
+@onready var world_view               : WorldViewportContainer = $HSplitContainer/Layout/WorldView
 @onready var img_import_wizard        := $ImageImportWizard
 @onready var tooltip_timer            := $ToolTipTimer
 
@@ -127,7 +127,6 @@ func _ready():
 	
 	# add shortcuts
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
-	
 
 func _input(event):
 	if event is InputEventKey and event.is_pressed():
@@ -150,36 +149,7 @@ func _input(event):
 			var helper := WorldObjectReorderHelper.new(_selected_objs)
 			helper.apply_shift_to_top(world_view)
 
-func _nearest_pickable_obj(pos_in_world: Vector2) -> WorldObject:
-	var smallest_dist_px = null
-	var nearest_pick_area = null
-	var cursor : Area2D = world_view.cursor
-	var highest_draw_order : int = -1
-	for pick_area in cursor.get_overlapping_areas():
-		var obj_center = pick_area.global_position
-		var pick_parent = pick_area.get_parent()
-		var draw_order = -1
-		if pick_parent is WorldObject:
-			obj_center = pick_parent.get_visual_center()
-			draw_order = pick_parent.get_order_in_world()
-		var dist_px = obj_center.distance_to(pos_in_world)
-		if draw_order < highest_draw_order:
-			continue
-		elif smallest_dist_px and draw_order == highest_draw_order and dist_px > smallest_dist_px:
-			continue
-		nearest_pick_area = pick_area
-		smallest_dist_px = dist_px
-		highest_draw_order = draw_order
-	
-	if nearest_pick_area:
-		return nearest_pick_area.get_parent() as WorldObject
-	return null
-
-func _handle_left_click(click_pos: Vector2):
-	# ignore clicks that are outside the world viewpoint
-	if not _is_point_over_world(click_pos):
-		return
-	
+func _handle_left_click(_pos_in_world_px: Vector2):
 	match mode:
 		Mode.Idle:
 			if _hovered_obj:
@@ -189,8 +159,7 @@ func _handle_left_click(click_pos: Vector2):
 					_clear_selected_objects()
 					_hovered_obj.picked = true
 
-func _handle_left_click_release(click_pos: Vector2):
-	var pos_in_world_px = world_view.global_xy_to_pos_in_world(click_pos)
+func _handle_left_click_release(pos_in_world_px: Vector2):
 	match mode:
 		Mode.Idle:
 			Utils.pop_cursor_shape()
@@ -473,61 +442,59 @@ func _on_preference_update_timer_timeout():
 	TheProject.layout_pref.zoom = world_view.camera2d.zoom.x
 
 func _on_world_view_gui_input(event: InputEvent):
+	var evt_global_pos = event.global_position
+	var pos_in_world_px := world_view.global_xy_to_pos_in_world(evt_global_pos)
 	if event is InputEventMouseButton:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
 				if ! event.alt_pressed: # let pan take precedence (alt + click + drag)
 					if event.pressed:
-						_handle_left_click(event.global_position)
+						_handle_left_click(pos_in_world_px)
 					else:
-						_handle_left_click_release(event.global_position)
+						_handle_left_click_release(pos_in_world_px)
 			MOUSE_BUTTON_RIGHT:
 				_cancel_mode() # will only cancel if possible
 	elif event is InputEventMouseMotion:
-		var evt_global_pos = event.global_position
-		if _is_point_over_world(evt_global_pos):
-			var pos_in_world_px = world_view.global_xy_to_pos_in_world(evt_global_pos)
-			
-			# detect which object mouse is hovering over
-			if mode == Mode.Idle:
-				var nearest_pickable := _nearest_pickable_obj(pos_in_world_px)
-				if nearest_pickable != _hovered_obj:
-					# transition 'hovering' status from one object to the next
-					if _hovered_obj:
-						_hovered_obj.hovering = false
-					if nearest_pickable:
-						nearest_pickable.hovering = true
-					_hovered_obj = nearest_pickable
+		# detect which object mouse is hovering over
+		if mode == Mode.Idle:
+			var nearest_pickable := world_view.get_pickable_under_cursor()
+			if nearest_pickable != _hovered_obj:
+				# transition 'hovering' status from one object to the next
+				if _hovered_obj:
+					_hovered_obj.hovering = false
 				if nearest_pickable:
-					Utils.push_cursor_shape(Input.CURSOR_POINTING_HAND)
-				else:
-					Utils.pop_cursor_shape()
+					nearest_pickable.hovering = true
+				_hovered_obj = nearest_pickable
+			if nearest_pickable:
+				Utils.push_cursor_shape(Input.CURSOR_POINTING_HAND)
+			else:
+				Utils.pop_cursor_shape()
+		
+		if sprinkler_to_add:
+			sprinkler_to_add.position = pos_in_world_px
+		elif dist_meas_to_add and mode == Mode.AddDistMeasureB:
+			dist_meas_to_add.point_b = pos_in_world_px
+		elif poly_to_add:
+			if poly_edit_point_idx < poly_to_add.point_count():
+				poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
+		elif mode != Mode.MovingObjects and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			# check if any selected objects are position locked
+			var any_locked = false
+			for obj in _selected_objs:
+				if obj.position_locked:
+					any_locked = true
+					break
 			
-			if sprinkler_to_add:
-				sprinkler_to_add.position = pos_in_world_px
-			elif dist_meas_to_add and mode == Mode.AddDistMeasureB:
-				dist_meas_to_add.point_b = pos_in_world_px
-			elif poly_to_add:
-				if poly_edit_point_idx < poly_to_add.point_count():
-					poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
-			elif mode != Mode.MovingObjects and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-				# check if any selected objects are position locked
-				var any_locked = false
+			# start move operations if no objects are locked
+			if any_locked:
+				Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
+			else:
 				for obj in _selected_objs:
-					if obj.position_locked:
-						any_locked = true
-						break
-				
-				# start move operations if no objects are locked
-				if any_locked:
-					Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
-				else:
-					for obj in _selected_objs:
-						obj.start_move()
-						mode = Mode.MovingObjects
-			
-			if mode == Mode.MovingObjects:
-				_handle_held_obj_move(pos_in_world_px)
+					obj.start_move()
+					mode = Mode.MovingObjects
+		
+		if mode == Mode.MovingObjects:
+			_handle_held_obj_move(pos_in_world_px)
 
 func _on_viewport_container_pan_state_changed(panning: bool) -> void:
 	if panning:
