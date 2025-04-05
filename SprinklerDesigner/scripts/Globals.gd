@@ -36,8 +36,9 @@ func _ready():
 func get_app_name() -> String:
 	return ProjectSettings.get_setting("application/config/name") as String
 
-func get_app_version() -> String:
-	return ProjectSettings.get_setting("application/config/version") as String
+func get_app_version() -> Version:
+	var sver := ProjectSettings.get_setting("application/config/version") as String
+	return Version.from_str(sver)
 
 func get_recent_projects() -> Array[String]:
 	return _recent_projects

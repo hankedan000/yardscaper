@@ -18,13 +18,15 @@ var selected_project_item : PreviousProjectItem = null:
 		if not is_inside_tree():
 			await ready
 		
-		var project_is_invalid = false
+		var not_editable = false
 		if selected_project_item == null:
-			project_is_invalid = true
+			not_editable = true
 		elif selected_project_item.is_missing:
-			project_is_invalid = true
-		open_button.disabled = project_is_invalid
-		rename_button.disabled = project_is_invalid
+			not_editable = true
+		elif not selected_project_item.is_version_compatible:
+			not_editable = true
+		open_button.disabled = not_editable
+		rename_button.disabled = not_editable
 		remove_button.disabled = selected_project_item == null
 
 func _ready():

@@ -49,7 +49,7 @@ func is_opened() -> bool:
 
 class QuickProjectInfo:
 	var name : String = "Unnamed Project"
-	var version : String = Globals.UNKOWN_VERSION
+	var version : Version = Version.from_str(Globals.UNKOWN_VERSION)
 	# last modified timestamp (in UNIX time)
 	var last_modified : int = 0
 
@@ -62,7 +62,7 @@ static func get_quick_info(dir: String) -> QuickProjectInfo:
 	
 	var info := QuickProjectInfo.new()
 	info.name = _get_project_name(project_data, dir)
-	info.version = Utils.dict_get(project_data, VERSION_KEY, Globals.UNKOWN_VERSION)
+	info.version = Version.from_str(Utils.dict_get(project_data, VERSION_KEY, Globals.UNKOWN_VERSION))
 	info.last_modified = FileAccess.get_modified_time(_get_project_data_filepath(dir))
 	return info
 
