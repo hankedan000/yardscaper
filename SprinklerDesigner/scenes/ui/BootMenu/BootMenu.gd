@@ -3,13 +3,15 @@ class_name BootMenu
 
 @export var PreviousItemScene : PackedScene = null
 
-@onready var previous_projects := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/ScrollContainer/PreviousProjects
 @onready var import_project_dialog := $ImportProjectDialog
 @onready var create_project_dialog := $CreateProjectDialog
 @onready var rename_project_dialog := $RenameProjectDialog
+@onready var github_request : GithubRequest = $GithubRequest
+@onready var previous_projects := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/ScrollContainer/PreviousProjects
 @onready var open_button := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/OpenButton
 @onready var rename_button := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/RenameButton
 @onready var remove_button := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/RemoveButton
+@onready var new_version_label : RichTextLabel = $VBoxContainer/BottomBar/NewVersionLabel
 @onready var version_label := $VBoxContainer/BottomBar/VersionLabel
 
 var selected_project_item : PreviousProjectItem = null:
@@ -33,6 +35,7 @@ func _ready():
 	DisplayServer.window_set_title("Project Manager - %s" % Globals.get_app_name())
 	_reload_previous_projects()
 	version_label.text = "v%s" % Globals.get_app_version()
+	github_request.request_latest_release(Globals.GITHUB_USER, Globals.GITHUB_REPO)
 
 func _reload_previous_projects() -> void:
 	selected_project_item = null # make sure button start disabled
@@ -84,3 +87,17 @@ func _on_remove_button_pressed() -> void:
 	var path_to_remove := selected_project_item.get_project_path()
 	Globals.remove_recent_project(path_to_remove)
 	_reload_previous_projects()
+
+func _on_github_request_received_latest_release(rel: GithubRelease) -> void:
+	var rel_version := Version.from_str(rel.tag_name)
+	var comp_res := rel_version.compare(Globals.get_app_version())
+	if comp_res == 0:
+		new_version_label.text = "[color=Lightgreen]You have the latest release![/color]"
+		new_version_label.show()
+	elif rel_version.compare(Globals.get_app_version()) > 0:
+		new_version_label.text = "[url=%s][color=Gold]New release available: v%s[/color][/url]" % [rel.html_url, rel_version.to_string()]
+		new_version_label.tooltip_text = "Click to go to download page"
+		new_version_label.show()
+
+func _on_new_version_label_meta_clicked(meta: Variant) -> void:
+	OS.shell_open(meta)

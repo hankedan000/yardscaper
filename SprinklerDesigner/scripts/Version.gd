@@ -5,29 +5,36 @@ var _major : int = 0
 var _minor : int = 0
 var _patch : int = 0
 
-func _init(major_v: int, minor_v: int, patch_v: int):
-	_major = major_v
-	_minor = minor_v
-	_patch = patch_v
+static func from_ints(major_v: int, minor_v: int, patch_v: int) -> Version:
+	var new_ver := Version.new()
 	if major_v < 0:
-		push_error('major version must be >= 0. was %d' % major_v)
+		push_warning('major version must be >= 0. was %d' % major_v)
 	elif minor_v < 0:
-		push_error('minor version must be >= 0. was %d' % minor_v)
+		push_warning('minor version must be >= 0. was %d' % minor_v)
 	elif patch_v < 0:
-		push_error('patch version must be >= 0. was %d' % patch_v)
+		push_warning('patch version must be >= 0. was %d' % patch_v)
 	elif minor_v >= 1000:
-		push_error('minor version must be < 1000. was %d' % minor_v)
+		push_warning('minor version must be < 1000. was %d' % minor_v)
 	elif patch_v >= 1000:
-		push_error('patch version must be < 1000. was %d' % patch_v)
+		push_warning('patch version must be < 1000. was %d' % patch_v)
+	else:
+		new_ver._major = major_v
+		new_ver._minor = minor_v
+		new_ver._patch = patch_v
+	return new_ver
 
 static func from_str(sver: String) -> Version:
-	var parts := sver.split('.')
-	if parts.size() != 3:
-		push_error("version split of '%s' didn't result in 3 parts! parts = %s" % [sver, parts])
-	var major_v := int(parts[0])
-	var minor_v := int(parts[1])
-	var patch_v := int(parts[2])
-	return Version.new(major_v, minor_v, patch_v)
+	var regex = RegEx.new()
+	regex.compile(r"(\d+)\.(\d+)\.(\d+)")
+	var result = regex.search(sver)
+	if not result:
+		push_warning("regex failed to parse version from string '%s'" % sver)
+		return Version.new()
+	
+	var major_v := int(result.get_string(1))
+	var minor_v := int(result.get_string(2))
+	var patch_v := int(result.get_string(3))
+	return Version.from_ints(major_v, minor_v, patch_v)
 
 static func from_int(iver: int) -> Version:
 	var patch_v := iver % 1000
@@ -35,7 +42,7 @@ static func from_int(iver: int) -> Version:
 	var minor_v := iver % 1000
 	iver /= 1000
 	var major_v := iver
-	return Version.new(major_v, minor_v, patch_v)
+	return Version.from_ints(major_v, minor_v, patch_v)
 
 func major() -> int:
 	return _major
@@ -56,7 +63,7 @@ func to_int() -> int:
 # @return true if this version is considered compatible with the
 # current application version (ie. major <= app.major && minor <= app.minor)
 func is_compatible() -> bool:
-	var lhs_no_patch := Version.new(_major, _minor, 0)
+	var lhs_no_patch := Version.from_ints(_major, _minor, 0)
 	var rhs_no_patch := Globals.get_app_version()
 	rhs_no_patch._patch = 0
 	return lhs_no_patch.compare(rhs_no_patch) <= 0

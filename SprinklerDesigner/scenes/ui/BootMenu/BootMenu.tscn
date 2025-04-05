@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://cqfa5mme82onl"]
+[gd_scene load_steps=14 format=3 uid="uid://cqfa5mme82onl"]
 
 [ext_resource type="Script" path="res://scenes/ui/BootMenu/BootMenu.gd" id="1_a8g1b"]
 [ext_resource type="Theme" uid="uid://b7bms6qoy7yfq" path="res://assets/themes/MainTheme.tres" id="1_h2chn"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://dgejlhlde13ed" path="res://assets/icons/Rename.svg" id="7_7snhg"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="8_bs2io"]
 [ext_resource type="LabelSettings" uid="uid://6m4gdl765t3" path="res://assets/themes/GreyLabelSettings.tres" id="10_1eadb"]
+[ext_resource type="PackedScene" uid="uid://bd0k0hej4cpkr" path="res://scenes/GithubRequest/GithubRequest.tscn" id="11_r52mt"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8iuw1"]
 content_margin_left = 4.0
@@ -53,6 +54,8 @@ visible = false
 
 [node name="RenameProjectDialog" parent="." instance=ExtResource("5_jj620")]
 visible = false
+
+[node name="GithubRequest" parent="." instance=ExtResource("11_r52mt")]
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -127,6 +130,20 @@ icon = ExtResource("8_bs2io")
 layout_mode = 2
 alignment = 2
 
+[node name="NewVersionLabel" type="RichTextLabel" parent="VBoxContainer/BottomBar"]
+visible = false
+clip_contents = false
+layout_mode = 2
+bbcode_enabled = true
+text = "[url][color=Gold]New release available: v0.0.0[/color][/url]"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="Separation" type="Control" parent="VBoxContainer/BottomBar"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
 [node name="VersionLabel" type="Label" parent="VBoxContainer/BottomBar"]
 layout_mode = 2
 text = "v0.0.0"
@@ -135,8 +152,10 @@ label_settings = ExtResource("10_1eadb")
 [connection signal="dir_selected" from="ImportProjectDialog" to="." method="_on_import_project_dialog_dir_selected"]
 [connection signal="create_requested" from="CreateProjectDialog" to="." method="_on_create_project_dialog_create_requested"]
 [connection signal="project_renamed" from="RenameProjectDialog" to="." method="_on_rename_project_dialog_project_renamed"]
+[connection signal="received_latest_release" from="GithubRequest" to="." method="_on_github_request_received_latest_release"]
 [connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/TopButtonBar/CreateProjectButton" to="." method="_on_create_project_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/TopButtonBar/ImportProjectButton" to="." method="_on_import_project_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/OpenButton" to="." method="_on_open_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/RenameButton" to="." method="_on_rename_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/RemoveButton" to="." method="_on_remove_button_pressed"]
+[connection signal="meta_clicked" from="VBoxContainer/BottomBar/NewVersionLabel" to="." method="_on_new_version_label_meta_clicked"]

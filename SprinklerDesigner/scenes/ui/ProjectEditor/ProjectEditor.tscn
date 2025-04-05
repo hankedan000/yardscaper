@@ -24,6 +24,8 @@ script/source = "extends Window
 func _ready():
 	name_label.text = Globals.get_app_name()
 	ver_label.text = \"Version: %s\" % Globals.get_app_version()
+	var repo_path := \"%s/%s\" % [Globals.GITHUB_USER, Globals.GITHUB_REPO]
+	source_link.text = \"[center][url=https://github.com/%s]github.com/%s[/url][/center]\" % [repo_path, repo_path]
 	source_link.meta_clicked.connect(_on_source_link_meta_clicked)
 
 func _on_source_link_meta_clicked(meta):
@@ -107,8 +109,10 @@ horizontal_alignment = 1
 [node name="SourceLink" type="RichTextLabel" parent="AboutDialog/PanelContainer/VBox"]
 layout_mode = 2
 bbcode_enabled = true
-text = "[center][url=\"https://github.com/hankedan000/sprinkler_designer\"]github.com/hankedan000/sprinkler_designer[/url][/center]"
+text = "[center][url=]github.com/user/repo[/url][/center]"
 fit_content = true
+scroll_active = false
+autowrap_mode = 0
 
 [node name="HelpDialog" type="Window" parent="."]
 title = "Help"

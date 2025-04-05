@@ -7,6 +7,8 @@ const HOVER_COLOR := Color.DARK_TURQUOISE
 const SELECT_COLOR := Color.DARK_ORANGE
 const MAX_RECENT_PROJECT = 10
 const RECENT_PROJECTS_PATH = "user://recent_project.json"
+const GITHUB_USER := "hankedan000"
+const GITHUB_REPO := "sprinkler_designer"
 
 # most recent is at the front, oldest at the back
 var _recent_projects : Array[String] = []
