@@ -137,10 +137,10 @@ func get_subclass_count(subclass: String) -> int:
 			count += 1
 	return count
 
-func add_object(obj: WorldObject) -> void:
+func add_object(obj: WorldObject) -> bool:
 	if objects.has(obj):
 		push_warning("obj '%s' is already added to project. ignoring add." % obj.name)
-		return
+		return false
 	
 	# connect signal handlers
 	obj.property_changed.connect(_on_node_property_changed)
@@ -148,11 +148,12 @@ func add_object(obj: WorldObject) -> void:
 	objects.append(obj)
 	node_changed.emit(obj, ChangeType.ADD, [])
 	has_edits = true
+	return true
 
-func remove_object(obj: WorldObject) -> void:
+func remove_object(obj: WorldObject) -> bool:
 	if not objects.has(obj):
 		push_warning("obj '%s' is not in the project. ignoring remove." % obj.name)
-		return
+		return false
 	
 	objects.erase(obj)
 	
@@ -162,6 +163,7 @@ func remove_object(obj: WorldObject) -> void:
 	
 	node_changed.emit(obj, ChangeType.REMOVE, [])
 	has_edits = true
+	return true
 
 func get_img_dir() -> String:
 	if len(project_path) == 0:

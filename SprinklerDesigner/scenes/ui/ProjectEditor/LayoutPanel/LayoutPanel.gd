@@ -334,10 +334,10 @@ func _on_add_polygon_pressed():
 
 func _on_remove_button_pressed():
 	for obj in _selected_objs:
-		undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.Remove.new(
+		undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.AddOrRemove.new(
 			world_view,
-			obj.get_order_in_world(),
-			obj))
+			obj,
+			true)) # is_remove
 		TheProject.remove_object(obj)
 	_clear_selected_objects()
 
@@ -347,6 +347,10 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 		TheProject.ChangeType.ADD:
 			if not obj_in_world:
 				world_view.objects.add_child(obj)
+			undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.AddOrRemove.new(
+				world_view,
+				obj,
+				false)) # is_remove
 			obj.picked_state_changed.connect(_on_pickable_object_pick_state_changed.bind(obj))
 			_clear_selected_objects()
 			obj.picked = true
