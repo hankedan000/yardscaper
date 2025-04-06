@@ -98,7 +98,7 @@ texture = ExtResource("5_y37na")
 
 [node name="NameLabel" type="Label" parent="AboutDialog/PanelContainer/VBox"]
 layout_mode = 2
-text = "Sprinkler Designer"
+text = "Applicat Name"
 horizontal_alignment = 1
 
 [node name="VersionLabel" type="Label" parent="AboutDialog/PanelContainer/VBox"]
