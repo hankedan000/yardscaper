@@ -10,7 +10,7 @@ const ORIGIN_HORZ_COLOR := Color.INDIAN_RED
 
 @onready var viewport          : Viewport = $ViewportContainer/Viewport
 @onready var objects           := $ViewportContainer/Viewport/Objects
-@onready var pan_zoom_ctrl     := $ViewportContainer/Viewport/PanZoomController
+@onready var pan_zoom_ctrl     : PanZoomController = $ViewportContainer/Viewport/PanZoomController
 @onready var camera2d          : Camera2D = $ViewportContainer/Viewport/Camera2D
 @onready var cursor            : Area2D = $ViewportContainer/Viewport/Cursor
 @onready var tooltip_label     : Label = $ViewportContainer/Viewport/Cursor/ToolTipLabel

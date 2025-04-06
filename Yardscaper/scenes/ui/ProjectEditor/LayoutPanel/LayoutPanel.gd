@@ -29,7 +29,6 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 
 enum Mode {
 	Idle,
-	Panning,
 	MovingObjects,
 	AddSprinkler,
 	AddDistMeasureA,
@@ -63,8 +62,6 @@ var mode = Mode.Idle:
 		match mode:
 			Mode.Idle:
 				Utils.pop_cursor_shape()
-			Mode.Panning:
-				Utils.push_cursor_shape(Input.CURSOR_DRAG)
 			Mode.MovingObjects:
 				Utils.push_cursor_shape(Input.CURSOR_DRAG)
 			Mode.AddSprinkler:
@@ -460,7 +457,7 @@ func _on_world_view_gui_input(event: InputEvent):
 				_cancel_mode() # will only cancel if possible
 	elif event is InputEventMouseMotion:
 		# detect which object mouse is hovering over
-		if mode == Mode.Idle:
+		if mode == Mode.Idle and not world_view.pan_zoom_ctrl.is_panning():
 			var nearest_pickable := world_view.get_pickable_under_cursor()
 			if nearest_pickable != _hovered_obj:
 				# transition 'hovering' status from one object to the next
@@ -502,9 +499,9 @@ func _on_world_view_gui_input(event: InputEvent):
 
 func _on_viewport_container_pan_state_changed(panning: bool) -> void:
 	if panning:
-		mode = Mode.Panning
+		Utils.push_cursor_shape(Input.CURSOR_DRAG)
 	else:
-		mode = Mode.Idle
+		Utils.pop_cursor_shape()
 
 func _on_position_lock_button_pressed() -> void:
 	for obj in _selected_objs:

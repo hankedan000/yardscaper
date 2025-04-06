@@ -1,14 +1,15 @@
 extends Node2D
+class_name PanZoomController
 
 signal pan_state_changed(panning: bool)
 signal zoom_changed(old_zoom: Vector2, new_zoom: Vector2)
 
-var _dragging : bool = false:
+var _panning : bool = false:
 	set(value):
-		var old_value := _dragging
-		_dragging = value
-		if _dragging != old_value:
-			pan_state_changed.emit(_dragging)
+		var old_value := _panning
+		_panning = value
+		if _panning != old_value:
+			pan_state_changed.emit(_panning)
 var _drag_start = Vector2.ZERO
 var _camera_original_position = Vector2.ZERO
 
@@ -29,15 +30,18 @@ func world_pos_to_local(pos_world: Vector2) -> Vector2:
 	var viewport_rect_size = get_viewport().get_visible_rect().size
 	return viewport_rect_size / 2.0 + Utils.world_to_global_size_px(offset_from_camera_world, camera.zoom)
 
+func is_panning() -> bool:
+	return _panning
+
 func _do_pan_logic(event: InputEventMouseButton, camera_pos: Vector2) -> void:
 	if event.pressed:
 		# Start dragging
-		_dragging = true
+		_panning = true
 		_drag_start = event.position
 		_camera_original_position = camera_pos
 	else:
 		# Stop dragging
-		_dragging = false
+		_panning = false
 
 func _input(event: InputEvent):
 	var camera := get_viewport().get_camera_2d()
@@ -54,7 +58,7 @@ func _input(event: InputEvent):
 			MOUSE_BUTTON_WHEEL_DOWN:
 				zoom_out(event.position)
 	elif event is InputEventMouseMotion:
-		if _dragging:
+		if _panning:
 			# Calculate drag distance and offset camera accordingly
 			var drag_delta = (event.position - _drag_start) / camera.zoom.x
 			camera.position = _camera_original_position - drag_delta
