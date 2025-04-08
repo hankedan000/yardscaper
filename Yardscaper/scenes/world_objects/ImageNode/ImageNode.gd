@@ -17,6 +17,7 @@ var width_ft : float = 0:
 		if texture_rect:
 			texture_rect.size.x = Utils.ft_to_px(value)
 			queue_redraw()
+		_sync_pick_area_size()
 
 var height_ft : float = 0:
 	set(value):
@@ -27,6 +28,7 @@ var height_ft : float = 0:
 		if texture_rect:
 			texture_rect.size.y = Utils.ft_to_px(value)
 			queue_redraw()
+		_sync_pick_area_size()
 
 func _ready():
 	super._ready()
@@ -43,10 +45,8 @@ func _ready():
 				texture_rect.size.y = Utils.ft_to_px(height_ft)
 	
 	# change pick shape to a rectangle (default is ellipse)
-	var rect_shape := RectangleShape2D.new()
-	rect_shape.size = texture_rect.size
-	pick_coll_shape.shape = rect_shape
-	pick_area.position = texture_rect.size / 2.0
+	pick_coll_shape.shape = RectangleShape2D.new()
+	_sync_pick_area_size()
 
 func _draw():
 	# draw indicator box
@@ -75,3 +75,12 @@ func deserialize(obj):
 	filename = obj['filename']
 	width_ft = Utils.dict_get(obj, PROP_KEY_WIDTH_FT, 0)
 	height_ft = Utils.dict_get(obj, PROP_KEY_HEIGHT_FT, 0)
+
+func _sync_pick_area_size():
+	if not pick_coll_shape or not texture_rect:
+		return
+	
+	var rect_shape := pick_coll_shape.shape as RectangleShape2D
+	if rect_shape:
+		rect_shape.size = texture_rect.size
+		pick_area.position = texture_rect.size / 2.0

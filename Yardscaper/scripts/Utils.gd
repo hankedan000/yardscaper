@@ -1,12 +1,12 @@
 extends Node
 
-const PX_PER_FT = 12 # 1px per inch
-const INCHES_PER_FT = 12.0
+const PX_PER_FT : float = 12.0 # 1px per inch
+const INCHES_PER_FT : float = 12.0
 
-func ft_to_px(ft: float):
+func ft_to_px(ft: float) -> float:
 	return ft * PX_PER_FT
 
-func px_to_ft(px: float):
+func px_to_ft(px: float) -> float:
 	return px / PX_PER_FT
 
 func ft_to_px_vec(ft: Vector2):
