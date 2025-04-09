@@ -10,6 +10,7 @@ class_name SprinklerPropertyEditor
 @onready var min_dist_spinbox         := $MinDistanceSpinBox
 @onready var max_dist_spinbox         := $MaxDistanceSpinBox
 @onready var dist_spinbox             := $DistanceSpinBox
+@onready var body_color_picker        := $BodyColorPicker
 
 var sprinkler : Sprinkler = null:
 	set(obj):
@@ -75,6 +76,7 @@ func _sync_ui():
 	dist_spinbox.min_value = min_dist_spinbox.value
 	dist_spinbox.max_value = max_dist_spinbox.value
 	dist_spinbox.value = sprinkler.dist_ft
+	body_color_picker.color = sprinkler.body_color
 	_ignore_internal_edits = false
 	_ui_needs_sync = false
 
@@ -125,3 +127,7 @@ func _on_max_distance_spin_box_value_changed(value):
 
 func _on_sprinkler_property_changed(_obj: WorldObject, _property: StringName, _from: Variant, _to: Variant) -> void:
 	queue_ui_sync()
+
+func _on_body_color_picker_color_changed(color: Color) -> void:
+	if sprinkler is Sprinkler and not _ignore_internal_edits:
+		sprinkler.body_color = color

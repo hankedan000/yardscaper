@@ -8,6 +8,13 @@ const DEFAULT_MAX_DIST_FT = 14.0
 const DEFAULT_MIN_SWEEP_DEG = 0.0
 const DEFAULT_MAX_SWEEP_DEG = 360.0
 
+const PROP_KEY_DIST_FT = &"dist_ft"
+const PROP_KEY_MIN_DIST_FT = &"min_dist_ft"
+const PROP_KEY_MAX_DIST_FT = &"max_dist_ft"
+const PROP_KEY_SWEEP_DEG = &"sweep_deg"
+const PROP_KEY_MANUFACTURER = &"manufacturer"
+const PROP_KEY_MODEL = &"model"
+const PROP_KEY_BODY_COLOR = &"body_color"
 const PROP_KEY_ZONE = &"zone"
 const PROP_MIN_SWEEP_DEG = &"min_sweep_deg"
 const PROP_MAX_SWEEP_DEG = &"max_sweep_deg"
@@ -145,6 +152,14 @@ var show_water := true :
 		show_water = value
 		queue_redraw()
 
+var body_color : Color = Color.BLACK :
+	set(value):
+		var old_value = body_color
+		body_color = value
+		if old_value != body_color:
+			property_changed.emit(self, PROP_KEY_BODY_COLOR, old_value, body_color)
+		queue_redraw()
+
 var _head_info = null
 
 func draw_sector(center: Vector2, radius: float, angle_from: float, angle_to: float, n_points: int, color: Color):
@@ -164,13 +179,6 @@ func draw_sector(center: Vector2, radius: float, angle_from: float, angle_to: fl
 func get_subclass() -> String:
 	return "Sprinkler"
 
-const PROP_KEY_DIST_FT = &"dist_ft"
-const PROP_KEY_MIN_DIST_FT = &"min_dist_ft"
-const PROP_KEY_MAX_DIST_FT = &"max_dist_ft"
-const PROP_KEY_SWEEP_DEG = &"sweep_deg"
-const PROP_KEY_MANUFACTURER = &"manufacturer"
-const PROP_KEY_MODEL = &"model"
-
 func serialize():
 	var obj = super.serialize()
 	obj[PROP_KEY_DIST_FT] = dist_ft
@@ -180,6 +188,7 @@ func serialize():
 	obj[PROP_KEY_MANUFACTURER] = manufacturer
 	obj[PROP_KEY_MODEL] = model
 	obj[PROP_KEY_ZONE] = zone
+	obj[PROP_KEY_BODY_COLOR] = body_color.to_html(true)
 	return obj
 
 func deserialize(obj):
@@ -187,10 +196,11 @@ func deserialize(obj):
 	sweep_deg = obj[PROP_KEY_SWEEP_DEG]
 	manufacturer = obj[PROP_KEY_MANUFACTURER]
 	model = obj[PROP_KEY_MODEL]
-	dist_ft = Utils.dict_get(obj, PROP_KEY_DIST_FT, max_dist_ft)
 	min_dist_ft = Utils.dict_get(obj, PROP_KEY_MIN_DIST_FT, min_dist_ft)
 	max_dist_ft = Utils.dict_get(obj, PROP_KEY_MAX_DIST_FT, max_dist_ft)
+	dist_ft = Utils.dict_get(obj, PROP_KEY_DIST_FT, max_dist_ft)
 	zone = Utils.dict_get(obj, PROP_KEY_ZONE, 1)
+	body_color = Utils.dict_get(obj, PROP_KEY_BODY_COLOR, body_color)
 
 func _draw():
 	var stop_angle = deg_to_rad(sweep_deg)
@@ -211,7 +221,7 @@ func _draw():
 		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
 		draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT * 2), indic_color)
 	# draw body
-	draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT), Color.BLACK)
+	draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT), body_color)
 
 func _cap_values():
 	if dist_ft < min_dist_ft:

@@ -87,6 +87,13 @@ text = "Distance: "
 layout_mode = 2
 suffix = "ft"
 
+[node name="Label10" type="Label" parent="."]
+layout_mode = 2
+text = "Head Color:"
+
+[node name="BodyColorPicker" type="ColorPickerButton" parent="."]
+layout_mode = 2
+
 [connection signal="text_submitted" from="UserLabelLineEdit" to="." method="_on_user_label_line_edit_text_submitted"]
 [connection signal="item_selected" from="ManufacturerOption" to="." method="_on_manufacturer_option_item_selected"]
 [connection signal="item_selected" from="ModelOption" to="." method="_on_model_option_item_selected"]
@@ -96,3 +103,4 @@ suffix = "ft"
 [connection signal="value_changed" from="MinDistanceSpinBox" to="." method="_on_min_distance_spin_box_value_changed"]
 [connection signal="value_changed" from="MaxDistanceSpinBox" to="." method="_on_max_distance_spin_box_value_changed"]
 [connection signal="value_changed" from="DistanceSpinBox" to="." method="_on_distance_spin_box_value_changed"]
+[connection signal="color_changed" from="BodyColorPicker" to="." method="_on_body_color_picker_color_changed"]
