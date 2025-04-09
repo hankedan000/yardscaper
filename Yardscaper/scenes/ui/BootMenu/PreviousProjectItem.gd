@@ -27,8 +27,8 @@ func setup(project_path: String) -> void:
 	is_version_compatible = false
 	path_label.text = project_path
 	path_label.tooltip_text = project_path # if path is too long, show full path as tooltip
-	name_label.text = "Unknown Project Name"
-	version_label.text = Globals.UNKOWN_VERSION
+	name_label.text = "Missing Project"
+	version_label.text = "?" # unknown project version
 	modify_time_label.text = Time.get_datetime_string_from_unix_time(0, true)
 	
 	# now populate project info if the project path does exist

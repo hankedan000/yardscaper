@@ -373,6 +373,7 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 				undo_redo_ctrl.push_undo_op(undo_op)
 
 func _on_TheProject_opened():
+	_clear_selected_objects()
 	undo_redo_ctrl.reset()
 	
 	# restore "View" options
@@ -386,7 +387,7 @@ func _on_TheProject_opened():
 	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Polygons, TheProject.layout_pref.show_polygons)
 	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Sprinklers, TheProject.layout_pref.show_sprinklers)
 	
-	# restor camera position and zoom level
+	# restore camera position and zoom level
 	world_view.camera2d.position = TheProject.layout_pref.camera_pos
 	world_view.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.layout_pref.zoom
 

@@ -27,8 +27,8 @@ func swap_root_scene(new_scene: Control, window_mode: int, preferred_size: Vecto
 	_release_root_scene()
 	root_scene = new_scene
 	add_child(root_scene)
-	DisplayServer.window_set_mode(window_mode)
 	get_window().size = preferred_size
+	DisplayServer.window_set_mode(window_mode)
 	if window_mode == DisplayServer.WINDOW_MODE_WINDOWED:
 		get_window().move_to_center()
 
