@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://dqfod1mptbtve"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/WorldViewportContainer/WorldViewportContainer.gd" id="1_fywpf"]
-[ext_resource type="PackedScene" uid="uid://dvfn3vnt35gw7" path="res://scenes/ui/ProjectEditor/LayoutPanel/PanZoomController.tscn" id="2_tht5a"]
+[ext_resource type="PackedScene" uid="uid://dvfn3vnt35gw7" path="res://scenes/ui/ProjectEditor/WorldViewportContainer/PanZoomController.tscn" id="2_tht5a"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1hpj6"]
 
@@ -41,11 +41,11 @@ handle_input_locally = false
 size = Vector2i(711, 400)
 render_target_update_mode = 4
 
-[node name="Objects" type="Node2D" parent="ViewportContainer/Viewport"]
+[node name="Camera2D" type="Camera2D" parent="ViewportContainer/Viewport"]
 
 [node name="PanZoomController" parent="ViewportContainer/Viewport" instance=ExtResource("2_tht5a")]
 
-[node name="Camera2D" type="Camera2D" parent="ViewportContainer/Viewport"]
+[node name="Objects" type="Node2D" parent="ViewportContainer/Viewport"]
 
 [node name="Cursor" type="Area2D" parent="ViewportContainer/Viewport"]
 position = Vector2(20, 20)
@@ -79,3 +79,4 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_wvb5t")
 
 [connection signal="gui_input" from="." to="." method="_on_gui_input"]
 [connection signal="pan_state_changed" from="ViewportContainer/Viewport/PanZoomController" to="." method="_on_pan_zoom_controller_pan_state_changed"]
+[connection signal="zoom_changed" from="ViewportContainer/Viewport/PanZoomController" to="." method="_on_pan_zoom_controller_zoom_changed"]

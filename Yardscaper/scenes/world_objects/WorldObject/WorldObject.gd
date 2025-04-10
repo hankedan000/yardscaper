@@ -130,3 +130,7 @@ func deserialize(obj):
 	user_label = obj[PROP_KEY_USER_LABEL]
 	info_label.visible = Utils.dict_get(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)
 	position_locked = Utils.dict_get(obj, PROP_KEY_POSITION_LOCKED, false)
+
+func on_zoom_changed(_new_zoom: Vector2, inv_new_zoom: Vector2) -> void:
+	info_label.scale = inv_new_zoom
+	lock_indicator.scale = inv_new_zoom

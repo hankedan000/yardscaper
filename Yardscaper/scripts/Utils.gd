@@ -112,9 +112,9 @@ func pop_cursor_shape() -> Input.CursorShape:
 		Input.set_default_cursor_shape(_curr_cursor_shape)
 	return _curr_cursor_shape
 
-func get_label_text_size(label: Label, text: String) -> Vector2:
+func get_label_text_size(label: Label, text: String, include_scale: bool = true) -> Vector2:
 	var font := label.get_theme_font(&"font")
-	return font.get_multiline_string_size(
+	var text_size := font.get_multiline_string_size(
 		text,
 		label.horizontal_alignment,
 		(int)(label.size.x) if label.clip_text else -1, # width
@@ -124,6 +124,10 @@ func get_label_text_size(label: Label, text: String) -> Vector2:
 		label.justification_flags,
 		label.text_direction as TextServer.Direction,
 		TextServer.ORIENTATION_HORIZONTAL)
+	if include_scale:
+		text_size.x *= label.scale.x
+		text_size.y *= label.scale.y
+	return text_size
 
 func set_item_checked_by_id(popup: PopupMenu, id: int, checked: bool) -> void:
 	var idx := popup.get_item_index(id)

@@ -32,25 +32,6 @@ func _draw():
 		if prev_point && first_point:
 			draw_line(prev_point, first_point, perim_color, PERIMETER_WIDTH)
 
-func _update_info_label():
-	info_label.visible = point_count() > 2
-	if not info_label.visible:
-		return
-	
-	info_label.text = "%s\n(%0.2f sq. ft)" % [user_label, get_area_ft()]
-	
-	# compute bounding box size of the new label's text string
-	var font : Font = info_label.get_theme_font("font")
-	var font_size : int = info_label.get_theme_font_size("font_size")
-	var text_size := font.get_multiline_string_size(
-		info_label.text,
-		HORIZONTAL_ALIGNMENT_CENTER,
-		-1,
-		font_size)
-	
-	# position the label in center of the polygon
-	info_label.global_position = get_visual_center() - (text_size / 2.0)
-
 func add_point(point: Vector2):
 	if ! _is_ready:
 		await ready
@@ -150,6 +131,26 @@ func deserialize(obj):
 	for point in points_ft:
 		add_point(Utils.ft_to_px_vec(Utils.pair_to_vect2(point)))
 	color = Utils.dict_get(obj, PROP_KEY_COLOR, color)
+
+func _update_info_label():
+	info_label.visible = point_count() > 2
+	if not info_label.visible:
+		return
+	
+	info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	info_label.text = "%s\n(%0.2f sq. ft)" % [user_label, get_area_ft()]
+	_reposition_info_label()
+
+func _reposition_info_label() -> void:
+	# compute bounding box size of the new label's text string
+	var text_size := Utils.get_label_text_size(info_label, info_label.text)
+	# position the label in center of the polygon
+	info_label.global_position = get_visual_center() - (text_size / 2.0)
+
+# overrides WorldObject::on_zoom_changed()
+func on_zoom_changed(new_zoom: Vector2, inv_new_zoom: Vector2) -> void:
+	super.on_zoom_changed(new_zoom, inv_new_zoom)
+	_reposition_info_label()
 
 func _on_property_changed(_obj: WorldObject, property_key: StringName, _from: Variant, _to: Variant) -> void:
 	if is_inside_tree() and property_key == WorldObject.PROP_KEY_USER_LABEL:

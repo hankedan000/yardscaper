@@ -226,10 +226,6 @@ func _process(_delta):
 	var mouse_pos = get_local_mouse_position()
 	var pos_in_world = pan_zoom_ctrl.local_pos_to_world(mouse_pos)
 	cursor.position = pos_in_world
-	# scale the cursor so that it always stays at the same size,
-	# regardless of zoom level.
-	cursor.scale.x = 1.0 / curr_zoom.x
-	cursor.scale.y = 1.0 / curr_zoom.y
 
 func _on_pan_zoom_controller_pan_state_changed(panning: bool) -> void:
 	pan_state_changed.emit(panning)
@@ -244,3 +240,14 @@ func _on_gui_input(event: InputEvent) -> void:
 		
 		if show_cursor_crosshairs:
 			queue_redraw()
+
+func _on_pan_zoom_controller_zoom_changed(_old_zoom: Vector2, new_zoom: Vector2) -> void:
+	var inv_zoom := Vector2(1.0 / new_zoom.x, 1.0 / new_zoom.y)
+	# scale the cursor so that it always stays at the same size,
+	# regardless of zoom level.
+	cursor.scale = inv_zoom
+	
+	# notify world objects that zoom is changing too
+	for obj in objects.get_children():
+		if obj is WorldObject:
+			obj.on_zoom_changed(new_zoom, inv_zoom)

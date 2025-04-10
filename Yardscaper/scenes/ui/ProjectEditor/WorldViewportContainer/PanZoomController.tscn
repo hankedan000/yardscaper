@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dvfn3vnt35gw7"]
 
-[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/LayoutPanel/PanZoomController.gd" id="1_ragfe"]
+[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/WorldViewportContainer/PanZoomController.gd" id="1_ragfe"]
 
 [node name="PanZoomController" type="Node2D"]
 script = ExtResource("1_ragfe")
