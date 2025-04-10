@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=20 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/world_objects/Sprinkler/Sprinkler.tscn" id="2_16d6l"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://bujgf1ym2asal" path="res://scenes/ui/ProjectEditor/ImageNodePropertyEditor/ImageNodePropertyEditor.tscn" id="4_legmd"]
 [ext_resource type="PackedScene" uid="uid://cn8j4nj6r83we" path="res://scenes/ui/dialogs/ImageImportWizard/ImageImportWizard.tscn" id="5_3cenq"]
 [ext_resource type="PackedScene" uid="uid://c7ey0qd3m5ads" path="res://scenes/ui/ProjectEditor/ObjectsList/ObjectsList.tscn" id="5_p3ckg"]
+[ext_resource type="PackedScene" uid="uid://ug68ljbldsj5" path="res://scenes/ui/dialogs/GridSpacingDialog/GridSpacingDialog.tscn" id="6_lbneg"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="7_nx6cf"]
 [ext_resource type="PackedScene" uid="uid://0w6g4f1p5gwe" path="res://scenes/ui/ProjectEditor/PolygonNodePropertyEditor/PolygonNodePropertyEditor.tscn" id="7_u58qy"]
 [ext_resource type="Texture2D" uid="uid://b7dml04prcvb" path="res://assets/icons/Water.svg" id="9_t5ctp"]
@@ -33,6 +34,12 @@ SprinklerScene = ExtResource("2_16d6l")
 DistanceMeasurementScene = ExtResource("2_rmdn3")
 PolygonScene = ExtResource("4_85obg")
 
+[node name="PreferenceUpdateTimer" type="Timer" parent="."]
+autostart = true
+
+[node name="ToolTipTimer" type="Timer" parent="."]
+one_shot = true
+
 [node name="ImgDialog" type="FileDialog" parent="."]
 title = "Open a File"
 size = Vector2i(900, 600)
@@ -42,6 +49,9 @@ access = 2
 filters = PackedStringArray("*.jpg", "*.png", "*.bmp", "*.jpeg")
 
 [node name="ImageImportWizard" parent="." instance=ExtResource("5_3cenq")]
+visible = false
+
+[node name="GridSpacingDialog" parent="." instance=ExtResource("6_lbneg")]
 visible = false
 
 [node name="HSplitContainer" type="HSplitContainer" parent="."]
@@ -158,12 +168,10 @@ item_count = 3
 popup/item_0/text = "Show Origin"
 popup/item_0/checkable = 1
 popup/item_0/checked = true
-popup/item_1/text = "Show Grid"
-popup/item_1/checkable = 1
-popup/item_1/checked = true
-popup/item_1/id = 1
-popup/item_2/text = "Objects"
-popup/item_2/id = 2
+popup/item_1/text = "Objects"
+popup/item_1/id = 2
+popup/item_2/text = "Grid"
+popup/item_2/id = 3
 
 [node name="ObjectsViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
 size = Vector2i(173, 100)
@@ -184,18 +192,25 @@ item_3/checkable = 1
 item_3/checked = true
 item_3/id = 3
 
+[node name="GridViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
+size = Vector2i(162, 100)
+item_count = 2
+item_0/text = "Show"
+item_0/checkable = 1
+item_1/text = "Spacing ..."
+item_1/id = 1
+
 [node name="WorldView" parent="HSplitContainer/Layout" instance=ExtResource("9_xrpqu")]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="PreferenceUpdateTimer" type="Timer" parent="."]
-autostart = true
-
-[node name="ToolTipTimer" type="Timer" parent="."]
-one_shot = true
-
+[connection signal="timeout" from="PreferenceUpdateTimer" to="." method="_on_preference_update_timer_timeout"]
+[connection signal="timeout" from="ToolTipTimer" to="." method="_on_tool_tip_timer_timeout"]
 [connection signal="file_selected" from="ImgDialog" to="." method="_on_img_dialog_file_selected"]
 [connection signal="accepted" from="ImageImportWizard" to="." method="_on_image_import_wizard_accepted"]
+[connection signal="apply" from="GridSpacingDialog" to="." method="_on_grid_spacing_dialog_apply"]
+[connection signal="cancel" from="GridSpacingDialog" to="." method="_on_grid_spacing_dialog_cancel"]
+[connection signal="spacing_changed" from="GridSpacingDialog" to="." method="_on_grid_spacing_dialog_spacing_changed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddImage" to="." method="_on_add_image_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddDistMeasure" to="." method="_on_add_dist_measure_pressed"]
@@ -204,8 +219,7 @@ one_shot = true
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionLockButton" to="." method="_on_position_lock_button_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton" to="." method="_on_position_unlock_button_pressed"]
 [connection signal="id_pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/ObjectsViewPopupMenu" to="." method="_on_objects_view_popup_menu_id_pressed"]
+[connection signal="id_pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/GridViewPopupMenu" to="." method="_on_grid_view_popup_menu_id_pressed"]
 [connection signal="gui_input" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_view_gui_input"]
 [connection signal="pan_state_changed" from="HSplitContainer/Layout/WorldView" to="." method="_on_viewport_container_pan_state_changed"]
 [connection signal="world_object_reordered" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_object_reordered"]
-[connection signal="timeout" from="PreferenceUpdateTimer" to="." method="_on_preference_update_timer_timeout"]
-[connection signal="timeout" from="ToolTipTimer" to="." method="_on_tool_tip_timer_timeout"]

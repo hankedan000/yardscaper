@@ -9,13 +9,13 @@ func ft_to_px(ft: float) -> float:
 func px_to_ft(px: float) -> float:
 	return px / PX_PER_FT
 
-func ft_to_px_vec(ft: Vector2):
+func ft_to_px_vec(ft: Vector2) -> Vector2:
 	return Vector2(ft_to_px(ft.x), ft_to_px(ft.y))
 
-func px_to_ft_vec(px: Vector2):
+func px_to_ft_vec(px: Vector2) -> Vector2:
 	return Vector2(px_to_ft(px.x), px_to_ft(px.y))
 
-func pretty_dist(dist_ft: float):
+func pretty_dist(dist_ft: float) -> String:
 	# round dist_ft to nearest inch
 	dist_ft = round(dist_ft * INCHES_PER_FT) / INCHES_PER_FT
 	

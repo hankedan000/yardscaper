@@ -36,9 +36,9 @@ var show_cursor_crosshairs = false:
 		show_cursor_crosshairs = value
 		queue_redraw()
 
-var major_spacing_ft : float = 5:
+var major_spacing_ft : Vector2 = Vector2(5, 5):
 	set(value):
-		major_spacing_ft = float(value)
+		major_spacing_ft = value
 		queue_redraw()
 
 var major_line_color : Color = Color.LIGHT_SLATE_GRAY:
@@ -158,24 +158,24 @@ func _draw_cursor_crosshairs() -> void:
 		Color.WHITE,        # color
 		1)                  # line_width
 
-func _draw_grid(grid_spacing_ft: float, color: Color, line_width: int):
+func _draw_grid(grid_spacing_ft: Vector2, color: Color, line_width: int):
 	var visible_rect_size := viewport.get_visible_rect().size
 	var visible_world_size := Utils.global_to_world_size_px(
 		visible_rect_size, camera2d.zoom)
 	
-	var spacing_world = Utils.ft_to_px(grid_spacing_ft)
-	var vert_spacing_global = Utils.world_to_global_px(
-		spacing_world, camera2d.zoom.x)
-	var horz_spacing_global = Utils.world_to_global_px(
-		spacing_world, camera2d.zoom.y)
-	var n_vert_lines = ceil(visible_world_size.x / spacing_world)
-	var n_horz_lines = ceil(visible_world_size.y / spacing_world)
+	var spacing_world := Utils.ft_to_px_vec(grid_spacing_ft)
+	var vert_spacing_global := Utils.world_to_global_px(
+		spacing_world.x, camera2d.zoom.x)
+	var horz_spacing_global := Utils.world_to_global_px(
+		spacing_world.y, camera2d.zoom.y)
+	var n_vert_lines = ceil(visible_world_size.x / spacing_world.x)
+	var n_horz_lines = ceil(visible_world_size.y / spacing_world.y)
 	
 	var upper_left_pos_world = pan_zoom_ctrl.local_pos_to_world(Vector2(0, 0))
-	var first_major_grid_pos_world = Vector2(
-		ceil(upper_left_pos_world.x / spacing_world) * spacing_world,
-		ceil(upper_left_pos_world.y / spacing_world) * spacing_world)
-	var first_major_grid_pos_local = Vector2(
+	var first_major_grid_pos_world := Vector2(
+		ceil(upper_left_pos_world.x / spacing_world.x) * spacing_world.x,
+		ceil(upper_left_pos_world.y / spacing_world.y) * spacing_world.y)
+	var first_major_grid_pos_local := Vector2(
 		(first_major_grid_pos_world.x - upper_left_pos_world.x) * camera2d.zoom.x,
 		(first_major_grid_pos_world.y - upper_left_pos_world.y) * camera2d.zoom.y)
 	_draw_vert_lines(

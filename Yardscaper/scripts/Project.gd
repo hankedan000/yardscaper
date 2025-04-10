@@ -249,7 +249,7 @@ static func _get_project_data_filepath(project_dir: String) -> String:
 # returns an empty dictionary on error
 static func _get_project_data(dir: String) -> Dictionary:
 	if not DirAccess.dir_exists_absolute(dir):
-		push_error("project dir '%s' doesn't exist" % [dir])
+		push_warning("project dir '%s' doesn't exist" % [dir])
 		return {}
 	
 	return Utils.from_json_file(_get_project_data_filepath(dir))

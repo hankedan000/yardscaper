@@ -9,6 +9,7 @@ const PROP_KEY_SHOW_POLYGONS = &"show_polygons"
 const PROP_KEY_SHOW_SPRINKLERS = &"show_sprinklers"
 const PROP_KEY_CAMERA_POS = &"camera_pos"
 const PROP_KEY_ZOOM = &"zoom"
+const PROP_KEY_GRID_MAJOR_SPACING = &"grid_major_spacing_ft"
 
 signal view_show_state_changed(prop_key: StringName, new_value: bool)
 
@@ -48,8 +49,9 @@ var show_sprinklers = true:
 			return
 		show_sprinklers = value
 		view_show_state_changed.emit(PROP_KEY_SHOW_SPRINKLERS, value)
-var camera_pos = Vector2()
+var camera_pos := Vector2()
 var zoom = 1.0
+var grid_major_spacing_ft := Vector2(5, 5)
 
 func serialize():
 	return {
@@ -60,7 +62,8 @@ func serialize():
 		PROP_KEY_SHOW_POLYGONS : show_polygons,
 		PROP_KEY_SHOW_SPRINKLERS : show_sprinklers,
 		PROP_KEY_CAMERA_POS : Utils.vect2_to_pair(camera_pos),
-		PROP_KEY_ZOOM : zoom
+		PROP_KEY_ZOOM : zoom,
+		PROP_KEY_GRID_MAJOR_SPACING : Utils.vect2_to_pair(grid_major_spacing_ft)
 	}
 
 func deserialize(obj):
@@ -72,3 +75,4 @@ func deserialize(obj):
 	show_sprinklers = Utils.dict_get(obj, PROP_KEY_SHOW_SPRINKLERS, true)
 	camera_pos = Utils.pair_to_vect2(Utils.dict_get(obj, PROP_KEY_CAMERA_POS, [0,0]))
 	zoom = Utils.dict_get(obj, PROP_KEY_ZOOM, 1.0)
+	grid_major_spacing_ft = Utils.pair_to_vect2(Utils.dict_get(obj, PROP_KEY_GRID_MAJOR_SPACING, [5,5]))
