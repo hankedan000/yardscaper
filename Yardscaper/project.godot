@@ -17,7 +17,6 @@ config/features=PackedStringArray("4.3", "Forward Plus")
 boot_splash/bg_color=Color(0, 0, 0, 0)
 boot_splash/image="res://assets/imgs/splashscreen.png"
 config/icon="res://assets/icons/grass_128.png"
-config/windows_native_icon="res://assets/icons/grass_128.ico"
 boot_splash/minimum_display_time=1000
 
 [autoload]
