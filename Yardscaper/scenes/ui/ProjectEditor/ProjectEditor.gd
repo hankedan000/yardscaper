@@ -6,7 +6,7 @@ enum ProjectMenuIDs {
 	Save = 2,
 	SaveAs = 3,
 	ExportToImage = 4,
-	QuitToProjectList = 5
+	QuitToProjectManager = 5
 }
 
 enum EditMenuIDs {
@@ -20,9 +20,9 @@ enum HelpMenuIDs {
 }
 
 enum CloseType {
-	None        = 0,
-	ProjectList = 1, # close project and goto project list window
-	Application = 2  # close application entirely
+	None           = 0,
+	ProjectManager = 1, # close project and goto project manager window
+	Application    = 2  # close application entirely
 }
 
 @onready var open_dialog := $OpenDialog
@@ -86,9 +86,9 @@ func _do_close(type: CloseType):
 	match type:
 		CloseType.None:
 			pass # nothing to do
-		CloseType.ProjectList:
+		CloseType.ProjectManager:
 			TheProject.reset()
-			Globals.main.open_boot_menu()
+			Globals.main.open_project_manager()
 		CloseType.Application:
 			get_tree().quit()
 
@@ -128,8 +128,8 @@ func _on_project_id_pressed(id):
 			save_as_dialog.popup_centered()
 		ProjectMenuIDs.ExportToImage:
 			export_to_img_dialog.popup_centered()
-		ProjectMenuIDs.QuitToProjectList:
-			_request_close(CloseType.ProjectList)
+		ProjectMenuIDs.QuitToProjectManager:
+			_request_close(CloseType.ProjectManager)
 
 func _on_save_as_dialog_dir_selected(dir: String):
 	if TheProject.save_as(dir):

@@ -174,7 +174,7 @@ popup/item_2/text = "Grid"
 popup/item_2/id = 3
 
 [node name="ObjectsViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
-size = Vector2i(173, 100)
+size = Vector2i(173, 116)
 item_count = 4
 item_0/text = "Images"
 item_0/checkable = 1

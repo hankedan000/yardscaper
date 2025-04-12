@@ -175,7 +175,7 @@ item_2/text = "Save As ..."
 item_2/id = 3
 item_3/text = "Export to Image..."
 item_3/id = 4
-item_4/text = "Quit to Project List"
+item_4/text = "Quit to Project Manager"
 item_4/id = 5
 
 [node name="Edit" type="PopupMenu" parent="VBoxContainer/MenuBar"]

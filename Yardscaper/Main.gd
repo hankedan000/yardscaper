@@ -1,18 +1,18 @@
 extends PanelContainer
 class_name Main
 
+@export var ProjectManagerScene : PackedScene = null
 @export var ProjectEditorScene : PackedScene = null
-@export var BootMenuScene      : PackedScene = null
 
 var root_scene : Control = null
 
 func _ready():
 	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
-	open_boot_menu()
+	open_project_manager()
 
-func open_boot_menu():
+func open_project_manager():
 	swap_root_scene(
-		BootMenuScene.instantiate() as Control,
+		ProjectManagerScene.instantiate() as Control,
 		DisplayServer.WINDOW_MODE_WINDOWED,
 		Vector2(1000, 400))
 
@@ -27,9 +27,10 @@ func swap_root_scene(new_scene: Control, window_mode: int, preferred_size: Vecto
 	_release_root_scene()
 	root_scene = new_scene
 	add_child(root_scene)
-	get_window().size = preferred_size
+	DisplayServer.window_set_size(preferred_size)
 	DisplayServer.window_set_mode(window_mode)
 	if window_mode == DisplayServer.WINDOW_MODE_WINDOWED:
+		await get_tree().process_frame
 		get_window().move_to_center()
 
 func _release_root_scene() -> void:

@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=17 format=3 uid="uid://b7bms6qoy7yfq"]
+[gd_resource type="Theme" load_steps=19 format=3 uid="uid://b7bms6qoy7yfq"]
 
 [ext_resource type="Texture2D" uid="uid://jat5iiamiedo" path="res://assets/icons/GuiToggleOn.svg" id="1_8gcai"]
 [ext_resource type="Texture2D" uid="uid://dn2g1utnsav2y" path="res://assets/icons/GuiToggleOnDisabled.svg" id="2_j7tqy"]
@@ -15,6 +15,17 @@ content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 4.0
 bg_color = Color(0.211765, 0.239216, 0.290196, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exi5h"]
+bg_color = Color(0.273649, 0.309122, 0.375, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fj2v0"]
+bg_color = Color(0.211765, 0.239216, 0.290196, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1srxv"]
 content_margin_left = 4.0
@@ -72,6 +83,8 @@ CheckButton/icons/unchecked_disabled = ExtResource("6_r535c")
 CheckButton/icons/unchecked_disabled_mirrored = ExtResource("7_dix7b")
 CheckButton/icons/unchecked_mirrored = ExtResource("8_8frcv")
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_l5g62")
+PopupMenu/styles/hover = SubResource("StyleBoxFlat_exi5h")
+PopupMenu/styles/panel = SubResource("StyleBoxFlat_fj2v0")
 TabContainer/constants/side_margin = 0
 TabContainer/styles/panel = SubResource("StyleBoxFlat_1srxv")
 TabContainer/styles/tab_disabled = SubResource("StyleBoxFlat_2xdqx")

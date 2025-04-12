@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Main.gd" id="1_bcdjs"]
 [ext_resource type="PackedScene" uid="uid://u1375je75c1f" path="res://scenes/ui/ProjectEditor/ProjectEditor.tscn" id="2_5j2jp"]
-[ext_resource type="PackedScene" uid="uid://cqfa5mme82onl" path="res://scenes/ui/BootMenu/BootMenu.tscn" id="3_1qthf"]
+[ext_resource type="PackedScene" uid="uid://cqfa5mme82onl" path="res://scenes/ui/ProjectManager/ProjectManager.tscn" id="3_1qthf"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_knxo1"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -15,5 +15,5 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_knxo1")
 script = ExtResource("1_bcdjs")
+ProjectManagerScene = ExtResource("3_1qthf")
 ProjectEditorScene = ExtResource("2_5j2jp")
-BootMenuScene = ExtResource("3_1qthf")

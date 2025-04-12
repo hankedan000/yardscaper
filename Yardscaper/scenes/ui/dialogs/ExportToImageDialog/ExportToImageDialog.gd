@@ -45,3 +45,6 @@ func _on_about_to_popup() -> void:
 	file_dialog.current_dir = default_dir
 	file_dialog.current_file = default_file_name
 	file_lineedit.text = default_dir.path_join(default_file_name)
+
+func _on_close_requested() -> void:
+	hide()

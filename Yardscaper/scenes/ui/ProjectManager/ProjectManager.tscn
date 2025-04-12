@@ -1,11 +1,11 @@
 [gd_scene load_steps=14 format=3 uid="uid://cqfa5mme82onl"]
 
-[ext_resource type="Script" path="res://scenes/ui/BootMenu/BootMenu.gd" id="1_a8g1b"]
+[ext_resource type="Script" path="res://scenes/ui/ProjectManager/ProjectManager.gd" id="1_a8g1b"]
 [ext_resource type="Theme" uid="uid://b7bms6qoy7yfq" path="res://assets/themes/MainTheme.tres" id="1_h2chn"]
 [ext_resource type="Texture2D" uid="uid://bumt4lc5f8gm2" path="res://assets/icons/Add.svg" id="2_kewc0"]
 [ext_resource type="PackedScene" uid="uid://cojeq6ah4kvjj" path="res://scenes/ui/dialogs/CreateProjectDialog/CreateProjectDialog.tscn" id="3_nxvso"]
-[ext_resource type="PackedScene" uid="uid://84ngs66iblgm" path="res://scenes/ui/BootMenu/PreviousProjectItem.tscn" id="5_jgdj7"]
-[ext_resource type="PackedScene" uid="uid://bk6kkbtfb7bm1" path="res://scenes/ui/BootMenu/RenameProjectDialog.tscn" id="5_jj620"]
+[ext_resource type="PackedScene" uid="uid://84ngs66iblgm" path="res://scenes/ui/ProjectManager/PreviousProjectItem.tscn" id="5_jgdj7"]
+[ext_resource type="PackedScene" uid="uid://bk6kkbtfb7bm1" path="res://scenes/ui/dialogs/RenameProjectDialog/RenameProjectDialog.tscn" id="5_jj620"]
 [ext_resource type="Texture2D" uid="uid://7k5qn270h1yw" path="res://assets/icons/Load.svg" id="6_c1bf8"]
 [ext_resource type="Texture2D" uid="uid://dgejlhlde13ed" path="res://assets/icons/Rename.svg" id="7_7snhg"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="8_bs2io"]
@@ -26,7 +26,7 @@ content_margin_right = 4.0
 content_margin_bottom = 4.0
 bg_color = Color(0.180392, 0.180392, 0.180392, 1)
 
-[node name="BootMenu" type="PanelContainer"]
+[node name="ProjectManager" type="PanelContainer"]
 layout_direction = 2
 anchors_preset = 15
 anchor_right = 1.0
@@ -51,9 +51,11 @@ use_native_dialog = true
 
 [node name="CreateProjectDialog" parent="." instance=ExtResource("3_nxvso")]
 visible = false
+exclusive = true
 
 [node name="RenameProjectDialog" parent="." instance=ExtResource("5_jj620")]
 visible = false
+exclusive = true
 
 [node name="GithubRequest" parent="." instance=ExtResource("11_r52mt")]
 
