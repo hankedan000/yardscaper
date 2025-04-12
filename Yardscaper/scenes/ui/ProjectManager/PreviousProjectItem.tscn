@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://84ngs66iblgm"]
+[gd_scene load_steps=7 format=3 uid="uid://84ngs66iblgm"]
 
 [ext_resource type="Texture2D" uid="uid://h0ug1cx5m5aj" path="res://assets/icons/grass_128.png" id="1_2td0s"]
 [ext_resource type="Script" path="res://scenes/ui/ProjectManager/PreviousProjectItem.gd" id="1_4jem3"]
 [ext_resource type="Texture2D" uid="uid://7k5qn270h1yw" path="res://assets/icons/Load.svg" id="3_vy70r"]
 [ext_resource type="LabelSettings" uid="uid://6m4gdl765t3" path="res://assets/themes/GreyLabelSettings.tres" id="4_yn2v1"]
 [ext_resource type="PackedScene" uid="uid://dr5hpsc6fcmd0" path="res://scenes/ui/widgets/StatusIcon/StatusIcon.tscn" id="5_dpve2"]
+[ext_resource type="Texture2D" uid="uid://b3ns4uq06n44i" path="res://assets/icons/Reload.svg" id="5_pf70b"]
 
 [node name="HBoxContainer" type="HBoxContainer"]
 custom_minimum_size = Vector2(0, 50)
@@ -57,13 +58,20 @@ text = "/path/to/project"
 label_settings = ExtResource("4_yn2v1")
 clip_text = true
 
+[node name="RecoveryIcon" type="TextureRect" parent="SelectButton/HBoxContainer/VBoxContainer/HBoxContainer"]
+modulate = Color(1, 0.628016, 0, 1)
+layout_mode = 2
+tooltip_text = "Recovery data exists for this project"
+texture = ExtResource("5_pf70b")
+stretch_mode = 5
+
 [node name="StatusIcon" parent="SelectButton/HBoxContainer/VBoxContainer/HBoxContainer" instance=ExtResource("5_dpve2")]
 layout_mode = 2
 status = 1
 
 [node name="ProjectVersionLabel" type="Label" parent="SelectButton/HBoxContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-text = "1.0"
+text = "1.0.0"
 
 [node name="ModifyTimeLabel" type="Label" parent="SelectButton/HBoxContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2

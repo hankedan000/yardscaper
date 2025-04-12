@@ -8,6 +8,7 @@ signal opened(item: PreviousProjectItem)
 @onready var name_label : Label = $SelectButton/HBoxContainer/VBoxContainer/ProjectNameLabel
 @onready var path_label : Label = $SelectButton/HBoxContainer/VBoxContainer/HBoxContainer/ProjectPathLabel
 @onready var version_label : Label = $SelectButton/HBoxContainer/VBoxContainer/HBoxContainer/ProjectVersionLabel
+@onready var recovery_icon := $SelectButton/HBoxContainer/VBoxContainer/HBoxContainer/RecoveryIcon
 @onready var status_icon := $SelectButton/HBoxContainer/VBoxContainer/HBoxContainer/StatusIcon
 @onready var modify_time_label : Label = $SelectButton/HBoxContainer/VBoxContainer/HBoxContainer/ModifyTimeLabel
 
@@ -18,6 +19,11 @@ var _last_click_ticks_msec : int = 0
 var is_missing : bool = true
 # false if the project's version is unknown or > editor's version
 var is_version_compatible : bool = false
+# true if project has recovery data, false otherwise
+var has_recovery_data : bool = false:
+	set(value):
+		has_recovery_data = value
+		recovery_icon.visible = value
 
 func setup(project_path: String) -> void:
 	if not is_inside_tree():
@@ -30,6 +36,7 @@ func setup(project_path: String) -> void:
 	name_label.text = "Missing Project"
 	version_label.text = "?" # unknown project version
 	modify_time_label.text = Time.get_datetime_string_from_unix_time(0, true)
+	has_recovery_data = false
 	
 	# now populate project info if the project path does exist
 	var info := Project.get_quick_info(project_path)
@@ -38,7 +45,7 @@ func setup(project_path: String) -> void:
 		is_version_compatible = info.version.is_compatible()
 		name_label.text = info.name
 		version_label.text = info.version.to_string()
-		status_icon.visible = false
+		has_recovery_data = info.has_recovery_data
 		modify_time_label.text = Time.get_datetime_string_from_unix_time(info.last_modified, true)
 	
 	status_icon.visible = false

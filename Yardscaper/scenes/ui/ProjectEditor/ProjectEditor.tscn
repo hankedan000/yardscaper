@@ -70,6 +70,7 @@ file_mode = 2
 access = 2
 
 [node name="UnsavedChangesDialog" parent="." instance=ExtResource("3_fwduj")]
+visible = false
 
 [node name="ExportToImageDialog" parent="." instance=ExtResource("4_h12le")]
 visible = false

@@ -29,11 +29,19 @@ var has_edits = false :
 	set(value):
 		var old_value = has_edits
 		has_edits = value
+		_has_edits_since_auto_save = value
 		if old_value != has_edits and not _suppress_self_edit_signals:
 			has_edits_changed.emit(has_edits)
 var layout_pref := LayoutPreferences.new()
 
+var _auto_save_timer := Timer.new()
+var _has_edits_since_auto_save := false
 var _suppress_self_edit_signals = false
+
+func _ready() -> void:
+	add_child(_auto_save_timer)
+	_auto_save_timer.timeout.connect(_on_auto_save_timer_timeout)
+	_auto_save_timer.start(1)
 
 func reset() -> void:
 	_suppress_self_edit_signals = true
@@ -52,22 +60,24 @@ class QuickProjectInfo:
 	var version : Version = Version.from_str(Globals.UNKOWN_VERSION)
 	# last modified timestamp (in UNIX time)
 	var last_modified : int = 0
+	var has_recovery_data : bool = false
 
 # @param[in] dir - path to the project
 # @return parsed QuickProjectInfo, or null on error
 static func get_quick_info(dir: String) -> QuickProjectInfo:
-	var project_data = _get_project_data(dir)
+	var project_data = _get_project_data(dir, false)
 	if project_data.is_empty():
 		return null
 	
 	var info := QuickProjectInfo.new()
 	info.name = _get_project_name(project_data, dir)
 	info.version = Version.from_str(Utils.dict_get(project_data, VERSION_KEY, Globals.UNKOWN_VERSION))
-	info.last_modified = FileAccess.get_modified_time(_get_project_data_filepath(dir))
+	info.last_modified = FileAccess.get_modified_time(_get_project_data_filepath(dir, false))
+	info.has_recovery_data = has_auto_save_file(dir)
 	return info
 
 static func rename_project(dir: String, new_name: String) -> bool:
-	var project_data = _get_project_data(dir)
+	var project_data = _get_project_data(dir, false)
 	if project_data.is_empty():
 		return false
 	
@@ -75,11 +85,28 @@ static func rename_project(dir: String, new_name: String) -> bool:
 	project_data[PROJECT_NAME_KEY] = new_name
 	
 	# save modified project data
-	var json_filepath := _get_project_data_filepath(dir)
+	var json_filepath := _get_project_data_filepath(dir, false)
 	return Utils.to_json_file(project_data, json_filepath)
 
+static func has_auto_save_file(dir: String) -> bool:
+	var auto_save_filepath := _get_project_data_filepath(dir, true)
+	return FileAccess.file_exists(auto_save_filepath)
+
+static func discard_unsaved_edits(dir: String) -> void:
+	var auto_save_filepath := _get_project_data_filepath(dir, true)
+	if not FileAccess.file_exists(auto_save_filepath):
+		return
+	DirAccess.remove_absolute(auto_save_filepath)
+
+static func recover_from_auto_save(dir: String) -> bool:
+	var auto_save_filepath := _get_project_data_filepath(dir, true)
+	if not FileAccess.file_exists(auto_save_filepath):
+		return false
+	var regular_save_filepath := _get_project_data_filepath(dir, false)
+	return DirAccess.rename_absolute(auto_save_filepath, regular_save_filepath) == OK
+
 func open(dir: String) -> bool:
-	var project_data = _get_project_data(dir)
+	var project_data = _get_project_data(dir, false)
 	if project_data.is_empty():
 		return false
 	
@@ -109,13 +136,20 @@ func save_preferences() -> void:
 func save_as(dir: String) -> bool:
 	if DirAccess.make_dir_recursive_absolute(dir) != OK:
 		return false
-	var json_filepath = _get_project_data_filepath(dir)
-	if Utils.to_json_file(serialize(), json_filepath):
-		Globals.add_recent_project(dir)
-		project_path = dir
-		has_edits = false
-	else:
+		
+	# serial project and save to json file
+	var json_filepath = _get_project_data_filepath(dir, false)
+	if not Utils.to_json_file(serialize(), json_filepath):
 		return false
+	
+	# cleanup any auto-save files we don't need anymore
+	var auto_save_filepath := _get_project_data_filepath(dir, true)
+	if FileAccess.file_exists(auto_save_filepath):
+		DirAccess.remove_absolute(auto_save_filepath)
+	
+	Globals.add_recent_project(dir)
+	project_path = dir
+	has_edits = false
 		
 	save_preferences()
 	
@@ -243,16 +277,18 @@ func instance_world_obj(ser_obj: Dictionary) -> WorldObject:
 		wobj.deserialize(ser_obj)
 	return wobj
 
-static func _get_project_data_filepath(project_dir: String) -> String:
-	return project_dir.path_join("project.json")
+static func _get_project_data_filepath(project_dir: String, from_auto_save: bool) -> String:
+	if from_auto_save:
+		return project_dir.path_join("project_auto_save.json")
+	else:
+		return project_dir.path_join("project.json")
 
 # returns an empty dictionary on error
-static func _get_project_data(dir: String) -> Dictionary:
+static func _get_project_data(dir: String, from_auto_save: bool) -> Dictionary:
 	if not DirAccess.dir_exists_absolute(dir):
 		push_warning("project dir '%s' doesn't exist" % [dir])
 		return {}
-	
-	return Utils.from_json_file(_get_project_data_filepath(dir))
+	return Utils.from_json_file(_get_project_data_filepath(dir, from_auto_save))
 
 # @param[in] data - serialized project data
 static func _get_project_name(data: Dictionary, project_dir: String) -> String:
@@ -271,3 +307,13 @@ func _on_node_property_changed(obj: WorldObject, property_key: StringName, from:
 func _on_node_moved(node, from_xy, to_xy):
 	node_changed.emit(node, ChangeType.PROP_EDIT, ['position', from_xy, to_xy])
 	has_edits = true
+
+func _on_auto_save_timer_timeout() -> void:
+	if not is_opened():
+		return
+	elif not _has_edits_since_auto_save:
+		return
+	var filepath := _get_project_data_filepath(project_path, true)
+	if not Utils.to_json_file(serialize(), filepath):
+		return
+	_has_edits_since_auto_save = false

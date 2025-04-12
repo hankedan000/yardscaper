@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cqfa5mme82onl"]
+[gd_scene load_steps=15 format=3 uid="uid://cqfa5mme82onl"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectManager/ProjectManager.gd" id="1_a8g1b"]
 [ext_resource type="Theme" uid="uid://b7bms6qoy7yfq" path="res://assets/themes/MainTheme.tres" id="1_h2chn"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://cojeq6ah4kvjj" path="res://scenes/ui/dialogs/CreateProjectDialog/CreateProjectDialog.tscn" id="3_nxvso"]
 [ext_resource type="PackedScene" uid="uid://84ngs66iblgm" path="res://scenes/ui/ProjectManager/PreviousProjectItem.tscn" id="5_jgdj7"]
 [ext_resource type="PackedScene" uid="uid://bk6kkbtfb7bm1" path="res://scenes/ui/dialogs/RenameProjectDialog/RenameProjectDialog.tscn" id="5_jj620"]
+[ext_resource type="PackedScene" uid="uid://bw0qh8xwbf0r3" path="res://scenes/ui/dialogs/RecoverProjectDialog/RecoverProjectDialog.tscn" id="6_8w3w3"]
 [ext_resource type="Texture2D" uid="uid://7k5qn270h1yw" path="res://assets/icons/Load.svg" id="6_c1bf8"]
 [ext_resource type="Texture2D" uid="uid://dgejlhlde13ed" path="res://assets/icons/Rename.svg" id="7_7snhg"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="8_bs2io"]
@@ -56,6 +57,9 @@ exclusive = true
 [node name="RenameProjectDialog" parent="." instance=ExtResource("5_jj620")]
 visible = false
 exclusive = true
+
+[node name="RecoverProjectDialog" parent="." instance=ExtResource("6_8w3w3")]
+visible = false
 
 [node name="GithubRequest" parent="." instance=ExtResource("11_r52mt")]
 
@@ -154,6 +158,8 @@ label_settings = ExtResource("10_1eadb")
 [connection signal="dir_selected" from="ImportProjectDialog" to="." method="_on_import_project_dialog_dir_selected"]
 [connection signal="create_requested" from="CreateProjectDialog" to="." method="_on_create_project_dialog_create_requested"]
 [connection signal="project_renamed" from="RenameProjectDialog" to="." method="_on_rename_project_dialog_project_renamed"]
+[connection signal="no" from="RecoverProjectDialog" to="." method="_on_recover_project_dialog_no"]
+[connection signal="yes" from="RecoverProjectDialog" to="." method="_on_recover_project_dialog_yes"]
 [connection signal="received_latest_release" from="GithubRequest" to="." method="_on_github_request_received_latest_release"]
 [connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/TopButtonBar/CreateProjectButton" to="." method="_on_create_project_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/TopButtonBar/ImportProjectButton" to="." method="_on_import_project_button_pressed"]

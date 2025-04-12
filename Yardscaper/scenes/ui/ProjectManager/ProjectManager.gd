@@ -6,6 +6,7 @@ class_name BootMenu
 @onready var import_project_dialog := $ImportProjectDialog
 @onready var create_project_dialog := $CreateProjectDialog
 @onready var rename_project_dialog := $RenameProjectDialog
+@onready var recover_project_dialog := $RecoverProjectDialog
 @onready var github_request : GithubRequest = $GithubRequest
 @onready var previous_projects := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/ScrollContainer/PreviousProjects
 @onready var open_button := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/OpenButton
@@ -60,7 +61,12 @@ func _on_recent_project_selected(item: PreviousProjectItem):
 	selected_project_item = item
 
 func _on_recent_project_opened(item: PreviousProjectItem):
-	Globals.main.open_project_editor(item.get_project_path())
+	if not item.has_recovery_data:
+		# open project immediately
+		Globals.main.open_project_editor(item.get_project_path())
+	else:
+		# ask user if they want to recover auto-saved data
+		recover_project_dialog.popup_centered()
 
 func _on_import_project_dialog_dir_selected(dir: String) -> void:
 	# use get_quick_info() to make sure project is valid
@@ -77,7 +83,7 @@ func _on_rename_project_dialog_project_renamed() -> void:
 	_reload_previous_projects()
 
 func _on_open_button_pressed() -> void:
-	Globals.main.open_project_editor(selected_project_item.get_project_path())
+	_on_recent_project_opened(selected_project_item)
 
 func _on_rename_button_pressed() -> void:
 	rename_project_dialog.setup(selected_project_item)
@@ -101,3 +107,22 @@ func _on_github_request_received_latest_release(rel: GithubRelease) -> void:
 
 func _on_new_version_label_meta_clicked(meta: Variant) -> void:
 	OS.shell_open(meta)
+
+func _on_recover_project_dialog_yes() -> void:
+	if selected_project_item == null:
+		push_warning("selected_project_item is null")
+	
+	# recover the data and then open the project
+	Project.recover_from_auto_save(selected_project_item.get_project_path())
+	Globals.main.open_project_editor(selected_project_item.get_project_path())
+
+func _on_recover_project_dialog_no() -> void:
+	if selected_project_item == null:
+		push_warning("selected_project_item is null")
+	
+	# user doesn't want to recover from auto-save data, so discard it and then
+	# open the project per-usual.
+	print("discarding!")
+	Project.discard_unsaved_edits(selected_project_item.get_project_path())
+	print("opening!")
+	Globals.main.open_project_editor(selected_project_item.get_project_path())

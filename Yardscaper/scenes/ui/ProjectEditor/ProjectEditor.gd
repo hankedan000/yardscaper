@@ -159,6 +159,7 @@ func _on_unsaved_changes_dialog_cancel():
 	_requested_close_type = CloseType.None
 
 func _on_unsaved_changes_dialog_discard():
+	Project.discard_unsaved_edits(TheProject.project_path) # removes auto-save file
 	_do_close(_requested_close_type)
 
 func _on_project_tabs_tab_changed(tab):

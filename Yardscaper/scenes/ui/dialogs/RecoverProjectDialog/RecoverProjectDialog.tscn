@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://bw0qh8xwbf0r3"]
+
+[ext_resource type="Script" path="res://scenes/ui/dialogs/RecoverProjectDialog/RecoverProjectDialog.gd" id="1_cvya6"]
+
+[node name="RecoverProjectDialog" type="Window"]
+title = "Recover Project"
+position = Vector2i(0, 36)
+size = Vector2i(500, 100)
+script = ExtResource("1_cvya6")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Auto-saved data exists from a previous unexpected closure.
+Do you want to open the project from this data?"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="YesButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Yes"
+
+[node name="NoButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "No, Open Like Usual"
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer/YesButton" to="." method="_on_yes_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer/NoButton" to="." method="_on_no_button_pressed"]

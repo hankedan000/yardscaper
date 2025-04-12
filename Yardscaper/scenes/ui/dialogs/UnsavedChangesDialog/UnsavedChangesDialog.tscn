@@ -5,7 +5,6 @@
 [node name="UnsavedChangesDialog" type="Window"]
 title = "Unsaved changes"
 size = Vector2i(300, 100)
-visible = false
 script = ExtResource("1_e4o3b")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
