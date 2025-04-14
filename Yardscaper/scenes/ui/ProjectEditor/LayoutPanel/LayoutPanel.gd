@@ -87,7 +87,7 @@ var undo_redo_ctrl := UndoRedoController.new()
 # vars for editing PolygonNode points
 var poly_edit_point_idx = 0
 
-var _selected_objs : Array[WorldObject] = []
+var _selection_controller : WorldObjectSelectionController = WorldObjectSelectionController.new()
 var _mouse_move_start_pos_px = null
 var _move_undo_batch : UndoRedoController.OperationBatch = null
 # object that would be selected next if LEFT mouse button were pressed
@@ -113,6 +113,8 @@ func _ready():
 	TheProject.node_changed.connect(_on_TheProject_node_changed)
 	TheProject.opened.connect(_on_TheProject_opened)
 	TheProject.layout_pref.view_show_state_changed.connect(_on_LayoutPref_view_show_state_changed)
+	_selection_controller.item_selected.connect(_on_selection_controller_item_selected)
+	_selection_controller.item_deselected.connect(_on_selection_controller_item_deselected)
 	sprink_prop_list.visible = false
 	img_prop_list.visible = false
 	poly_prop_list.visible = false
@@ -143,43 +145,28 @@ func _input(event):
 		if event.keycode == KEY_ESCAPE:
 			_cancel_mode() # will only cancel if possible
 		elif event.keycode == KEY_C and event.ctrl_pressed:
-			_handle_world_object_copy(_selected_objs)
+			_handle_world_object_copy(_selection_controller.selected_objs())
 		elif event.keycode == KEY_V and event.ctrl_pressed:
 			_handle_world_object_paste(_copied_world_objs)
 		elif event.keycode == KEY_PAGEUP:
-			var helper := WorldObjectReorderHelper.new(_selected_objs)
+			var helper := WorldObjectReorderHelper.new(_selection_controller.selected_objs())
 			helper.apply_relative_shift(world_view, +1)
 		elif event.keycode == KEY_PAGEDOWN:
-			var helper := WorldObjectReorderHelper.new(_selected_objs)
+			var helper := WorldObjectReorderHelper.new(_selection_controller.selected_objs())
 			helper.apply_relative_shift(world_view, -1)
 		elif event.keycode == KEY_END:
-			var helper := WorldObjectReorderHelper.new(_selected_objs)
+			var helper := WorldObjectReorderHelper.new(_selection_controller.selected_objs())
 			helper.apply_shift_to_bottom(world_view)
 		elif event.keycode == KEY_HOME:
-			var helper := WorldObjectReorderHelper.new(_selected_objs)
+			var helper := WorldObjectReorderHelper.new(_selection_controller.selected_objs())
 			helper.apply_shift_to_top(world_view)
-
-func _handle_left_click(_pos_in_world_px: Vector2):
-	match mode:
-		Mode.Idle:
-			if _hovered_obj:
-				if not Input.is_key_pressed(MULTI_SELECT_KEY) and (_hovered_obj not in _selected_objs):
-					# handle corner case where object is newly selected and
-					# we start dragging without releasing yet.
-					_clear_selected_objects()
-					_hovered_obj.picked = true
 
 func _handle_left_click_release(pos_in_world_px: Vector2):
 	match mode:
 		Mode.Idle:
 			Utils.pop_cursor_shape()
-			if not Input.is_key_pressed(MULTI_SELECT_KEY):
-				if _hovered_obj == null:
-					_clear_selected_objects()
-			else:
-				_hovered_obj.picked = not _hovered_obj.picked
 		Mode.MovingObjects:
-			for obj in _selected_objs:
+			for obj in _selection_controller.selected_objs():
 				obj.finish_move()
 			_move_undo_batch = null
 			_mouse_move_start_pos_px = null
@@ -208,7 +195,7 @@ func _handle_held_obj_move(mouse_pos_in_world_px: Vector2) -> void:
 	
 	# apply delta movement vector to all selected movable objects
 	var delta_px = mouse_pos_in_world_px - _mouse_move_start_pos_px
-	for obj in _selected_objs:
+	for obj in _selection_controller.selected_objs():
 		obj.update_move(delta_px)
 
 func _handle_world_object_copy(objs: Array[WorldObject]) -> void:
@@ -252,37 +239,18 @@ func _cancel_add_polygon():
 		poly_to_add = null
 		mode = Mode.Idle
 
-func _clear_selected_objects() -> void:
-	# make a copy of the list because setting picked to false
-	# will trigger a picked_state_change signal to fire which
-	# ends up modifying the _selected_objs list, and we don't
-	# want that to happen while we're iterating on it.
-	for obj in _selected_objs.duplicate():
-		obj.picked = false
-
-func _add_selected_object(obj: WorldObject) -> void:
-	if obj == null:
-		return
-	elif obj in _selected_objs:
-		return # don't double add
-	_selected_objs.append(obj)
-	_update_ui_after_selection_change()
-
-func _remove_selected_object(obj: WorldObject) -> void:
-	_selected_objs.erase(obj)
-	_update_ui_after_selection_change()
-
 func _update_ui_after_selection_change():
+	var selected_objs := _selection_controller.selected_objs()
 	_update_position_lock_buttons()
-	remove_button.disabled = _selected_objs.is_empty()
+	remove_button.disabled = selected_objs.is_empty()
 	sprink_prop_list.hide()
 	img_prop_list.hide()
 	poly_prop_list.hide()
 	
-	if _selected_objs.size() != 1:
+	if selected_objs.size() != 1:
 		return
 	
-	var obj = _selected_objs[0]
+	var obj = selected_objs[0]
 	if obj is Sprinkler:
 		sprink_prop_list.sprinkler = obj
 		sprink_prop_list.show()
@@ -296,13 +264,14 @@ func _update_ui_after_selection_change():
 		poly_prop_list.show()
 
 func _update_position_lock_buttons():
+	var selected_objs := _selection_controller.selected_objs()
 	var all_are_locked = true
-	for obj in _selected_objs:
+	for obj in selected_objs:
 		if not obj.position_locked:
 			all_are_locked = false
 			break
 	
-	if _selected_objs.is_empty():
+	if selected_objs.is_empty():
 		pos_lock_button.disabled = true
 		pos_lock_button.visible = true
 		pos_unlock_button.visible = false
@@ -343,13 +312,13 @@ func _on_add_polygon_pressed():
 	mode = Mode.AddPolygon
 
 func _on_remove_button_pressed():
-	for obj in _selected_objs:
+	for obj in _selection_controller.selected_objs():
 		undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.AddOrRemove.new(
 			world_view,
 			obj,
 			true)) # is_remove
 		TheProject.remove_object(obj)
-	_clear_selected_objects()
+	_selection_controller.clear_selection()
 
 func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 	var obj_in_world = obj in world_view.objects.get_children()
@@ -362,7 +331,7 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 				obj,
 				false)) # is_remove
 			obj.picked_state_changed.connect(_on_pickable_object_pick_state_changed.bind(obj))
-			_clear_selected_objects()
+			_selection_controller.clear_selection()
 			obj.picked = true
 		TheProject.ChangeType.REMOVE:
 			if obj_in_world:
@@ -386,7 +355,7 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 				undo_redo_ctrl.push_undo_op(undo_op)
 
 func _on_TheProject_opened():
-	_clear_selected_objects()
+	_selection_controller.clear_selection()
 	undo_redo_ctrl.reset()
 	
 	# restore "View" options
@@ -450,9 +419,9 @@ func _on_world_object_reordered(from_idx: int, to_idx: int):
 
 func _on_pickable_object_pick_state_changed(obj: WorldObject) -> void:
 	if obj.picked:
-		_add_selected_object(obj)
+		_selection_controller.add_to_selection(obj)
 	else:
-		_remove_selected_object(obj)
+		_selection_controller.remove_from_selection(obj)
 
 func _on_preference_update_timer_timeout():
 	TheProject.layout_pref.camera_pos = world_view.camera2d.position
@@ -466,14 +435,15 @@ func _on_world_view_gui_input(event: InputEvent):
 			MOUSE_BUTTON_LEFT:
 				if ! event.alt_pressed: # let pan take precedence (alt + click + drag)
 					if event.pressed:
-						_handle_left_click(pos_in_world_px)
+						_selection_controller.on_select_button_pressed(_hovered_obj)
 					else:
 						_handle_left_click_release(pos_in_world_px)
 			MOUSE_BUTTON_RIGHT:
 				_cancel_mode() # will only cancel if possible
 	elif event is InputEventMouseMotion:
 		# detect which object mouse is hovering over
-		if mode == Mode.Idle and not world_view.pan_zoom_ctrl.is_panning():
+		var is_panning := Input.is_key_pressed(KEY_ALT) or world_view.pan_zoom_ctrl.is_panning()
+		if mode == Mode.Idle and not is_panning:
 			var nearest_pickable := world_view.get_pickable_under_cursor()
 			if nearest_pickable != _hovered_obj:
 				# transition 'hovering' status from one object to the next
@@ -487,6 +457,11 @@ func _on_world_view_gui_input(event: InputEvent):
 			else:
 				Utils.pop_cursor_shape()
 		
+		var can_start_move := (
+			mode != Mode.MovingObjects and
+			not is_panning and
+			Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and
+			not Input.is_key_pressed(MULTI_SELECT_KEY))
 		if sprinkler_to_add:
 			sprinkler_to_add.position = pos_in_world_px
 		elif dist_meas_to_add and mode == Mode.AddDistMeasureB:
@@ -494,10 +469,11 @@ func _on_world_view_gui_input(event: InputEvent):
 		elif poly_to_add:
 			if poly_edit_point_idx < poly_to_add.point_count():
 				poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
-		elif mode != Mode.MovingObjects and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		elif can_start_move:
 			# check if any selected objects are position locked
 			var any_locked = false
-			for obj in _selected_objs:
+			var selected_objs := _selection_controller.selected_objs()
+			for obj in selected_objs:
 				if obj.position_locked:
 					any_locked = true
 					break
@@ -506,7 +482,7 @@ func _on_world_view_gui_input(event: InputEvent):
 			if any_locked:
 				Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
 			else:
-				for obj in _selected_objs:
+				for obj in selected_objs:
 					obj.start_move()
 					mode = Mode.MovingObjects
 		
@@ -520,12 +496,12 @@ func _on_viewport_container_pan_state_changed(panning: bool) -> void:
 		Utils.pop_cursor_shape()
 
 func _on_position_lock_button_pressed() -> void:
-	for obj in _selected_objs:
+	for obj in _selection_controller.selected_objs():
 		obj.position_locked = true
 	_update_position_lock_buttons()
 
 func _on_position_unlock_button_pressed() -> void:
-	for obj in _selected_objs:
+	for obj in _selection_controller.selected_objs():
 		obj.position_locked = false
 	_update_position_lock_buttons()
 
@@ -588,3 +564,11 @@ func _on_grid_spacing_dialog_cancel(original_major_spacing_ft: Vector2) -> void:
 	
 func _on_grid_spacing_dialog_spacing_changed(major_spacing_ft: Vector2) -> void:
 	world_view.major_spacing_ft = major_spacing_ft
+
+func _on_selection_controller_item_selected(obj: WorldObject) -> void:
+	obj.picked = true
+	_update_ui_after_selection_change()
+
+func _on_selection_controller_item_deselected(obj: WorldObject) -> void:
+	obj.picked = false
+	_update_ui_after_selection_change()
