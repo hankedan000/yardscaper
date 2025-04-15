@@ -2,7 +2,7 @@ extends Node2D
 class_name PanZoomController
 
 signal pan_state_changed(panning: bool)
-signal zoom_changed(old_zoom: Vector2, new_zoom: Vector2)
+signal zoom_changed(old_zoom: float, new_zoom: float)
 
 var _panning : bool = false:
 	set(value):
@@ -73,12 +73,12 @@ func zoom_out(mouse_pos: Vector2) -> void:
 # @param[in] zoom_speed - positive zooms in, negative zooms out
 func _do_zoom(mouse_pos: Vector2, zoom_speed: float) -> void:
 	var camera = get_viewport().get_camera_2d()
-	var new_zoom = clamp(camera.zoom.x * (1 + zoom_speed), MIN_ZOOM, MAX_ZOOM)
+	var new_zoom := clamp(camera.zoom.x * (1 + zoom_speed), MIN_ZOOM, MAX_ZOOM) as float
 	var mouse_pos_old = local_pos_to_world(mouse_pos)
-	var old_zoom := camera.zoom as Vector2
-	camera.zoom = Vector2(new_zoom, new_zoom)
+	var old_zoom := camera.zoom.x as float
+	camera.zoom = Vector2(1.0, 1.0) * new_zoom
 	# Adjust camera position to keep the mouse position fixed
 	var mouse_pos_new = local_pos_to_world(mouse_pos)
 	var camera_offset = mouse_pos_old - mouse_pos_new
 	camera.position += camera_offset
-	zoom_changed.emit(old_zoom, camera.zoom)
+	zoom_changed.emit(old_zoom, camera.zoom.x)

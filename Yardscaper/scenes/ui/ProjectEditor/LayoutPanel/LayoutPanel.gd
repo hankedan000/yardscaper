@@ -373,7 +373,7 @@ func _on_TheProject_opened():
 	world_view.major_spacing_ft = TheProject.layout_pref.grid_major_spacing_ft
 	world_view.camera2d.position = TheProject.layout_pref.camera_pos
 	world_view.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.layout_pref.zoom
-	world_view._on_pan_zoom_controller_zoom_changed(Vector2(1,1), world_view.camera2d.zoom)
+	world_view._on_pan_zoom_controller_zoom_changed(1.0, TheProject.layout_pref.zoom)
 
 func _on_LayoutPref_view_show_state_changed(property: StringName, new_value: bool):
 	match property:

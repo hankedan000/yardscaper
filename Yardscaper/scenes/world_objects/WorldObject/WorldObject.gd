@@ -131,6 +131,10 @@ func deserialize(obj):
 	info_label.visible = Utils.dict_get(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)
 	position_locked = Utils.dict_get(obj, PROP_KEY_POSITION_LOCKED, false)
 
-func on_zoom_changed(_new_zoom: Vector2, inv_new_zoom: Vector2) -> void:
-	info_label.scale = inv_new_zoom
-	lock_indicator.scale = inv_new_zoom
+# @param[in] new_zoom - the new zoom level (range 0.0 to N)
+# @param[in] inv_scale - convenience arguments used to invert the
+# scale of object that need to maintain the same size regardless of
+# zoom. this always equal to Vector2(1.0, 1.0) * (1.0 / new_zoom).
+func on_zoom_changed(_new_zoom: float, inv_scale: Vector2) -> void:
+	info_label.scale = inv_scale
+	lock_indicator.scale = inv_scale

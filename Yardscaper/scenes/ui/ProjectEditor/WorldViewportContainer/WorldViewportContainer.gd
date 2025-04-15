@@ -46,7 +46,7 @@ var major_line_color : Color = Color.LIGHT_SLATE_GRAY:
 		major_line_color = value
 		queue_redraw()
 
-var _prev_zoom := Vector2()
+var _prev_zoom : float = 0.0
 var _prev_global_pos := Vector2()
 
 func show_tooltip(text: String) -> void:
@@ -74,6 +74,9 @@ func reorder_world_object(from_idx: int, to_idx: int) -> bool:
 	objects.move_child(obj, to_idx)
 	world_object_reordered.emit(from_idx, to_idx)
 	return true
+
+func get_zoom() -> float:
+	return camera2d.zoom.x
 
 # move a world object to another draw order index
 # @return -1 if obj doesn't exist, else the object's order index
@@ -212,13 +215,14 @@ func _draw_horz_lines(start_y: float, step: float, width: float, n_lines: int, c
 			line_width)
 
 func _process(_delta):
+	# TODO could move this into events from the pan/zoom controller
 	var curr_pos := camera2d.global_position
-	var curr_zoom := camera2d.zoom
+	var curr_zoom := get_zoom()
 	var delta_pos := curr_pos - _prev_global_pos
 	var delta_zoom := curr_zoom - _prev_zoom
 	if delta_pos.length() > 0.5:
 		queue_redraw()
-	if delta_zoom.length() > 0.00001:
+	if delta_zoom > 0.00001:
 		queue_redraw()
 	_prev_global_pos = curr_pos
 	_prev_zoom = curr_zoom
@@ -241,13 +245,13 @@ func _on_gui_input(event: InputEvent) -> void:
 		if show_cursor_crosshairs:
 			queue_redraw()
 
-func _on_pan_zoom_controller_zoom_changed(_old_zoom: Vector2, new_zoom: Vector2) -> void:
-	var inv_zoom := Vector2(1.0 / new_zoom.x, 1.0 / new_zoom.y)
+func _on_pan_zoom_controller_zoom_changed(_old_zoom: float, new_zoom: float) -> void:
 	# scale the cursor so that it always stays at the same size,
 	# regardless of zoom level.
-	cursor.scale = inv_zoom
+	var inv_scale := Vector2(1.0, 1.0) * (1.0 / new_zoom)
+	cursor.scale = inv_scale
 	
 	# notify world objects that zoom is changing too
 	for obj in objects.get_children():
 		if obj is WorldObject:
-			obj.on_zoom_changed(new_zoom, inv_zoom)
+			obj.on_zoom_changed(new_zoom, inv_scale)

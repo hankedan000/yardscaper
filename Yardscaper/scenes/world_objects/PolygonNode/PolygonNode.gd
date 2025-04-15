@@ -148,8 +148,8 @@ func _reposition_info_label() -> void:
 	info_label.global_position = get_visual_center() - (text_size / 2.0)
 
 # overrides WorldObject::on_zoom_changed()
-func on_zoom_changed(new_zoom: Vector2, inv_new_zoom: Vector2) -> void:
-	super.on_zoom_changed(new_zoom, inv_new_zoom)
+func on_zoom_changed(new_zoom: float, inv_scale: Vector2) -> void:
+	super.on_zoom_changed(new_zoom, inv_scale)
 	_reposition_info_label()
 
 func _on_property_changed(_obj: WorldObject, property_key: StringName, _from: Variant, _to: Variant) -> void:
