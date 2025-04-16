@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=25 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/world_objects/Sprinkler/Sprinkler.tscn" id="2_16d6l"]
@@ -15,9 +15,14 @@
 [ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/ui/ProjectEditor/WorldViewportContainer/WorldViewportContainer.tscn" id="9_xrpqu"]
 [ext_resource type="Texture2D" uid="uid://cn15hpoo53btg" path="res://assets/icons/Image.svg" id="10_7tkh4"]
 [ext_resource type="Texture2D" uid="uid://cu32v2mhfe8e5" path="res://assets/icons/Ruler.svg" id="11_6kdtp"]
+[ext_resource type="Theme" uid="uid://c42vavmyapxw2" path="res://assets/themes/ToolbarButton.tres" id="11_w0qvw"]
 [ext_resource type="Texture2D" uid="uid://bp0qj22qp5ed7" path="res://assets/icons/PolygonTool.svg" id="12_0ook5"]
 [ext_resource type="Texture2D" uid="uid://dvsonuppgtdb7" path="res://assets/icons/Lock.svg" id="16_0llxi"]
 [ext_resource type="Texture2D" uid="uid://b2np3mm4ejoy6" path="res://assets/icons/Unlock.svg" id="17_pwsqd"]
+[ext_resource type="Texture2D" uid="uid://c0te0jgsfwqbq" path="res://assets/icons/CurveCreate.svg" id="18_3j2nk"]
+[ext_resource type="ButtonGroup" uid="uid://b664mtqybvxmi" path="res://scenes/ui/ProjectEditor/LayoutPanel/CurveEditButtonGroup.tres" id="18_emdii"]
+[ext_resource type="Texture2D" uid="uid://cgi7x2mrycjj0" path="res://assets/icons/CurveEdit.svg" id="20_pfhm2"]
+[ext_resource type="Texture2D" uid="uid://gbukq6uonk0u" path="res://assets/icons/CurveDelete.svg" id="21_j3b3p"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60egv"]
 bg_color = Color(0.105882, 0.113725, 0.12549, 1)
@@ -101,6 +106,7 @@ custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add sprinkler"
 focus_mode = 0
+theme = ExtResource("11_w0qvw")
 icon = ExtResource("9_t5ctp")
 icon_alignment = 1
 
@@ -109,6 +115,7 @@ custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add image"
 focus_mode = 0
+theme = ExtResource("11_w0qvw")
 icon = ExtResource("10_7tkh4")
 icon_alignment = 1
 
@@ -117,6 +124,7 @@ custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add distance measurement"
 focus_mode = 0
+theme = ExtResource("11_w0qvw")
 icon = ExtResource("11_6kdtp")
 icon_alignment = 1
 
@@ -125,6 +133,7 @@ custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add polygon shape"
 focus_mode = 0
+theme = ExtResource("11_w0qvw")
 icon = ExtResource("12_0ook5")
 icon_alignment = 1
 
@@ -133,6 +142,7 @@ custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Remove item(s)."
 focus_mode = 0
+theme = ExtResource("11_w0qvw")
 disabled = true
 icon = ExtResource("7_nx6cf")
 icon_alignment = 1
@@ -145,6 +155,7 @@ custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Enable position lock on selected object(s)."
 focus_mode = 0
+theme = ExtResource("11_w0qvw")
 disabled = true
 icon = ExtResource("16_0llxi")
 icon_alignment = 1
@@ -155,6 +166,7 @@ custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Disable position lock on selected object(s)."
 focus_mode = 0
+theme = ExtResource("11_w0qvw")
 icon = ExtResource("17_pwsqd")
 icon_alignment = 1
 
@@ -200,6 +212,46 @@ item_0/checkable = 1
 item_1/text = "Spacing ..."
 item_1/id = 1
 
+[node name="VSeparator3" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+layout_mode = 2
+
+[node name="CurveEditButtons" type="HBoxContainer" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+visible = false
+layout_mode = 2
+
+[node name="CurveCreateButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "Create points."
+theme = ExtResource("11_w0qvw")
+toggle_mode = true
+button_group = ExtResource("18_emdii")
+icon = ExtResource("18_3j2nk")
+icon_alignment = 1
+
+[node name="CurveEditButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "Edit points.
+Left Click: Move/Add points
+Right Click: Remove points"
+theme = ExtResource("11_w0qvw")
+toggle_mode = true
+button_pressed = true
+button_group = ExtResource("18_emdii")
+icon = ExtResource("20_pfhm2")
+icon_alignment = 1
+
+[node name="CurveRemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "Remove points."
+theme = ExtResource("11_w0qvw")
+toggle_mode = true
+button_group = ExtResource("18_emdii")
+icon = ExtResource("21_j3b3p")
+icon_alignment = 1
+
 [node name="WorldView" parent="HSplitContainer/Layout" instance=ExtResource("9_xrpqu")]
 layout_mode = 2
 size_flags_vertical = 3
@@ -220,6 +272,9 @@ size_flags_vertical = 3
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton" to="." method="_on_position_unlock_button_pressed"]
 [connection signal="id_pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/ObjectsViewPopupMenu" to="." method="_on_objects_view_popup_menu_id_pressed"]
 [connection signal="id_pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/GridViewPopupMenu" to="." method="_on_grid_view_popup_menu_id_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons/CurveCreateButton" to="." method="_on_curve_create_button_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons/CurveEditButton" to="." method="_on_curve_edit_button_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons/CurveRemoveButton" to="." method="_on_curve_remove_button_pressed"]
 [connection signal="gui_input" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_view_gui_input"]
 [connection signal="pan_state_changed" from="HSplitContainer/Layout/WorldView" to="." method="_on_viewport_container_pan_state_changed"]
 [connection signal="world_object_reordered" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_object_reordered"]

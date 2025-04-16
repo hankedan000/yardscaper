@@ -22,6 +22,7 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 @onready var view_menu_button         := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton
 @onready var obj_view_popupmenu       := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/ObjectsViewPopupMenu
 @onready var grid_view_popupmenu      := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/GridViewPopupMenu
+@onready var curve_edit_buttons       := $HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons
 @onready var world_view               : WorldViewportContainer = $HSplitContainer/Layout/WorldView
 @onready var tooltip_timer            := $ToolTipTimer
 
@@ -84,9 +85,6 @@ var dist_meas_to_add : DistanceMeasurement = null
 var poly_to_add : PolygonNode = null
 var undo_redo_ctrl := UndoRedoController.new()
 
-# vars for editing PolygonNode points
-var poly_edit_point_idx = 0
-
 var _selection_controller : WorldObjectSelectionController = WorldObjectSelectionController.new()
 var _mouse_move_start_pos_px = null
 var _move_undo_batch : UndoRedoController.OperationBatch = null
@@ -102,6 +100,10 @@ var _hovered_obj : WorldObject = null:
 				tooltip_timer.start(TOOLTIP_DELAY_DURATION_SEC)
 # serialized versions of all copied world objects
 var _copied_world_objs : Array[Dictionary] = []
+
+# vars for editing PolygonNode points
+var _poly_edit_point_idx = 0
+var _poly_edit_mode := PolygonNode.EditMode.Edit
 
 func _set_all_cursors(ctrl: Control, cursor_shape: CursorShape) -> void:
 	ctrl.set_default_cursor_shape(cursor_shape)
@@ -185,9 +187,11 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			dist_meas_to_add = null
 			mode = Mode.Idle
 		Mode.AddPolygon:
-			poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
+			poly_to_add.set_point(_poly_edit_point_idx, pos_in_world_px)
+			poly_to_add.set_handle_visible(_poly_edit_point_idx, true)
 			poly_to_add.add_point(pos_in_world_px)
-			poly_edit_point_idx = poly_to_add.point_count() - 1
+			_poly_edit_point_idx = poly_to_add.point_count() - 1
+			poly_to_add.set_handle_visible(_poly_edit_point_idx, false)
 
 func _handle_held_obj_move(mouse_pos_in_world_px: Vector2) -> void:
 	if _mouse_move_start_pos_px == null:
@@ -232,10 +236,11 @@ func _cancel_add_sprinkler():
 
 func _cancel_add_polygon():
 	if poly_to_add:
-		if poly_edit_point_idx < poly_to_add.point_count():
-			poly_to_add.remove_point(poly_edit_point_idx)
+		if _poly_edit_point_idx < poly_to_add.point_count():
+			poly_to_add.remove_point(_poly_edit_point_idx)
 		poly_to_add.picked = false
-		TheProject.add_object(poly_to_add)
+		if poly_to_add.point_count() >= 3:
+			TheProject.add_object(poly_to_add)
 		poly_to_add = null
 		mode = Mode.Idle
 
@@ -246,6 +251,7 @@ func _update_ui_after_selection_change():
 	sprink_prop_list.hide()
 	img_prop_list.hide()
 	poly_prop_list.hide()
+	curve_edit_buttons.hide()
 	
 	if selected_objs.size() != 1:
 		return
@@ -262,6 +268,7 @@ func _update_ui_after_selection_change():
 	elif obj is PolygonNode:
 		poly_prop_list.poly_node = obj
 		poly_prop_list.show()
+		curve_edit_buttons.show()
 
 func _update_position_lock_buttons():
 	var selected_objs := _selection_controller.selected_objs()
@@ -286,6 +293,11 @@ func _update_position_lock_buttons():
 func _is_point_over_world(global_pos: Vector2) -> bool:
 	return world_view.get_global_rect().has_point(global_pos)
 
+func _apply_polygon_edit_mode(objs: Array[WorldObject]) -> void:
+	for obj in objs:
+		if obj is PolygonNode:
+			obj.edit_mode = _poly_edit_mode
+
 func _on_add_sprinkler_pressed():
 	sprinkler_to_add = SprinklerScene.instantiate()
 	sprinkler_to_add.user_label = TheProject.get_unique_name('Sprinkler')
@@ -304,11 +316,12 @@ func _on_add_dist_measure_pressed():
 
 func _on_add_polygon_pressed():
 	poly_to_add = PolygonScene.instantiate()
+	world_view.objects.add_child(poly_to_add)
 	poly_to_add.user_label = TheProject.get_unique_name('PolygonNode')
 	poly_to_add.picked = true
 	poly_to_add.add_point(Vector2())
-	poly_edit_point_idx = 0
-	world_view.objects.add_child(poly_to_add)
+	poly_to_add.set_handle_visible(0, false)
+	_poly_edit_point_idx = 0
 	mode = Mode.AddPolygon
 
 func _on_remove_button_pressed():
@@ -331,6 +344,8 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 				obj,
 				false)) # is_remove
 			obj.picked_state_changed.connect(_on_pickable_object_pick_state_changed.bind(obj))
+			if obj is PolygonNode:
+				obj.edited.connect(_on_polygon_edited)
 			_selection_controller.clear_selection()
 			obj.picked = true
 		TheProject.ChangeType.REMOVE:
@@ -404,7 +419,6 @@ func _on_img_dialog_file_selected(path):
 
 func _on_image_import_wizard_accepted(img_path: String, size_ft: Vector2) -> void:
 	var new_image := TheProject.add_image(img_path)
-	print(new_image)
 	if new_image:
 		new_image.width_ft = size_ft.x
 		new_image.height_ft = size_ft.y
@@ -422,6 +436,10 @@ func _on_pickable_object_pick_state_changed(obj: WorldObject) -> void:
 		_selection_controller.add_to_selection(obj)
 	else:
 		_selection_controller.remove_from_selection(obj)
+
+func _on_polygon_edited(undo_op: UndoRedoController.UndoRedoOperation) -> void:
+	undo_redo_ctrl.push_undo_op(undo_op)
+	TheProject.has_edits = true
 
 func _on_preference_update_timer_timeout():
 	TheProject.layout_pref.camera_pos = world_view.camera2d.position
@@ -467,19 +485,19 @@ func _on_world_view_gui_input(event: InputEvent):
 		elif dist_meas_to_add and mode == Mode.AddDistMeasureB:
 			dist_meas_to_add.point_b = pos_in_world_px
 		elif poly_to_add:
-			if poly_edit_point_idx < poly_to_add.point_count():
-				poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
+			if _poly_edit_point_idx < poly_to_add.point_count():
+				poly_to_add.set_point(_poly_edit_point_idx, pos_in_world_px)
 		elif can_start_move:
 			# check if any selected objects are position locked
-			var any_locked = false
+			var all_movable = true
 			var selected_objs := _selection_controller.selected_objs()
 			for obj in selected_objs:
-				if obj.position_locked:
-					any_locked = true
+				if ! obj.is_movable():
+					all_movable = false
 					break
 			
-			# start move operations if no objects are locked
-			if any_locked:
+			# start move operations if all objects are movable
+			if ! all_movable:
 				Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
 			else:
 				for obj in selected_objs:
@@ -567,8 +585,21 @@ func _on_grid_spacing_dialog_spacing_changed(major_spacing_ft: Vector2) -> void:
 
 func _on_selection_controller_item_selected(obj: WorldObject) -> void:
 	obj.picked = true
+	_apply_polygon_edit_mode([obj])
 	_update_ui_after_selection_change()
 
 func _on_selection_controller_item_deselected(obj: WorldObject) -> void:
 	obj.picked = false
 	_update_ui_after_selection_change()
+
+func _on_curve_create_button_pressed() -> void:
+	_poly_edit_mode = PolygonNode.EditMode.Add
+	_apply_polygon_edit_mode(_selection_controller.selected_objs())
+
+func _on_curve_edit_button_pressed() -> void:
+	_poly_edit_mode = PolygonNode.EditMode.Edit
+	_apply_polygon_edit_mode(_selection_controller.selected_objs())
+
+func _on_curve_remove_button_pressed() -> void:
+	_poly_edit_mode = PolygonNode.EditMode.Remove
+	_apply_polygon_edit_mode(_selection_controller.selected_objs())

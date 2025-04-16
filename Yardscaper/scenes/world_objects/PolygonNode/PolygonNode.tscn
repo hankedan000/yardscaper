@@ -1,15 +1,36 @@
-[gd_scene load_steps=3 format=3 uid="uid://cmr73cpklqypc"]
+[gd_scene load_steps=5 format=3 uid="uid://cmr73cpklqypc"]
 
 [ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_7o48a"]
 [ext_resource type="Script" path="res://scenes/world_objects/PolygonNode/PolygonNode.gd" id="2_1ojob"]
+[ext_resource type="PackedScene" uid="uid://dy0t3omtev6y4" path="res://scenes/ui/gizmos/EditorHandle/EditorHandle.tscn" id="3_t8ynx"]
+
+[sub_resource type="Curve2D" id="Curve2D_pxui4"]
+resource_local_to_scene = true
 
 [node name="PolygonObj" instance=ExtResource("1_7o48a")]
 z_index = 1
 script = ExtResource("2_1ojob")
+EditorHandleScene = ExtResource("3_t8ynx")
+
+[node name="InfoLabel" parent="." index="0"]
+text = ""
 
 [node name="Polygon2D" type="Polygon2D" parent="." index="1"]
 z_index = -1
 color = Color(0.157437, 0.863281, 0.542127, 1)
+
+[node name="EditHandles" type="Node2D" parent="." index="2"]
+
+[node name="EditPath" type="Path2D" parent="." index="3"]
+curve = SubResource("Curve2D_pxui4")
+
+[node name="PathFollow2D" type="PathFollow2D" parent="EditPath" index="0"]
+
+[node name="AddPointHandle" parent="EditPath/PathFollow2D" index="0" instance=ExtResource("3_t8ynx")]
+visible = false
+normal_type = 0
+hover_type = 2
+show_label_on_hover = false
 
 [node name="CollisionShape2D" parent="PickArea" index="0"]
 shape = null
@@ -17,4 +38,5 @@ disabled = true
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="PickArea" index="1"]
 
+[connection signal="picked_state_changed" from="." to="." method="_on_picked_state_changed"]
 [connection signal="property_changed" from="." to="." method="_on_property_changed"]

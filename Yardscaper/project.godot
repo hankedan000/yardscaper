@@ -33,6 +33,10 @@ window/size/viewport_height=400
 window/size/borderless=true
 window/subwindows/embed_subwindows=false
 
+[global_group]
+
+gizmos=""
+
 [gui]
 
 theme/custom="res://assets/themes/MainTheme.tres"

@@ -11,8 +11,8 @@ const PROP_KEY_ROTATION_DEG = &"rotation_deg"
 const PROP_KEY_INFO_LABEL_VISIBLE = &"info_label.visible"
 const PROP_KEY_POSITION_LOCKED = &"position_locked"
 
-@onready var info_label      : Label = $InfoLabel
-@onready var lock_indicator  : Sprite2D = $LockIndicator
+@onready var info_label      : GizmoLabel = $InfoLabel
+@onready var lock_indicator  : Gizmo = $LockIndicator
 @onready var pick_area       : Area2D = $PickArea
 @onready var pick_coll_shape : CollisionShape2D = $PickArea/CollisionShape2D
 
@@ -45,6 +45,8 @@ var picked : bool = false:
 		if old_picked != picked:
 			picked_state_changed.emit()
 			queue_redraw()
+
+var short_term_position_locked : bool = false
 
 var _is_ready = false
 var _pos_at_move_start = null
@@ -86,6 +88,11 @@ func set_info_label_visible(new_visible: bool) -> void:
 
 func get_visual_center() -> Vector2:
 	return global_position
+
+func is_movable() -> bool:
+	if position_locked || short_term_position_locked:
+		return false
+	return true
 
 func moving() -> bool:
 	return _pos_at_move_start != null
@@ -130,11 +137,3 @@ func deserialize(obj):
 	user_label = obj[PROP_KEY_USER_LABEL]
 	info_label.visible = Utils.dict_get(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)
 	position_locked = Utils.dict_get(obj, PROP_KEY_POSITION_LOCKED, false)
-
-# @param[in] new_zoom - the new zoom level (range 0.0 to N)
-# @param[in] inv_scale - convenience arguments used to invert the
-# scale of object that need to maintain the same size regardless of
-# zoom. this always equal to Vector2(1.0, 1.0) * (1.0 / new_zoom).
-func on_zoom_changed(_new_zoom: float, inv_scale: Vector2) -> void:
-	info_label.scale = inv_scale
-	lock_indicator.scale = inv_scale

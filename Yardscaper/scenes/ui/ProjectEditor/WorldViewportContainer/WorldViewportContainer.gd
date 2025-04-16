@@ -251,7 +251,6 @@ func _on_pan_zoom_controller_zoom_changed(_old_zoom: float, new_zoom: float) -> 
 	var inv_scale := Vector2(1.0, 1.0) * (1.0 / new_zoom)
 	cursor.scale = inv_scale
 	
-	# notify world objects that zoom is changing too
-	for obj in objects.get_children():
-		if obj is WorldObject:
-			obj.on_zoom_changed(new_zoom, inv_scale)
+	for gizmo in get_tree().get_nodes_in_group(&"gizmos") as Array[Node2D]:
+		gizmo.scale = inv_scale
+	
