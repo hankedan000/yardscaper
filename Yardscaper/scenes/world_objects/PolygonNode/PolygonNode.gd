@@ -6,6 +6,8 @@ const PERIMETER_WIDTH = 2
 const PROP_KEY_COLOR = &"color"
 const PROP_KEY_POINTS_FT = &"points_ft"
 
+@export var EditorHandleScene : PackedScene = null
+
 @onready var poly := $Polygon2D
 @onready var coll_poly := $PickArea/CollisionPolygon2D
 
@@ -16,6 +18,13 @@ var color := Color.MEDIUM_AQUAMARINE:
 		if old_value != color:
 			property_changed.emit(self, PROP_KEY_COLOR, old_value, color)
 		queue_redraw()
+
+var is_editable : bool = true
+
+var _handle_being_moved : EditorHandle = null
+var _handle_init_pos : Vector2 = Vector2() # init position when starting move
+var _mouse_init_pos : Vector2 = Vector2() # init position when starting move
+var _moveable_handles : Array[EditorHandle] = []
 
 func _draw():
 	poly.color = color
@@ -31,6 +40,12 @@ func _draw():
 			prev_point = point
 		if prev_point && first_point:
 			draw_line(prev_point, first_point, perim_color, PERIMETER_WIDTH)
+
+func _process(_delta: float) -> void:
+	if _handle_being_moved:
+		var mouse_delta_pos := get_global_mouse_position() - _mouse_init_pos
+		_handle_being_moved.position = _handle_init_pos + mouse_delta_pos
+		set_point(_handle_being_moved.user_id, _handle_being_moved.position)
 
 func add_point(point: Vector2):
 	if ! _is_ready:
@@ -147,6 +162,23 @@ func _reposition_info_label() -> void:
 	# position the label in center of the polygon
 	info_label.global_position = get_visual_center() - (text_size / 2.0)
 
+func _setup_edit_handles() -> void:
+	for point_idx in point_count():
+		var point : Vector2 = poly.polygon[point_idx]
+		var new_handle : EditorHandle = EditorHandleScene.instantiate()
+		$EditHandles.add_child(new_handle)
+		new_handle.user_id = point_idx
+		new_handle.type = EditorHandle.HandleType.Sharp
+		new_handle.position = point
+		new_handle.base_button().button_down.connect(_on_moveable_handle_button_down.bind(new_handle))
+		new_handle.base_button().button_up.connect(_on_moveable_handle_button_up.bind(new_handle))
+		_moveable_handles.push_back(new_handle)
+
+func _cleanup_edit_handles() -> void:
+	for handle in _moveable_handles:
+		handle.queue_free()
+	_moveable_handles.clear()
+
 # overrides WorldObject::on_zoom_changed()
 func on_zoom_changed(new_zoom: float, inv_scale: Vector2) -> void:
 	super.on_zoom_changed(new_zoom, inv_scale)
@@ -155,3 +187,19 @@ func on_zoom_changed(new_zoom: float, inv_scale: Vector2) -> void:
 func _on_property_changed(_obj: WorldObject, property_key: StringName, _from: Variant, _to: Variant) -> void:
 	if is_inside_tree() and property_key == WorldObject.PROP_KEY_USER_LABEL:
 		_update_info_label()
+
+func _on_picked_state_changed() -> void:
+	if picked and is_editable:
+		_setup_edit_handles()
+	else:
+		_cleanup_edit_handles()
+
+func _on_moveable_handle_button_down(handle: EditorHandle) -> void:
+	_handle_being_moved = handle
+	_handle_init_pos = handle.position
+	_mouse_init_pos = get_global_mouse_position()
+	set_process(true)
+
+func _on_moveable_handle_button_up(_handle: EditorHandle) -> void:
+	_handle_being_moved = null
+	set_process(false)
