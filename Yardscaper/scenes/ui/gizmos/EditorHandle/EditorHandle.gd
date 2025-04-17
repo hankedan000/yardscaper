@@ -2,27 +2,27 @@
 extends Node2D
 class_name EditorHandle
 
-@export var SharpHandleTexture : Texture2D = null
-@export var AddHandleTexture : Texture2D = null
-
 enum HandleType {
-	Sharp, Add
+	None, Sharp, Add, ControlAnchor
 }
 
-@onready var tex_button : TextureButton = $TextureButton
-
-var type : HandleType = HandleType.Sharp:
+@export var SharpHandleTexture : Texture2D = null
+@export var AddHandleTexture : Texture2D = null
+@export var ControlAnchorTexture : Texture2D = null
+@export var normal_type : HandleType = HandleType.None:
 	set(value):
-		if ! is_inside_tree():
-			await ready
-		type = value
-		match type:
-			HandleType.Sharp:
-				_setup_button(tex_button, SharpHandleTexture)
-				modulate_on_hover = Color.YELLOW
-			HandleType.Add:
-				_setup_button(tex_button, AddHandleTexture)
-				modulate_on_hover = Color.WHITE
+		normal_type = value
+		_set_button_texture(&"texture_normal", value)
+@export var pressed_type : HandleType = HandleType.None:
+	set(value):
+		pressed_type = value
+		_set_button_texture(&"texture_pressed", value)
+@export var hover_type : HandleType = HandleType.None:
+	set(value):
+		hover_type = value
+		_set_button_texture(&"texture_hover", value)
+
+@onready var tex_button : TextureButton = $TextureButton
 
 # a user-definable identifier
 var user_id : int = 0
@@ -30,18 +30,32 @@ var user_id : int = 0
 var modulate_on_hover : Color = Color.WHITE
 
 func _ready() -> void:
-	type = HandleType.Sharp
+	normal_type = HandleType.Sharp
 
-func base_button() -> BaseButton:
+func get_button() -> BaseButton:
 	return tex_button
+
+func _get_texture_from_type(type: HandleType) -> Texture2D:
+	match type:
+		HandleType.Sharp:
+			return SharpHandleTexture
+		HandleType.Add:
+			return AddHandleTexture
+		HandleType.ControlAnchor:
+			return ControlAnchorTexture
+	return null
+
+func _set_button_texture(tex_property: StringName, type: HandleType) -> void:
+	if ! is_inside_tree():
+		await ready
+	var tex2d := _get_texture_from_type(type)
+	tex_button.set(tex_property, tex2d)
+	if tex2d:
+		tex_button.size = tex2d.get_size()
+		tex_button.position = Vector2() - (tex_button.size / 2.0)
 
 func _on_texture_button_mouse_entered() -> void:
 	tex_button.modulate = modulate_on_hover
 
 func _on_texture_button_mouse_exited() -> void:
 	tex_button.modulate = Color.WHITE
-
-func _setup_button(button: TextureButton, tex: Texture2D) -> void:
-	button.texture_normal = tex
-	button.size = tex.get_size()
-	button.position = Vector2() - (button.size / 2.0) # center button on handle origin

@@ -46,6 +46,8 @@ var picked : bool = false:
 			picked_state_changed.emit()
 			queue_redraw()
 
+var short_term_position_locked : bool = false
+
 var _is_ready = false
 var _pos_at_move_start = null
 
@@ -86,6 +88,11 @@ func set_info_label_visible(new_visible: bool) -> void:
 
 func get_visual_center() -> Vector2:
 	return global_position
+
+func is_movable() -> bool:
+	if position_locked || short_term_position_locked:
+		return false
+	return true
 
 func moving() -> bool:
 	return _pos_at_move_start != null

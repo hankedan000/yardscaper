@@ -471,17 +471,19 @@ func _on_world_view_gui_input(event: InputEvent):
 				poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
 		elif can_start_move:
 			# check if any selected objects are position locked
-			var any_locked = false
+			var all_movable = true
 			var selected_objs := _selection_controller.selected_objs()
 			for obj in selected_objs:
-				if obj.position_locked:
-					any_locked = true
+				print("%s.is_movable() = %s" % [obj.user_label, obj.is_movable()])
+				if ! obj.is_movable():
+					all_movable = false
 					break
 			
-			# start move operations if no objects are locked
-			if any_locked:
+			# start move operations if all objects are movable
+			if ! all_movable:
 				Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
 			else:
+				print("starting move")
 				for obj in selected_objs:
 					obj.start_move()
 					mode = Mode.MovingObjects
