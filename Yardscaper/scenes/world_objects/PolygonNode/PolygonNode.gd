@@ -22,12 +22,12 @@ var color := Color.MEDIUM_AQUAMARINE:
 			property_changed.emit(self, PROP_KEY_COLOR, old_value, color)
 		queue_redraw()
 
-var is_editable : bool = false
+var is_editable : bool = true
 
 var _handle_being_moved : EditorHandle = null
 var _handle_init_pos : Vector2 = Vector2() # init position when starting move
 var _mouse_init_pos : Vector2 = Vector2() # init position when starting move
-var _moveable_handles : Array[EditorHandle] = []
+var _vertex_handles : Array[EditorHandle] = []
 
 func _ready() -> void:
 	super._ready()
@@ -92,26 +92,32 @@ func _input(event: InputEvent) -> void:
 			_handle_being_moved = null
 			set_process_input(false)
 
-func add_point(point: Vector2):
-	if ! _is_ready:
-		await ready
+func add_point(point: Vector2) -> void:
+	if ! is_inside_tree():
+		push_error("must be inside tree")
+		return
 	# can't do direct append of point onto polygon.
 	# need to assign polygon with edited list of points
 	var new_points : PackedVector2Array = poly.polygon
 	new_points.append(point)
 	poly.polygon = new_points
 	coll_poly.polygon = new_points
-	if is_being_edited():
-		_rebuild_edit_handles()
-		_rebuild_edit_path()
+	_update_edit_objects()
 	_update_info_label()
 	queue_redraw()
 
-func set_point(idx: int, point: Vector2):
-	poly.polygon[idx] = point
-	coll_poly.polygon[idx] = point
+func set_handle_visible(idx: int, new_visible: bool) -> void:
+	if idx < _vertex_handles.size():
+		_vertex_handles[idx].visible = new_visible
+
+func set_point(idx: int, point: Vector2) -> void:
+	if idx < point_count():
+		poly.polygon[idx] = point
+		coll_poly.polygon[idx] = point
 	
-	# update the edit_path points if it's setup
+	# update the edit-related objects
+	if idx < _vertex_handles.size():
+		_vertex_handles[idx].position = point
 	var edit_path_point_count := edit_path.curve.point_count
 	if edit_path_point_count > 0:
 		edit_path.curve.set_point_position(idx, point)
@@ -127,9 +133,7 @@ func insert_point(at_idx: int, point: Vector2):
 	new_points.insert(at_idx, point)
 	poly.polygon = new_points
 	coll_poly.polygon = new_points
-	if is_being_edited():
-		_rebuild_edit_handles()
-		_rebuild_edit_path()
+	_update_edit_objects()
 	_update_info_label()
 	queue_redraw()
 
@@ -140,9 +144,7 @@ func remove_point(idx: int):
 	new_points.remove_at(idx)
 	poly.polygon = new_points
 	coll_poly.polygon = new_points
-	if is_being_edited():
-		_rebuild_edit_handles()
-		_rebuild_edit_path()
+	_update_edit_objects()
 	_update_info_label()
 	queue_redraw()
 
@@ -233,10 +235,16 @@ func _setup_cmn_edit_handle_signals(handle: EditorHandle) -> void:
 	button.mouse_entered.connect(_on_handle_mouse_entered)
 	button.mouse_exited.connect(_on_handle_mouse_exited)
 
-func _rebuild_edit_handles() -> void:
-	for handle in _moveable_handles:
+func _update_edit_objects() -> void:
+	if ! is_being_edited():
+		return
+	
+	# ----------------------------------------------
+	# rebuild the vertex handles
+	
+	for handle in _vertex_handles:
 		handle.queue_free()
-	_moveable_handles.clear()
+	_vertex_handles.clear()
 	# add EditorHanlder's at each polygon control point
 	for point_idx in point_count():
 		var point : Vector2 = poly.polygon[point_idx]
@@ -246,25 +254,26 @@ func _rebuild_edit_handles() -> void:
 		new_handle.normal_type = EditorHandle.HandleType.Sharp
 		new_handle.position = point
 		_setup_cmn_edit_handle_signals(new_handle)
-		new_handle.get_button().button_down.connect(_on_moveable_handle_button_down.bind(new_handle))
-		_moveable_handles.push_back(new_handle)
+		new_handle.get_button().button_down.connect(_on_vertex_handle_button_down.bind(new_handle))
+		_vertex_handles.push_back(new_handle)
 
-func _rebuild_edit_path() -> void:
+	# ----------------------------------------------
+	# rebuild the edit_path
+
 	edit_path.curve.clear_points()
 	for point in get_closed_points():
 		edit_path.curve.add_point(point)
 
 func _enter_edit_state() -> void:
-	_rebuild_edit_handles()
-	_rebuild_edit_path()
+	_update_edit_objects()
 	set_process(true)
 
 func _exit_edit_state() -> void:
 	edit_path.curve.clear_points()
 	add_point_handle.visible = false
-	for handle in _moveable_handles:
+	for handle in _vertex_handles:
 		handle.queue_free()
-	_moveable_handles.clear()
+	_vertex_handles.clear()
 	set_process(false)
 
 # overrides WorldObject::on_zoom_changed()
@@ -287,7 +296,7 @@ func _on_picked_state_changed() -> void:
 	elif is_editable and ! picked:
 		_exit_edit_state()
 
-func _on_moveable_handle_button_down(handle: EditorHandle) -> void:
+func _on_vertex_handle_button_down(handle: EditorHandle) -> void:
 	set_process_input(true)
 	_handle_being_moved = handle
 	_handle_init_pos = handle.position
@@ -314,7 +323,7 @@ func _on_add_point_handle_button_down() -> void:
 		add_point_handle.visible = false
 		var new_point := edit_path.curve.sample_baked(insert_offset)
 		insert_point(insert_idx, new_point)
-		_on_moveable_handle_button_down(_moveable_handles[insert_idx])
+		_on_vertex_handle_button_down(_vertex_handles[insert_idx])
 
 func _on_handle_mouse_entered() -> void:
 	short_term_position_locked = true

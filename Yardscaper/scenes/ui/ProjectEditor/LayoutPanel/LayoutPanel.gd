@@ -186,8 +186,10 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			mode = Mode.Idle
 		Mode.AddPolygon:
 			poly_to_add.set_point(poly_edit_point_idx, pos_in_world_px)
+			poly_to_add.set_handle_visible(poly_edit_point_idx, true)
 			poly_to_add.add_point(pos_in_world_px)
 			poly_edit_point_idx = poly_to_add.point_count() - 1
+			poly_to_add.set_handle_visible(poly_edit_point_idx, false)
 
 func _handle_held_obj_move(mouse_pos_in_world_px: Vector2) -> void:
 	if _mouse_move_start_pos_px == null:
@@ -304,11 +306,12 @@ func _on_add_dist_measure_pressed():
 
 func _on_add_polygon_pressed():
 	poly_to_add = PolygonScene.instantiate()
+	world_view.objects.add_child(poly_to_add)
 	poly_to_add.user_label = TheProject.get_unique_name('PolygonNode')
 	poly_to_add.picked = true
 	poly_to_add.add_point(Vector2())
+	poly_to_add.set_handle_visible(0, false)
 	poly_edit_point_idx = 0
-	world_view.objects.add_child(poly_to_add)
 	mode = Mode.AddPolygon
 
 func _on_remove_button_pressed():
@@ -404,7 +407,6 @@ func _on_img_dialog_file_selected(path):
 
 func _on_image_import_wizard_accepted(img_path: String, size_ft: Vector2) -> void:
 	var new_image := TheProject.add_image(img_path)
-	print(new_image)
 	if new_image:
 		new_image.width_ft = size_ft.x
 		new_image.height_ft = size_ft.y
@@ -474,7 +476,6 @@ func _on_world_view_gui_input(event: InputEvent):
 			var all_movable = true
 			var selected_objs := _selection_controller.selected_objs()
 			for obj in selected_objs:
-				print("%s.is_movable() = %s" % [obj.user_label, obj.is_movable()])
 				if ! obj.is_movable():
 					all_movable = false
 					break
@@ -483,7 +484,6 @@ func _on_world_view_gui_input(event: InputEvent):
 			if ! all_movable:
 				Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
 			else:
-				print("starting move")
 				for obj in selected_objs:
 					obj.start_move()
 					mode = Mode.MovingObjects
