@@ -36,8 +36,6 @@ func _ready() -> void:
 	is_editable = true
 	_setup_cmn_edit_handle_signals(add_point_handle)
 	add_point_handle.get_button().button_down.connect(_on_add_point_handle_button_down)
-	add_point_handle.normal_type = EditorHandle.HandleType.None
-	add_point_handle.hover_type = EditorHandle.HandleType.Add
 
 func _draw():
 	poly.color = color
@@ -208,8 +206,10 @@ func serialize():
 	obj[PROP_KEY_COLOR] = color.to_html(true) # with alpha = true
 	return obj
 
-func deserialize(obj):
+func deserialize(obj) -> void:
 	super.deserialize(obj)
+	if ! is_inside_tree():
+		await ready
 	var points_ft = Utils.dict_get(obj, PROP_KEY_POINTS_FT, [])
 	for point in points_ft:
 		add_point(Utils.ft_to_px_vec(Utils.pair_to_vect2(point)))
@@ -220,15 +220,9 @@ func _update_info_label():
 	if not info_label.visible:
 		return
 	
-	info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	info_label.position = get_visual_center()
+	info_label.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info_label.text = "%s\n(%0.2f sq. ft)" % [user_label, get_area_ft()]
-	_reposition_info_label()
-
-func _reposition_info_label() -> void:
-	# compute bounding box size of the new label's text string
-	var text_size := Utils.get_label_text_size(info_label, info_label.text)
-	# position the label in center of the polygon
-	info_label.global_position = get_visual_center() - (text_size / 2.0)
 
 func _setup_cmn_edit_handle_signals(handle: EditorHandle) -> void:
 	var button := handle.get_button()
@@ -252,6 +246,7 @@ func _update_edit_objects() -> void:
 		$EditHandles.add_child(new_handle)
 		new_handle.user_id = point_idx
 		new_handle.normal_type = EditorHandle.HandleType.Sharp
+		new_handle.modulate_on_hover = Color.AQUA
 		new_handle.position = point
 		_setup_cmn_edit_handle_signals(new_handle)
 		new_handle.get_button().button_down.connect(_on_vertex_handle_button_down.bind(new_handle))
@@ -275,11 +270,6 @@ func _exit_edit_state() -> void:
 		handle.queue_free()
 	_vertex_handles.clear()
 	set_process(false)
-
-# overrides WorldObject::on_zoom_changed()
-func on_zoom_changed(new_zoom: float, inv_scale: Vector2) -> void:
-	super.on_zoom_changed(new_zoom, inv_scale)
-	_reposition_info_label()
 
 func _on_property_changed(_obj: WorldObject, property_key: StringName, _from: Variant, _to: Variant) -> void:
 	if is_inside_tree() and property_key == WorldObject.PROP_KEY_USER_LABEL:

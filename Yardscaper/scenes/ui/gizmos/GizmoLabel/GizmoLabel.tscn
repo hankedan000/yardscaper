@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://c7fqgbd66tu6n"]
+
+[ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="1_l35wl"]
+[ext_resource type="Script" path="res://scenes/ui/gizmos/GizmoLabel/GizmoLabel.gd" id="2_08ifi"]
+
+[node name="GizmoLabel" instance=ExtResource("1_l35wl")]
+script = ExtResource("2_08ifi")
+keep_center = true
+text = null
+
+[node name="Label" type="Label" parent="." index="0"]
+offset_right = 1.0
+offset_bottom = 23.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3

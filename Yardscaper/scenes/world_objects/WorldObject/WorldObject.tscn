@@ -1,25 +1,19 @@
-[gd_scene load_steps=4 format=3 uid="uid://yvp357wae8et"]
+[gd_scene load_steps=5 format=3 uid="uid://yvp357wae8et"]
 
 [ext_resource type="Script" path="res://scenes/world_objects/WorldObject/WorldObject.gd" id="1_2eqnw"]
-[ext_resource type="Texture2D" uid="uid://dvsonuppgtdb7" path="res://assets/icons/Lock.svg" id="2_l525o"]
+[ext_resource type="PackedScene" uid="uid://1dad06jhn1o3" path="res://scenes/ui/gizmos/LockIndicator/LockIndicator.tscn" id="2_akkxm"]
+[ext_resource type="PackedScene" uid="uid://c7fqgbd66tu6n" path="res://scenes/ui/gizmos/GizmoLabel/GizmoLabel.tscn" id="2_ctmgo"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_7l7ai"]
 
 [node name="WorldObject" type="Node2D"]
 script = ExtResource("1_2eqnw")
 
-[node name="InfoLabel" type="Label" parent="."]
+[node name="InfoLabel" parent="." instance=ExtResource("2_ctmgo")]
 visible = false
-offset_right = 40.0
-offset_bottom = 23.0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-text = "World Object"
 
-[node name="LockIndicator" type="Sprite2D" parent="."]
+[node name="LockIndicator" parent="." instance=ExtResource("2_akkxm")]
 visible = false
-position = Vector2(8, 8)
-texture = ExtResource("2_l525o")
 
 [node name="PickArea" type="Area2D" parent="."]
 collision_layer = 2

@@ -1,5 +1,5 @@
 @tool
-extends Node2D
+extends Gizmo
 class_name EditorHandle
 
 enum HandleType {
@@ -21,15 +21,23 @@ enum HandleType {
 	set(value):
 		hover_type = value
 		_set_button_texture(&"texture_hover", value)
+@export var show_label_on_hover : bool = true
 
 @onready var tex_button : TextureButton = $TextureButton
+@onready var user_id_label : Label = $UserIdLabel
 
 # a user-definable identifier
-var user_id : int = 0
+var user_id : int = 0:
+	set(value):
+		user_id = value
+		if ! is_inside_tree():
+			await ready
+		user_id_label.text = str(user_id)
 
 var modulate_on_hover : Color = Color.WHITE
 
 func _ready() -> void:
+	super._ready()
 	normal_type = HandleType.Sharp
 
 func get_button() -> BaseButton:
@@ -56,6 +64,10 @@ func _set_button_texture(tex_property: StringName, type: HandleType) -> void:
 
 func _on_texture_button_mouse_entered() -> void:
 	tex_button.modulate = modulate_on_hover
+	if show_label_on_hover:
+		user_id_label.visible = true
 
 func _on_texture_button_mouse_exited() -> void:
 	tex_button.modulate = Color.WHITE
+	if show_label_on_hover:
+		user_id_label.visible = false

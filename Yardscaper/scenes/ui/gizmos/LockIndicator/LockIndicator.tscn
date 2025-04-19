@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://1dad06jhn1o3"]
+
+[ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="1_06po5"]
+[ext_resource type="Texture2D" uid="uid://dvsonuppgtdb7" path="res://assets/icons/Lock.svg" id="2_qok82"]
+
+[node name="LockIndicator" instance=ExtResource("1_06po5")]
+
+[node name="Sprite" type="Sprite2D" parent="." index="0"]
+texture = ExtResource("2_qok82")
