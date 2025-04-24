@@ -46,6 +46,19 @@ var picked : bool = false:
 			picked_state_changed.emit()
 			queue_redraw()
 
+# this property basically mirrors the built-in `rotation_degrees` property.
+# we needed this user-defined version so we can generate signals correctly
+# as well as handle undo/redo operations correctly.
+var rotation_deg : float = 0.0:
+	set(value):
+		var old_value = rotation_degrees
+		rotation_degrees = value
+		if old_value != rotation_deg:
+			property_changed.emit(self, PROP_KEY_ROTATION_DEG, old_value, rotation_degrees)
+			queue_redraw()
+	get():
+		return rotation_degrees
+
 var short_term_position_locked : bool = false
 
 var _is_ready = false

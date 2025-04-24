@@ -19,6 +19,9 @@ const PROP_KEY_ZONE = &"zone"
 const PROP_MIN_SWEEP_DEG = &"min_sweep_deg"
 const PROP_MAX_SWEEP_DEG = &"max_sweep_deg"
 
+@onready var rot_handle   : EditorHandle = $RotationHandle
+@onready var sweep_handle : EditorHandle = $SweepHandle
+
 func is_set(value: float):
 	return not is_nan(value)
 
@@ -109,13 +112,14 @@ var sweep_deg : float = NAN :
 		return max_sweep_deg
 	set(value):
 		var old_value = sweep_deg
+		if value < 0.0:
+			value += 360.0
 		sweep_deg = int(round(value)) % 361
-		if sweep_deg < 0:
-			sweep_deg = 360 - sweep_deg
 		if old_value != sweep_deg:
 			_cap_values()
 			queue_redraw()
-			property_changed.emit(self, PROP_KEY_SWEEP_DEG, old_value, sweep_deg)
+			if ! _ignore_internal_edits:
+				property_changed.emit(self, PROP_KEY_SWEEP_DEG, old_value, sweep_deg)
 
 var manufacturer : String = "" :
 	set(value):
@@ -162,6 +166,14 @@ var body_color : Color = Color.BLACK :
 
 var _head_info = null
 
+# variable used to track handle movement
+var _handle_being_moved : EditorHandle = null
+var _init_angle_to_mouse : float = 0.0
+var _init_rotation : float = 0.0
+var _init_sweep : float = 0.0
+
+var _ignore_internal_edits := false
+
 func draw_sector(center: Vector2, radius: float, angle_from: float, angle_to: float, n_points: int, color: Color):
 	if n_points <= 2:
 		printerr("n_points must be > 2. n_points = %d" % [n_points])
@@ -202,14 +214,33 @@ func deserialize(obj):
 	zone = Utils.dict_get(obj, PROP_KEY_ZONE, 1)
 	body_color = Utils.dict_get(obj, PROP_KEY_BODY_COLOR, body_color)
 
+func _ready() -> void:
+	super._ready()
+	set_process_input(false)
+	
+	rot_handle.get_button().button_down.connect(_on_handle_button_down.bind(rot_handle))
+	rot_handle.get_button().button_up.connect(_on_handle_button_up)
+	sweep_handle.get_button().button_down.connect(_on_handle_button_down.bind(sweep_handle))
+	sweep_handle.get_button().button_up.connect(_on_handle_button_up)
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		var delta_angle := _angle_to_mouse() - _init_angle_to_mouse
+		if delta_angle < -PI:
+			delta_angle += 2 * PI
+		if _handle_being_moved == rot_handle:
+			rotation = _init_rotation + delta_angle
+		elif _handle_being_moved == sweep_handle:
+			sweep_deg = rad_to_deg(_init_sweep + delta_angle)
+
 func _draw():
-	var stop_angle = deg_to_rad(sweep_deg)
-	var water_color = Color.DODGER_BLUE
+	var stop_angle := deg_to_rad(sweep_deg)
+	var water_color := Color.DODGER_BLUE
 	water_color.a = 0.5
-	var max_radius = Utils.ft_to_px(max_dist_ft)
-	var min_radius = Utils.ft_to_px(min_dist_ft)
-	var dist_radius = Utils.ft_to_px(dist_ft)
-	var center = Vector2()
+	var max_radius := Utils.ft_to_px(max_dist_ft)
+	var min_radius := Utils.ft_to_px(min_dist_ft)
+	var dist_radius := Utils.ft_to_px(dist_ft)
+	var center := Vector2()
 	if show_water:
 		draw_sector(center, dist_radius, 0, stop_angle, ARC_POINTS, water_color)
 	if show_min_dist:
@@ -222,6 +253,12 @@ func _draw():
 		draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT * 2), indic_color)
 	# draw body
 	draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT), body_color)
+	
+	# position the edit handles
+	rot_handle.visible = picked
+	sweep_handle.visible = picked
+	rot_handle.position = Vector2(dist_radius, 0)
+	sweep_handle.position = Vector2(dist_radius, 0).rotated(stop_angle)
 
 func _cap_values():
 	if dist_ft < min_dist_ft:
@@ -234,6 +271,35 @@ func _cap_values():
 	elif sweep_deg > max_sweep_deg:
 		sweep_deg = max_sweep_deg
 
+# @return return angle to current mouse location in range of 0 to 2PI;
+# where 0 is global right, and the angle increases clockwise.
+func _angle_to_mouse() -> float:
+	var angle := (get_global_mouse_position() - global_position).angle()
+	if angle < 0.0:
+		angle = (PI * 2) + angle
+	return angle
+
 func _on_picked_state_changed() -> void:
 	show_min_dist = picked
 	show_max_dist = picked
+
+func _on_handle_button_down(handle: EditorHandle) -> void:
+	_handle_being_moved = handle
+	_init_angle_to_mouse = _angle_to_mouse()
+	_init_rotation = rotation
+	_init_sweep = deg_to_rad(sweep_deg)
+	_ignore_internal_edits = true
+	set_process_input(true)
+
+func _on_handle_button_up() -> void:
+	var old_handle := _handle_being_moved
+	_handle_being_moved = null
+	_ignore_internal_edits = false
+	set_process_input(false)
+	
+	# emit property changed signals at the end since they were being
+	# suppressed while we were moving the handles.
+	if old_handle == rot_handle:
+		property_changed.emit(self, PROP_KEY_ROTATION_DEG, rad_to_deg(_init_rotation), rotation_degrees)
+	elif old_handle == sweep_handle:
+		property_changed.emit(self, PROP_KEY_SWEEP_DEG, rad_to_deg(_init_sweep), sweep_deg)

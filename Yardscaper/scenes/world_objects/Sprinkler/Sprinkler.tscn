@@ -1,9 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://g5yh8tb0v6bk"]
+[gd_scene load_steps=4 format=3 uid="uid://g5yh8tb0v6bk"]
 
 [ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_j5xd6"]
 [ext_resource type="Script" path="res://scenes/world_objects/Sprinkler/Sprinkler.gd" id="2_u6dch"]
+[ext_resource type="PackedScene" uid="uid://dy0t3omtev6y4" path="res://scenes/ui/gizmos/EditorHandle/EditorHandle.tscn" id="3_v1ovd"]
 
 [node name="Sprinkler" instance=ExtResource("1_j5xd6")]
 script = ExtResource("2_u6dch")
+
+[node name="RotationHandle" parent="." index="0" instance=ExtResource("3_v1ovd")]
+visible = false
+modulate = Color(0.225892, 1, 0.387758, 1)
+show_label_on_hover = false
+
+[node name="SweepHandle" parent="." index="1" instance=ExtResource("3_v1ovd")]
+visible = false
+show_label_on_hover = false
+
+[node name="InfoLabel" parent="." index="2"]
+text = ""
 
 [connection signal="picked_state_changed" from="." to="." method="_on_picked_state_changed"]
