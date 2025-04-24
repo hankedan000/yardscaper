@@ -46,9 +46,6 @@ var major_line_color : Color = Color.LIGHT_SLATE_GRAY:
 		major_line_color = value
 		queue_redraw()
 
-var _prev_zoom : float = 0.0
-var _prev_global_pos := Vector2()
-
 func show_tooltip(text: String) -> void:
 	tooltip_label.text = text
 	tooltip_label.size = Utils.get_label_text_size(tooltip_label, text)
@@ -214,38 +211,27 @@ func _draw_horz_lines(start_y: float, step: float, width: float, n_lines: int, c
 			color,
 			line_width)
 
-func _process(_delta):
-	# TODO could move this into events from the pan/zoom controller
-	var curr_pos := camera2d.global_position
-	var curr_zoom := get_zoom()
-	var delta_pos := curr_pos - _prev_global_pos
-	var delta_zoom := curr_zoom - _prev_zoom
-	if delta_pos.length() > 0.5:
-		queue_redraw()
-	if delta_zoom > 0.00001:
-		queue_redraw()
-	_prev_global_pos = curr_pos
-	_prev_zoom = curr_zoom
-	
-	var mouse_pos = get_local_mouse_position()
-	var pos_in_world = pan_zoom_ctrl.local_pos_to_world(mouse_pos)
-	cursor.position = pos_in_world
-
-func _on_pan_zoom_controller_pan_state_changed(panning: bool) -> void:
-	pan_state_changed.emit(panning)
-
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		var pos_in_world_px = global_xy_to_pos_in_world(event.global_position)
 		var pos_in_world_ft = Utils.px_to_ft_vec(pos_in_world_px)
 		var x_pretty = Utils.pretty_dist(pos_in_world_ft.x)
 		var y_pretty = Utils.pretty_dist(pos_in_world_ft.y)
+		cursor.position = pos_in_world_px
 		cursor_pos_label.text = "%s, %s" % [x_pretty, y_pretty]
 		
 		if show_cursor_crosshairs:
 			queue_redraw()
 
+func _on_pan_zoom_controller_pan_changed(_delta: Vector2) -> void:
+	queue_redraw() # to redraw grid & origin
+
+func _on_pan_zoom_controller_pan_state_changed(panning: bool) -> void:
+	pan_state_changed.emit(panning)
+
 func _on_pan_zoom_controller_zoom_changed(_old_zoom: float, new_zoom: float) -> void:
+	queue_redraw() # to redraw grid & origin
+	
 	# scale the cursor so that it always stays at the same size,
 	# regardless of zoom level.
 	var inv_scale := Vector2(1.0, 1.0) * (1.0 / new_zoom)
@@ -253,4 +239,3 @@ func _on_pan_zoom_controller_zoom_changed(_old_zoom: float, new_zoom: float) -> 
 	
 	for gizmo in get_tree().get_nodes_in_group(&"gizmos") as Array[Node2D]:
 		gizmo.scale = inv_scale
-	

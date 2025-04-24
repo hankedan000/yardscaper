@@ -2,6 +2,7 @@ extends Node2D
 class_name PanZoomController
 
 signal pan_state_changed(panning: bool)
+signal pan_changed(delta: Vector2)
 signal zoom_changed(old_zoom: float, new_zoom: float)
 
 var _panning : bool = false:
@@ -62,6 +63,7 @@ func _input(event: InputEvent):
 			# Calculate drag distance and offset camera accordingly
 			var drag_delta = (event.position - _drag_start) / camera.zoom.x
 			camera.position = _camera_original_position - drag_delta
+			pan_changed.emit(drag_delta)
 
 func zoom_in(mouse_pos: Vector2) -> void:
 	_do_zoom(mouse_pos, ZOOM_SPEED)

@@ -78,5 +78,6 @@ grow_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_wvb5t")
 
 [connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="pan_changed" from="ViewportContainer/Viewport/PanZoomController" to="." method="_on_pan_zoom_controller_pan_changed"]
 [connection signal="pan_state_changed" from="ViewportContainer/Viewport/PanZoomController" to="." method="_on_pan_zoom_controller_pan_state_changed"]
 [connection signal="zoom_changed" from="ViewportContainer/Viewport/PanZoomController" to="." method="_on_pan_zoom_controller_zoom_changed"]
