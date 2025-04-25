@@ -35,6 +35,7 @@ var has_edits = false :
 var layout_pref := LayoutPreferences.new()
 
 var _auto_save_timer := Timer.new()
+var _auto_save_thread : Thread = null
 var _has_edits_since_auto_save := false
 var _suppress_self_edit_signals = false
 
@@ -92,7 +93,7 @@ static func has_auto_save_file(dir: String) -> bool:
 	var auto_save_filepath := _get_project_data_filepath(dir, true)
 	return FileAccess.file_exists(auto_save_filepath)
 
-static func discard_unsaved_edits(dir: String) -> void:
+static func static_discard_unsaved_edits(dir: String) -> void:
 	var auto_save_filepath := _get_project_data_filepath(dir, true)
 	if not FileAccess.file_exists(auto_save_filepath):
 		return
@@ -104,6 +105,15 @@ static func recover_from_auto_save(dir: String) -> bool:
 		return false
 	var regular_save_filepath := _get_project_data_filepath(dir, false)
 	return DirAccess.rename_absolute(auto_save_filepath, regular_save_filepath) == OK
+
+func discard_unsaved_edits() -> void:
+	if ! is_opened():
+		return
+	
+	if _auto_save_thread:
+		# wait so we don't delete the file while it's saving
+		_auto_save_thread.wait_to_finish()
+	static_discard_unsaved_edits(project_path)
 
 func open(dir: String) -> bool:
 	var project_data = _get_project_data(dir, false)
@@ -234,7 +244,7 @@ func add_image(path: String) -> ImageNode:
 	has_edits = true
 	return img_node
 
-func serialize():
+func serialize() -> Dictionary:
 	var objects_ser = []
 	if len(objects) > 0:
 		# serialize all objects based on order they appear in world
@@ -308,12 +318,22 @@ func _on_node_moved(node, from_xy, to_xy):
 	node_changed.emit(node, ChangeType.PROP_EDIT, ['position', from_xy, to_xy])
 	has_edits = true
 
+func __THREADED__auto_save(filepath: String, data: Dictionary) -> void:
+	Utils.to_json_file(data, filepath)
+
 func _on_auto_save_timer_timeout() -> void:
 	if not is_opened():
 		return
 	elif not _has_edits_since_auto_save:
 		return
+	elif _auto_save_thread && _auto_save_thread.is_alive():
+		return # still saving from last cycle
+	
+	if _auto_save_thread:
+		_auto_save_thread.wait_to_finish() # allow thread to cleanup
+	
 	var filepath := _get_project_data_filepath(project_path, true)
-	if not Utils.to_json_file(serialize(), filepath):
-		return
+	var data := serialize()
+	_auto_save_thread = Thread.new()
+	_auto_save_thread.start(__THREADED__auto_save.bind(filepath, data))
 	_has_edits_since_auto_save = false

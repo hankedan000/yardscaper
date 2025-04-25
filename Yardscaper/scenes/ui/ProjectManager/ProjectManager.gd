@@ -122,5 +122,5 @@ func _on_recover_project_dialog_no() -> void:
 	
 	# user doesn't want to recover from auto-save data, so discard it and then
 	# open the project per-usual.
-	Project.discard_unsaved_edits(selected_project_item.get_project_path())
+	Project.static_discard_unsaved_edits(selected_project_item.get_project_path())
 	Globals.main.open_project_editor(selected_project_item.get_project_path())
