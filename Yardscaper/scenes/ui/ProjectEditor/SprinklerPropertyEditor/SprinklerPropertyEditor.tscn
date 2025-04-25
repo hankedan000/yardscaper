@@ -104,3 +104,5 @@ layout_mode = 2
 [connection signal="value_changed" from="MaxDistanceSpinBox" to="." method="_on_max_distance_spin_box_value_changed"]
 [connection signal="value_changed" from="DistanceSpinBox" to="." method="_on_distance_spin_box_value_changed"]
 [connection signal="color_changed" from="BodyColorPicker" to="." method="_on_body_color_picker_color_changed"]
+[connection signal="popup_closed" from="BodyColorPicker" to="." method="_on_body_color_picker_popup_closed"]
+[connection signal="pressed" from="BodyColorPicker" to="." method="_on_body_color_picker_pressed"]

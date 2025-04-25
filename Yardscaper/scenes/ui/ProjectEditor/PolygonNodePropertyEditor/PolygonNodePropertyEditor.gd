@@ -43,13 +43,21 @@ func _sync_ui_to_properties(node: PolygonNode):
 	_ui_needs_sync = false
 
 func _on_poly_node_property_changed(_obj: WorldObject, _property: StringName, _old_value: Variant, _new_value: Variant) -> void:
-	if poly_node is PolygonNode:
+	if poly_node:
 		queue_ui_sync()
 
 func _on_user_label_line_edit_text_submitted(new_text: String) -> void:
-	if poly_node is PolygonNode and not _ignore_internal_edits:
+	if poly_node and not _ignore_internal_edits:
 		poly_node.user_label = new_text
 
 func _on_color_picker_color_changed(color):
-	if poly_node is PolygonNode and not _ignore_internal_edits:
+	if poly_node and not _ignore_internal_edits:
 		poly_node.color = color
+
+func _on_color_picker_pressed() -> void:
+	if poly_node:
+		poly_node.deferred_prop_change.push(PolygonNode.PROP_KEY_COLOR)
+
+func _on_color_picker_popup_closed() -> void:
+	if poly_node:
+		poly_node.deferred_prop_change.pop(PolygonNode.PROP_KEY_COLOR)

@@ -29,8 +29,7 @@ var zone : int = 1 :
 	set(value):
 		var old_value = zone
 		zone = value
-		if old_value != zone:
-			property_changed.emit(self, PROP_KEY_ZONE, old_value, zone)
+		_check_and_emit_prop_change(PROP_KEY_ZONE, old_value)
 
 var min_dist_ft : float = NAN :
 	get:
@@ -42,10 +41,9 @@ var min_dist_ft : float = NAN :
 	set(value):
 		var old_value = min_dist_ft
 		min_dist_ft = value
-		if old_value != min_dist_ft:
-			_cap_values()
+		_cap_values()
+		if _check_and_emit_prop_change(PROP_KEY_MIN_DIST_FT, old_value):
 			queue_redraw()
-			property_changed.emit(self, PROP_KEY_MIN_DIST_FT, old_value, min_dist_ft)
 
 var max_dist_ft : float = NAN :
 	get:
@@ -57,10 +55,9 @@ var max_dist_ft : float = NAN :
 	set(value):
 		var old_value = max_dist_ft
 		max_dist_ft = value
-		if old_value != max_dist_ft:
-			_cap_values()
+		_cap_values()
+		if _check_and_emit_prop_change(PROP_KEY_MAX_DIST_FT, old_value):
 			queue_redraw()
-			property_changed.emit(self, PROP_KEY_MAX_DIST_FT, old_value, max_dist_ft)
 
 var dist_ft : float = NAN :
 	get:
@@ -70,10 +67,9 @@ var dist_ft : float = NAN :
 	set(value):
 		var old_value = dist_ft
 		dist_ft = value
-		if old_value != dist_ft:
-			_cap_values()
+		_cap_values()
+		if _check_and_emit_prop_change(PROP_KEY_DIST_FT, old_value):
 			queue_redraw()
-			property_changed.emit(self, PROP_KEY_DIST_FT, old_value, dist_ft)
 
 var min_sweep_deg : float = NAN :
 	get:
@@ -85,10 +81,9 @@ var min_sweep_deg : float = NAN :
 	set(value):
 		var old_value = min_sweep_deg
 		min_sweep_deg = value
-		if old_value != min_sweep_deg:
-			_cap_values()
+		_cap_values()
+		if _check_and_emit_prop_change(PROP_MIN_SWEEP_DEG, old_value):
 			queue_redraw()
-			property_changed.emit(self, PROP_MIN_SWEEP_DEG, old_value, min_sweep_deg)
 
 var max_sweep_deg : float = NAN :
 	get:
@@ -100,10 +95,9 @@ var max_sweep_deg : float = NAN :
 	set(value):
 		var old_value = max_sweep_deg
 		max_sweep_deg = value
-		if old_value != max_sweep_deg:
-			_cap_values()
+		_cap_values()
+		if _check_and_emit_prop_change(PROP_MAX_SWEEP_DEG, old_value):
 			queue_redraw()
-			property_changed.emit(self, PROP_MAX_SWEEP_DEG, old_value, max_sweep_deg)
 
 var sweep_deg : float = NAN :
 	get:
@@ -115,31 +109,27 @@ var sweep_deg : float = NAN :
 		if value < 0.0:
 			value += 360.0
 		sweep_deg = int(round(value)) % 361
-		if old_value != sweep_deg:
-			_cap_values()
+		_cap_values()
+		if _check_and_emit_prop_change(PROP_KEY_SWEEP_DEG, old_value):
 			queue_redraw()
-			if ! _ignore_internal_edits:
-				property_changed.emit(self, PROP_KEY_SWEEP_DEG, old_value, sweep_deg)
 
 var manufacturer : String = "" :
 	set(value):
 		var old_value = manufacturer
 		manufacturer = value
 		_head_info = TheSprinklerDb.get_head_info(manufacturer, model)
-		if old_value != manufacturer:
-			_cap_values()
+		_cap_values()
+		if _check_and_emit_prop_change(PROP_KEY_MANUFACTURER, old_value):
 			queue_redraw()
-			property_changed.emit(self, PROP_KEY_MANUFACTURER, old_value, manufacturer)
 
 var model : String = "" :
 	set(value):
 		var old_value = model
 		model = value
 		_head_info = TheSprinklerDb.get_head_info(manufacturer, model)
-		if old_value != model:
-			_cap_values()
+		_cap_values()
+		if _check_and_emit_prop_change(PROP_KEY_MODEL, old_value):
 			queue_redraw()
-			property_changed.emit(self, PROP_KEY_MODEL, old_value, model)
 
 var show_min_dist := false :
 	set(value):
@@ -160,9 +150,8 @@ var body_color : Color = Color.BLACK :
 	set(value):
 		var old_value = body_color
 		body_color = value
-		if old_value != body_color:
-			property_changed.emit(self, PROP_KEY_BODY_COLOR, old_value, body_color)
-		queue_redraw()
+		if _check_and_emit_prop_change(PROP_KEY_BODY_COLOR, old_value):
+			queue_redraw()
 
 var _head_info = null
 
@@ -171,8 +160,6 @@ var _handle_being_moved : EditorHandle = null
 var _init_angle_to_mouse : float = 0.0
 var _init_rotation : float = 0.0
 var _init_sweep : float = 0.0
-
-var _ignore_internal_edits := false
 
 func draw_sector(center: Vector2, radius: float, angle_from: float, angle_to: float, n_points: int, color: Color):
 	if n_points <= 2:
@@ -288,18 +275,20 @@ func _on_handle_button_down(handle: EditorHandle) -> void:
 	_init_angle_to_mouse = _angle_to_mouse()
 	_init_rotation = rotation
 	_init_sweep = deg_to_rad(sweep_deg)
-	_ignore_internal_edits = true
 	set_process_input(true)
+	
+	# defer property chang events until we're done with move operation
+	if handle == rot_handle:
+		deferred_prop_change.push(PROP_KEY_ROTATION_DEG)
+	elif handle == sweep_handle:
+		deferred_prop_change.push(PROP_KEY_SWEEP_DEG)
 
 func _on_handle_button_up() -> void:
 	var old_handle := _handle_being_moved
 	_handle_being_moved = null
-	_ignore_internal_edits = false
 	set_process_input(false)
 	
-	# emit property changed signals at the end since they were being
-	# suppressed while we were moving the handles.
 	if old_handle == rot_handle:
-		property_changed.emit(self, PROP_KEY_ROTATION_DEG, rad_to_deg(_init_rotation), rotation_degrees)
+		deferred_prop_change.pop(PROP_KEY_ROTATION_DEG)
 	elif old_handle == sweep_handle:
-		property_changed.emit(self, PROP_KEY_SWEEP_DEG, rad_to_deg(_init_sweep), sweep_deg)
+		deferred_prop_change.pop(PROP_KEY_SWEEP_DEG)

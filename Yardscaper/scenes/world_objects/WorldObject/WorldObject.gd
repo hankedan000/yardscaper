@@ -22,16 +22,14 @@ var user_label : String = "" :
 	set(value):
 		var old_value = user_label
 		user_label = value
-		if old_value != user_label:
-			property_changed.emit(self, PROP_KEY_USER_LABEL, old_value, user_label)
+		_check_and_emit_prop_change(PROP_KEY_USER_LABEL, old_value)
 
 var position_locked : bool = false:
 	set(value):
 		var old_value = position_locked
 		position_locked = value
 		lock_indicator.visible = position_locked
-		if old_value != position_locked:
-			property_changed.emit(self, PROP_KEY_POSITION_LOCKED, old_value, position_locked)
+		_check_and_emit_prop_change(PROP_KEY_POSITION_LOCKED, old_value)
 
 var hovering : bool = false:
 	set(value):
@@ -53,13 +51,14 @@ var rotation_deg : float = 0.0:
 	set(value):
 		var old_value = rotation_degrees
 		rotation_degrees = value
-		if old_value != rotation_deg:
-			property_changed.emit(self, PROP_KEY_ROTATION_DEG, old_value, rotation_degrees)
+		if _check_and_emit_prop_change(PROP_KEY_ROTATION_DEG, old_value):
 			queue_redraw()
 	get():
 		return rotation_degrees
 
 var short_term_position_locked : bool = false
+
+var deferred_prop_change : DeferredPropertyChange = DeferredPropertyChange.new(self)
 
 var _is_ready = false
 var _pos_at_move_start = null
@@ -96,8 +95,7 @@ func get_info_label_visible() -> bool:
 func set_info_label_visible(new_visible: bool) -> void:
 	var old_value = info_label.visible
 	info_label.visible = new_visible
-	if old_value != new_visible:
-		property_changed.emit(self, PROP_KEY_INFO_LABEL_VISIBLE, old_value, new_visible)
+	_check_and_emit_prop_change(PROP_KEY_INFO_LABEL_VISIBLE, old_value)
 
 func get_visual_center() -> Vector2:
 	return global_position
@@ -150,3 +148,12 @@ func deserialize(obj):
 	user_label = obj[PROP_KEY_USER_LABEL]
 	info_label.visible = Utils.dict_get(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)
 	position_locked = Utils.dict_get(obj, PROP_KEY_POSITION_LOCKED, false)
+
+# @return true if the value changed, false if not (does not indicate if change
+# event was fired or not)
+func _check_and_emit_prop_change(prop_name: StringName, old_value: Variant) -> bool:
+	var new_value = get(prop_name)
+	var changed : bool = old_value != new_value
+	if changed && ! deferred_prop_change.matches(prop_name):
+		property_changed.emit(self, prop_name, old_value, new_value)
+	return changed

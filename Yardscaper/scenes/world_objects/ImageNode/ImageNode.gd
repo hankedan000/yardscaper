@@ -12,8 +12,7 @@ var width_ft : float = 0:
 	set(value):
 		var old_value = width_ft
 		width_ft = value
-		if old_value != width_ft:
-			property_changed.emit(self, PROP_KEY_WIDTH_FT, old_value, width_ft)
+		_check_and_emit_prop_change(PROP_KEY_WIDTH_FT, old_value)
 		if texture_rect:
 			texture_rect.size.x = Utils.ft_to_px(value)
 			queue_redraw()
@@ -23,8 +22,7 @@ var height_ft : float = 0:
 	set(value):
 		var old_value = height_ft
 		height_ft = value
-		if old_value != height_ft:
-			property_changed.emit(self, PROP_KEY_HEIGHT_FT, old_value, height_ft)
+		_check_and_emit_prop_change(PROP_KEY_HEIGHT_FT, old_value)
 		if texture_rect:
 			texture_rect.size.y = Utils.ft_to_px(value)
 			queue_redraw()

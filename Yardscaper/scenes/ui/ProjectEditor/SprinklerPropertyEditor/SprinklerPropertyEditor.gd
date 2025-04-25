@@ -88,46 +88,54 @@ func _sync_option_to_text(option_button: OptionButton, text: String):
 	option_button.selected = 0
 
 func _on_user_label_line_edit_text_submitted(new_text):
-	if sprinkler is Sprinkler and not _ignore_internal_edits:
+	if sprinkler and not _ignore_internal_edits:
 		sprinkler.user_label = new_text
 
 func _on_zone_spin_box_value_changed(value):
-	if sprinkler is Sprinkler and not _ignore_internal_edits:
+	if sprinkler and not _ignore_internal_edits:
 		sprinkler.zone = value
 
 func _on_sweep_spin_box_value_changed(sweep_deg):
-	if sprinkler is Sprinkler and not _ignore_internal_edits:
+	if sprinkler and not _ignore_internal_edits:
 		sprinkler.sweep_deg = sweep_deg
 
 func _on_rotation_spin_box_value_changed(rot_deg):
-	if sprinkler is Sprinkler and not _ignore_internal_edits:
+	if sprinkler and not _ignore_internal_edits:
 		sprinkler.rotation_degrees = rot_deg
 
 func _on_manufacturer_option_item_selected(index):
 	var manufacturer = manu_option.get_item_text(index)
 	_update_model_options(manufacturer)
-	if sprinkler is Sprinkler and not _ignore_internal_edits:
+	if sprinkler and not _ignore_internal_edits:
 		sprinkler.manufacturer = manufacturer
 
 func _on_model_option_item_selected(index):
-	if sprinkler is Sprinkler and not _ignore_internal_edits:
+	if sprinkler and not _ignore_internal_edits:
 		sprinkler.model = model_option.get_item_text(index)
 
 func _on_distance_spin_box_value_changed(value):
-	if sprinkler is Sprinkler and not _ignore_internal_edits:
+	if sprinkler and not _ignore_internal_edits:
 		sprinkler.dist_ft = value
 
 func _on_min_distance_spin_box_value_changed(value):
-	if sprinkler is Sprinkler and not _ignore_internal_edits:
+	if sprinkler and not _ignore_internal_edits:
 		sprinkler.min_dist_ft = value
 
 func _on_max_distance_spin_box_value_changed(value):
-	if sprinkler is Sprinkler and not _ignore_internal_edits:
+	if sprinkler and not _ignore_internal_edits:
 		sprinkler.max_dist_ft = value
 
 func _on_sprinkler_property_changed(_obj: WorldObject, _property: StringName, _from: Variant, _to: Variant) -> void:
 	queue_ui_sync()
 
 func _on_body_color_picker_color_changed(color: Color) -> void:
-	if sprinkler is Sprinkler and not _ignore_internal_edits:
+	if sprinkler and not _ignore_internal_edits:
 		sprinkler.body_color = color
+
+func _on_body_color_picker_pressed() -> void:
+	if sprinkler:
+		sprinkler.deferred_prop_change.push(Sprinkler.PROP_KEY_BODY_COLOR)
+
+func _on_body_color_picker_popup_closed() -> void:
+	if sprinkler:
+		sprinkler.deferred_prop_change.pop(Sprinkler.PROP_KEY_BODY_COLOR)

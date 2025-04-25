@@ -24,9 +24,8 @@ var color := Color.MEDIUM_AQUAMARINE:
 	set(value):
 		var old_value = color
 		color = value
-		if old_value != color:
-			property_changed.emit(self, PROP_KEY_COLOR, old_value, color)
-		queue_redraw()
+		if _check_and_emit_prop_change(PROP_KEY_COLOR, old_value):
+			queue_redraw()
 
 var edit_mode : EditMode = EditMode.None:
 	set(value):
