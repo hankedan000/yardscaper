@@ -1,22 +1,73 @@
-[gd_scene load_steps=4 format=3 uid="uid://g5yh8tb0v6bk"]
+[gd_scene load_steps=6 format=3 uid="uid://g5yh8tb0v6bk"]
 
 [ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_j5xd6"]
 [ext_resource type="Script" path="res://scenes/world_objects/Sprinkler/Sprinkler.gd" id="2_u6dch"]
+[ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="3_ur1sa"]
 [ext_resource type="PackedScene" uid="uid://dy0t3omtev6y4" path="res://scenes/ui/gizmos/EditorHandle/EditorHandle.tscn" id="3_v1ovd"]
+
+[sub_resource type="GDScript" id="GDScript_m2jro"]
+script/source = "extends Gizmo
+
+const ARC_POINTS = 32
+const BODY_RADIUS_FT = 3.0 / 12.0
+const LINE_WIDTH_BASE_PX = 1.0
+
+var _sprink : Sprinkler = null
+var _line_width : float = LINE_WIDTH_BASE_PX
+
+func _ready() -> void:
+	super._ready()
+	_sprink = get_parent() as Sprinkler
+
+func _draw():
+	var stop_angle := deg_to_rad(_sprink.sweep_deg)
+	var water_color := Color.DODGER_BLUE
+	water_color.a = 0.5
+	var body_radius_px := Utils.ft_to_px(BODY_RADIUS_FT)
+	var max_radius := Utils.ft_to_px(_sprink.max_dist_ft)
+	var min_radius := Utils.ft_to_px(_sprink.min_dist_ft)
+	var dist_radius := Utils.ft_to_px(_sprink.dist_ft)
+	var center := Vector2()
+	if _sprink.show_water:
+		Utils.draw_sector(self, center, dist_radius, 0, stop_angle, ARC_POINTS, water_color)
+	if _sprink.show_min_dist:
+		draw_arc(center, min_radius, 0, stop_angle, ARC_POINTS, Color.RED, _line_width)
+	if _sprink.show_max_dist:
+		draw_arc(center, max_radius, 0, stop_angle, ARC_POINTS, Color.LIME_GREEN, _line_width)
+	# draw indicator circle
+	if _sprink.picked or _sprink.hovering:
+		var indic_color = Globals.SELECT_COLOR if _sprink.picked else Globals.HOVER_COLOR
+		draw_circle(center, body_radius_px * 2, indic_color)
+	# draw body
+	draw_circle(center, body_radius_px, _sprink.body_color)
+	
+	# position the edit handles
+	_sprink.rot_handle.visible = _sprink.picked
+	_sprink.sweep_handle.visible = _sprink.picked
+	_sprink.rot_handle.position = Vector2(dist_radius, 0)
+	_sprink.sweep_handle.position = Vector2(dist_radius, 0).rotated(stop_angle)
+
+func on_zoom_changed(new_zoom: float, _inv_scale: Vector2) -> void:
+	_line_width = LINE_WIDTH_BASE_PX / new_zoom
+	queue_redraw()
+"
 
 [node name="Sprinkler" instance=ExtResource("1_j5xd6")]
 script = ExtResource("2_u6dch")
 
-[node name="RotationHandle" parent="." index="0" instance=ExtResource("3_v1ovd")]
+[node name="ManualDrawLayer" parent="." index="0" instance=ExtResource("3_ur1sa")]
+script = SubResource("GDScript_m2jro")
+
+[node name="RotationHandle" parent="." index="1" instance=ExtResource("3_v1ovd")]
 visible = false
 modulate = Color(0.225892, 1, 0.387758, 1)
 show_label_on_hover = false
 
-[node name="SweepHandle" parent="." index="1" instance=ExtResource("3_v1ovd")]
+[node name="SweepHandle" parent="." index="2" instance=ExtResource("3_v1ovd")]
 visible = false
 show_label_on_hover = false
 
-[node name="InfoLabel" parent="." index="2"]
+[node name="InfoLabel" parent="." index="3"]
 text = ""
 
 [connection signal="picked_state_changed" from="." to="." method="_on_picked_state_changed"]

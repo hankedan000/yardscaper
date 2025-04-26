@@ -5,6 +5,7 @@ var main : Main = null
 const UNKOWN_VERSION : String = "0.0.0"
 const HOVER_COLOR := Color.DARK_TURQUOISE
 const SELECT_COLOR := Color.DARK_ORANGE
+const OUTLINE_BASE_WIDTH_PX : float = 2.0
 const MAX_RECENT_PROJECT = 10
 const RECENT_PROJECTS_FILE := &"recent_project.json"
 const GITHUB_USER := &"hankedan000"

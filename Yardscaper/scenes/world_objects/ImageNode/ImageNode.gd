@@ -5,6 +5,7 @@ const PROP_KEY_WIDTH_FT = &"width_ft"
 const PROP_KEY_HEIGHT_FT = &"height_ft"
 
 @onready var texture_rect := $TextureRect
+@onready var draw_layer := $ManualDrawLayer
 
 var filename : String = ""
 
@@ -47,10 +48,7 @@ func _ready():
 	_sync_pick_area_size()
 
 func _draw():
-	# draw indicator box
-	if picked or hovering:
-		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
-		draw_rect(Rect2(Vector2(), img_size_px()), indic_color, false, 4)
+	draw_layer.queue_redraw()
 
 func get_visual_center() -> Vector2:
 	return global_position + (img_size_px() / 2.0)

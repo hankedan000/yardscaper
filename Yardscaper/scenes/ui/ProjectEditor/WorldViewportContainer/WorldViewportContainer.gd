@@ -238,4 +238,4 @@ func _on_pan_zoom_controller_zoom_changed(_old_zoom: float, new_zoom: float) -> 
 	cursor.scale = inv_scale
 	
 	for gizmo in get_tree().get_nodes_in_group(&"gizmos") as Array[Node2D]:
-		gizmo.scale = inv_scale
+		gizmo.on_zoom_changed(new_zoom, inv_scale)

@@ -1,8 +1,38 @@
-[gd_scene load_steps=5 format=3 uid="uid://cmr73cpklqypc"]
+[gd_scene load_steps=7 format=3 uid="uid://cmr73cpklqypc"]
 
 [ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_7o48a"]
 [ext_resource type="Script" path="res://scenes/world_objects/PolygonNode/PolygonNode.gd" id="2_1ojob"]
 [ext_resource type="PackedScene" uid="uid://dy0t3omtev6y4" path="res://scenes/ui/gizmos/EditorHandle/EditorHandle.tscn" id="3_t8ynx"]
+[ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="4_qxojn"]
+
+[sub_resource type="GDScript" id="GDScript_13pqy"]
+script/source = "extends Gizmo
+
+var _poly : PolygonNode = null
+var _outline_width : float = Globals.OUTLINE_BASE_WIDTH_PX
+
+func _ready() -> void:
+	super._ready()
+	_poly = get_parent() as PolygonNode
+
+func _draw() -> void:
+	if _poly.picked or _poly.hovering:
+		var perim_color := Globals.SELECT_COLOR if _poly.picked else Globals.HOVER_COLOR
+		var first_point = null
+		var prev_point = null
+		for point in _poly.poly.polygon:
+			if first_point == null:
+				first_point = point
+			if prev_point:
+				draw_line(prev_point, point, perim_color, _outline_width)
+			prev_point = point
+		if prev_point && first_point:
+			draw_line(prev_point, first_point, perim_color, _outline_width)
+
+func on_zoom_changed(new_zoom: float, _inv_scale: Vector2) -> void:
+	_outline_width = Globals.OUTLINE_BASE_WIDTH_PX / new_zoom
+	queue_redraw()
+"
 
 [sub_resource type="Curve2D" id="Curve2D_pxui4"]
 resource_local_to_scene = true
@@ -19,9 +49,12 @@ text = ""
 z_index = -1
 color = Color(0.157437, 0.863281, 0.542127, 1)
 
-[node name="EditHandles" type="Node2D" parent="." index="2"]
+[node name="ManualDrawLayer" parent="." index="2" instance=ExtResource("4_qxojn")]
+script = SubResource("GDScript_13pqy")
 
-[node name="EditPath" type="Path2D" parent="." index="3"]
+[node name="EditHandles" type="Node2D" parent="." index="3"]
+
+[node name="EditPath" type="Path2D" parent="." index="4"]
 curve = SubResource("Curve2D_pxui4")
 
 [node name="PathFollow2D" type="PathFollow2D" parent="EditPath" index="0"]

@@ -1,8 +1,6 @@
 extends WorldObject
 class_name Sprinkler
 
-const ARC_POINTS = 32
-const BODY_RADIUS_FT = 3.0 / 12.0
 const DEFAULT_MIN_DIST_FT = 8.0
 const DEFAULT_MAX_DIST_FT = 14.0
 const DEFAULT_MIN_SWEEP_DEG = 0.0
@@ -19,6 +17,7 @@ const PROP_KEY_ZONE = &"zone"
 const PROP_MIN_SWEEP_DEG = &"min_sweep_deg"
 const PROP_MAX_SWEEP_DEG = &"max_sweep_deg"
 
+@onready var draw_layer   := $ManualDrawLayer
 @onready var rot_handle   : EditorHandle = $RotationHandle
 @onready var sweep_handle : EditorHandle = $SweepHandle
 
@@ -161,20 +160,6 @@ var _init_angle_to_mouse : float = 0.0
 var _init_rotation : float = 0.0
 var _init_sweep : float = 0.0
 
-func draw_sector(center: Vector2, radius: float, angle_from: float, angle_to: float, n_points: int, color: Color):
-	if n_points <= 2:
-		printerr("n_points must be > 2. n_points = %d" % [n_points])
-		return
-
-	var angle_step = (angle_to - angle_from) / (n_points - 1)
-	var points = PackedVector2Array()
-	points.push_back(center)
-	for i in range(n_points):
-		var angle_point = angle_from + i * angle_step
-		points.push_back(center + Vector2(cos(angle_point), sin(angle_point)) * radius)
-
-	draw_polygon(points, [color])
-
 func get_subclass() -> String:
 	return "Sprinkler"
 
@@ -220,32 +205,8 @@ func _input(event: InputEvent) -> void:
 		elif _handle_being_moved == sweep_handle:
 			sweep_deg = rad_to_deg(_init_sweep + delta_angle)
 
-func _draw():
-	var stop_angle := deg_to_rad(sweep_deg)
-	var water_color := Color.DODGER_BLUE
-	water_color.a = 0.5
-	var max_radius := Utils.ft_to_px(max_dist_ft)
-	var min_radius := Utils.ft_to_px(min_dist_ft)
-	var dist_radius := Utils.ft_to_px(dist_ft)
-	var center := Vector2()
-	if show_water:
-		draw_sector(center, dist_radius, 0, stop_angle, ARC_POINTS, water_color)
-	if show_min_dist:
-		draw_arc(center, min_radius, 0, stop_angle, ARC_POINTS, Color.RED, 1.0)
-	if show_max_dist:
-		draw_arc(center, max_radius, 0, stop_angle, ARC_POINTS, Color.LIME_GREEN, 1.0)
-	# draw indicator circle
-	if picked or hovering:
-		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
-		draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT * 2), indic_color)
-	# draw body
-	draw_circle(center, Utils.ft_to_px(BODY_RADIUS_FT), body_color)
-	
-	# position the edit handles
-	rot_handle.visible = picked
-	sweep_handle.visible = picked
-	rot_handle.position = Vector2(dist_radius, 0)
-	sweep_handle.position = Vector2(dist_radius, 0).rotated(stop_angle)
+func _draw() -> void:
+	draw_layer.queue_redraw()
 
 func _cap_values():
 	if dist_ft < min_dist_ft:

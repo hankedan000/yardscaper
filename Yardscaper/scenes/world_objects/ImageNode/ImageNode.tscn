@@ -1,7 +1,29 @@
-[gd_scene load_steps=3 format=3 uid="uid://d3cwej23wp4gk"]
+[gd_scene load_steps=5 format=3 uid="uid://d3cwej23wp4gk"]
 
 [ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_r5s32"]
 [ext_resource type="Script" path="res://scenes/world_objects/ImageNode/ImageNode.gd" id="2_dfkcr"]
+[ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="3_rk1d2"]
+
+[sub_resource type="GDScript" id="GDScript_jercw"]
+script/source = "extends Gizmo
+
+var _img : ImageNode = null
+var _outline_width : float = Globals.OUTLINE_BASE_WIDTH_PX
+
+func _ready() -> void:
+	super._ready()
+	_img = get_parent() as ImageNode
+
+func _draw() -> void:
+	# draw indicator box
+	if _img.picked or _img.hovering:
+		var indic_color := Globals.SELECT_COLOR if _img.picked else Globals.HOVER_COLOR
+		draw_rect(Rect2(Vector2(), _img.img_size_px()), indic_color, false, _outline_width)
+
+func on_zoom_changed(new_zoom: float, _inv_scale: Vector2) -> void:
+	_outline_width = Globals.OUTLINE_BASE_WIDTH_PX / new_zoom
+	queue_redraw()
+"
 
 [node name="ImageNode" instance=ExtResource("1_r5s32")]
 script = ExtResource("2_dfkcr")
@@ -10,3 +32,9 @@ script = ExtResource("2_dfkcr")
 offset_right = 50.0
 offset_bottom = 50.0
 mouse_filter = 2
+
+[node name="ManualDrawLayer" parent="." index="1" instance=ExtResource("3_rk1d2")]
+script = SubResource("GDScript_jercw")
+
+[node name="InfoLabel" parent="." index="2"]
+text = ""

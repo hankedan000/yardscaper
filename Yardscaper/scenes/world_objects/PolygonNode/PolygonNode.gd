@@ -1,8 +1,6 @@
 extends WorldObject
 class_name PolygonNode
 
-const PERIMETER_WIDTH = 2
-
 const PROP_KEY_COLOR = &"color"
 const PROP_KEY_POINTS_FT = &"points_ft"
 
@@ -16,6 +14,7 @@ signal edited(undo_op: UndoRedoController.UndoRedoOperation)
 
 @onready var poly             : Polygon2D = $Polygon2D
 @onready var coll_poly        : CollisionPolygon2D = $PickArea/CollisionPolygon2D
+@onready var draw_layer       := $ManualDrawLayer
 @onready var edit_path        : Path2D = $EditPath
 @onready var path_follow      : PathFollow2D = $EditPath/PathFollow2D
 @onready var add_point_handle : EditorHandle = $EditPath/PathFollow2D/AddPointHandle
@@ -49,19 +48,8 @@ func _ready() -> void:
 	add_point_handle.get_button().button_down.connect(_on_add_point_handle_button_down)
 
 func _draw():
+	draw_layer.queue_redraw()
 	poly.color = color
-	if picked or hovering:
-		var perim_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
-		var first_point = null
-		var prev_point = null
-		for point in poly.polygon:
-			if first_point == null:
-				first_point = point
-			if prev_point:
-				draw_line(prev_point, point, perim_color, PERIMETER_WIDTH)
-			prev_point = point
-		if prev_point && first_point:
-			draw_line(prev_point, first_point, perim_color, PERIMETER_WIDTH)
 
 func _process(_delta: float) -> void:
 	# even though the getter says 'global', it seems to return a position

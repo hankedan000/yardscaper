@@ -132,3 +132,17 @@ func get_label_text_size(label: Label, text: String, include_scale: bool = true)
 func set_item_checked_by_id(popup: PopupMenu, id: int, checked: bool) -> void:
 	var idx := popup.get_item_index(id)
 	popup.set_item_checked(idx, checked)
+
+func draw_sector(canvas: CanvasItem, center: Vector2, radius: float, angle_from: float, angle_to: float, n_points: int, color: Color) -> void:
+	if n_points <= 2:
+		printerr("n_points must be > 2. n_points = %d" % [n_points])
+		return
+
+	var angle_step = (angle_to - angle_from) / (n_points - 1)
+	var points = PackedVector2Array()
+	points.push_back(center)
+	for i in range(n_points):
+		var angle_point = angle_from + i * angle_step
+		points.push_back(center + Vector2(cos(angle_point), sin(angle_point)) * radius)
+
+	canvas.draw_polygon(points, [color])
