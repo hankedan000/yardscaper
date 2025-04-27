@@ -1,7 +1,7 @@
 extends Node
 class_name InputRecorder
 
-enum EventType {Invalid = 0, None = 1, MouseButton = 2}
+enum EventType {Invalid = 0, None = 1, MouseButton = 2, MouseMotion = 3}
 
 class RecordedEvent:
 	var ticks_msec : int = 0
@@ -28,6 +28,8 @@ class RecordedEvent:
 				return EventType.None
 			2:
 				return EventType.MouseButton
+			3:
+				return EventType.MouseMotion
 		push_error("event type %d invalid!" % i)
 		return EventType.Invalid
 
@@ -45,7 +47,7 @@ class RecordedMouseButtonEvent extends RecordedEvent:
 		rec_evt.button_index = evt.button_index
 		rec_evt.button_mask = evt.button_mask
 		rec_evt.pressed = evt.pressed
-		rec_evt.global_position = evt.global_position
+		rec_evt.position = evt.position
 		return rec_evt
 	
 	static func from_csv_parts(parts: Array[String]) -> RecordedMouseButtonEvent:
@@ -83,6 +85,35 @@ class RecordedMouseButtonEvent extends RecordedEvent:
 		in_evt.position = position
 		return in_evt
 
+class RecordedMouseMotionEvent extends RecordedEvent:
+	var position : Vector2 = Vector2()
+	
+	func _init() -> void:
+		super._init(EventType.MouseMotion)
+	
+	static func from_input_event(evt: InputEventMouseMotion) -> RecordedMouseMotionEvent:
+		var rec_evt := RecordedMouseMotionEvent.new()
+		rec_evt.position = evt.position
+		return rec_evt
+	
+	static func from_csv_parts(parts: Array[String]) -> RecordedMouseMotionEvent:
+		var rec_evt := RecordedMouseMotionEvent.new()
+		rec_evt.ticks_msec = int(parts[0])
+		rec_evt.evt_type = evt_type_from_int(int(parts[1]))
+		rec_evt.position.x = int(parts[2])
+		rec_evt.position.y = int(parts[3])
+		return rec_evt
+	
+	func to_csv() -> String:
+		var csv := super.to_csv()
+		csv += ",%d,%d" % [int(position.x), int(position.y)]
+		return csv
+	
+	func to_input_event() -> InputEvent:
+		var in_evt := InputEventMouseMotion.new()
+		in_evt.position = position
+		return in_evt
+
 var _log_file : FileAccess = null
 var _thread : Thread = Thread.new()
 var _mutex : Mutex = Mutex.new() # guards _evt_queue
@@ -94,7 +125,9 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
-		_on_mouse_button_evt(event)
+		_queue_evt(RecordedMouseButtonEvent.from_input_event(event))
+	elif event is InputEventMouseMotion:
+		_queue_evt(RecordedMouseMotionEvent.from_input_event(event))
 
 func is_recording() -> bool:
 	return _thread.is_alive()
@@ -129,14 +162,9 @@ func __THREADED__write_events() -> void:
 		var evt : RecordedEvent = _evt_queue.pop_front()
 		_mutex.unlock()
 		if evt:
-			var csv_str := evt.to_csv()
-			print(csv_str)
-			_log_file.store_line(csv_str)
+			_log_file.store_line(evt.to_csv())
 	_log_file.close()
 	_log_file = null
-
-func _on_mouse_button_evt(evt: InputEventMouseButton) -> void:
-	_queue_evt(RecordedMouseButtonEvent.from_input_event(evt))
 
 func _queue_evt(evt: RecordedEvent) -> void:
 	_mutex.lock()

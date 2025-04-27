@@ -1,7 +1,7 @@
 extends Node
 class_name InputPlayback
 
-const MIN_EVENT_TO_EVENT_DELAY_MSEC = 1000.0
+const MIN_EVENT_TO_EVENT_DELAY_MSEC = 0.0
 
 var _evt_queue : Array[InputRecorder.RecordedEvent] = []
 var _msec_till_next_event : float = 0.0
@@ -19,10 +19,7 @@ func _process(delta: float) -> void:
 	var input_evt := next_evt.to_input_event()
 	if input_evt:
 		if input_evt is InputEventMouse:
-			var motion = InputEventMouseMotion.new()
-			motion.position = input_evt.position
 			Input.warp_mouse(input_evt.position)
-			Input.parse_input_event(motion)
 		Input.parse_input_event(input_evt)
 	
 	if _evt_queue.is_empty():
@@ -46,6 +43,8 @@ func load_events_from_file(filepath: String) -> int:
 		match evt_type:
 			InputRecorder.EventType.MouseButton:
 				_evt_queue.push_back(InputRecorder.RecordedMouseButtonEvent.from_csv_parts(csv_parts))
+			InputRecorder.EventType.MouseMotion:
+				_evt_queue.push_back(InputRecorder.RecordedMouseMotionEvent.from_csv_parts(csv_parts))
 			_:
 				push_warning("unsupported playback of event type %s" % evt_type)
 	
