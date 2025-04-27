@@ -88,8 +88,10 @@ func _do_close(type: CloseType):
 			pass # nothing to do
 		CloseType.ProjectManager:
 			TheProject.reset()
+			Globals.main.input_recorder.stop_recording()
 			Globals.main.open_project_manager()
 		CloseType.Application:
+			Globals.main.input_recorder.stop_recording()
 			get_tree().quit()
 
 func _notification(what):
@@ -143,6 +145,7 @@ func _on_open_dialog_dir_selected(dir):
 
 func _on_TheProject_opened():
 	_update_window_title()
+	#Globals.main.input_recorder.start_recording(TheProject.project_path.path_join("inputs.csv"))
 
 func _on_TheProject_has_edits_changed(_has_edits):
 	_update_window_title()

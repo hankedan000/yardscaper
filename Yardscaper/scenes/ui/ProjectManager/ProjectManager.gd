@@ -64,6 +64,11 @@ func _on_recent_project_opened(item: PreviousProjectItem):
 	if not item.has_recovery_data:
 		# open project immediately
 		Globals.main.open_project_editor(item.get_project_path())
+		var inputs_file := item.get_project_path().path_join("playback_inputs.csv")
+		var evt_count := Globals.main.input_playback.load_events_from_file(inputs_file)
+		print("evt_count: %d" % evt_count)
+		if evt_count > 0:
+			Globals.main.input_playback.start_playback(2000.0)
 	else:
 		# ask user if they want to recover auto-saved data
 		recover_project_dialog.popup_centered()

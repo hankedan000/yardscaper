@@ -4,6 +4,9 @@ class_name Main
 @export var ProjectManagerScene : PackedScene = null
 @export var ProjectEditorScene : PackedScene = null
 
+@onready var input_recorder : InputRecorder = $InputRecorder
+@onready var input_playback : InputPlayback = $InputPlayback
+
 var root_scene : Control = null
 
 func _ready():

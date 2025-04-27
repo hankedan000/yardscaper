@@ -446,6 +446,7 @@ func _on_preference_update_timer_timeout():
 	TheProject.layout_pref.zoom = world_view.camera2d.zoom.x
 
 func _on_world_view_gui_input(event: InputEvent):
+	print(event)
 	var evt_global_pos = event.global_position
 	var pos_in_world_px := world_view.global_xy_to_pos_in_world(evt_global_pos)
 	if event is InputEventMouseButton:
