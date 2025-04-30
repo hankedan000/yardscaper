@@ -1,4 +1,5 @@
 extends PanelContainer
+class_name LayoutPanel
 
 const MULTI_SELECT_KEY = KEY_SHIFT
 const TOOLTIP_DELAY_DURATION_SEC := 1.0
@@ -87,7 +88,8 @@ var undo_redo_ctrl := UndoRedoController.new()
 
 var _selection_controller : WorldObjectSelectionController = WorldObjectSelectionController.new()
 var _mouse_move_start_pos_px = null
-var _move_undo_batch : UndoRedoController.OperationBatch = null
+var _batch_edits_for_prop : StringName = &""
+var _curr_batch_undo_op : UndoRedoController.OperationBatch = null
 # object that would be selected next if LEFT mouse button were pressed
 var _hovered_obj : WorldObject = null:
 	set(value):
@@ -118,6 +120,7 @@ func _ready():
 	_selection_controller.item_selected.connect(_on_selection_controller_item_selected)
 	_selection_controller.item_deselected.connect(_on_selection_controller_item_deselected)
 	sprink_prop_list.visible = false
+	sprink_prop_list.set_layout_panel(self)
 	img_prop_list.visible = false
 	poly_prop_list.visible = false
 	objects_list.world = world_view
@@ -163,6 +166,16 @@ func _input(event):
 			var helper := WorldObjectReorderHelper.new(_selection_controller.selected_objs())
 			helper.apply_shift_to_top(world_view)
 
+func start_batch_edit(prop_name: StringName) -> void:
+	if _batch_edits_for_prop.length() > 0:
+		push_warning("starting new batch edit for '%s', but there was an unstopped batch edit for '%s'" % [prop_name, _batch_edits_for_prop])
+	_batch_edits_for_prop = prop_name
+	_curr_batch_undo_op = null
+
+func stop_batch_edit() -> void:
+	_batch_edits_for_prop = &""
+	_curr_batch_undo_op = null
+
 func _handle_left_click_release(pos_in_world_px: Vector2):
 	match mode:
 		Mode.Idle:
@@ -170,7 +183,7 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 		Mode.MovingObjects:
 			for obj in _selection_controller.selected_objs():
 				obj.finish_move()
-			_move_undo_batch = null
+			stop_batch_edit()
 			_mouse_move_start_pos_px = null
 			mode = Mode.Idle
 		Mode.AddSprinkler:
@@ -253,20 +266,45 @@ func _update_ui_after_selection_change():
 	poly_prop_list.hide()
 	curve_edit_buttons.hide()
 	
-	if selected_objs.size() != 1:
+	if selected_objs.size() == 0:
 		return
 	
-	var obj = selected_objs[0]
-	if obj is Sprinkler:
-		sprink_prop_list.sprinkler = obj
+	var all_sprinklers := true
+	var all_images := true
+	var all_distances := true
+	var all_polygons := true
+	
+	for obj in selected_objs:
+		if obj is Sprinkler:
+			all_images = false
+			all_distances = false
+			all_polygons = false
+		elif obj is ImageNode:
+			all_sprinklers = false
+			all_distances = false
+			all_polygons = false
+		elif obj is DistanceMeasurement:
+			all_sprinklers = false
+			all_images = false
+			all_polygons = false
+		elif obj is PolygonNode:
+			all_sprinklers = false
+			all_images = false
+			all_distances = false
+	
+	var is_single_select = selected_objs.size() == 1
+	if all_sprinklers:
+		sprink_prop_list.clear_sprinklers()
+		for obj in selected_objs:
+			sprink_prop_list.add_sprinkler(obj)
 		sprink_prop_list.show()
-	elif obj is ImageNode:
-		img_prop_list.img_node = obj
+	elif all_images && is_single_select:
+		img_prop_list.img_node = selected_objs[0]
 		img_prop_list.show()
-	elif obj is DistanceMeasurement:
+	elif all_distances && is_single_select:
 		pass
-	elif obj is PolygonNode:
-		poly_prop_list.poly_node = obj
+	elif all_polygons && is_single_select:
+		poly_prop_list.poly_node = selected_objs[0]
 		poly_prop_list.show()
 		curve_edit_buttons.show()
 
@@ -352,7 +390,7 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 			if obj_in_world:
 				world_view.objects.remove_child(obj)
 		TheProject.ChangeType.PROP_EDIT:
-			var prop_name : String = args[0]
+			var prop_name : StringName = args[0]
 			var old_value = args[1]
 			var new_value = args[2]
 			var undo_op := UndoRedoController.PropEditUndoRedoOperation.new(
@@ -360,12 +398,12 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 					prop_name,
 					old_value,
 					new_value)
-			if prop_name == &"position" and mode == Mode.MovingObjects:
-				# batch undo operations for a multi-object move
-				if _move_undo_batch != null:
-					_move_undo_batch.push_op(undo_op)
+			if prop_name == _batch_edits_for_prop:
+				# batch undo operations for a multi-object edits
+				if _curr_batch_undo_op != null:
+					_curr_batch_undo_op.push_op(undo_op)
 				else:
-					_move_undo_batch = undo_redo_ctrl.push_undo_op(undo_op)
+					_curr_batch_undo_op = undo_redo_ctrl.push_undo_op(undo_op)
 			else:
 				undo_redo_ctrl.push_undo_op(undo_op)
 
@@ -500,6 +538,7 @@ func _on_world_view_gui_input(event: InputEvent):
 			if ! all_movable:
 				Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
 			else:
+				start_batch_edit(&"position")
 				for obj in selected_objs:
 					obj.start_move()
 					mode = Mode.MovingObjects
