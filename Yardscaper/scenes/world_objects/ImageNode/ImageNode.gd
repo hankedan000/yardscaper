@@ -53,6 +53,9 @@ func _draw():
 func get_visual_center() -> Vector2:
 	return global_position + (img_size_px() / 2.0)
 
+func get_bounding_box() -> Rect2:
+	return Rect2(global_position, img_size_px())
+
 func img_size_px() -> Vector2:
 	return texture_rect.size
 

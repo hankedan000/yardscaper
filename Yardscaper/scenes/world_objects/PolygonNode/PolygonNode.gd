@@ -199,6 +199,14 @@ func get_visual_center() -> Vector2:
 		return poly.global_position
 	return poly.global_position + get_centroid_px()
 
+func get_bounding_box() -> Rect2:
+	if poly.polygon.size() == 0:
+		return super.get_bounding_box()
+	var box := Rect2(poly.polygon[0], Vector2(1,1))
+	for idx in range(1, poly.polygon.size()):
+		box = box.expand(poly.polygon[idx])
+	return box
+
 func get_subclass() -> String:
 	return "PolygonNode"
 

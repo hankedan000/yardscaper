@@ -65,6 +65,10 @@ func dist_ft() -> float:
 func get_subclass() -> String:
 	return "DistanceMeasurement"
 
+func get_bounding_box() -> Rect2:
+	var box := Rect2(point_a, Vector2(1,1))
+	return box.expand(point_b)
+
 func serialize():
 	var obj = super.serialize()
 	obj['point_a_ft'] = Utils.vect2_to_pair(Utils.px_to_ft_vec(point_a))
