@@ -146,3 +146,38 @@ func draw_sector(canvas: CanvasItem, center: Vector2, radius: float, angle_from:
 		points.push_back(center + Vector2(cos(angle_point), sin(angle_point)) * radius)
 
 	canvas.draw_polygon(points, [color])
+
+func get_bounding_box_around_all(objs: Array[WorldObject]) -> Rect2:
+	if objs.is_empty():
+		push_error("objs can't be empty")
+		return Rect2()
+	
+	var box := objs[0].get_bounding_box()
+	for idx in range(1, objs.size()):
+		box = box.merge(objs[idx].get_bounding_box())
+	return box
+
+func fit_camera_to_rect(camera: Camera2D, rect: Rect2, padding: float = 0.0) -> void:
+	# Get the size of the viewport (window) in pixels
+	var viewport_size = camera.get_viewport_rect().size
+
+	# Add padding to the bounding rect
+	var padded_rect = rect.grow_individual(
+		rect.size.x * padding,
+		rect.size.y * padding,
+		rect.size.x * padding,
+		rect.size.y * padding
+	)
+	
+	# Calculate the scale needed to fit the rect into the viewport
+	var scale_x = viewport_size.x / padded_rect.size.x
+	var scale_y = viewport_size.y / padded_rect.size.y
+
+	# Choose the min scale so the whole rect fits in both dimensions
+	var zoom_factor = min(scale_x, scale_y)
+
+	# Set the camera zoom (zoom is relative to 1.0, so larger = zoomed out)
+	camera.zoom = Vector2(zoom_factor, zoom_factor)
+
+	# Center the camera on the rect
+	camera.global_position = padded_rect.get_center()

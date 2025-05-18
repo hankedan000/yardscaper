@@ -252,7 +252,7 @@ func get_objs_by_zone() -> Dictionary:
 			if obj.zone in objs_by_zone:
 				objs_by_zone[obj.zone].push_back(obj)
 			else:
-				objs_by_zone[obj.zone] = [obj]
+				objs_by_zone[obj.zone] = [obj] as Array[WorldObject]
 	return objs_by_zone
 
 # @param[in] zone - the zone # to search for

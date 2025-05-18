@@ -112,6 +112,12 @@ func get_pickable_under_cursor() -> WorldObject:
 	
 	return nearest_obj
 
+# @param[in] rect - the rectangle to fit the view to
+# @param[in] padding - ratio to grow the box by on each side
+func fit_view_to_rect(rect: Rect2, padding: float = 0.0) -> void:
+	Utils.fit_camera_to_rect(camera2d, rect, padding)
+	queue_redraw()
+
 func _draw():
 	if show_grid:
 		_draw_grid(major_spacing_ft, major_line_color, MAJOR_LINE_WIDTH)

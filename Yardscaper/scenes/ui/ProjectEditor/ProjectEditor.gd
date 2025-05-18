@@ -213,3 +213,8 @@ func _on_export_to_image_dialog_export(view_opt, _zone: int, filepath: String):
 			img.save_webp(filepath)
 		else:
 			push_warning("unsupported image file extension '%s'" % ext)
+
+func _on_export_to_image_dialog_zone_selection_changed(zone: int) -> void:
+	var objs := TheProject.get_objs_in_zone(zone)
+	var zone_box := Utils.get_bounding_box_around_all(objs)
+	layout_tab.world_view.fit_view_to_rect(zone_box, 0.1)
