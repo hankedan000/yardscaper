@@ -77,7 +77,7 @@ func _update_after_path_change() -> void:
 	if new_path.is_relative_path():
 		_set_status(StatusIcon.StatusType.Error, "The project path can't be relative.")
 	elif DirAccess.dir_exists_absolute(new_path):
-		if Utils.is_dir_empty(new_path):
+		if FileUtils.is_dir_empty(new_path):
 			_set_status(StatusIcon.StatusType.Success, "The existing empty folder will be used.")
 		else:
 			_set_status(StatusIcon.StatusType.Warning, "The project folder isn't empty.\nHighly recommend that you select and empty folder.")

@@ -1,0 +1,6 @@
+[submodule "Yardscaper/addons/godot-basics-addon"]
+	path = Yardscaper/addons/godot-basics-addon
+	url = https://github.com/hankedan000/godot-basics-addon.git
+[submodule "Yardscaper/addons/gd_basics"]
+	path = Yardscaper/addons/gd_basics
+	url = https://github.com/hankedan000/godot-basics-addon.git

@@ -146,8 +146,8 @@ func deserialize(obj):
 	position = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj[PROP_KEY_POSITION_FT]))
 	rotation_degrees = obj[PROP_KEY_ROTATION_DEG]
 	user_label = obj[PROP_KEY_USER_LABEL]
-	info_label.visible = Utils.dict_get(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)
-	position_locked = Utils.dict_get(obj, PROP_KEY_POSITION_LOCKED, false)
+	info_label.visible = DictUtils.get_w_default(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)
+	position_locked = DictUtils.get_w_default(obj, PROP_KEY_POSITION_LOCKED, false)
 
 # @return true if the value changed, false if not (does not indicate if change
 # event was fired or not)

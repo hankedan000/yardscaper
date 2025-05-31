@@ -72,7 +72,7 @@ static func get_quick_info(dir: String) -> QuickProjectInfo:
 	
 	var info := QuickProjectInfo.new()
 	info.name = _get_project_name(project_data, dir)
-	info.version = Version.from_str(Utils.dict_get(project_data, VERSION_KEY, Globals.UNKOWN_VERSION))
+	info.version = Version.from_str(DictUtils.get_w_default(project_data, VERSION_KEY, Globals.UNKOWN_VERSION))
 	info.last_modified = FileAccess.get_modified_time(_get_project_data_filepath(dir, false))
 	info.has_recovery_data = has_auto_save_file(dir)
 	return info
@@ -87,7 +87,7 @@ static func rename_project(dir: String, new_name: String) -> bool:
 	
 	# save modified project data
 	var json_filepath := _get_project_data_filepath(dir, false)
-	return Utils.to_json_file(project_data, json_filepath)
+	return FileUtils.to_json_file(project_data, json_filepath)
 
 static func has_auto_save_file(dir: String) -> bool:
 	var auto_save_filepath := _get_project_data_filepath(dir, true)
@@ -128,7 +128,7 @@ func open(dir: String) -> bool:
 	
 	# load layout preferences
 	var layout_pref_filepath = dir.path_join('layout_pref.json')
-	var layout_pref_data = Utils.from_json_file(layout_pref_filepath)
+	var layout_pref_data = FileUtils.from_json_file(layout_pref_filepath)
 	if layout_pref_data:
 		layout_pref.deserialize(layout_pref_data)
 	
@@ -141,7 +141,7 @@ func save() -> bool:
 func save_preferences() -> void:
 	# save layout preferences
 	var layout_pref_filepath = project_path.path_join('layout_pref.json')
-	Utils.to_json_file(layout_pref.serialize(), layout_pref_filepath)
+	FileUtils.to_json_file(layout_pref.serialize(), layout_pref_filepath)
 
 func save_as(dir: String) -> bool:
 	if DirAccess.make_dir_recursive_absolute(dir) != OK:
@@ -149,7 +149,7 @@ func save_as(dir: String) -> bool:
 		
 	# serial project and save to json file
 	var json_filepath = _get_project_data_filepath(dir, false)
-	if not Utils.to_json_file(serialize(), json_filepath):
+	if not FileUtils.to_json_file(serialize(), json_filepath):
 		return false
 	
 	# cleanup any auto-save files we don't need anymore
@@ -253,7 +253,7 @@ func serialize() -> Dictionary:
 			objects_ser.append(obj.serialize())
 	
 	return {
-		VERSION_KEY : Globals.get_app_version(),
+		VERSION_KEY : ProjectUtils.get_app_version(),
 		OBJECTS_KEY : objects_ser,
 		PROJECT_NAME_KEY : project_name
 	}
@@ -263,7 +263,7 @@ func serialize() -> Dictionary:
 func deserialize(data: Dictionary, dir: String) -> void:
 	_suppress_self_edit_signals = true
 	reset()
-	for ser_obj in Utils.dict_get(data, OBJECTS_KEY, []):
+	for ser_obj in DictUtils.get_w_default(data, OBJECTS_KEY, []):
 		var wobj = instance_world_obj(ser_obj)
 		if wobj:
 			add_object(wobj)
@@ -298,11 +298,11 @@ static func _get_project_data(dir: String, from_auto_save: bool) -> Dictionary:
 	if not DirAccess.dir_exists_absolute(dir):
 		push_warning("project dir '%s' doesn't exist" % [dir])
 		return {}
-	return Utils.from_json_file(_get_project_data_filepath(dir, from_auto_save))
+	return FileUtils.from_json_file(_get_project_data_filepath(dir, from_auto_save))
 
 # @param[in] data - serialized project data
 static func _get_project_name(data: Dictionary, project_dir: String) -> String:
-	var pname = Utils.dict_get(data, PROJECT_NAME_KEY, "") as String
+	var pname = DictUtils.get_w_default(data, PROJECT_NAME_KEY, "") as String
 	if pname.length() == 0:
 		# try returning project folder name as project name in
 		var parts = project_dir.split("/")
@@ -319,7 +319,7 @@ func _on_node_moved(node, from_xy, to_xy):
 	has_edits = true
 
 func __THREADED__auto_save(filepath: String, data: Dictionary) -> void:
-	Utils.to_json_file(data, filepath)
+	FileUtils.to_json_file(data, filepath)
 
 func _on_auto_save_timer_timeout() -> void:
 	if not is_opened():

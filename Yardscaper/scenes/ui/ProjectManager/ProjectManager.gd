@@ -33,9 +33,9 @@ var selected_project_item : PreviousProjectItem = null:
 		remove_button.disabled = selected_project_item == null
 
 func _ready():
-	DisplayServer.window_set_title("Project Manager - %s" % Globals.get_app_name())
+	DisplayServer.window_set_title("Project Manager - %s" % ProjectUtils.get_app_name())
 	_reload_previous_projects()
-	version_label.text = "v%s" % Globals.get_app_version()
+	version_label.text = "v%s" % ProjectUtils.get_app_version()
 	github_request.request_latest_release(Globals.GITHUB_USER, Globals.GITHUB_REPO)
 
 func _reload_previous_projects() -> void:
@@ -96,11 +96,11 @@ func _on_remove_button_pressed() -> void:
 
 func _on_github_request_received_latest_release(rel: GithubRelease) -> void:
 	var rel_version := Version.from_str(rel.tag_name)
-	var comp_res := rel_version.compare(Globals.get_app_version())
+	var comp_res := rel_version.compare(ProjectUtils.get_app_version())
 	if comp_res == 0:
 		new_version_label.text = "[color=Lightgreen]You have the latest release![/color]"
 		new_version_label.show()
-	elif rel_version.compare(Globals.get_app_version()) > 0:
+	elif rel_version.compare(ProjectUtils.get_app_version()) > 0:
 		new_version_label.text = "[url=%s][color=Gold]New release available: v%s[/color][/url]" % [rel.html_url, rel_version.to_string()]
 		new_version_label.tooltip_text = "Click to go to download page"
 		new_version_label.show()

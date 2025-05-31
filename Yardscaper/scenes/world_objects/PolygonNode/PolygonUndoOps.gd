@@ -1,8 +1,8 @@
+class_name PolygonUndoOps
 extends Object
-class_name PolygonUndoRedoOps
 
 class PointMove:
-	extends UndoRedoController.UndoRedoOperation
+	extends UndoController.UndoOperation
 	
 	var _poly : PolygonNode = null
 	var _idx : int = 0
@@ -32,7 +32,7 @@ class PointMove:
 		})
 
 class PointAdd:
-	extends UndoRedoController.UndoRedoOperation
+	extends UndoController.UndoOperation
 	
 	var _poly : PolygonNode = null
 	var _idx : int = 0
@@ -59,7 +59,7 @@ class PointAdd:
 		})
 
 class PointRemove:
-	extends UndoRedoController.UndoRedoOperation
+	extends UndoController.UndoOperation
 	
 	var _poly : PolygonNode = null
 	var _idx : int = 0

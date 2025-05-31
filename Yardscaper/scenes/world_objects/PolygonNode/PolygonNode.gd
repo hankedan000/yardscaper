@@ -8,7 +8,7 @@ enum EditMode {
 	None, Add, Edit, Remove
 }
 
-signal edited(undo_op: UndoRedoController.UndoRedoOperation)
+signal edited(undo_op: UndoController.UndoOperation)
 
 @export var EditorHandleScene : PackedScene = null
 
@@ -215,10 +215,10 @@ func deserialize(obj) -> void:
 	super.deserialize(obj)
 	if ! is_inside_tree():
 		await ready
-	var points_ft = Utils.dict_get(obj, PROP_KEY_POINTS_FT, [])
+	var points_ft = DictUtils.get_w_default(obj, PROP_KEY_POINTS_FT, [])
 	for point in points_ft:
 		add_point(Utils.ft_to_px_vec(Utils.pair_to_vect2(point)))
-	color = Utils.dict_get(obj, PROP_KEY_COLOR, color)
+	color = DictUtils.get_w_default(obj, PROP_KEY_COLOR, color)
 
 func _update_info_label():
 	info_label.visible = point_count() > 2
@@ -280,14 +280,14 @@ func _exit_edit_state() -> void:
 	set_process(false)
 
 func _stop_vertex_movement() -> void:
-	var undo_op : UndoRedoController.UndoRedoOperation = null
+	var undo_op : UndoController.UndoOperation = null
 	if _is_new_vertex:
-		undo_op = PolygonUndoRedoOps.PointAdd.new(
+		undo_op = PolygonUndoOps.PointAdd.new(
 			self,
 			_handle_being_moved.user_id,  # idx
 			_handle_being_moved.position) # point
 	else:
-		undo_op = PolygonUndoRedoOps.PointMove.new(
+		undo_op = PolygonUndoOps.PointMove.new(
 			self,
 			_handle_being_moved.user_id,  # idx
 			_handle_init_pos,             # from_point
@@ -340,7 +340,7 @@ func _on_vertex_handle_button_down(handle: EditorHandle, is_new_vertex: bool) ->
 			if point_count() <= 3:
 				# polygons need to keep at least 3 points to still exist
 				return
-			var undo_op := PolygonUndoRedoOps.PointRemove.new(
+			var undo_op := PolygonUndoOps.PointRemove.new(
 				self,
 				handle.user_id,  # idx
 				handle.position) # point

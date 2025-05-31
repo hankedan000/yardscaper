@@ -69,8 +69,8 @@ func serialize():
 func deserialize(obj):
 	super.deserialize(obj)
 	filename = obj['filename']
-	width_ft = Utils.dict_get(obj, PROP_KEY_WIDTH_FT, 0)
-	height_ft = Utils.dict_get(obj, PROP_KEY_HEIGHT_FT, 0)
+	width_ft = DictUtils.get_w_default(obj, PROP_KEY_WIDTH_FT, 0)
+	height_ft = DictUtils.get_w_default(obj, PROP_KEY_HEIGHT_FT, 0)
 
 func _sync_pick_area_size():
 	if not pick_coll_shape or not texture_rect:

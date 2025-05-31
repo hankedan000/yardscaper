@@ -11,7 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://dgejlhlde13ed" path="res://assets/icons/Rename.svg" id="7_7snhg"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="8_bs2io"]
 [ext_resource type="LabelSettings" uid="uid://6m4gdl765t3" path="res://assets/themes/GreyLabelSettings.tres" id="10_1eadb"]
-[ext_resource type="PackedScene" uid="uid://bd0k0hej4cpkr" path="res://scenes/GithubRequest/GithubRequest.tscn" id="11_r52mt"]
+[ext_resource type="PackedScene" uid="uid://bd0k0hej4cpkr" path="res://addons/gd_basics/nodes/github_request/github_request.tscn" id="11_r52mt"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8iuw1"]
 content_margin_left = 4.0
