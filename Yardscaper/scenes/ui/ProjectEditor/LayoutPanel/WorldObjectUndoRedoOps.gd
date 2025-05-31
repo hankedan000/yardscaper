@@ -2,7 +2,7 @@ extends Object
 class_name WorldObjectUndoRedoOps
 
 class AddOrRemove:
-	extends UndoRedoController.UndoRedoOperation
+	extends UndoController.UndoOperation
 	
 	var _world : WorldViewportContainer = null
 	var _from_idx : int = -1
@@ -46,7 +46,7 @@ class AddOrRemove:
 		return TheProject.remove_object(wobj)
 
 class Reordered:
-	extends UndoRedoController.UndoRedoOperation
+	extends UndoController.UndoOperation
 	
 	var _world : WorldViewportContainer = null
 	var _from_idx = 0

@@ -67,12 +67,12 @@ func serialize():
 	}
 
 func deserialize(obj):
-	show_grid = Utils.dict_get(obj, PROP_KEY_SHOW_GRID, true)
-	show_origin = Utils.dict_get(obj, PROP_KEY_SHOW_ORIGIN, true)
-	show_images = Utils.dict_get(obj, PROP_KEY_SHOW_IMAGES, true)
-	show_measurements = Utils.dict_get(obj, PROP_KEY_SHOW_MEASUREMENTS, true)
-	show_polygons = Utils.dict_get(obj, PROP_KEY_SHOW_POLYGONS, true)
-	show_sprinklers = Utils.dict_get(obj, PROP_KEY_SHOW_SPRINKLERS, true)
-	camera_pos = Utils.pair_to_vect2(Utils.dict_get(obj, PROP_KEY_CAMERA_POS, [0,0]))
-	zoom = Utils.dict_get(obj, PROP_KEY_ZOOM, 1.0)
-	grid_major_spacing_ft = Utils.pair_to_vect2(Utils.dict_get(obj, PROP_KEY_GRID_MAJOR_SPACING, [5,5]))
+	show_grid = DictUtils.get_w_default(obj, PROP_KEY_SHOW_GRID, true)
+	show_origin = DictUtils.get_w_default(obj, PROP_KEY_SHOW_ORIGIN, true)
+	show_images = DictUtils.get_w_default(obj, PROP_KEY_SHOW_IMAGES, true)
+	show_measurements = DictUtils.get_w_default(obj, PROP_KEY_SHOW_MEASUREMENTS, true)
+	show_polygons = DictUtils.get_w_default(obj, PROP_KEY_SHOW_POLYGONS, true)
+	show_sprinklers = DictUtils.get_w_default(obj, PROP_KEY_SHOW_SPRINKLERS, true)
+	camera_pos = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_CAMERA_POS, [0,0]))
+	zoom = DictUtils.get_w_default(obj, PROP_KEY_ZOOM, 1.0)
+	grid_major_spacing_ft = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_GRID_MAJOR_SPACING, [5,5]))

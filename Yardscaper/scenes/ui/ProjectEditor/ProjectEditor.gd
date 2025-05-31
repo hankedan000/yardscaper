@@ -37,11 +37,11 @@ enum CloseType {
 @onready var layout_tab := $VBoxContainer/ProjectTabs/Layout
 
 var _requested_close_type = CloseType.None
-var _active_undo_redo_ctrl : UndoRedoController = null:
+var _active_undo_redo_ctrl : UndoController = null:
 	set(value):
 		if _active_undo_redo_ctrl:
 			_active_undo_redo_ctrl.history_changed.disconnect(_on_undo_redo_ctrl_history_changed)
-		if value is UndoRedoController:
+		if value is UndoController:
 			value.history_changed.connect(_on_undo_redo_ctrl_history_changed)
 		_active_undo_redo_ctrl = value
 		_update_undo_redo_enabled(_active_undo_redo_ctrl)
@@ -112,7 +112,7 @@ func _request_save_as():
 func _update_undo_redo_enabled(undo_redo_ctrl):
 	var undo_disabled = true
 	var redo_disabled = true
-	if undo_redo_ctrl is UndoRedoController:
+	if undo_redo_ctrl is UndoController:
 		undo_disabled = not undo_redo_ctrl.has_undo()
 		redo_disabled = not undo_redo_ctrl.has_redo()
 	edit_menu.set_item_disabled(edit_menu.get_item_index(EditMenuIDs.Undo), undo_disabled)

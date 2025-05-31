@@ -84,12 +84,12 @@ var mode = Mode.Idle:
 var sprinkler_to_add : Sprinkler = null
 var dist_meas_to_add : DistanceMeasurement = null
 var poly_to_add : PolygonNode = null
-var undo_redo_ctrl := UndoRedoController.new()
+var undo_redo_ctrl := UndoController.new()
 
 var _selection_controller : WorldObjectSelectionController = WorldObjectSelectionController.new()
 var _mouse_move_start_pos_px = null
 var _batch_edits_for_prop : StringName = &""
-var _curr_batch_undo_op : UndoRedoController.OperationBatch = null
+var _curr_batch_undo_op : UndoController.OperationBatch = null
 # object that would be selected next if LEFT mouse button were pressed
 var _hovered_obj : WorldObject = null:
 	set(value):
@@ -393,7 +393,7 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 			var prop_name : StringName = args[0]
 			var old_value = args[1]
 			var new_value = args[2]
-			var undo_op := UndoRedoController.PropEditUndoRedoOperation.new(
+			var undo_op := UndoController.PropEditUndoOperation.new(
 					obj,
 					prop_name,
 					old_value,
@@ -475,7 +475,7 @@ func _on_pickable_object_pick_state_changed(obj: WorldObject) -> void:
 	else:
 		_selection_controller.remove_from_selection(obj)
 
-func _on_polygon_edited(undo_op: UndoRedoController.UndoRedoOperation) -> void:
+func _on_polygon_edited(undo_op: UndoController.UndoOperation) -> void:
 	undo_redo_ctrl.push_undo_op(undo_op)
 	TheProject.has_edits = true
 

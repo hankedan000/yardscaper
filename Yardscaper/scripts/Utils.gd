@@ -23,11 +23,6 @@ func pretty_dist(dist_ft: float) -> String:
 	var whole_in = round(abs(dist_ft - whole_ft) * INCHES_PER_FT)
 	return "%0.0f' %0.0f\"" % [whole_ft, whole_in]
 
-func dict_get(dict: Dictionary, key: Variant, default_value=null):
-	if dict.has(key):
-		return dict[key]
-	return default_value
-
 func create_shortcut(letter: Key, ctrl: bool = false, shift: bool = false, alt: bool = false) -> Shortcut:
 	var shortcut = Shortcut.new()
 
@@ -54,47 +49,11 @@ func world_to_global_size_px(size: Vector2, zoom: Vector2) -> Vector2:
 func global_to_world_size_px(size: Vector2, zoom: Vector2) -> Vector2:
 	return Vector2(size.x / zoom.x, size.y / zoom.y)
 
-func to_json_file(obj, filepath: String, indent="  ", sort_key=true, full_precision=true) -> bool:
-	var obj_str = JSON.stringify(obj, indent,  sort_key, full_precision)
-	var json_file = FileAccess.open(filepath, FileAccess.WRITE)
-	if json_file:
-		json_file.store_string(obj_str)
-		json_file.close()
-	else:
-		push_error("failed to save to '%s'" % [filepath])
-		return false
-	return true
-
-func from_json_file(filepath: String):
-	var json_file = FileAccess.open(filepath, FileAccess.READ)
-	if json_file == null:
-		push_error("failed to open json file '%s'" % [filepath])
-		return null
-	var obj_str = json_file.get_as_text()
-	var json = JSON.new()
-	if json.parse(obj_str) == OK:
-		return json.data
-	push_error("failed to parse JSON object from str '%s'" % [obj_str])
-	return null
-
 func vect2_to_pair(vec: Vector2) -> Array:
 	return [vec.x, vec.y]
 
 func pair_to_vect2(pair: Array) -> Vector2:
 	return Vector2(pair[0], pair[1])
-
-func is_dir_empty(path: String) -> bool:
-	var dir := DirAccess.open(path)
-	if not dir:
-		return false
-		
-	dir.include_hidden = false
-	dir.include_navigational = false
-	if dir.get_directories().size() > 0:
-		return false
-	elif dir.get_files().size() > 0:
-		return false
-	return true
 
 var _prev_cursor_shape : Input.CursorShape = Input.CURSOR_ARROW
 var _curr_cursor_shape : Input.CursorShape = Input.CURSOR_ARROW

@@ -35,7 +35,7 @@ func _ready():
 	# restore recent projects from user preferences
 	var recent_proj_path := recent_project_path()
 	if FileAccess.file_exists(recent_proj_path):
-		var ser_projects = Utils.from_json_file(recent_proj_path)
+		var ser_projects = FileUtils.from_json_file(recent_proj_path)
 		if ser_projects is Array:
 			while len(ser_projects) > 0:
 				add_recent_project(ser_projects.pop_back())
@@ -60,11 +60,11 @@ func add_recent_project(path: String) -> void:
 	_recent_projects.push_front(path)
 	while len(_recent_projects) > MAX_RECENT_PROJECT:
 		_recent_projects.pop_back()
-	Utils.to_json_file(_recent_projects, recent_project_path())
+	FileUtils.to_json_file(_recent_projects, recent_project_path())
 
 func remove_recent_project(path: String) -> void:
 	_recent_projects.erase(path)
-	Utils.to_json_file(_recent_projects, recent_project_path())
+	FileUtils.to_json_file(_recent_projects, recent_project_path())
 
 func _try_migrate_recent_projects() -> void:
 	var new_path := recent_project_path()

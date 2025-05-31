@@ -180,11 +180,11 @@ func deserialize(obj):
 	sweep_deg = obj[PROP_KEY_SWEEP_DEG]
 	manufacturer = obj[PROP_KEY_MANUFACTURER]
 	model = obj[PROP_KEY_MODEL]
-	min_dist_ft = Utils.dict_get(obj, PROP_KEY_MIN_DIST_FT, min_dist_ft)
-	max_dist_ft = Utils.dict_get(obj, PROP_KEY_MAX_DIST_FT, max_dist_ft)
-	dist_ft = Utils.dict_get(obj, PROP_KEY_DIST_FT, max_dist_ft)
-	zone = Utils.dict_get(obj, PROP_KEY_ZONE, 1)
-	body_color = Utils.dict_get(obj, PROP_KEY_BODY_COLOR, body_color)
+	min_dist_ft = DictUtils.get_w_default(obj, PROP_KEY_MIN_DIST_FT, min_dist_ft)
+	max_dist_ft = DictUtils.get_w_default(obj, PROP_KEY_MAX_DIST_FT, max_dist_ft)
+	dist_ft = DictUtils.get_w_default(obj, PROP_KEY_DIST_FT, max_dist_ft)
+	zone = DictUtils.get_w_default(obj, PROP_KEY_ZONE, 1)
+	body_color = DictUtils.get_w_default(obj, PROP_KEY_BODY_COLOR, body_color)
 
 func _ready() -> void:
 	super._ready()
