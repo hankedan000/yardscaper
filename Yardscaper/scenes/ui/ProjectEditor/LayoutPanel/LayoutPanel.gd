@@ -28,6 +28,7 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 @onready var tooltip_timer            := $ToolTipTimer
 
 @export var SprinklerScene : PackedScene = null
+@export var PipeScene : PackedScene = null
 @export var DistanceMeasurementScene : PackedScene = null
 @export var PolygonScene : PackedScene = null
 
@@ -342,6 +343,14 @@ func _on_add_sprinkler_pressed():
 	sprinkler_to_add.position = world_view.global_xy_to_pos_in_world(get_global_mouse_position())
 	world_view.objects.add_child(sprinkler_to_add)
 	mode = Mode.AddSprinkler
+
+func _on_add_pipe_pressed() -> void:
+	# since pipes are similar to DistanceMeasurement nodes, we'll reused the
+	# "adding" logic for it. should work for now ...
+	dist_meas_to_add = PipeScene.instantiate()
+	dist_meas_to_add.user_label = TheProject.get_unique_name('Pipe')
+	world_view.objects.add_child(dist_meas_to_add)
+	mode = Mode.AddDistMeasureA
 
 func _on_add_image_pressed():
 	img_dialog.popup_centered()

@@ -21,6 +21,7 @@ const SprinklerScene : PackedScene = preload("res://scenes/world_objects/Sprinkl
 const ImageNodeScene : PackedScene = preload("res://scenes/world_objects/ImageNode/ImageNode.tscn")
 const DistanceMeasurementScene : PackedScene = preload("res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn")
 const PolygonNodeScene : PackedScene = preload("res://scenes/world_objects/PolygonNode/PolygonNode.tscn")
+const PipeScene : PackedScene = preload("res://scenes/world_objects/Pipe/Pipe.tscn")
 
 var project_path = ""
 var project_name : String = ""
@@ -281,6 +282,8 @@ func instance_world_obj(ser_obj: Dictionary) -> WorldObject:
 			wobj = DistanceMeasurementScene.instantiate()
 		'PolygonNode':
 			wobj = PolygonNodeScene.instantiate()
+		'Pipe':
+			wobj = PipeScene.instantiate()
 		_:
 			push_warning("unimplemented subclass '%s' deserialization" % [ser_obj['subclass']])
 	if wobj:
