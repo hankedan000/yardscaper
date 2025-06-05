@@ -5,6 +5,3 @@
 
 [node name="Pipe" instance=ExtResource("1_m6rx2")]
 script = ExtResource("2_y5374")
-
-[node name="InfoLabel" parent="." index="0"]
-text = ""
