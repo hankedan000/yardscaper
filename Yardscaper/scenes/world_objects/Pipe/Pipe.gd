@@ -34,6 +34,7 @@ func _draw():
 	if picked or hovering:
 		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
 		draw_line(point_a, point_b, indic_color, diameter_px + (OUTLINE_PX * 2))
+	_update_handles()
 	
 	# draw the pipe as line
 	draw_line(point_a, point_b, color, diameter_px)

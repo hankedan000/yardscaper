@@ -1,7 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://db8wvn8xh27x0"]
+[gd_scene load_steps=4 format=3 uid="uid://db8wvn8xh27x0"]
 
 [ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_gjd6h"]
 [ext_resource type="Script" path="res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.gd" id="2_skq7c"]
+[ext_resource type="PackedScene" uid="uid://dy0t3omtev6y4" path="res://scenes/ui/gizmos/EditorHandle/EditorHandle.tscn" id="3_4r0ad"]
 
 [node name="DistanceMeasurement" instance=ExtResource("1_gjd6h")]
 script = ExtResource("2_skq7c")
+
+[node name="InfoLabel" parent="." index="0"]
+text = ""
+
+[node name="PointA_Handle" parent="." index="1" instance=ExtResource("3_4r0ad")]
+visible = false
+pressed_type = 1
+hover_type = 1
+
+[node name="PointB_Handle" parent="." index="2" instance=ExtResource("3_4r0ad")]
+visible = false
+pressed_type = 1
+hover_type = 1
