@@ -3,6 +3,12 @@ extends Node
 const PX_PER_FT : float = 12.0 # 1px per inch
 const INCHES_PER_FT : float = 12.0
 
+func ft_to_inches(ft: float) -> float:
+	return ft * INCHES_PER_FT
+
+func inches_to_ft(inches: float) -> float:
+	return inches / INCHES_PER_FT
+
 func ft_to_px(ft: float) -> float:
 	return ft * PX_PER_FT
 
