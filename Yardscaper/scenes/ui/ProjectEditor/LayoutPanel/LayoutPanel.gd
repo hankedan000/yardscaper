@@ -88,6 +88,7 @@ var poly_to_add : PolygonNode = null
 var undo_redo_ctrl := UndoController.new()
 
 var _selection_controller : WorldObjectSelectionController = WorldObjectSelectionController.new()
+var _can_start_move : bool = false
 var _mouse_move_start_pos_px = null
 var _batch_edits_for_prop : StringName = &""
 var _curr_batch_undo_op : UndoController.OperationBatch = null
@@ -391,8 +392,7 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 				obj,
 				false)) # is_remove
 			obj.picked_state_changed.connect(_on_pickable_object_pick_state_changed.bind(obj))
-			if obj is PolygonNode:
-				obj.edited.connect(_on_polygon_edited)
+			obj.undoable_edit.connect(_on_world_obj_undoable_edit)
 			_selection_controller.clear_selection()
 			obj.picked = true
 		TheProject.ChangeType.REMOVE:
@@ -484,7 +484,7 @@ func _on_pickable_object_pick_state_changed(obj: WorldObject) -> void:
 	else:
 		_selection_controller.remove_from_selection(obj)
 
-func _on_polygon_edited(undo_op: UndoController.UndoOperation) -> void:
+func _on_world_obj_undoable_edit(undo_op: UndoController.UndoOperation) -> void:
 	undo_redo_ctrl.push_undo_op(undo_op)
 	TheProject.has_edits = true
 
@@ -498,7 +498,11 @@ func _on_world_view_gui_input(event: InputEvent):
 	if event is InputEventMouseButton:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
-				if ! event.alt_pressed: # let pan take precedence (alt + click + drag)
+				if ! Input.is_key_pressed(KEY_ALT): # let pan take precedence (alt + click + drag)
+					_can_start_move = (
+						event.pressed &&
+						mode != Mode.MovingObjects &&
+						! Input.is_key_pressed(MULTI_SELECT_KEY))
 					if event.pressed:
 						_selection_controller.on_select_button_pressed(_hovered_obj)
 					else:
@@ -522,11 +526,6 @@ func _on_world_view_gui_input(event: InputEvent):
 			else:
 				Utils.pop_cursor_shape()
 		
-		var can_start_move := (
-			mode != Mode.MovingObjects and
-			not is_panning and
-			Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and
-			not Input.is_key_pressed(MULTI_SELECT_KEY))
 		if sprinkler_to_add:
 			sprinkler_to_add.position = pos_in_world_px
 		elif dist_meas_to_add and mode == Mode.AddDistMeasureB:
@@ -534,7 +533,8 @@ func _on_world_view_gui_input(event: InputEvent):
 		elif poly_to_add:
 			if _poly_edit_point_idx < poly_to_add.point_count():
 				poly_to_add.set_point(_poly_edit_point_idx, pos_in_world_px)
-		elif can_start_move:
+		elif _can_start_move:
+			_can_start_move = false # clear flag once we started
 			# check if any selected objects are position locked
 			var all_movable = true
 			var selected_objs := _selection_controller.selected_objs()
@@ -544,13 +544,13 @@ func _on_world_view_gui_input(event: InputEvent):
 					break
 			
 			# start move operations if all objects are movable
-			if ! all_movable:
-				Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
-			else:
+			if all_movable && selected_objs.size() > 0:
 				start_batch_edit(&"position")
 				for obj in selected_objs:
 					obj.start_move()
-					mode = Mode.MovingObjects
+				mode = Mode.MovingObjects
+			elif ! all_movable && selected_objs.size() > 0:
+				Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
 		
 		if mode == Mode.MovingObjects:
 			_handle_held_obj_move(pos_in_world_px)

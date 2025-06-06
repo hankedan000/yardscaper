@@ -52,6 +52,7 @@ func reset() -> void:
 	project_name = ""
 	_suppress_self_edit_signals = false
 	has_edits = false
+	TheFluidSimulator.reset()
 	closed.emit()
 
 func is_opened() -> bool:
@@ -268,6 +269,12 @@ func deserialize(data: Dictionary, dir: String) -> void:
 		var wobj = instance_world_obj(ser_obj)
 		if wobj:
 			add_object(wobj)
+		if wobj is Pipe:
+			TheFluidSimulator.add_pipe(wobj)
+	
+	# notify all pipes to restore attachments to their flow sources
+	TheFluidSimulator.initialize_pipe_flow_sources()
+	
 	project_name = _get_project_name(data, dir)
 	_suppress_self_edit_signals = false
 

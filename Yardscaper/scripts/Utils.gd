@@ -111,3 +111,14 @@ func draw_sector(canvas: CanvasItem, center: Vector2, radius: float, angle_from:
 		points.push_back(center + Vector2(cos(angle_point), sin(angle_point)) * radius)
 
 	canvas.draw_polygon(points, [color])
+
+class ClosestPointInfo:
+	var global_position : Vector2 = Vector2()
+	var progress : float = 0.0
+
+func find_closest_point_on_path(path: Path2D, global_point: Vector2) -> ClosestPointInfo:
+	var info := ClosestPointInfo.new()
+	var pos_in_path_space := global_point - path.global_position
+	info.progress = path.curve.get_closest_offset(pos_in_path_space)
+	info.global_position = path.global_position + path.curve.sample_baked(info.progress)
+	return info
