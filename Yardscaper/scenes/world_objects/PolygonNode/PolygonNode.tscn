@@ -63,7 +63,6 @@ curve = SubResource("Curve2D_pxui4")
 visible = false
 normal_type = 0
 hover_type = 2
-show_label_on_hover = false
 
 [node name="CollisionShape2D" parent="PickArea" index="0"]
 shape = null

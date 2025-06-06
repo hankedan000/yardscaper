@@ -4,6 +4,7 @@ class_name WorldObject
 signal property_changed(obj: WorldObject, property_key: StringName, from, to)
 signal picked_state_changed()
 signal moved(obj: WorldObject, from_xy: Vector2, to_xy: Vector2)
+signal undoable_edit(undo_op: UndoController.UndoOperation)
 
 const PROP_KEY_POSITION_FT = &"position_ft"
 const PROP_KEY_USER_LABEL = &"user_label"

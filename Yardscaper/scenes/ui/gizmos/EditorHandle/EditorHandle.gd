@@ -6,6 +6,10 @@ enum HandleType {
 	None, Sharp, Add, ControlAnchor
 }
 
+enum HoverShowType {
+	Disabled, UserId, UserText
+}
+
 @export var SharpHandleTexture : Texture2D = null
 @export var AddHandleTexture : Texture2D = null
 @export var ControlAnchorTexture : Texture2D = null
@@ -21,18 +25,15 @@ enum HandleType {
 	set(value):
 		hover_type = value
 		_set_button_texture(&"texture_hover", value)
-@export var show_label_on_hover : bool = true
+@export var show_on_hover : HoverShowType = HoverShowType.UserId
 
 @onready var tex_button : TextureButton = $TextureButton
-@onready var user_id_label : Label = $UserIdLabel
+@onready var user_label : Label = $UserLabel
 
 # a user-definable identifier
-var user_id : int = 0:
-	set(value):
-		user_id = value
-		if ! is_inside_tree():
-			await ready
-		user_id_label.text = str(user_id)
+var user_id : int = 0
+
+var user_text : String = ""
 
 var modulate_on_hover : Color = Color.WHITE
 
@@ -60,10 +61,22 @@ func _set_button_texture(tex_property: StringName, type: HandleType) -> void:
 
 func _on_texture_button_mouse_entered() -> void:
 	tex_button.modulate = modulate_on_hover
-	if show_label_on_hover:
-		user_id_label.visible = true
+	match show_on_hover:
+		HoverShowType.Disabled:
+			pass # leave visible untouched
+		HoverShowType.UserId:
+			user_label.text = str(user_id)
+			user_label.visible = true
+		HoverShowType.UserText:
+			user_label.text = user_text
+			user_label.visible = true
 
 func _on_texture_button_mouse_exited() -> void:
 	tex_button.modulate = Color.WHITE
-	if show_label_on_hover:
-		user_id_label.visible = false
+	match show_on_hover:
+		HoverShowType.Disabled:
+			pass # leave visible untouched
+		HoverShowType.UserId:
+			user_label.visible = false
+		HoverShowType.UserText:
+			user_label.visible = false

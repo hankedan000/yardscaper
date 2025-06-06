@@ -14,7 +14,7 @@ ControlAnchorTexture = ExtResource("4_pkcr2")
 normal_type = 1
 pressed_type = 0
 hover_type = 0
-show_label_on_hover = true
+show_on_hover = 1
 
 [node name="TextureButton" type="TextureButton" parent="." index="0"]
 offset_left = -8.0
@@ -24,7 +24,7 @@ offset_bottom = 8.0
 texture_normal = ExtResource("2_qgddj")
 stretch_mode = 5
 
-[node name="UserIdLabel" type="Label" parent="." index="1"]
+[node name="UserLabel" type="Label" parent="." index="1"]
 visible = false
 offset_left = -20.0
 offset_top = -30.0

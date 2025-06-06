@@ -8,8 +8,6 @@ enum EditMode {
 	None, Add, Edit, Remove
 }
 
-signal edited(undo_op: UndoController.UndoOperation)
-
 @export var EditorHandleScene : PackedScene = null
 
 @onready var poly             : Polygon2D = $Polygon2D
@@ -295,7 +293,7 @@ func _stop_vertex_movement() -> void:
 	_handle_being_moved = null
 	_is_new_vertex = false
 	set_process_input(false)
-	edited.emit(undo_op)
+	undoable_edit.emit(undo_op)
 
 func _on_property_changed(_obj: WorldObject, property_key: StringName, _from: Variant, _to: Variant) -> void:
 	if is_inside_tree() and property_key == WorldObject.PROP_KEY_USER_LABEL:
@@ -345,7 +343,7 @@ func _on_vertex_handle_button_down(handle: EditorHandle, is_new_vertex: bool) ->
 				handle.user_id,  # idx
 				handle.position) # point
 			remove_point(handle.user_id)
-			edited.emit(undo_op)
+			undoable_edit.emit(undo_op)
 
 # located the next vertex point follow the offset location of the curve.
 # the return index is intended to be used with Curve2D.add_point().
