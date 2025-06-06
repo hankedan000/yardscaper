@@ -71,17 +71,17 @@ var mode = Mode.Idle:
 			world_view.hide_tooltip()
 		match mode:
 			Mode.Idle:
-				Utils.pop_cursor_shape()
+				Globals.pop_cursor_shape()
 			Mode.MovingObjects:
-				Utils.push_cursor_shape(Input.CURSOR_DRAG)
+				Globals.push_cursor_shape(Input.CURSOR_DRAG)
 			Mode.AddSprinkler:
-				Utils.push_cursor_shape(Input.CURSOR_CROSS)
+				Globals.push_cursor_shape(Input.CURSOR_CROSS)
 			Mode.AddDistMeasureA:
-				Utils.push_cursor_shape(Input.CURSOR_CROSS)
+				Globals.push_cursor_shape(Input.CURSOR_CROSS)
 			Mode.AddDistMeasureB:
-				Utils.push_cursor_shape(Input.CURSOR_CROSS)
+				Globals.push_cursor_shape(Input.CURSOR_CROSS)
 			Mode.AddPolygon:
-				Utils.push_cursor_shape(Input.CURSOR_CROSS)
+				Globals.push_cursor_shape(Input.CURSOR_CROSS)
 var sprinkler_to_add : Sprinkler = null
 var dist_meas_to_add : DistanceMeasurement = null
 var poly_to_add : PolygonNode = null
@@ -181,7 +181,7 @@ func stop_batch_edit() -> void:
 func _handle_left_click_release(pos_in_world_px: Vector2):
 	match mode:
 		Mode.Idle:
-			Utils.pop_cursor_shape()
+			Globals.pop_cursor_shape()
 		Mode.MovingObjects:
 			for obj in _selection_controller.selected_objs():
 				obj.finish_move()
@@ -522,9 +522,9 @@ func _on_world_view_gui_input(event: InputEvent):
 					nearest_pickable.hovering = true
 				_hovered_obj = nearest_pickable
 			if nearest_pickable:
-				Utils.push_cursor_shape(Input.CURSOR_POINTING_HAND)
+				Globals.push_cursor_shape(Input.CURSOR_POINTING_HAND)
 			else:
-				Utils.pop_cursor_shape()
+				Globals.pop_cursor_shape()
 		
 		if sprinkler_to_add:
 			sprinkler_to_add.position = pos_in_world_px
@@ -550,16 +550,16 @@ func _on_world_view_gui_input(event: InputEvent):
 					obj.start_move()
 				mode = Mode.MovingObjects
 			elif ! all_movable && selected_objs.size() > 0:
-				Utils.push_cursor_shape(Input.CURSOR_FORBIDDEN)
+				Globals.push_cursor_shape(Input.CURSOR_FORBIDDEN)
 		
 		if mode == Mode.MovingObjects:
 			_handle_held_obj_move(pos_in_world_px)
 
 func _on_viewport_container_pan_state_changed(panning: bool) -> void:
 	if panning:
-		Utils.push_cursor_shape(Input.CURSOR_DRAG)
+		Globals.push_cursor_shape(Input.CURSOR_DRAG)
 	else:
-		Utils.pop_cursor_shape()
+		Globals.pop_cursor_shape()
 
 func _on_position_lock_button_pressed() -> void:
 	for obj in _selection_controller.selected_objs():
