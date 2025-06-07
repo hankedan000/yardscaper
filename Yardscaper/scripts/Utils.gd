@@ -107,3 +107,20 @@ static func find_closest_point_on_path(path: Path2D, global_point: Vector2) -> C
 	info.progress = path.curve.get_closest_offset(pos_in_path_space)
 	info.global_position = path.global_position + path.curve.sample_baked(info.progress)
 	return info
+
+static func find_nearest_baked_point_index(path: Path2D, point: Vector2) -> int:
+	var curve := path.curve
+	if not curve:
+		return -1
+
+	var closest_index := -1
+	var closest_distance := INF
+	var baked_points := curve.get_baked_points()
+
+	for i in baked_points.size():
+		var dist := point.distance_squared_to(baked_points[i])
+		if dist < closest_distance:
+			closest_distance = dist
+			closest_index = i
+
+	return closest_index

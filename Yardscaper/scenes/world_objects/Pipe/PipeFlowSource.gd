@@ -51,6 +51,11 @@ func get_position_info() -> PositionInfo:
 		info.src_pipe_user_label = source_pipe.user_label
 	return info
 
+func get_flow_stats() -> Pipe.FlowStats:
+	if ! source_pipe:
+		return Pipe.FlowStats.new()
+	return source_pipe.get_flow_stats_at_progress(progress)
+
 func is_attached() -> bool:
 	return source_pipe != null
 

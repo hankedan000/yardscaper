@@ -188,6 +188,9 @@ func add_object(obj: WorldObject) -> bool:
 		push_warning("obj '%s' is already added to project. ignoring add." % obj.name)
 		return false
 	
+	if obj is Pipe:
+		TheFluidSimulator.add_pipe(obj)
+	
 	# connect signal handlers
 	obj.property_changed.connect(_on_node_property_changed)
 	obj.moved.connect(_on_node_moved)
@@ -269,8 +272,6 @@ func deserialize(data: Dictionary, dir: String) -> void:
 		var wobj = instance_world_obj(ser_obj)
 		if wobj:
 			add_object(wobj)
-		if wobj is Pipe:
-			TheFluidSimulator.add_pipe(wobj)
 	
 	# notify all pipes to restore attachments to their flow sources
 	TheFluidSimulator.initialize_pipe_flow_sources()

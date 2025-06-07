@@ -1,7 +1,7 @@
 class_name Pipe
 extends DistanceMeasurement
 
-signal flow_source_changed()
+signal needs_rebake()
 
 const PROP_KEY_DIAMETER_INCHES = &'diameter_inches'
 const PROP_KEY_IS_FLOW_SRC = &'is_flow_source'
@@ -48,9 +48,28 @@ var pipe_color : Color = Color.WHITE_SMOKE:
 		if _check_and_emit_prop_change(PROP_KEY_PIPE_COLOR, old_value):
 			queue_redraw()
 
+var show_flow_arrows : bool = false
+var show_pressure_gradient : bool = true
+
 var _sim : FluidSimulator = null
 var _do_default_flow_src_positioning : bool = true
 var _flow_src_pos_info_from_disk : PipeFlowSource.PositionInfo = null
+var _needs_rebake : bool = false
+var _prev_point_a : Vector2 = Vector2()
+var _prev_point_b : Vector2 = Vector2()
+
+# A list of pipes that this pipe provides fluid flow too. The list is ordered
+# based on where the pipe is along our path. Pipes with a progress of 0.0 will
+# be first, and progress of 1.0 will be last.
+var _feed_pipes_by_progress : Array[Pipe] = []
+
+var _q_points : PackedFloat32Array = PackedFloat32Array() # volumetric flow (gal / min)
+var _h_points : PackedFloat32Array = PackedFloat32Array() # pressure (psi)
+var _l_points : PackedFloat32Array = PackedFloat32Array() # length of pipe (inches)
+
+class FlowStats:
+	var q : float = 0.0
+	var h : float = 0.0
 
 func _ready():
 	super._ready()
@@ -82,11 +101,22 @@ func _draw() -> void:
 	if picked or hovering:
 		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
 		draw_line(point_a, point_b, indic_color, diameter_px + (OUTLINE_PX * 2))
-	_update_handles()
-	_update_path()
 	
-	# draw the pipe as line
-	draw_line(point_a, point_b, pipe_color, diameter_px)
+	_update_handles()
+	if _prev_point_a != point_a || _prev_point_b != point_b:
+		_update_path()
+		_prev_point_a = point_a
+		_prev_point_b = point_b
+	
+	# draw the pipe body
+	if show_pressure_gradient && ! _needs_rebake:
+		_draw_gradient_pipe(diameter_px)
+	else:
+		# just show pipe as a simple line
+		draw_line(point_a, point_b, pipe_color, diameter_px)
+	
+	if show_flow_arrows:
+		_draw_flow_arrows()
 	
 	# draw distance label at midpoint of pipe
 	var font : Font = ThemeDB.fallback_font
@@ -102,6 +132,13 @@ func _draw() -> void:
 
 func get_sim() -> FluidSimulator:
 	return _sim
+
+func get_outward_flows() -> Array[PipeFlowSource]:
+	var srcs : Array[PipeFlowSource] = []
+	for child in path.get_children():
+		if child is PipeFlowSource:
+			srcs.append(child)
+	return srcs
 
 func get_subclass() -> String:
 	return "Pipe"
@@ -135,7 +172,87 @@ func init_flow_source(all_pipes: Array[Pipe]) -> void:
 	flow_src.apply_position_info(all_pipes, _flow_src_pos_info_from_disk)
 	_flow_src_pos_info_from_disk = null
 	_do_default_flow_src_positioning = false
+
+func get_feed_pipes_by_progress() -> Array[Pipe]:
+	return _feed_pipes_by_progress.duplicate()
+
+const ARROW_ANGLE_RAD := deg_to_rad(45)
+const ARROW_LENGTH_PX := 4
+const ARROW_WIDTH_PX := 1
+const ARROW_COLOR := Color.AQUA
+func _draw_flow_arrows() -> void:
+	var arrow_base := (point_a - point_b).normalized() * ARROW_LENGTH_PX
+	var flow_arrow_left := arrow_base.rotated(ARROW_ANGLE_RAD)
+	var flow_arrow_right := arrow_base.rotated(-ARROW_ANGLE_RAD)
+	for point in path.curve.get_baked_points():
+		draw_line(point, point + flow_arrow_left, ARROW_COLOR, ARROW_WIDTH_PX)
+		draw_line(point, point + flow_arrow_right, ARROW_COLOR, ARROW_WIDTH_PX)
+
+func get_min_pressure() -> float:
+	if _h_points.size() > 0:
+		return _h_points[-1]
+	return 0.0
+
+func get_max_pressure() -> float:
+	if _h_points.size() > 0:
+		return _h_points[0]
+	return 0.0
+
+func get_flow_stats_at_progress(progress: float) -> FlowStats:
+	var stats_out = FlowStats.new()
+	var point := path.curve.sample_baked(progress)
+	var idx := Utils.find_nearest_baked_point_index(path, point)
+	if idx < 0:
+		push_error("unable to find pressure at point")
+	elif idx >= _h_points.size():
+		push_error("idx extends past end of path _h_points")
+	else:
+		stats_out.q = _q_points[idx]
+		stats_out.h = _h_points[idx]
+	return stats_out
+
+# called by FluidSimulator class when flow sources change
+func rebake() -> void:
+	_needs_rebake = false
+	var baked_points := path.curve.get_baked_points()
+	_q_points.resize(baked_points.size())
+	_h_points.resize(baked_points.size())
+	_l_points.resize(baked_points.size())
 	
+	var src_flow_stats := flow_src.get_flow_stats()
+	var q := src_flow_rate_gpm if is_flow_source else src_flow_stats.q
+	var h := src_pressure_psi if is_flow_source else src_flow_stats.h
+	for idx in range(baked_points.size()):
+		var l_ft := Utils.px_to_ft((baked_points[idx] - point_a).length())
+		_q_points[idx] = q
+		_h_points[idx] = h
+		_l_points[idx] = Utils.ft_to_inches(l_ft)
+		h = max(0.0, h - h * 0.01) # 1% pressure loss for each segment
+	if show_pressure_gradient:
+		queue_redraw()
+
+func queue_rebake() -> void:
+	_needs_rebake = true
+	needs_rebake.emit()
+
+const MIN_GRADIENT_COLOR = Color.BLUE
+const MAX_GRADIENT_COLOR = Color.RED
+func _draw_gradient_pipe(diameter_px: float) -> void:
+	var min_h := _sim.get_system_min_pressure()
+	var h_spread := _sim.get_system_max_pressure() - min_h
+	var baked_points := path.curve.get_baked_points()
+	if baked_points.size() < 2:
+		return
+	
+	var prev_point : Vector2 = baked_points[0]
+	for idx in range(1, baked_points.size()):
+		var curr_point : Vector2 = baked_points[idx]
+		var h_at_point := _h_points[idx]
+		var color_ratio := (h_at_point - min_h) / h_spread
+		var seg_color := MIN_GRADIENT_COLOR.lerp(MAX_GRADIENT_COLOR, color_ratio)
+		draw_line(prev_point, curr_point, seg_color, diameter_px)
+		prev_point = curr_point
+
 func _update_handles() -> void:
 	# call super method that updates point a/b handle positions and visibility
 	super._update_handles()
@@ -157,15 +274,44 @@ func _position_flow_src_near_feed(offset_ft: float) -> void:
 	var offset_vect = pipe_dir * Utils.ft_to_px(offset_ft)
 	flow_src.position = point_a - offset_vect
 
+class CachedProgress:
+	var follow : PathFollow2D = null
+	var progress_ratio : float = 0.0
+	
+	func _init(f: PathFollow2D) -> void:
+		follow = f
+		progress_ratio = f.progress_ratio
+
 func _update_path() -> void:
+	# Store the old progress for PathFollow2D node's that reside on our path.
+	# The engine doesn't update their position when the path is modified.
+	# The fix is in Godot 4.4?? Currently on Godot 4.3 at time of writing this.
+	# https://github.com/godotengine/godot/issues/85813
+	var cache : Array[CachedProgress] = []
+	for child in path.get_children():
+		if child is PathFollow2D:
+			cache.append(CachedProgress.new(child))
 	path.curve.set_point_position(0, point_a)
 	path.curve.set_point_position(1, point_b)
+	for cache_entry in cache:
+		cache_entry.follow.progress_ratio = cache_entry.progress_ratio
+	queue_rebake()
+
+static func _sort_by_ascending_progress(a: Pipe, b: Pipe) -> bool:
+	return a.flow_src.progress < b.flow_src.progress
 
 func _on_flow_source_moved(_old_pos: Vector2, _new_pos: Vector2) -> void:
 	_do_default_flow_src_positioning = false
+	queue_rebake()
 
-func _on_flow_source_attached(_new_src: Pipe) -> void:
-	flow_source_changed.emit()
+func _on_flow_source_attached(new_src: Pipe) -> void:
+	# append ourselves to the new pipe's feed list and resort it
+	new_src._feed_pipes_by_progress.append(self)
+	new_src._feed_pipes_by_progress.sort_custom(_sort_by_ascending_progress)
+	queue_rebake()
 
-func _on_flow_source_dettached(_old_src: Pipe) -> void:
-	flow_source_changed.emit()
+func _on_flow_source_dettached(old_src: Pipe) -> void:
+	# remove ourselves from the old pipe's feed list. no need to resort because
+	# removal of a node should still preserve the ordering.
+	old_src._feed_pipes_by_progress.erase(self)
+	queue_rebake()
