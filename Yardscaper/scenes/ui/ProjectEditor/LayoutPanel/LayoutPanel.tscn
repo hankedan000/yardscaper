@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=27 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/world_objects/Sprinkler/Sprinkler.tscn" id="2_16d6l"]
@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/ui/ProjectEditor/WorldViewportContainer/WorldViewportContainer.tscn" id="9_xrpqu"]
 [ext_resource type="Texture2D" uid="uid://cn15hpoo53btg" path="res://assets/icons/Image.svg" id="10_7tkh4"]
 [ext_resource type="Texture2D" uid="uid://cu32v2mhfe8e5" path="res://assets/icons/Ruler.svg" id="11_6kdtp"]
+[ext_resource type="PackedScene" uid="uid://eve0n62ubtrx" path="res://scenes/ui/ProjectEditor/PipePropertyEditor/PipePropertyEditor.tscn" id="11_bx27v"]
 [ext_resource type="Theme" uid="uid://c42vavmyapxw2" path="res://assets/themes/ToolbarButton.tres" id="11_w0qvw"]
 [ext_resource type="Texture2D" uid="uid://bp0qj22qp5ed7" path="res://assets/icons/PolygonTool.svg" id="12_0ook5"]
 [ext_resource type="Texture2D" uid="uid://dvsonuppgtdb7" path="res://assets/icons/Lock.svg" id="16_0llxi"]
@@ -85,6 +86,10 @@ visible = false
 layout_mode = 2
 
 [node name="PolygonNodePropertiesList" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("7_u58qy")]
+visible = false
+layout_mode = 2
+
+[node name="PipePropertyEditor" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("11_bx27v")]
 visible = false
 layout_mode = 2
 

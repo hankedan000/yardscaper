@@ -70,6 +70,11 @@ func _on_texture_button_mouse_entered() -> void:
 		HoverShowType.UserText:
 			user_label.text = user_text
 			user_label.visible = true
+	
+	# resize the label to fit the text and center it above the handle
+	var new_label_size := Utils.get_label_text_size(user_label, user_label.text)
+	user_label.position.x = new_label_size.x / -2.0
+	user_label.size = new_label_size
 
 func _on_texture_button_mouse_exited() -> void:
 	tex_button.modulate = Color.WHITE
