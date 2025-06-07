@@ -116,39 +116,39 @@ func _apply_prop_edit(prop_name: StringName, new_value: Variant) -> void:
 	_layout_panel.stop_batch_edit()
 
 func _on_user_label_line_edit_text_submitted(new_text):
-	_apply_prop_edit(&"user_label", new_text)
+	_apply_prop_edit(WorldObject.PROP_KEY_USER_LABEL, new_text)
 
 func _on_zone_spin_box_value_changed(value):
-	_apply_prop_edit(&"zone", value)
+	_apply_prop_edit(Sprinkler.PROP_KEY_ZONE, value)
 
 func _on_sweep_spin_box_value_changed(sweep_deg):
-	_apply_prop_edit(&"sweep_deg", sweep_deg)
+	_apply_prop_edit(Sprinkler.PROP_KEY_SWEEP_DEG, sweep_deg)
 
 func _on_rotation_spin_box_value_changed(rot_deg):
-	_apply_prop_edit(&"rotation_degrees", rot_deg)
+	_apply_prop_edit(Sprinkler.PROP_KEY_ROTATION_DEG, rot_deg)
 
 func _on_manufacturer_option_item_selected(index):
 	var manufacturer = manu_option.get_item_text(index)
 	_update_model_options(manufacturer)
-	_apply_prop_edit(&"manufacturer", manufacturer)
+	_apply_prop_edit(Sprinkler.PROP_KEY_MANUFACTURER, manufacturer)
 
 func _on_model_option_item_selected(index):
-	_apply_prop_edit(&"model", model_option.get_item_text(index))
+	_apply_prop_edit(Sprinkler.PROP_KEY_MODEL, model_option.get_item_text(index))
 
 func _on_distance_spin_box_value_changed(value):
-	_apply_prop_edit(&"dist_ft", value)
+	_apply_prop_edit(Sprinkler.PROP_KEY_DIST_FT, value)
 
 func _on_min_distance_spin_box_value_changed(value):
-	_apply_prop_edit(&"min_dist_ft", value)
+	_apply_prop_edit(Sprinkler.PROP_KEY_MIN_DIST_FT, value)
 
 func _on_max_distance_spin_box_value_changed(value):
-	_apply_prop_edit(&"max_dist_ft", value)
+	_apply_prop_edit(Sprinkler.PROP_KEY_MAX_DIST_FT, value)
 
 func _on_sprinkler_property_changed(_obj: WorldObject, _property: StringName, _from: Variant, _to: Variant) -> void:
 	queue_ui_sync()
 
 func _on_body_color_picker_color_changed(color: Color) -> void:
-	_apply_prop_edit(&"body_color", color)
+	_apply_prop_edit(Sprinkler.PROP_KEY_BODY_COLOR, color)
 
 func _on_body_color_picker_pressed() -> void:
 	for s in _sprinklers:

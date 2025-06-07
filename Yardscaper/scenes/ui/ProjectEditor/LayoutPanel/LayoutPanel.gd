@@ -11,6 +11,7 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 @onready var sprink_prop_list         : SprinklerPropertyEditor = $HSplitContainer/LeftPane/Properties/SprinklerPropertiesList
 @onready var img_prop_list            : ImageNodePropertyEditor = $HSplitContainer/LeftPane/Properties/ImageNodePropertiesList
 @onready var poly_prop_list           : PolygonNodePropertyEditor = $HSplitContainer/LeftPane/Properties/PolygonNodePropertiesList
+@onready var pipe_prop_list           : PipePropertyEditor = $HSplitContainer/LeftPane/Properties/PipePropertyEditor
 @onready var objects_list             := $HSplitContainer/LeftPane/Objects
 
 @onready var add_sprink_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler
@@ -125,6 +126,8 @@ func _ready():
 	sprink_prop_list.set_layout_panel(self)
 	img_prop_list.visible = false
 	poly_prop_list.visible = false
+	pipe_prop_list.visible = false
+	pipe_prop_list.set_layout_panel(self)
 	objects_list.world = world_view
 	img_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
 	
@@ -266,6 +269,7 @@ func _update_ui_after_selection_change():
 	sprink_prop_list.hide()
 	img_prop_list.hide()
 	poly_prop_list.hide()
+	pipe_prop_list.hide()
 	curve_edit_buttons.hide()
 	
 	if selected_objs.size() == 0:
@@ -275,24 +279,34 @@ func _update_ui_after_selection_change():
 	var all_images := true
 	var all_distances := true
 	var all_polygons := true
+	var all_pipes := true
 	
 	for obj in selected_objs:
 		if obj is Sprinkler:
 			all_images = false
 			all_distances = false
 			all_polygons = false
+			all_pipes = false
 		elif obj is ImageNode:
 			all_sprinklers = false
+			all_distances = false
+			all_polygons = false
+			all_pipes = false
+		elif obj is Pipe: # test Pipe before DistanceMeasurement because it inherits from it
+			all_sprinklers = false
+			all_images = false
 			all_distances = false
 			all_polygons = false
 		elif obj is DistanceMeasurement:
 			all_sprinklers = false
 			all_images = false
 			all_polygons = false
+			all_pipes = false
 		elif obj is PolygonNode:
 			all_sprinklers = false
 			all_images = false
 			all_distances = false
+			all_pipes = false
 	
 	var is_single_select = selected_objs.size() == 1
 	if all_sprinklers:
@@ -309,6 +323,11 @@ func _update_ui_after_selection_change():
 		poly_prop_list.poly_node = selected_objs[0]
 		poly_prop_list.show()
 		curve_edit_buttons.show()
+	elif all_pipes:
+		pipe_prop_list.clear_pipes()
+		for obj in selected_objs:
+			pipe_prop_list.add_pipe(obj)
+		pipe_prop_list.show()
 
 func _update_position_lock_buttons():
 	var selected_objs := _selection_controller.selected_objs()

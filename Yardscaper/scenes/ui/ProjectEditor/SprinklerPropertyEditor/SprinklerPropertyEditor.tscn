@@ -50,7 +50,7 @@ text = "Zone: "
 [node name="ZoneSpinBox" type="SpinBox" parent="VBoxContainer/SprinklerPropertiesList"]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "User-definable label for this sprinkler"
+tooltip_text = "The watering zone this sprinkler belongs to."
 
 [node name="Label2" type="Label" parent="VBoxContainer/SprinklerPropertiesList"]
 layout_mode = 2

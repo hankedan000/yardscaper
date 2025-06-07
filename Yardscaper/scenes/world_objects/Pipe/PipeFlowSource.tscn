@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://dy0t3omtev6y4" path="res://scenes/ui/gizmos/EditorHandle/EditorHandle.tscn" id="2_3cffy"]
 
 [node name="PipeFlowSource" type="PathFollow2D"]
+rotates = false
 script = ExtResource("1_aftmt")
 
 [node name="EditorHandle" parent="." instance=ExtResource("2_3cffy")]
