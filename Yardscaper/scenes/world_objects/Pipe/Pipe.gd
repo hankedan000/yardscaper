@@ -52,6 +52,8 @@ var _sim : FluidSimulator = null
 var _do_default_flow_src_positioning : bool = true
 var _flow_src_pos_info_from_disk : PipeFlowSource.PositionInfo = null
 
+var _q_points : PackedFloat32Array = PackedFloat32Array()
+
 func _ready():
 	super._ready()
 	color = Color.WHITE
@@ -102,6 +104,13 @@ func _draw() -> void:
 
 func get_sim() -> FluidSimulator:
 	return _sim
+
+func get_outward_flows() -> Array[PipeFlowSource]:
+	var srcs : Array[PipeFlowSource] = []
+	for child in path.get_children():
+		if child is PipeFlowSource:
+			srcs.append(child)
+	return srcs
 
 func get_subclass() -> String:
 	return "Pipe"
