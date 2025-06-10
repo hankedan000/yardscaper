@@ -5,13 +5,13 @@ signal no()
 signal cancel()
 
 func _on_close_requested():
-	cancel.emit()
 	hide()
+	cancel.emit()
 
 func _on_yes_button_pressed() -> void:
-	yes.emit()
 	hide()
+	yes.emit()
 
 func _on_no_button_pressed() -> void:
-	no.emit()
 	hide()
+	no.emit()

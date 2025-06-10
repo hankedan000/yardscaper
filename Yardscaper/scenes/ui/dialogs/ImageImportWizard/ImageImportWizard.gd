@@ -111,8 +111,8 @@ func _calc_img_size_ft(ref_dist_ft: float) -> Vector2:
 		Utils.px_to_ft(_img_original_size_px.y))
 
 func _on_accept_button_pressed() -> void:
-	accepted.emit(_img_path, _calc_img_size_ft(real_dist_spinbox.value))
 	hide()
+	accepted.emit(_img_path, _calc_img_size_ft(real_dist_spinbox.value))
 
 func _on_real_distance_spin_box_value_changed(value: float) -> void:
 	var img_size_ft := _calc_img_size_ft(value)

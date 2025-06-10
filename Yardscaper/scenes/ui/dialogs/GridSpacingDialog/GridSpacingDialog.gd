@@ -19,12 +19,12 @@ func get_major_spacing_ft() -> Vector2:
 	return Vector2(major_x_spinbox.value, major_y_spinbox.value)
 
 func _on_apply_button_pressed() -> void:
-	apply.emit(get_major_spacing_ft())
 	hide()
+	apply.emit(get_major_spacing_ft())
 
 func _on_cancel_button_pressed() -> void:
-	cancel.emit(_orig_major_spacing_ft)
 	hide()
+	cancel.emit(_orig_major_spacing_ft)
 
 func _on_major_x_spin_box_value_changed(_value: float) -> void:
 	spacing_changed.emit(get_major_spacing_ft())

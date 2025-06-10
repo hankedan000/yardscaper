@@ -130,5 +130,5 @@ func _on_cancel_button_pressed() -> void:
 	hide()
 
 func _on_create_button_pressed() -> void:
-	create_requested.emit(project_name_line_edit.text, project_path_line_edit.text)
 	hide()
+	create_requested.emit(project_name_line_edit.text, project_path_line_edit.text)

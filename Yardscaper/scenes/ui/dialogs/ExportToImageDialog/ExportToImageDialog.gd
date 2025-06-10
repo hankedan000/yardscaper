@@ -21,11 +21,11 @@ func _on_export_button_pressed():
 		view_opt = Globals.ViewOptions.Full
 	elif zone_view_button.button_pressed:
 		view_opt = Globals.ViewOptions.Zone
-	
 	var zone = zone_spinbox.value
 	var filename = file_lineedit.text
-	export.emit(view_opt, zone, filename)
+	
 	hide()
+	export.emit(view_opt, zone, filename)
 
 func _on_zone_view_check_box_toggled(toggled_on):
 	zone_selection.visible = toggled_on
