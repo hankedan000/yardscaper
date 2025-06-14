@@ -23,6 +23,8 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 @onready var pos_unlock_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton
 @onready var view_menu_button         := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton
 @onready var obj_view_popupmenu       := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/ObjectsViewPopupMenu
+@onready var pipe_view_popupmenu      := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/PipeViewPopupMenu
+@onready var pipe_colorize_popupmenu  : PopupMenu = $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/PipeColorizePopupMenu
 @onready var grid_view_popupmenu      := $HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/GridViewPopupMenu
 @onready var curve_edit_buttons       := $HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons
 @onready var world_view               : WorldViewportContainer = $HSplitContainer/Layout/WorldView
@@ -45,14 +47,21 @@ enum Mode {
 enum ViewMenuIds {
 	ShowOrigin = 0,
 	Objects = 2,
+	Pipes = 4,
 	Grid = 3
+}
+
+enum PipeViewMenuIds {
+	ShowFlowDirection = 0,
+	Colorize = 1
 }
 
 enum ObjectViewMenuIds {
 	Images = 0,
 	Measurements = 1,
 	Polygons = 2,
-	Sprinklers = 3
+	Sprinklers = 3,
+	Pipes = 4
 }
 
 enum GridViewMenuIds {
@@ -120,6 +129,7 @@ func _ready():
 	TheProject.node_changed.connect(_on_TheProject_node_changed)
 	TheProject.opened.connect(_on_TheProject_opened)
 	TheProject.layout_pref.view_show_state_changed.connect(_on_LayoutPref_view_show_state_changed)
+	TheProject.layout_pref.pipe_colorize_changed.connect(_on_LayoutPref_pipe_colorize_changed)
 	_selection_controller.item_selected.connect(_on_selection_controller_item_selected)
 	_selection_controller.item_deselected.connect(_on_selection_controller_item_deselected)
 	sprink_prop_list.visible = false
@@ -131,21 +141,18 @@ func _ready():
 	objects_list.world = world_view
 	img_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
 	
+	# setup the view MenuButton
 	var view_popup := view_menu_button.get_popup() as PopupMenu
 	view_popup.hide_on_checkable_item_selection = false
 	obj_view_popupmenu.hide_on_checkable_item_selection = false
+	pipe_view_popupmenu.hide_on_checkable_item_selection = false
+	pipe_colorize_popupmenu.hide_on_checkable_item_selection = false
 	grid_view_popupmenu.hide_on_checkable_item_selection = false
 	view_popup.id_pressed.connect(_on_view_menu_id_pressed)
-	# reparent the object view PopupMenu into the View MenuButton
-	obj_view_popupmenu.get_parent().remove_child(obj_view_popupmenu)
-	view_popup.set_item_submenu_node(
-		view_popup.get_item_index(ViewMenuIds.Objects),
-		obj_view_popupmenu)
-	# reparent the grid view PopupMenu into the View MenuButton
-	grid_view_popupmenu.get_parent().remove_child(grid_view_popupmenu)
-	view_popup.set_item_submenu_node(
-		view_popup.get_item_index(ViewMenuIds.Grid),
-		grid_view_popupmenu)
+	Utils.reparent_as_submenu(obj_view_popupmenu, view_popup, ViewMenuIds.Objects)
+	Utils.reparent_as_submenu(pipe_view_popupmenu, view_popup, ViewMenuIds.Pipes)
+	Utils.reparent_as_submenu(pipe_colorize_popupmenu, pipe_view_popupmenu, PipeViewMenuIds.Colorize)
+	Utils.reparent_as_submenu(grid_view_popupmenu, view_popup, ViewMenuIds.Grid)
 	
 	# add shortcuts
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
@@ -441,12 +448,16 @@ func _on_TheProject_opened():
 	
 	# restore "View" options
 	var view_popup := view_menu_button.get_popup() as PopupMenu
-	Utils.set_item_checked_by_id(view_popup, ViewMenuIds.ShowOrigin, TheProject.layout_pref.show_origin)
-	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Images, TheProject.layout_pref.show_images)
-	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Measurements, TheProject.layout_pref.show_measurements)
-	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Polygons, TheProject.layout_pref.show_polygons)
-	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Sprinklers, TheProject.layout_pref.show_sprinklers)
-	Utils.set_item_checked_by_id(grid_view_popupmenu, GridViewMenuIds.ShowGrid, TheProject.layout_pref.show_grid)
+	var layout_prefs := TheProject.layout_pref
+	Utils.set_item_checked_by_id(view_popup, ViewMenuIds.ShowOrigin, layout_prefs.show_origin)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Images, layout_prefs.show_images)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Measurements, layout_prefs.show_measurements)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Polygons, layout_prefs.show_polygons)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Sprinklers, layout_prefs.show_sprinklers)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Pipes, layout_prefs.show_pipes)
+	Utils.set_item_checked_by_id(pipe_view_popupmenu, PipeViewMenuIds.ShowFlowDirection, layout_prefs.show_pipe_flow_direction)
+	Utils.set_item_checked_by_id(pipe_colorize_popupmenu, int(layout_prefs.pipe_colorize), true)
+	Utils.set_item_checked_by_id(grid_view_popupmenu, GridViewMenuIds.ShowGrid, layout_prefs.show_grid)
 	
 	# restore world view preferences
 	world_view.show_grid = TheProject.layout_pref.show_grid
@@ -456,7 +467,7 @@ func _on_TheProject_opened():
 	world_view.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.layout_pref.zoom
 	world_view._on_pan_zoom_controller_zoom_changed(1.0, TheProject.layout_pref.zoom)
 
-func _on_LayoutPref_view_show_state_changed(property: StringName, new_value: bool):
+func _on_LayoutPref_view_show_state_changed(property: StringName, new_value: bool) -> void:
 	match property:
 		LayoutPreferences.PROP_KEY_SHOW_GRID:
 			world_view.show_grid = new_value
@@ -468,7 +479,9 @@ func _on_LayoutPref_view_show_state_changed(property: StringName, new_value: boo
 					obj.visible = new_value
 		LayoutPreferences.PROP_KEY_SHOW_MEASUREMENTS:
 			for obj in world_view.objects.get_children():
-				if obj is DistanceMeasurement:
+				if obj is Pipe:
+					pass # Pipes inherit from DistanceMeasurement, so ignore
+				elif obj is DistanceMeasurement:
 					obj.visible = new_value
 		LayoutPreferences.PROP_KEY_SHOW_POLYGONS:
 			for obj in world_view.objects.get_children():
@@ -478,8 +491,21 @@ func _on_LayoutPref_view_show_state_changed(property: StringName, new_value: boo
 			for obj in world_view.objects.get_children():
 				if obj is Sprinkler:
 					obj.visible = new_value
+		LayoutPreferences.PROP_KEY_SHOW_PIPES:
+			for obj in world_view.objects.get_children():
+				if obj is Pipe:
+					obj.visible = new_value
+		LayoutPreferences.PROP_KEY_SHOW_PIPE_FLOW_DIRECTION:
+			for obj in world_view.objects.get_children():
+				if obj is Pipe:
+					obj.show_flow_arrows = new_value
 
-func _on_img_dialog_file_selected(path):
+func _on_LayoutPref_pipe_colorize_changed(colorize: Pipe.Colorize) -> void:
+	for obj in world_view.objects.get_children():
+		if obj is Pipe:
+			obj.colorize = colorize
+
+func _on_img_dialog_file_selected(path) -> void:
 	if img_import_wizard.load_img(path):
 		img_import_wizard.popup_centered()
 
@@ -608,6 +634,26 @@ func _on_view_menu_id_pressed(id: int) -> void:
 			world_view.show_origin = is_checked
 			TheProject.layout_pref.show_origin = is_checked
 
+func _on_pipe_view_popup_menu_id_pressed(id: int) -> void:
+	var idx := pipe_view_popupmenu.get_item_index(id) as int
+	# toggle checked state if item is checkable
+	if pipe_view_popupmenu.is_item_checkable(idx):
+		pipe_view_popupmenu.toggle_item_checked(idx)
+	
+	var is_checked := pipe_view_popupmenu.is_item_checked(idx) as bool
+	match id:
+		PipeViewMenuIds.ShowFlowDirection:
+			TheProject.layout_pref.show_pipe_flow_direction = is_checked
+
+func _on_pipe_colorize_popup_menu_id_pressed(id: int) -> void:
+	for item_idx in range(pipe_colorize_popupmenu.item_count):
+		pipe_colorize_popupmenu.set_item_checked(item_idx, false)
+	var idx := pipe_colorize_popupmenu.get_item_index(id) as int
+	pipe_colorize_popupmenu.toggle_item_checked(idx)
+	
+	TheProject.layout_pref.pipe_colorize =  id as Pipe.Colorize
+	
+
 func _on_objects_view_popup_menu_id_pressed(id: int) -> void:
 	var idx := obj_view_popupmenu.get_item_index(id) as int
 	# toggle checked state if item is checkable
@@ -624,6 +670,8 @@ func _on_objects_view_popup_menu_id_pressed(id: int) -> void:
 			TheProject.layout_pref.show_polygons = is_checked
 		ObjectViewMenuIds.Sprinklers:
 			TheProject.layout_pref.show_sprinklers = is_checked
+		ObjectViewMenuIds.Pipes:
+			TheProject.layout_pref.show_pipes = is_checked
 
 func _on_grid_view_popup_menu_id_pressed(id: int) -> void:
 	var idx := grid_view_popupmenu.get_item_index(id) as int

@@ -124,3 +124,11 @@ static func find_nearest_baked_point_index(path: Path2D, point: Vector2) -> int:
 			closest_index = i
 
 	return closest_index
+
+static func reparent_as_submenu(menu: PopupMenu, new_parent_menu: PopupMenu, new_parent_item_id: int) -> void:
+	var item_index := new_parent_menu.get_item_index(new_parent_item_id)
+	if item_index < 0:
+		push_error("couldn't find item_index for item_id %d" % new_parent_item_id)
+		return
+	menu.get_parent().remove_child(menu)
+	new_parent_menu.set_item_submenu_node(item_index, menu)

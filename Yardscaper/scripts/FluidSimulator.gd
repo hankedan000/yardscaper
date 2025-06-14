@@ -4,6 +4,8 @@ extends Node
 var _all_pipes : Array[Pipe] = []
 var _cached_min_pressure : float = 0.0
 var _cached_max_pressure : float = 0.0
+var _cached_min_flow : float = 0.0
+var _cached_max_flow : float = 0.0
 var _sim_cycle : int = 0 # count the # of simulation cycles the engine has ran
 
 func _ready() -> void:
@@ -17,8 +19,10 @@ func _process(_delta: float) -> void:
 	_sim_cycle += 1
 	print("=========== SIM CYCLE %d ===========" % [_sim_cycle])
 	
-	_cached_max_pressure = -100000.0
-	_cached_min_pressure =  100000.0
+	_cached_max_pressure = -INF
+	_cached_min_pressure =  INF
+	_cached_max_flow = -INF
+	_cached_min_flow =  INF
 	for pipe in _all_pipes:
 		if pipe.is_flow_source:
 			_bake_pipe(pipe)
@@ -30,6 +34,8 @@ func _bake_pipe(pipe: Pipe) -> void:
 	pipe.rebake()
 	_cached_min_pressure = min(_cached_min_pressure, pipe.get_min_pressure())
 	_cached_max_pressure = max(_cached_max_pressure, pipe.get_max_pressure())
+	_cached_min_flow = min(_cached_min_flow, pipe.get_min_flow())
+	_cached_max_flow = max(_cached_max_flow, pipe.get_max_flow())
 	for feed_pipe in pipe.get_feed_pipes_by_progress():
 		_bake_pipe(feed_pipe)
 
@@ -63,6 +69,12 @@ func get_system_min_pressure() -> float:
 
 func get_system_max_pressure() -> float:
 	return _cached_max_pressure
+
+func get_system_min_flow() -> float:
+	return _cached_min_flow
+
+func get_system_max_flow() -> float:
+	return _cached_max_flow
 
 func queue_recalc() -> void:
 	set_process(true)

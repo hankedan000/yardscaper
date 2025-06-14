@@ -10,6 +10,12 @@ const PROP_KEY_SRC_FLOW_RATE_GPM = &'src_flow_rate_gpm'
 const PROP_KEY_PIPE_COLOR = &'pipe_color'
 const PROP_KEY_FLOW_SRC_POS_INFO = &'flow_src_pos_info'
 
+enum Colorize {
+	Normal = 0,
+	Pressure = 1,
+	FlowRate = 2
+}
+
 @onready var path : Path2D = $Path2D
 @onready var flow_src : PipeFlowSource = $FlowSource
 
@@ -48,8 +54,19 @@ var pipe_color : Color = Color.WHITE_SMOKE:
 		if _check_and_emit_prop_change(PROP_KEY_PIPE_COLOR, old_value):
 			queue_redraw()
 
-var show_flow_arrows : bool = false
-var show_pressure_gradient : bool = true
+var show_flow_arrows : bool = false:
+	set(value):
+		if show_flow_arrows == value:
+			return
+		show_flow_arrows = value
+		queue_redraw()
+
+var colorize : Colorize = Colorize.Normal:
+	set(value):
+		if colorize == value:
+			return
+		colorize = value
+		queue_redraw()
 
 var _sim : FluidSimulator = null
 var _do_default_flow_src_positioning : bool = true
@@ -109,8 +126,8 @@ func _draw() -> void:
 		_prev_point_b = point_b
 	
 	# draw the pipe body
-	if show_pressure_gradient && ! _needs_rebake:
-		_draw_gradient_pipe(diameter_px)
+	if ! _needs_rebake && colorize != Colorize.Normal:
+		_draw_colorized_pipe(diameter_px)
 	else:
 		# just show pipe as a simple line
 		draw_line(point_a, point_b, pipe_color, diameter_px)
@@ -198,6 +215,16 @@ func get_max_pressure() -> float:
 		return _h_points[0]
 	return 0.0
 
+func get_min_flow() -> float:
+	if _q_points.size() > 0:
+		return _q_points[-1]
+	return 0.0
+
+func get_max_flow() -> float:
+	if _q_points.size() > 0:
+		return _q_points[0]
+	return 0.0
+
 func get_flow_stats_at_progress(progress: float) -> FlowStats:
 	var stats_out = FlowStats.new()
 	var point := path.curve.sample_baked(progress)
@@ -228,27 +255,46 @@ func rebake() -> void:
 		_h_points[idx] = h
 		_l_points[idx] = Utils.ft_to_inches(l_ft)
 		h = max(0.0, h - h * 0.01) # 1% pressure loss for each segment
-	if show_pressure_gradient:
+	if colorize != Colorize.Normal:
 		queue_redraw()
 
 func queue_rebake() -> void:
 	_needs_rebake = true
 	needs_rebake.emit()
 
+func _draw_colorized_pipe(diameter_px: float) -> void:
+	var min_value : float = 0.0
+	var value_spread : float = 0.0
+	var values = null
+	match colorize:
+		Colorize.Pressure:
+			min_value = _sim.get_system_min_pressure()
+			value_spread = _sim.get_system_max_pressure() - min_value
+			values = _h_points
+		Colorize.FlowRate:
+			min_value = _sim.get_system_min_flow()
+			value_spread = _sim.get_system_max_flow() - min_value
+			values = _q_points
+	
+	_draw_gradient_pipe(min_value, value_spread, values, diameter_px)
+
 const MIN_GRADIENT_COLOR = Color.BLUE
 const MAX_GRADIENT_COLOR = Color.RED
-func _draw_gradient_pipe(diameter_px: float) -> void:
-	var min_h := _sim.get_system_min_pressure()
-	var h_spread := _sim.get_system_max_pressure() - min_h
+func _draw_gradient_pipe(min_value: float, value_spread: float, values: PackedFloat32Array, diameter_px: float) -> void:
 	var baked_points := path.curve.get_baked_points()
 	if baked_points.size() < 2:
+		return
+	
+	# avoid divide by zero in color_ratio calculation and just draw line
+	if abs(value_spread) < 0.000000001:
+		draw_line(point_a, point_b, MAX_GRADIENT_COLOR, diameter_px)
 		return
 	
 	var prev_point : Vector2 = baked_points[0]
 	for idx in range(1, baked_points.size()):
 		var curr_point : Vector2 = baked_points[idx]
-		var h_at_point := _h_points[idx]
-		var color_ratio := (h_at_point - min_h) / h_spread
+		var value_at_point := values[idx]
+		var color_ratio := (value_at_point - min_value) / value_spread
 		var seg_color := MIN_GRADIENT_COLOR.lerp(MAX_GRADIENT_COLOR, color_ratio)
 		draw_line(prev_point, curr_point, seg_color, diameter_px)
 		prev_point = curr_point

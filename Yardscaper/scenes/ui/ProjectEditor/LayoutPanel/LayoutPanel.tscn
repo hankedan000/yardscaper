@@ -192,33 +192,62 @@ layout_mode = 2
 [node name="ViewMenuButton" type="MenuButton" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 layout_mode = 2
 text = "View"
-item_count = 3
+item_count = 4
 popup/item_0/text = "Show Origin"
 popup/item_0/checkable = 1
 popup/item_0/checked = true
-popup/item_1/text = "Objects"
+popup/item_1/text = "Object Visibility"
 popup/item_1/id = 2
-popup/item_2/text = "Grid"
-popup/item_2/id = 3
+popup/item_2/text = "Pipes"
+popup/item_2/id = 4
+popup/item_3/text = "Grid"
+popup/item_3/id = 3
 
 [node name="ObjectsViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
 size = Vector2i(173, 116)
-item_count = 4
-item_0/text = "Images"
+item_count = 5
+item_0/text = "Sprinklers"
 item_0/checkable = 1
 item_0/checked = true
-item_1/text = "Measurements"
+item_0/id = 3
+item_1/text = "Pipes"
 item_1/checkable = 1
 item_1/checked = true
-item_1/id = 1
-item_2/text = "Polygons"
+item_1/id = 4
+item_2/text = "Images"
 item_2/checkable = 1
 item_2/checked = true
 item_2/id = 2
-item_3/text = "Sprinklers"
+item_3/text = "Measurements"
 item_3/checkable = 1
 item_3/checked = true
-item_3/id = 3
+item_3/id = 1
+item_4/text = "Polygons"
+item_4/checkable = 1
+item_4/checked = true
+item_4/id = 2
+
+[node name="PipeViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
+auto_translate_mode = 1
+size = Vector2i(173, 116)
+item_count = 2
+item_0/text = "Show Flow Direction"
+item_0/checkable = 1
+item_1/text = "Colorize"
+item_1/id = 1
+
+[node name="PipeColorizePopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
+auto_translate_mode = 1
+size = Vector2i(173, 116)
+item_count = 3
+item_0/text = "Normal"
+item_0/checkable = 2
+item_1/text = "By pressure"
+item_1/checkable = 2
+item_1/id = 1
+item_2/text = "By flow rate"
+item_2/checkable = 2
+item_2/id = 2
 
 [node name="GridViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
 size = Vector2i(162, 100)
@@ -288,6 +317,8 @@ size_flags_vertical = 3
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionLockButton" to="." method="_on_position_lock_button_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton" to="." method="_on_position_unlock_button_pressed"]
 [connection signal="id_pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/ObjectsViewPopupMenu" to="." method="_on_objects_view_popup_menu_id_pressed"]
+[connection signal="id_pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/PipeViewPopupMenu" to="." method="_on_pipe_view_popup_menu_id_pressed"]
+[connection signal="id_pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/PipeColorizePopupMenu" to="." method="_on_pipe_colorize_popup_menu_id_pressed"]
 [connection signal="id_pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton/GridViewPopupMenu" to="." method="_on_grid_view_popup_menu_id_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons/CurveCreateButton" to="." method="_on_curve_create_button_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons/CurveEditButton" to="." method="_on_curve_edit_button_pressed"]
