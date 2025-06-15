@@ -10,6 +10,8 @@ const PROP_KEY_SRC_FLOW_RATE_GPM = &'src_flow_rate_gpm'
 const PROP_KEY_PIPE_COLOR = &'pipe_color'
 const PROP_KEY_FLOW_SRC_POS_INFO = &'flow_src_pos_info'
 
+const PVC_SPECIFIC_ROUGHNESS_FT := 0.000005
+
 enum Colorize {
 	Normal = 0,
 	Pressure = 1,
@@ -54,6 +56,9 @@ var pipe_color : Color = Color.WHITE_SMOKE:
 		if _check_and_emit_prop_change(PROP_KEY_PIPE_COLOR, old_value):
 			queue_redraw()
 
+# pipe material's specific roughness in ft
+var specific_roughness_ft : float = PVC_SPECIFIC_ROUGHNESS_FT
+
 var show_flow_arrows : bool = false:
 	set(value):
 		if show_flow_arrows == value:
@@ -80,13 +85,12 @@ var _prev_point_b : Vector2 = Vector2()
 # be first, and progress of 1.0 will be last.
 var _feed_pipes_by_progress : Array[Pipe] = []
 
-var _q_points : PackedFloat32Array = PackedFloat32Array() # volumetric flow (gal / min)
-var _h_points : PackedFloat32Array = PackedFloat32Array() # pressure (psi)
-var _l_points : PackedFloat32Array = PackedFloat32Array() # length of pipe (inches)
+var _q_points : PackedFloat32Array = PackedFloat32Array() # volumetric flow (ft^3/s)
+var _p_points : PackedFloat32Array = PackedFloat32Array() # pressure (lb/ft^2)
 
 class FlowStats:
-	var q : float = 0.0
-	var h : float = 0.0
+	var q : float = 0.0 # flow rate (ft^3/s)
+	var p : float = 0.0 # pressure (lb/ft^2)
 
 func _ready():
 	super._ready()
@@ -205,21 +209,25 @@ func _draw_flow_arrows() -> void:
 		draw_line(point, point + flow_arrow_left, ARROW_COLOR, ARROW_WIDTH_PX)
 		draw_line(point, point + flow_arrow_right, ARROW_COLOR, ARROW_WIDTH_PX)
 
+# @return pressure in lb/ft^2
 func get_min_pressure() -> float:
-	if _h_points.size() > 0:
-		return _h_points[-1]
+	if _p_points.size() > 0:
+		return _p_points[-1]
 	return 0.0
 
+# @return pressure in lb/ft^2
 func get_max_pressure() -> float:
-	if _h_points.size() > 0:
-		return _h_points[0]
+	if _p_points.size() > 0:
+		return _p_points[0]
 	return 0.0
 
+# @return flow rate in ft^3/s
 func get_min_flow() -> float:
 	if _q_points.size() > 0:
 		return _q_points[-1]
 	return 0.0
 
+# @return flow rate in ft^3/s
 func get_max_flow() -> float:
 	if _q_points.size() > 0:
 		return _q_points[0]
@@ -231,30 +239,45 @@ func get_flow_stats_at_progress(progress: float) -> FlowStats:
 	var idx := Utils.find_nearest_baked_point_index(path, point)
 	if idx < 0:
 		push_error("unable to find pressure at point")
-	elif idx >= _h_points.size():
-		push_error("idx extends past end of path _h_points")
+	elif idx >= _p_points.size():
+		push_error("idx extends past end of path _p_points")
 	else:
 		stats_out.q = _q_points[idx]
-		stats_out.h = _h_points[idx]
+		stats_out.p = _p_points[idx]
 	return stats_out
+
+# @return hydraulic diamter in ft
+func get_diam_h() -> float:
+	return Utils.inches_to_ft(diameter_inches)
+
+# @return hydaulic cross sectional area in ft^2
+func get_area_h() -> float:
+	return Math.area_circle(get_diam_h())
 
 # called by FluidSimulator class when flow sources change
 func rebake() -> void:
 	_needs_rebake = false
 	var baked_points := path.curve.get_baked_points()
 	_q_points.resize(baked_points.size())
-	_h_points.resize(baked_points.size())
-	_l_points.resize(baked_points.size())
+	_p_points.resize(baked_points.size())
 	
 	var src_flow_stats := flow_src.get_flow_stats()
-	var q := src_flow_rate_gpm if is_flow_source else src_flow_stats.q
-	var h := src_pressure_psi if is_flow_source else src_flow_stats.h
+	var q := Utils.gpm_to_cftps(src_flow_rate_gpm) if is_flow_source else src_flow_stats.q
+	var p := Utils.psi_to_psft(src_pressure_psi) if is_flow_source else src_flow_stats.p
+	var diam_h := get_diam_h()
+	var area_h := get_area_h()
+	var prev_point := point_a
 	for idx in range(baked_points.size()):
-		var l_ft := Utils.px_to_ft((baked_points[idx] - point_a).length())
+		var curr_point := baked_points[idx]
+		var l_ft := Utils.px_to_ft((curr_point - prev_point).length())
 		_q_points[idx] = q
-		_h_points[idx] = h
-		_l_points[idx] = Utils.ft_to_inches(l_ft)
-		h = max(0.0, h - h * 0.01) # 1% pressure loss for each segment
+		_p_points[idx] = p
+		var v := q / area_h # velocity
+		var Re := FluidMath.reynolds(v, diam_h, FluidMath.WATER_VISCOCITY_K)
+		var f_darcy := FluidMath.f_darcy(Re, specific_roughness_ft)
+		var major_loss := FluidMath.major_loss(f_darcy, l_ft, v, FluidMath.WATER_DENSITY, diam_h)
+		p = max(0.0, p - major_loss)
+		prev_point = curr_point
 	if colorize != Colorize.Normal:
 		queue_redraw()
 
@@ -270,7 +293,7 @@ func _draw_colorized_pipe(diameter_px: float) -> void:
 		Colorize.Pressure:
 			min_value = _sim.get_system_min_pressure()
 			value_spread = _sim.get_system_max_pressure() - min_value
-			values = _h_points
+			values = _p_points
 		Colorize.FlowRate:
 			min_value = _sim.get_system_min_flow()
 			value_spread = _sim.get_system_max_flow() - min_value

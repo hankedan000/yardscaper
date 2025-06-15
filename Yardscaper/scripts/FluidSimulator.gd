@@ -9,6 +9,11 @@ var _cached_max_flow : float = 0.0
 var _sim_cycle : int = 0 # count the # of simulation cycles the engine has ran
 
 func _ready() -> void:
+	var diam_h = Utils.inches_to_ft(0.75)
+	var velocity = Utils.gpm_to_cftps(50.0) / Math.area_circle(diam_h)
+	print("velocity: %f (ft/s)" % [velocity])
+	var Re := FluidMath.reynolds(velocity, diam_h, FluidMath.WATER_VISCOCITY_K)
+	print("Re: %f" % [Re])
 	set_process(false)
 
 func _process(_delta: float) -> void:
@@ -27,11 +32,17 @@ func _process(_delta: float) -> void:
 		if pipe.is_flow_source:
 			_bake_pipe(pipe)
 	
+	print("system pressure min/max: %f/%f (psi)" %
+		[Utils.psft_to_psi(_cached_min_pressure), Utils.psft_to_psi(_cached_max_pressure)])
+	print("system flow min/max: %f/%f (gpm)" %
+		[Utils.cftps_to_gpm(_cached_min_flow), Utils.cftps_to_gpm(_cached_max_flow)])
 	set_process(false)
 
 func _bake_pipe(pipe: Pipe) -> void:
 	print("baking %s ..." % pipe.user_label)
 	pipe.rebake()
+	print("min/max pressure: %f/%f (psi)" %
+		[Utils.psft_to_psi(pipe.get_min_pressure()), Utils.psft_to_psi(pipe.get_max_pressure())])
 	_cached_min_pressure = min(_cached_min_pressure, pipe.get_min_pressure())
 	_cached_max_pressure = max(_cached_max_pressure, pipe.get_max_pressure())
 	_cached_min_flow = min(_cached_min_flow, pipe.get_min_flow())

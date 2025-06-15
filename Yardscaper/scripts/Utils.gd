@@ -3,6 +3,8 @@ extends Object
 
 const PX_PER_FT : float = 12.0 # 1px per inch
 const INCHES_PER_FT : float = 12.0
+const CFTPS_PER_GPM : float = 0.0022280092365745
+const SQINCH_PER_SQFT : float = 144.0
 
 static func ft_to_inches(ft: float) -> float:
 	return ft * INCHES_PER_FT
@@ -21,6 +23,22 @@ static func ft_to_px_vec(ft: Vector2) -> Vector2:
 
 static func px_to_ft_vec(px: Vector2) -> Vector2:
 	return Vector2(px_to_ft(px.x), px_to_ft(px.y))
+
+# US gallons per minute to cubic ft per second
+static func gpm_to_cftps(gpm: float) -> float:
+	return gpm * CFTPS_PER_GPM
+
+# cubic ft per second to US gallons per minute
+static func cftps_to_gpm(cftps: float) -> float:
+	return cftps / CFTPS_PER_GPM
+
+# pounds per square inch to pounds per square ft
+static func psi_to_psft(psi: float) -> float:
+	return psi * SQINCH_PER_SQFT
+
+# pounds per square ft to pounds per square inch
+static func psft_to_psi(psft: float) -> float:
+	return psft / SQINCH_PER_SQFT
 
 static func pretty_dist(dist_ft: float) -> String:
 	# round dist_ft to nearest inch
