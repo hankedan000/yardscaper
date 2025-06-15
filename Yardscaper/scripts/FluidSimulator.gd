@@ -9,11 +9,6 @@ var _cached_max_flow : float = 0.0
 var _sim_cycle : int = 0 # count the # of simulation cycles the engine has ran
 
 func _ready() -> void:
-	var diam_h = Utils.inches_to_ft(0.75)
-	var velocity = Utils.gpm_to_cftps(50.0) / Math.area_circle(diam_h)
-	print("velocity: %f (ft/s)" % [velocity])
-	var Re := FluidMath.reynolds(velocity, diam_h, FluidMath.WATER_VISCOCITY_K)
-	print("Re: %f" % [Re])
 	set_process(false)
 
 func _process(_delta: float) -> void:

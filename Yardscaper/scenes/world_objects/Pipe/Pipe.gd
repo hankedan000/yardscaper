@@ -10,7 +10,7 @@ const PROP_KEY_SRC_FLOW_RATE_GPM = &'src_flow_rate_gpm'
 const PROP_KEY_PIPE_COLOR = &'pipe_color'
 const PROP_KEY_FLOW_SRC_POS_INFO = &'flow_src_pos_info'
 
-const PVC_SPECIFIC_ROUGHNESS_FT := 0.000005
+const PVC_SURFACE_ROUGHNESS_FT := 0.000005
 
 enum Colorize {
 	Normal = 0,
@@ -57,7 +57,7 @@ var pipe_color : Color = Color.WHITE_SMOKE:
 			queue_redraw()
 
 # pipe material's specific roughness in ft
-var specific_roughness_ft : float = PVC_SPECIFIC_ROUGHNESS_FT
+var surface_roughness_ft : float = PVC_SURFACE_ROUGHNESS_FT
 
 var show_flow_arrows : bool = false:
 	set(value):
@@ -254,6 +254,10 @@ func get_diam_h() -> float:
 func get_area_h() -> float:
 	return Math.area_circle(get_diam_h())
 
+# @return relative roughness k/D
+func get_relative_roughness() -> float:
+	return surface_roughness_ft / get_diam_h()
+
 # called by FluidSimulator class when flow sources change
 func rebake() -> void:
 	_needs_rebake = false
@@ -267,6 +271,7 @@ func rebake() -> void:
 	var diam_h := get_diam_h()
 	var area_h := get_area_h()
 	var prev_point := point_a
+	var rel_roughness := get_relative_roughness()
 	for idx in range(baked_points.size()):
 		var curr_point := baked_points[idx]
 		var l_ft := Utils.px_to_ft((curr_point - prev_point).length())
@@ -274,7 +279,7 @@ func rebake() -> void:
 		_p_points[idx] = p
 		var v := q / area_h # velocity
 		var Re := FluidMath.reynolds(v, diam_h, FluidMath.WATER_VISCOCITY_K)
-		var f_darcy := FluidMath.f_darcy(Re, specific_roughness_ft)
+		var f_darcy := FluidMath.f_darcy(Re, rel_roughness)
 		var major_loss := FluidMath.major_loss(f_darcy, l_ft, v, FluidMath.WATER_DENSITY, diam_h)
 		p = max(0.0, p - major_loss)
 		prev_point = curr_point
