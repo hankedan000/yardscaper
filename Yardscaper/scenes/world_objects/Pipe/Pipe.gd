@@ -27,6 +27,7 @@ var diameter_inches : float = 0.75:
 		diameter_inches = value
 		if _check_and_emit_prop_change(PROP_KEY_DIAMETER_INCHES, old_value):
 			queue_redraw()
+			queue_rebake()
 
 var is_flow_source : bool = false:
 	set(value):
@@ -34,6 +35,7 @@ var is_flow_source : bool = false:
 		is_flow_source = value
 		if _check_and_emit_prop_change(PROP_KEY_IS_FLOW_SRC, old_value):
 			queue_redraw()
+			queue_rebake()
 
 var src_pressure_psi : float = 60.0:
 	set(value):
@@ -41,6 +43,7 @@ var src_pressure_psi : float = 60.0:
 		src_pressure_psi = value
 		if _check_and_emit_prop_change(PROP_KEY_SRC_PRESSURE_PSI, old_value):
 			queue_redraw()
+			queue_rebake()
 
 var src_flow_rate_gpm : float = 50.0:
 	set(value):
@@ -48,6 +51,7 @@ var src_flow_rate_gpm : float = 50.0:
 		src_flow_rate_gpm = value
 		if _check_and_emit_prop_change(PROP_KEY_SRC_FLOW_RATE_GPM, old_value):
 			queue_redraw()
+			queue_rebake()
 
 var pipe_color : Color = Color.WHITE_SMOKE:
 	set(value):
@@ -124,10 +128,7 @@ func _draw() -> void:
 		draw_line(point_a, point_b, indic_color, diameter_px + (OUTLINE_PX * 2))
 	
 	_update_handles()
-	if _prev_point_a != point_a || _prev_point_b != point_b:
-		_update_path()
-		_prev_point_a = point_a
-		_prev_point_b = point_b
+	_check_and_update_path()
 	
 	# draw the pipe body
 	if ! _needs_rebake && colorize != Colorize.Normal:
@@ -160,6 +161,9 @@ func get_outward_flows() -> Array[PipeFlowSource]:
 		if child is PipeFlowSource:
 			srcs.append(child)
 	return srcs
+
+func is_rebake_needed() -> bool:
+	return _needs_rebake
 
 func get_subclass() -> String:
 	return "Pipe"
@@ -196,18 +200,6 @@ func init_flow_source(all_pipes: Array[Pipe]) -> void:
 
 func get_feed_pipes_by_progress() -> Array[Pipe]:
 	return _feed_pipes_by_progress.duplicate()
-
-const ARROW_ANGLE_RAD := deg_to_rad(45)
-const ARROW_LENGTH_PX := 4
-const ARROW_WIDTH_PX := 1
-const ARROW_COLOR := Color.AQUA
-func _draw_flow_arrows() -> void:
-	var arrow_base := (point_a - point_b).normalized() * ARROW_LENGTH_PX
-	var flow_arrow_left := arrow_base.rotated(ARROW_ANGLE_RAD)
-	var flow_arrow_right := arrow_base.rotated(-ARROW_ANGLE_RAD)
-	for point in path.curve.get_baked_points():
-		draw_line(point, point + flow_arrow_left, ARROW_COLOR, ARROW_WIDTH_PX)
-		draw_line(point, point + flow_arrow_right, ARROW_COLOR, ARROW_WIDTH_PX)
 
 # @return pressure in lb/ft^2
 func get_min_pressure() -> float:
@@ -260,6 +252,7 @@ func get_relative_roughness() -> float:
 
 # called by FluidSimulator class when flow sources change
 func rebake() -> void:
+	_check_and_update_path()
 	_needs_rebake = false
 	var baked_points := path.curve.get_baked_points()
 	_q_points.resize(baked_points.size())
@@ -287,8 +280,27 @@ func rebake() -> void:
 		queue_redraw()
 
 func queue_rebake() -> void:
-	_needs_rebake = true
-	needs_rebake.emit()
+	if ! _needs_rebake:
+		_needs_rebake = true
+		needs_rebake.emit()
+
+func _check_and_update_path() -> void:
+	if _prev_point_a != point_a || _prev_point_b != point_b:
+		_prev_point_a = point_a
+		_prev_point_b = point_b
+		_update_path()
+
+const ARROW_ANGLE_RAD := deg_to_rad(45)
+const ARROW_LENGTH_PX := 4
+const ARROW_WIDTH_PX := 1
+const ARROW_COLOR := Color.AQUA
+func _draw_flow_arrows() -> void:
+	var arrow_base := (point_a - point_b).normalized() * ARROW_LENGTH_PX
+	var flow_arrow_left := arrow_base.rotated(ARROW_ANGLE_RAD)
+	var flow_arrow_right := arrow_base.rotated(-ARROW_ANGLE_RAD)
+	for point in path.curve.get_baked_points():
+		draw_line(point, point + flow_arrow_left, ARROW_COLOR, ARROW_WIDTH_PX)
+		draw_line(point, point + flow_arrow_right, ARROW_COLOR, ARROW_WIDTH_PX)
 
 func _draw_colorized_pipe(diameter_px: float) -> void:
 	var min_value : float = 0.0

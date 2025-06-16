@@ -6,7 +6,7 @@ var _cached_min_pressure : float = 0.0
 var _cached_max_pressure : float = 0.0
 var _cached_min_flow : float = 0.0
 var _cached_max_flow : float = 0.0
-var _sim_cycle : int = 0 # count the # of simulation cycles the engine has ran
+var _sim_cycles : int = 0 # count the # of simulation cycles the engine has ran
 
 func _ready() -> void:
 	set_process(false)
@@ -15,9 +15,12 @@ func _process(_delta: float) -> void:
 	if _all_pipes.size() == 0:
 		set_process(false)
 		return
-	
-	_sim_cycle += 1
-	print("=========== SIM CYCLE %d ===========" % [_sim_cycle])
+	run_calculations()
+	set_process(false)
+
+func run_calculations() -> void:
+	_sim_cycles += 1
+	print("=========== SIM CYCLE %d ===========" % [_sim_cycles])
 	
 	_cached_max_pressure = -INF
 	_cached_min_pressure =  INF
@@ -27,23 +30,18 @@ func _process(_delta: float) -> void:
 		if pipe.is_flow_source:
 			_bake_pipe(pipe)
 	
+	# bake any orphaned pipes that still need to rebaked
+	for pipe in _all_pipes:
+		if pipe.is_rebake_needed():
+			_bake_pipe(pipe)
+	
 	print("system pressure min/max: %f/%f (psi)" %
 		[Utils.psft_to_psi(_cached_min_pressure), Utils.psft_to_psi(_cached_max_pressure)])
 	print("system flow min/max: %f/%f (gpm)" %
 		[Utils.cftps_to_gpm(_cached_min_flow), Utils.cftps_to_gpm(_cached_max_flow)])
-	set_process(false)
 
-func _bake_pipe(pipe: Pipe) -> void:
-	print("baking %s ..." % pipe.user_label)
-	pipe.rebake()
-	print("min/max pressure: %f/%f (psi)" %
-		[Utils.psft_to_psi(pipe.get_min_pressure()), Utils.psft_to_psi(pipe.get_max_pressure())])
-	_cached_min_pressure = min(_cached_min_pressure, pipe.get_min_pressure())
-	_cached_max_pressure = max(_cached_max_pressure, pipe.get_max_pressure())
-	_cached_min_flow = min(_cached_min_flow, pipe.get_min_flow())
-	_cached_max_flow = max(_cached_max_flow, pipe.get_max_flow())
-	for feed_pipe in pipe.get_feed_pipes_by_progress():
-		_bake_pipe(feed_pipe)
+func get_sim_cycles() -> int:
+	return _sim_cycles
 
 func get_all_pipes() -> Array[Pipe]:
 	return _all_pipes.duplicate()
@@ -84,6 +82,20 @@ func get_system_max_flow() -> float:
 
 func queue_recalc() -> void:
 	set_process(true)
+
+func _bake_pipe(pipe: Pipe) -> void:
+	print("baking %s ..." % pipe.user_label)
+	pipe.rebake()
+	print("pressure min/max: %f/%f (psi)" %
+		[Utils.psft_to_psi(pipe.get_min_pressure()), Utils.psft_to_psi(pipe.get_max_pressure())])
+	print("flow min/max: %f/%f (gpm)" %
+		[Utils.cftps_to_gpm(pipe.get_min_flow()), Utils.cftps_to_gpm(pipe.get_max_flow())])
+	_cached_min_pressure = min(_cached_min_pressure, pipe.get_min_pressure())
+	_cached_max_pressure = max(_cached_max_pressure, pipe.get_max_pressure())
+	_cached_min_flow = min(_cached_min_flow, pipe.get_min_flow())
+	_cached_max_flow = max(_cached_max_flow, pipe.get_max_flow())
+	for feed_pipe in pipe.get_feed_pipes_by_progress():
+		_bake_pipe(feed_pipe)
 
 func _on_pipe_needs_rebake() -> void:
 	queue_recalc()
