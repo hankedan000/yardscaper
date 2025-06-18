@@ -28,4 +28,5 @@ curve = SubResource("Curve2D_cvvec")
 
 [connection signal="attached" from="FlowSource" to="." method="_on_flow_source_attached"]
 [connection signal="dettached" from="FlowSource" to="." method="_on_flow_source_dettached"]
+[connection signal="flow_property_changed" from="FlowSource" to="." method="_on_flow_source_flow_property_changed"]
 [connection signal="moved" from="FlowSource" to="." method="_on_flow_source_moved"]

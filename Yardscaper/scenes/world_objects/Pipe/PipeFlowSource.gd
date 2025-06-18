@@ -1,6 +1,9 @@
 class_name PipeFlowSource
 extends PathFollow2D
 
+const PROP_KEY_POSITION_INFO := &'position_info'
+const PROP_KEY_FITTING_TYPE := &'fitting_type'
+
 const SNAP_DIST_PX := 5.0
 const UNSNAP_DIST_PX := 7.0 # slightly more so it doesn't toggle rapidly near edge
 
@@ -26,11 +29,19 @@ class PositionInfo:
 		info.free_position = Utils.pair_to_vect2(DictUtils.get_w_default(obj, &'free_position', [0.0, 0.0]))
 		return info
 
+signal flow_property_changed()
 signal moved(old_pos: Vector2, new_pos: Vector2)
 signal attached(new_src: Pipe)
 signal dettached(old_src: Pipe)
 
 @onready var handle : EditorHandle = $EditorHandle
+
+var fitting_type : PipeTables.FittingType = PipeTables.FittingType.ELBOW_90:
+	set(value):
+		if fitting_type == value:
+			return
+		fitting_type = value
+		flow_property_changed.emit()
 
 # the pipe to provide fluid flow to
 var parent_pipe : Pipe = null
@@ -38,6 +49,7 @@ var parent_pipe : Pipe = null
 # the pipe to get fluid flow from
 var source_pipe : Pipe = null
 
+var _pos_info_from_disk : PositionInfo = null
 var _init_pos_info : PositionInfo = null
 var _init_pos : Vector2 = Vector2() # init position when starting move
 var _mouse_init_pos : Vector2 = Vector2() # init position when starting move
@@ -86,6 +98,12 @@ func attach_to_source_at_progress(pipe: Pipe, at_progress: float) -> void:
 	progress = at_progress
 	attached.emit(source_pipe)
 
+# called by the FluidSimulator once it restores all objects from disk
+func init_flow_source(all_pipes: Array[Pipe]) -> void:
+	if _pos_info_from_disk != null:
+		apply_position_info(all_pipes, _pos_info_from_disk)
+		_pos_info_from_disk = null
+	
 func apply_position_info(all_pipes: Array[Pipe], info: PositionInfo) -> void:
 	if info.is_free_floating:
 		if is_attached():
@@ -99,6 +117,19 @@ func apply_position_info(all_pipes: Array[Pipe], info: PositionInfo) -> void:
 				return
 		
 		push_warning("source pipe '%s' not found" % info.src_pipe_user_label)
+
+func serialize():
+	var obj = {}
+	obj[PROP_KEY_POSITION_INFO] = get_position_info().to_dict()
+	obj[PROP_KEY_FITTING_TYPE] = EnumUtils.to_str(PipeTables.FittingType, fitting_type)
+	return obj
+
+func deserialize(obj):
+	var pos_info_dict = DictUtils.get_w_default(obj, PROP_KEY_POSITION_INFO, null)
+	if pos_info_dict is Dictionary:
+		_pos_info_from_disk = PipeFlowSource.PositionInfo.from_dict(pos_info_dict)
+	var fitting_type_str := DictUtils.get_w_default(obj, PROP_KEY_FITTING_TYPE, '') as String
+	fitting_type = EnumUtils.from_str(PipeTables.FittingType, PipeTables.FittingType.ELBOW_90, fitting_type_str) as PipeTables.FittingType
 
 func _ready() -> void:
 	handle.user_text = "Flow Source"

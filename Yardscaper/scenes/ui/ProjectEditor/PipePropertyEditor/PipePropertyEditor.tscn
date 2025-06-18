@@ -80,6 +80,15 @@ step = 0.01
 value = 60.0
 suffix = "gpm"
 
+[node name="MaterialLabel" type="Label" parent="VBoxContainer/PropertiesList"]
+layout_mode = 2
+text = "Material:"
+
+[node name="MaterialOption" type="OptionButton" parent="VBoxContainer/PropertiesList"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "The fluid's nominal flow rate (in gallons per minute) at the source of the pipe."
+
 [node name="Label10" type="Label" parent="VBoxContainer/PropertiesList"]
 layout_mode = 2
 text = "Color:"
@@ -96,6 +105,7 @@ layout_mode = 2
 [connection signal="toggled" from="VBoxContainer/PropertiesList/FlowSourceCheckBox" to="." method="_on_flow_source_check_box_toggled"]
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/SrcPressureSpinBox" to="." method="_on_src_pressure_spin_box_value_changed"]
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/SrcFlowRateSpinBox" to="." method="_on_src_flow_rate_spin_box_value_changed"]
+[connection signal="item_selected" from="VBoxContainer/PropertiesList/MaterialOption" to="." method="_on_material_option_item_selected"]
 [connection signal="color_changed" from="VBoxContainer/PropertiesList/PipeColorPicker" to="." method="_on_pipe_color_picker_color_changed"]
 [connection signal="popup_closed" from="VBoxContainer/PropertiesList/PipeColorPicker" to="." method="_on_pipe_color_picker_popup_closed"]
 [connection signal="pressed" from="VBoxContainer/PropertiesList/PipeColorPicker" to="." method="_on_pipe_color_picker_pressed"]

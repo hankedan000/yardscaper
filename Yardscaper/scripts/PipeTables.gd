@@ -2,6 +2,7 @@ class_name PipeTables
 extends Object
 
 enum FittingType {
+	Custom,
 	ELBOW_90,
 	ELBOW_45,
 	TEE_RUN,
@@ -9,10 +10,11 @@ enum FittingType {
 }
 
 enum MaterialType {
+	Custom,
 	PVC
 }
 
-const MINOR_LOSSES = [
+const MINOR_LOSSES_LUT = [
 	# PVC minor losses
 	{
 		'material' : MaterialType.PVC,
@@ -45,6 +47,14 @@ const MINOR_LOSSES = [
 	}
 ]
 
+# surface roughness in feet
+const SURFACE_ROUGHNESS_LUT = [
+	{
+		'material' : MaterialType.PVC,
+		'roughness' : 0.000005
+	}
+]
+
 enum LossLookupError {
 	# OOR - Out Of Range
 	OK, MaterialOOR, FittingOOR, EmptyLossTable, DiameterOOR
@@ -71,7 +81,7 @@ class LossLookupResult:
 		return res
 
 static func lookup_minor_loss(material: MaterialType, fitting: FittingType, diam_h: float) -> LossLookupResult:
-	for mat_entry in MINOR_LOSSES:
+	for mat_entry in MINOR_LOSSES_LUT:
 		if mat_entry['material'] == material:
 			return _lookup_minor_loss_in_mat_table(mat_entry, fitting, diam_h)
 	return LossLookupResult.from_error(LossLookupError.MaterialOOR)
@@ -110,3 +120,11 @@ static func _lookup_minor_loss_lerp(entry_a: Array, entry_b: Array, diam_h: floa
 	var diam_spread = entry_b[0] - entry_a[0] as float
 	var weight := (diam_h - entry_a[0]) / diam_spread  as float
 	return lerpf(entry_a[1], entry_b[1], weight)
+
+# @return -1.0 on error, else the roughness value in feet
+static func lookup_surface_roughness(material: MaterialType) -> float:
+	for entry in SURFACE_ROUGHNESS_LUT:
+		if entry['material'] == material:
+			return entry['roughness']
+	push_error("failed to find roughness for material %s. returning 0.0" % material)
+	return 0.0

@@ -8,7 +8,9 @@ const PROP_KEY_IS_FLOW_SRC = &'is_flow_source'
 const PROP_KEY_SRC_PRESSURE_PSI = &'src_pressure_psi'
 const PROP_KEY_SRC_FLOW_RATE_GPM = &'src_flow_rate_gpm'
 const PROP_KEY_PIPE_COLOR = &'pipe_color'
-const PROP_KEY_FLOW_SRC_POS_INFO = &'flow_src_pos_info'
+const PROP_KEY_MATERIAL_TYPE = &'material_type'
+const PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT = &'custom_surface_roughness_ft'
+const PROP_KEY_FLOW_SRC = &'flow_src'
 
 const PVC_SURFACE_ROUGHNESS_FT := 0.000005
 
@@ -60,8 +62,19 @@ var pipe_color : Color = Color.WHITE_SMOKE:
 		if _check_and_emit_prop_change(PROP_KEY_PIPE_COLOR, old_value):
 			queue_redraw()
 
-# pipe material's specific roughness in ft
-var surface_roughness_ft : float = PVC_SURFACE_ROUGHNESS_FT
+var material_type : PipeTables.MaterialType = PipeTables.MaterialType.PVC:
+	set(value):
+		var old_value = material_type
+		material_type = value
+		if _check_and_emit_prop_change(PROP_KEY_MATERIAL_TYPE, old_value):
+			queue_rebake()
+
+var custom_surface_roughness_ft : float = 0.0:
+	set(value):
+		var old_value = custom_surface_roughness_ft
+		custom_surface_roughness_ft = value
+		if _check_and_emit_prop_change(PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT, old_value):
+			queue_rebake()
 
 var show_flow_arrows : bool = false:
 	set(value):
@@ -78,8 +91,8 @@ var colorize : Colorize = Colorize.Normal:
 		queue_redraw()
 
 var _sim : FluidSimulator = null
+var _flow_src_data_from_disk : Dictionary = {}
 var _do_default_flow_src_positioning : bool = true
-var _flow_src_pos_info_from_disk : PipeFlowSource.PositionInfo = null
 var _needs_rebake : bool = false
 var _prev_point_a : Vector2 = Vector2()
 var _prev_point_b : Vector2 = Vector2()
@@ -103,6 +116,7 @@ func _ready():
 	point_b_handle.user_text = "Drain"
 	point_a_handle.show_on_hover = EditorHandle.HoverShowType.UserText
 	point_b_handle.show_on_hover = EditorHandle.HoverShowType.UserText
+	flow_src.deserialize(_flow_src_data_from_disk)
 	flow_src.parent_pipe = self
 	_update_path() # match path to restored point_a and point_b values
 
@@ -175,7 +189,9 @@ func serialize():
 	obj[PROP_KEY_SRC_PRESSURE_PSI] = src_pressure_psi
 	obj[PROP_KEY_SRC_FLOW_RATE_GPM] = src_flow_rate_gpm
 	obj[PROP_KEY_PIPE_COLOR] = pipe_color.to_html(true)
-	obj[PROP_KEY_FLOW_SRC_POS_INFO] = flow_src.get_position_info().to_dict()
+	obj[PROP_KEY_MATERIAL_TYPE] = EnumUtils.to_str(PipeTables.MaterialType, material_type)
+	obj[PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT] = custom_surface_roughness_ft
+	obj[PROP_KEY_FLOW_SRC] = flow_src.serialize()
 	return obj
 
 func deserialize(obj):
@@ -185,17 +201,14 @@ func deserialize(obj):
 	src_pressure_psi = DictUtils.get_w_default(obj, PROP_KEY_SRC_PRESSURE_PSI, 60.0)
 	src_flow_rate_gpm = DictUtils.get_w_default(obj, PROP_KEY_SRC_FLOW_RATE_GPM, 50.0)
 	pipe_color = DictUtils.get_w_default(obj, PROP_KEY_PIPE_COLOR, Color.WHITE_SMOKE)
-	var pos_info_dict := DictUtils.get_w_default(obj, PROP_KEY_FLOW_SRC_POS_INFO, null) as Dictionary
-	if pos_info_dict:
-		_flow_src_pos_info_from_disk = PipeFlowSource.PositionInfo.from_dict(pos_info_dict)
+	var material_type_str = DictUtils.get_w_default(obj, PROP_KEY_MATERIAL_TYPE, '') as String
+	material_type = EnumUtils.from_str(PipeTables.MaterialType, PipeTables.MaterialType.PVC, material_type_str) as PipeTables.MaterialType
+	custom_surface_roughness_ft = DictUtils.get_w_default(obj, PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT, 0.0)
+	_flow_src_data_from_disk = DictUtils.get_w_default(obj, PROP_KEY_FLOW_SRC, {}) as Dictionary
 
 # called by the FluidSimulator once it restores all objects from disk
 func init_flow_source(all_pipes: Array[Pipe]) -> void:
-	if _flow_src_pos_info_from_disk == null:
-		return # nothing to restore
-		
-	flow_src.apply_position_info(all_pipes, _flow_src_pos_info_from_disk)
-	_flow_src_pos_info_from_disk = null
+	flow_src.init_flow_source(all_pipes)
 	_do_default_flow_src_positioning = false
 
 func get_feed_pipes_by_progress() -> Array[Pipe]:
@@ -246,9 +259,15 @@ func get_diam_h() -> float:
 func get_area_h() -> float:
 	return Math.area_circle(get_diam_h())
 
+# @return surface roughness in ft
+func get_surface_roughness() -> float:
+	if material_type == PipeTables.MaterialType.Custom:
+		return custom_surface_roughness_ft
+	return PipeTables.lookup_surface_roughness(material_type)
+
 # @return relative roughness k/D
 func get_relative_roughness() -> float:
-	return surface_roughness_ft / get_diam_h()
+	return get_surface_roughness() / get_diam_h()
 
 # called by FluidSimulator class when flow sources change
 func rebake() -> void:
@@ -400,4 +419,7 @@ func _on_flow_source_dettached(old_src: Pipe) -> void:
 	# remove ourselves from the old pipe's feed list. no need to resort because
 	# removal of a node should still preserve the ordering.
 	old_src._feed_pipes_by_progress.erase(self)
+	queue_rebake()
+
+func _on_flow_source_flow_property_changed() -> void:
 	queue_rebake()

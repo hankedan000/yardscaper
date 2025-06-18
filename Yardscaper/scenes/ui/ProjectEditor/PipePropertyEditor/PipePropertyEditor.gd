@@ -2,12 +2,13 @@ class_name PipePropertyEditor
 extends PanelContainer
 
 @onready var user_label_lineedit      : LineEdit = $VBoxContainer/PropertiesList/UserLabelLineEdit
+@onready var diameter_spinbox         : SpinBox = $VBoxContainer/PropertiesList/DiameterSpinBox
 @onready var flow_src_checkbox        : CheckBox = $VBoxContainer/PropertiesList/FlowSourceCheckBox
 @onready var src_pressure_label       : Label = $VBoxContainer/PropertiesList/SrcPressureLabel
 @onready var src_pressure_spinbox     : SpinBox = $VBoxContainer/PropertiesList/SrcPressureSpinBox
 @onready var src_flow_rate_label      : Label = $VBoxContainer/PropertiesList/SrcFlowRateLabel
 @onready var src_flow_rate_spinbox    : SpinBox = $VBoxContainer/PropertiesList/SrcFlowRateSpinBox
-@onready var diameter_spinbox         : SpinBox = $VBoxContainer/PropertiesList/DiameterSpinBox
+@onready var material_option          : OptionButton = $VBoxContainer/PropertiesList/MaterialOption
 @onready var pipe_color_picker        := $VBoxContainer/PropertiesList/PipeColorPicker
 @onready var multi_edit_warning       := $VBoxContainer/MultiEditWarning
 
@@ -17,6 +18,8 @@ var _ignore_internal_edits = false
 
 func _ready() -> void:
 	set_process(false)
+	for material_key in PipeTables.MaterialType.keys():
+		material_option.add_item(material_key, int(PipeTables.MaterialType[material_key]))
 
 func _process(_delta) -> void:
 	_sync_ui()
@@ -64,10 +67,11 @@ func _sync_ui():
 	
 	_ignore_internal_edits = true
 	user_label_lineedit.text = ref_pipe.user_label if single_edit else "---"
+	diameter_spinbox.value = ref_pipe.diameter_inches
 	flow_src_checkbox.button_pressed = ref_pipe.is_flow_source
 	src_pressure_spinbox.value = ref_pipe.src_pressure_psi
 	src_flow_rate_spinbox.value = ref_pipe.src_flow_rate_gpm
-	diameter_spinbox.value = ref_pipe.diameter_inches
+	_select_material_option(ref_pipe.material_type)
 	pipe_color_picker.color = ref_pipe.pipe_color
 	_ignore_internal_edits = false
 
@@ -78,6 +82,11 @@ func _apply_prop_edit(prop_name: StringName, new_value: Variant) -> void:
 	for pipe in _pipes:
 		pipe.set(prop_name, new_value)
 	_layout_panel.stop_batch_edit()
+
+func _select_material_option(material_type: PipeTables.MaterialType) -> void:
+	for idx in range(material_option.item_count):
+		if material_option.get_item_id(idx) == int(material_type):
+			material_option.select(idx)
 
 func _on_user_label_line_edit_text_submitted(new_text):
 	_apply_prop_edit(WorldObject.PROP_KEY_USER_LABEL, new_text)
@@ -97,6 +106,10 @@ func _on_src_flow_rate_spin_box_value_changed(value: float) -> void:
 
 func _on_diameter_spin_box_value_changed(value: float) -> void:
 	_apply_prop_edit(Pipe.PROP_KEY_DIAMETER_INCHES, value)
+
+func _on_material_option_item_selected(index: int) -> void:
+	var key = material_option.get_item_text(index)
+	_apply_prop_edit(Pipe.PROP_KEY_MATERIAL_TYPE, PipeTables.MaterialType[key])
 
 func _on_pipe_color_picker_color_changed(color: Color) -> void:
 	_apply_prop_edit(Pipe.PROP_KEY_PIPE_COLOR, color)
