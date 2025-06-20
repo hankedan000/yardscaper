@@ -188,6 +188,12 @@ func stop_batch_edit() -> void:
 	_batch_edits_for_prop = &""
 	_curr_batch_undo_op = null
 
+func get_pipe_colorize() -> Pipe.Colorize:
+	for idx in range(pipe_colorize_popupmenu.item_count):
+		if pipe_colorize_popupmenu.is_item_checked(idx):
+			return pipe_colorize_popupmenu.get_item_id(idx) as Pipe.Colorize
+	return Pipe.Colorize.Normal
+
 func _handle_left_click_release(pos_in_world_px: Vector2):
 	match mode:
 		Mode.Idle:
@@ -274,9 +280,11 @@ func _update_ui_after_selection_change():
 	_update_position_lock_buttons()
 	remove_button.disabled = selected_objs.is_empty()
 	sprink_prop_list.hide()
+	sprink_prop_list.clear_sprinklers()
 	img_prop_list.hide()
 	poly_prop_list.hide()
 	pipe_prop_list.hide()
+	pipe_prop_list.clear_pipes()
 	curve_edit_buttons.hide()
 	
 	if selected_objs.size() == 0:
@@ -317,7 +325,6 @@ func _update_ui_after_selection_change():
 	
 	var is_single_select = selected_objs.size() == 1
 	if all_sprinklers:
-		sprink_prop_list.clear_sprinklers()
 		for obj in selected_objs:
 			sprink_prop_list.add_sprinkler(obj)
 		sprink_prop_list.show()
@@ -331,7 +338,6 @@ func _update_ui_after_selection_change():
 		poly_prop_list.show()
 		curve_edit_buttons.show()
 	elif all_pipes:
-		pipe_prop_list.clear_pipes()
 		for obj in selected_objs:
 			pipe_prop_list.add_pipe(obj)
 		pipe_prop_list.show()
@@ -363,6 +369,25 @@ func _apply_polygon_edit_mode(objs: Array[WorldObject]) -> void:
 	for obj in objs:
 		if obj is PolygonNode:
 			obj.edit_mode = _poly_edit_mode
+
+func _on_obj_added(obj: WorldObject) -> void:
+	world_view.objects.add_child(obj)
+	undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.AddOrRemove.new(
+		world_view,
+		obj,
+		false)) # is_remove
+	obj.picked_state_changed.connect(_on_pickable_object_pick_state_changed.bind(obj))
+	obj.undoable_edit.connect(_on_world_obj_undoable_edit)
+	if obj is Pipe:
+		obj.colorize = get_pipe_colorize()
+	_selection_controller.clear_selection()
+	obj.picked = true
+
+func _on_obj_removed(obj: WorldObject) -> void:
+	world_view.objects.remove_child(obj)
+	_selection_controller.remove_from_selection(obj)
+	if _hovered_obj == obj:
+		_hovered_obj = null
 
 func _on_add_sprinkler_pressed():
 	sprinkler_to_add = SprinklerScene.instantiate()
@@ -408,22 +433,11 @@ func _on_remove_button_pressed():
 	_selection_controller.clear_selection()
 
 func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
-	var obj_in_world = obj in world_view.objects.get_children()
 	match change_type:
 		TheProject.ChangeType.ADD:
-			if not obj_in_world:
-				world_view.objects.add_child(obj)
-			undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.AddOrRemove.new(
-				world_view,
-				obj,
-				false)) # is_remove
-			obj.picked_state_changed.connect(_on_pickable_object_pick_state_changed.bind(obj))
-			obj.undoable_edit.connect(_on_world_obj_undoable_edit)
-			_selection_controller.clear_selection()
-			obj.picked = true
+			_on_obj_added(obj)
 		TheProject.ChangeType.REMOVE:
-			if obj_in_world:
-				world_view.objects.remove_child(obj)
+			_on_obj_removed(obj)
 		TheProject.ChangeType.PROP_EDIT:
 			var prop_name : StringName = args[0]
 			var old_value = args[1]

@@ -199,7 +199,7 @@ func add_object(obj: WorldObject) -> bool:
 	has_edits = true
 	return true
 
-func remove_object(obj: WorldObject) -> bool:
+func remove_object(obj: WorldObject, free_it: bool = true) -> bool:
 	if not objects.has(obj):
 		push_warning("obj '%s' is not in the project. ignoring remove." % obj.name)
 		return false
@@ -210,7 +210,12 @@ func remove_object(obj: WorldObject) -> bool:
 	obj.property_changed.disconnect(_on_node_property_changed)
 	obj.moved.disconnect(_on_node_moved)
 	
+	if obj is Pipe:
+		TheFluidSimulator.remove_pipe(obj)
+	
 	node_changed.emit(obj, ChangeType.REMOVE, [])
+	if free_it:
+		obj.queue_free()
 	has_edits = true
 	return true
 

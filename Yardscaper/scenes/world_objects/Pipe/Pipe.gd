@@ -166,6 +166,10 @@ func _draw() -> void:
 		16, # font_size
 		color)
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_predelete()
+
 func get_sim() -> FluidSimulator:
 	return _sim
 
@@ -302,6 +306,14 @@ func queue_rebake() -> void:
 	if ! _needs_rebake:
 		_needs_rebake = true
 		needs_rebake.emit()
+
+func _predelete() -> void:
+	if is_instance_valid(flow_src):
+		flow_src.detach_from_source()
+		flow_src.queue_free()
+	# remove our selves from simulator if we're still associated with one
+	if is_instance_valid(_sim):
+		_sim.remove_pipe(self)
 
 func _check_and_update_path() -> void:
 	if _prev_point_a != point_a || _prev_point_b != point_b:

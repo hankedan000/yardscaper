@@ -1,6 +1,8 @@
 class_name FluidSimulator
 extends Node
 
+var debug = true
+
 var _all_pipes : Array[Pipe] = []
 var _cached_min_pressure : float = 0.0
 var _cached_max_pressure : float = 0.0
@@ -20,7 +22,8 @@ func _process(_delta: float) -> void:
 
 func run_calculations() -> void:
 	_sim_cycles += 1
-	print("=========== SIM CYCLE %d ===========" % [_sim_cycles])
+	if debug:
+		print("=========== SIM CYCLE %d ===========" % [_sim_cycles])
 	
 	_cached_max_pressure = -INF
 	_cached_min_pressure =  INF
@@ -35,10 +38,11 @@ func run_calculations() -> void:
 		if pipe.is_rebake_needed():
 			_bake_pipe(pipe)
 	
-	print("system pressure min/max: %f/%f (psi)" %
-		[Utils.psft_to_psi(_cached_min_pressure), Utils.psft_to_psi(_cached_max_pressure)])
-	print("system flow min/max: %f/%f (gpm)" %
-		[Utils.cftps_to_gpm(_cached_min_flow), Utils.cftps_to_gpm(_cached_max_flow)])
+	if debug:
+		print("system pressure min/max: %f/%f (psi)" %
+			[Utils.psft_to_psi(_cached_min_pressure), Utils.psft_to_psi(_cached_max_pressure)])
+		print("system flow min/max: %f/%f (gpm)" %
+			[Utils.cftps_to_gpm(_cached_min_flow), Utils.cftps_to_gpm(_cached_max_flow)])
 
 func get_sim_cycles() -> int:
 	return _sim_cycles
@@ -60,6 +64,7 @@ func add_pipe(pipe: Pipe) -> void:
 	pipe.needs_rebake.connect(_on_pipe_needs_rebake)
 	pipe._sim = self
 	_all_pipes.append(pipe)
+	queue_recalc()
 
 func remove_pipe(pipe: Pipe) -> void:
 	var idx := _all_pipes.find(pipe)
@@ -67,6 +72,7 @@ func remove_pipe(pipe: Pipe) -> void:
 		pipe.needs_rebake.disconnect(_on_pipe_needs_rebake)
 		pipe._sim = null
 		_all_pipes.remove_at(idx)
+		queue_recalc()
 
 func get_system_min_pressure() -> float:
 	return _cached_min_pressure
@@ -84,12 +90,14 @@ func queue_recalc() -> void:
 	set_process(true)
 
 func _bake_pipe(pipe: Pipe) -> void:
-	print("baking %s ..." % pipe.user_label)
+	if debug:
+		print("baking %s ..." % pipe.user_label)
 	pipe.rebake()
-	print("pressure min/max: %f/%f (psi)" %
-		[Utils.psft_to_psi(pipe.get_min_pressure()), Utils.psft_to_psi(pipe.get_max_pressure())])
-	print("flow min/max: %f/%f (gpm)" %
-		[Utils.cftps_to_gpm(pipe.get_min_flow()), Utils.cftps_to_gpm(pipe.get_max_flow())])
+	if debug:
+		print("pressure min/max: %f/%f (psi)" %
+			[Utils.psft_to_psi(pipe.get_min_pressure()), Utils.psft_to_psi(pipe.get_max_pressure())])
+		print("flow min/max: %f/%f (gpm)" %
+			[Utils.cftps_to_gpm(pipe.get_min_flow()), Utils.cftps_to_gpm(pipe.get_max_flow())])
 	_cached_min_pressure = min(_cached_min_pressure, pipe.get_min_pressure())
 	_cached_max_pressure = max(_cached_max_pressure, pipe.get_max_pressure())
 	_cached_min_flow = min(_cached_min_flow, pipe.get_min_flow())
