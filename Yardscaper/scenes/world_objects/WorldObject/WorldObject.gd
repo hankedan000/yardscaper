@@ -14,7 +14,7 @@ const PROP_KEY_INFO_LABEL_VISIBLE = &"info_label.visible"
 const PROP_KEY_POSITION_LOCKED = &"position_locked"
 
 @onready var info_label      : GizmoLabel = $InfoLabel
-@onready var lock_indicator  : Gizmo = $LockIndicator
+@onready var lock_indicator  : LockIndicator = $LockIndicator
 @onready var pick_area       : Area2D = $PickArea
 @onready var pick_coll_shape : CollisionShape2D = $PickArea/CollisionShape2D
 

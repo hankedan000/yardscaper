@@ -19,3 +19,5 @@ hover_type = 1
 visible = false
 pressed_type = 1
 hover_type = 1
+
+[connection signal="property_changed" from="." to="." method="_on_property_changed"]

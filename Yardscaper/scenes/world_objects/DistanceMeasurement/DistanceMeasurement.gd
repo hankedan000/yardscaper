@@ -112,6 +112,7 @@ func deserialize(obj):
 	point_b = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj['point_b_ft']))
 
 func _update_handles() -> void:
+	lock_indicator.position = point_a
 	point_a_handle.position = point_a
 	point_b_handle.position = point_b
 	point_a_handle.visible = picked && ! position_locked
@@ -135,3 +136,7 @@ func _on_handle_button_up() -> void:
 	deferred_prop_change.pop(prop_key)
 	_handle_being_moved = null
 	set_process(false)
+
+func _on_property_changed(_obj: WorldObject, property_key: StringName, _from: Variant, _to: Variant) -> void:
+	if property_key == PROP_KEY_POSITION_LOCKED:
+		_update_handles()
