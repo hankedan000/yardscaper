@@ -2,6 +2,19 @@ class_name FluidSimulator
 extends Node
 
 var debug = true
+var enable_major_losses : bool = true:
+	set(value):
+		if value == enable_major_losses:
+			return
+		enable_major_losses = value
+		queue_recalc()
+
+var enable_minor_losses : bool = true:
+	set(value):
+		if value == enable_minor_losses:
+			return
+		enable_minor_losses = value
+		queue_recalc()
 
 var _all_pipes : Array[Pipe] = []
 var _cached_min_pressure : float = 0.0

@@ -293,11 +293,12 @@ func rebake() -> void:
 		var l_ft := Utils.px_to_ft((curr_point - prev_point).length())
 		_q_points[idx] = q
 		_p_points[idx] = p
-		var v := q / area_h # velocity
-		var Re := FluidMath.reynolds(v, diam_h, FluidMath.WATER_VISCOCITY_K)
-		var f_darcy := FluidMath.f_darcy(Re, rel_roughness)
-		var major_loss := FluidMath.major_loss(f_darcy, l_ft, v, FluidMath.WATER_DENSITY, diam_h)
-		p = max(0.0, p - major_loss)
+		if _sim.enable_major_losses:
+			var v := q / area_h # velocity
+			var Re := FluidMath.reynolds(v, diam_h, FluidMath.WATER_VISCOCITY_K)
+			var f_darcy := FluidMath.f_darcy(Re, rel_roughness)
+			var major_loss := FluidMath.major_loss(f_darcy, l_ft, v, FluidMath.WATER_DENSITY, diam_h)
+			p = max(0.0, p - major_loss)
 		prev_point = curr_point
 	if colorize != Colorize.Normal:
 		queue_redraw()
