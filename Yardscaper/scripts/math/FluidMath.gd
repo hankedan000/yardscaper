@@ -54,11 +54,11 @@ static func _colebrook_white(Re: float, rel_roughness: float) -> float:
 # Computes the major pressure loss due to friction along a length of pipe.
 #
 # @param[in] f_darcy - the darcy friction factor
-# @param[in] length - length of the pipe (ft)
-# @param[in] velocity - velocity of fluid in the pipe (ft/s)
-# @param[in] density - density of the fluid (lb/ft^3)
-# @param[in] diam_h - hydraulic diameter of the pipe (ft)
+# @param[in] l_ft - length of the pipe (ft)
+# @param[in] v_fps - velocity of fluid in the pipe (ft/s)
+# @param[in] rho_lbft3 - density of the fluid (lb/ft^3)
+# @param[in] d_ft - hydraulic diameter of the pipe (ft)
 # @return pressure loss (lb/ft^2)
 @warning_ignore("shadowed_variable")
-static func major_loss(f_darcy: float, length: float, velocity: float, density: float, diam_h: float) -> float:
-	return (f_darcy * length * velocity * velocity * density) / (2.0 * G * diam_h)
+static func major_loss(f_darcy: float, l_ft: float, v_fps: float, rho_lbft3: float, d_ft: float) -> float:
+	return (f_darcy * l_ft * v_fps * v_fps * rho_lbft3) / (2.0 * G * d_ft)

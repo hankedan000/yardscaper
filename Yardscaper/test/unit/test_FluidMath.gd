@@ -1,9 +1,9 @@
 extends GutTest
 
 func test_reynolds():
-	var diam_h = Utils.inches_to_ft(0.75)
-	var velocity = Utils.gpm_to_cftps(50.0) / Math.area_circle(diam_h)
-	var Re := FluidMath.reynolds(velocity, diam_h, FluidMath.WATER_VISCOCITY_K)
+	var d_ft = Utils.inches_to_ft(0.75)
+	var v_fps = Utils.gpm_to_cftps(50.0) / Math.area_circle(d_ft)
+	var Re := FluidMath.reynolds(v_fps, d_ft, FluidMath.WATER_VISCOCITY_K)
 	assert_almost_eq(Re, 221840.0, 1.0)
 
 func test_f_darcy():

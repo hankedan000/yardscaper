@@ -27,7 +27,7 @@ func _ready():
 			break
 	
 	if main == null:
-		push_error("couldn't find main scene")
+		push_warning("couldn't find main scene")
 	
 	# try to get recent projects from old "Sprinkler Designer" user:// dir
 	_try_migrate_recent_projects()
