@@ -1,6 +1,9 @@
 class_name FSystem
 extends RefCounted
 
+var fluid_viscocity_k : float = FluidMath.WATER_VISCOCITY_K
+var fluid_density_lbft3 : float = FluidMath.WATER_DENSITY
+
 var _pipes : Array[FPipe] = []
 var _nodes : Array[FNode] = []
 
@@ -24,16 +27,12 @@ func get_nodes() -> Array[FNode]:
 	return _nodes.duplicate()
 
 func alloc_pipe() -> FPipe:
-	var pipe := FPipe.new()
-	pipe.id = get_next_node_id()
-	pipe.fsys = self
+	var pipe := FPipe.new(self, get_next_pipe_id())
 	_pipes.append(pipe)
 	return pipe
 
 func alloc_node() -> FNode:
-	var node := FNode.new()
-	node.id = get_next_node_id()
-	node.fsys = self
+	var node := FNode.new(self, get_next_node_id())
 	_nodes.append(node)
 	return node
 
