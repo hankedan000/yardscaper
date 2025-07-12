@@ -26,19 +26,42 @@ enum HoverShowType {
 		hover_type = value
 		_set_button_texture(&"texture_hover", value)
 @export var show_on_hover : HoverShowType = HoverShowType.UserId
+@export var magnetized : bool = false
 
 @onready var tex_button : TextureButton = $TextureButton
 @onready var user_label : Label = $UserLabel
 
 # a user-definable identifier
 var user_id : int = 0
-
 var user_text : String = ""
-
 var modulate_on_hover : Color = Color.WHITE
+
+var _magnet_area : Area2D = null
+var _magnet_coll : CollisionShape2D = null
+var _magnet_shape : CircleShape2D = null
+
+func _ready() -> void:
+	super._ready()
+	
+	if magnetized:
+		_magnet_area = Area2D.new()
+		_magnet_coll = CollisionShape2D.new()
+		_magnet_shape = CircleShape2D.new()
+		add_child(_magnet_area)
+		_magnet_area.add_child(_magnet_coll)
+		_magnet_coll.shape = _magnet_shape
 
 func get_button() -> BaseButton:
 	return tex_button
+
+func set_magnet_radius(radius_px: float) -> void:
+	if is_instance_valid(_magnet_shape):
+		_magnet_shape.radius = radius_px
+
+func get_magnet_radius() -> float:
+	if is_instance_valid(_magnet_shape):
+		return _magnet_shape.radius
+	return 0.0
 
 func _get_texture_from_type(type: HandleType) -> Texture2D:
 	match type:

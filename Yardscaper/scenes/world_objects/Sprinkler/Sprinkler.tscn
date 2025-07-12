@@ -61,11 +61,9 @@ script = SubResource("GDScript_m2jro")
 [node name="RotationHandle" parent="." index="1" instance=ExtResource("3_v1ovd")]
 visible = false
 modulate = Color(0.225892, 1, 0.387758, 1)
-show_label_on_hover = false
 
 [node name="SweepHandle" parent="." index="2" instance=ExtResource("3_v1ovd")]
 visible = false
-show_label_on_hover = false
 
 [node name="InfoLabel" parent="." index="3"]
 text = ""

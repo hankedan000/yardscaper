@@ -15,6 +15,7 @@ normal_type = 1
 pressed_type = 0
 hover_type = 0
 show_on_hover = 1
+magnetized = null
 
 [node name="TextureButton" type="TextureButton" parent="." index="0"]
 offset_left = -8.0

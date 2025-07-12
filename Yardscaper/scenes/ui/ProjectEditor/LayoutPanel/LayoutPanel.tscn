@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=28 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://g5yh8tb0v6bk" path="res://scenes/world_objects/Sprinkler/Sprinkler.tscn" id="2_16d6l"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://co2gtkorldd8j" path="res://scenes/ui/ProjectEditor/SprinklerPropertyEditor/SprinklerPropertyEditor.tscn" id="3_itpjk"]
 [ext_resource type="PackedScene" uid="uid://cmr73cpklqypc" path="res://scenes/world_objects/PolygonNode/PolygonNode.tscn" id="4_85obg"]
 [ext_resource type="PackedScene" uid="uid://bujgf1ym2asal" path="res://scenes/ui/ProjectEditor/ImageNodePropertyEditor/ImageNodePropertyEditor.tscn" id="4_legmd"]
+[ext_resource type="PackedScene" uid="uid://b6mbyigugbb1q" path="res://scenes/world_objects/PipeNode/PipeNode.tscn" id="4_mp2km"]
 [ext_resource type="PackedScene" uid="uid://cn8j4nj6r83we" path="res://scenes/ui/dialogs/ImageImportWizard/ImageImportWizard.tscn" id="5_3cenq"]
 [ext_resource type="PackedScene" uid="uid://c7ey0qd3m5ads" path="res://scenes/ui/ProjectEditor/ObjectsList/ObjectsList.tscn" id="5_p3ckg"]
 [ext_resource type="PackedScene" uid="uid://ug68ljbldsj5" path="res://scenes/ui/dialogs/GridSpacingDialog/GridSpacingDialog.tscn" id="6_lbneg"]
@@ -39,6 +40,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_60egv")
 script = ExtResource("1_o5pl2")
 SprinklerScene = ExtResource("2_16d6l")
 PipeScene = ExtResource("3_7watc")
+PipeNodeScene = ExtResource("4_mp2km")
 DistanceMeasurementScene = ExtResource("2_rmdn3")
 PolygonScene = ExtResource("4_85obg")
 
@@ -124,6 +126,15 @@ tooltip_text = "Add pipe"
 focus_mode = 0
 theme = ExtResource("11_w0qvw")
 text = "Pipe"
+icon_alignment = 1
+
+[node name="AddPipeNode" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "Add pipe"
+focus_mode = 0
+theme = ExtResource("11_w0qvw")
+text = "Node"
 icon_alignment = 1
 
 [node name="AddImage" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
@@ -310,6 +321,7 @@ size_flags_vertical = 3
 [connection signal="spacing_changed" from="GridSpacingDialog" to="." method="_on_grid_spacing_dialog_spacing_changed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPipe" to="." method="_on_add_pipe_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPipeNode" to="." method="_on_add_pipe_node_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddImage" to="." method="_on_add_image_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddDistMeasure" to="." method="_on_add_dist_measure_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon" to="." method="_on_add_polygon_pressed"]

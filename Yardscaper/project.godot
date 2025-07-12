@@ -48,6 +48,7 @@ enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 gizmos=""
 pipe_paths="Path2D nodes that belong to Pipe objects"
 pipes="All Pipe objects in the world"
+magnetic_areas="All MagneticArea nodes"
 
 [gui]
 
@@ -57,6 +58,7 @@ theme/custom="res://assets/themes/MainTheme.tres"
 
 2d_physics/layer_1="Cursor"
 2d_physics/layer_2="WorldObjects"
+2d_physics/layer_3="MagneticAreas"
 
 [rendering]
 

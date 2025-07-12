@@ -32,6 +32,7 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 
 @export var SprinklerScene : PackedScene = null
 @export var PipeScene : PackedScene = null
+@export var PipeNodeScene : PackedScene = null
 @export var DistanceMeasurementScene : PackedScene = null
 @export var PolygonScene : PackedScene = null
 
@@ -41,7 +42,8 @@ enum Mode {
 	AddSprinkler,
 	AddDistMeasureA,
 	AddDistMeasureB,
-	AddPolygon
+	AddPolygon,
+	AddPipeNode
 }
 
 enum ViewMenuIds {
@@ -92,8 +94,11 @@ var mode = Mode.Idle:
 				Globals.push_cursor_shape(Input.CURSOR_CROSS)
 			Mode.AddPolygon:
 				Globals.push_cursor_shape(Input.CURSOR_CROSS)
+			Mode.AddPipeNode:
+				Globals.push_cursor_shape(Input.CURSOR_CROSS)
 var sprinkler_to_add : Sprinkler = null
 var dist_meas_to_add : DistanceMeasurement = null
+var pipe_node_to_add : PipeNode = null
 var poly_to_add : PolygonNode = null
 var undo_redo_ctrl := UndoController.new()
 
@@ -223,6 +228,10 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			poly_to_add.add_point(pos_in_world_px)
 			_poly_edit_point_idx = poly_to_add.point_count() - 1
 			poly_to_add.set_handle_visible(_poly_edit_point_idx, false)
+		Mode.AddPipeNode:
+			TheProject.add_object(pipe_node_to_add)
+			pipe_node_to_add = null
+			mode = Mode.Idle
 
 func _handle_held_obj_move(mouse_pos_in_world_px: Vector2) -> void:
 	if _mouse_move_start_pos_px == null:
@@ -295,6 +304,7 @@ func _update_ui_after_selection_change():
 	var all_distances := true
 	var all_polygons := true
 	var all_pipes := true
+	var all_pipe_nodes := true
 	
 	for obj in selected_objs:
 		if obj is Sprinkler:
@@ -302,24 +312,35 @@ func _update_ui_after_selection_change():
 			all_distances = false
 			all_polygons = false
 			all_pipes = false
+			all_pipe_nodes = false
 		elif obj is ImageNode:
 			all_sprinklers = false
 			all_distances = false
 			all_polygons = false
 			all_pipes = false
+			all_pipe_nodes = false
 		elif obj is Pipe: # test Pipe before DistanceMeasurement because it inherits from it
 			all_sprinklers = false
 			all_images = false
 			all_distances = false
 			all_polygons = false
+			all_pipe_nodes = false
 		elif obj is DistanceMeasurement:
 			all_sprinklers = false
 			all_images = false
 			all_polygons = false
 			all_pipes = false
+			all_pipe_nodes = false
 		elif obj is PolygonNode:
 			all_sprinklers = false
 			all_images = false
+			all_distances = false
+			all_pipes = false
+			all_pipe_nodes = false
+		elif obj is PipeNode:
+			all_sprinklers = false
+			all_images = false
+			all_polygons = false
 			all_distances = false
 			all_pipes = false
 	
@@ -341,6 +362,8 @@ func _update_ui_after_selection_change():
 		for obj in selected_objs:
 			pipe_prop_list.add_pipe(obj)
 		pipe_prop_list.show()
+	elif all_pipe_nodes:
+		pass # TODO add PipeNode property editor
 
 func _update_position_lock_buttons():
 	var selected_objs := _selection_controller.selected_objs()
@@ -403,6 +426,12 @@ func _on_add_pipe_pressed() -> void:
 	dist_meas_to_add.user_label = TheProject.get_unique_name('Pipe')
 	world_view.objects.add_child(dist_meas_to_add)
 	mode = Mode.AddDistMeasureA
+
+func _on_add_pipe_node_pressed() -> void:
+	pipe_node_to_add = PipeNodeScene.instantiate()
+	pipe_node_to_add.user_label = TheProject.get_unique_name('PipeNode')
+	world_view.objects.add_child(pipe_node_to_add)
+	mode = Mode.AddPipeNode
 
 func _on_add_image_pressed():
 	img_dialog.popup_centered()
@@ -592,6 +621,8 @@ func _on_world_view_gui_input(event: InputEvent):
 		elif poly_to_add:
 			if _poly_edit_point_idx < poly_to_add.point_count():
 				poly_to_add.set_point(_poly_edit_point_idx, pos_in_world_px)
+		elif pipe_node_to_add:
+			pipe_node_to_add.position = pos_in_world_px
 		elif _can_start_move:
 			_can_start_move = false # clear flag once we started
 			# check if any selected objects are position locked
