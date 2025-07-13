@@ -41,45 +41,6 @@ step = 0.01
 value = 0.5
 suffix = "in"
 
-[node name="Label9" type="Label" parent="VBoxContainer/PropertiesList"]
-layout_mode = 2
-text = "Flow Source:"
-
-[node name="FlowSourceCheckBox" type="CheckBox" parent="VBoxContainer/PropertiesList"]
-layout_mode = 2
-size_flags_horizontal = 3
-tooltip_text = "Check this to make the pipe a water source. Typically, only 1 pipe should be set as the flow source, and the rest will feed from it."
-
-[node name="SrcPressureLabel" type="Label" parent="VBoxContainer/PropertiesList"]
-visible = false
-layout_mode = 2
-text = "Src. Pressure:"
-
-[node name="SrcPressureSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList"]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 3
-tooltip_text = "The fluid's nominal pressure (in pounds per sq. inch) at the source of the pipe."
-max_value = 300.0
-step = 0.01
-value = 60.0
-suffix = "psi"
-
-[node name="SrcFlowRateLabel" type="Label" parent="VBoxContainer/PropertiesList"]
-visible = false
-layout_mode = 2
-text = "Src. Flow Rate:"
-
-[node name="SrcFlowRateSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList"]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 3
-tooltip_text = "The fluid's nominal flow rate (in gallons per minute) at the source of the pipe."
-max_value = 300.0
-step = 0.01
-value = 60.0
-suffix = "gpm"
-
 [node name="MaterialLabel" type="Label" parent="VBoxContainer/PropertiesList"]
 layout_mode = 2
 text = "Material:"
@@ -102,9 +63,6 @@ layout_mode = 2
 
 [connection signal="text_submitted" from="VBoxContainer/PropertiesList/UserLabelLineEdit" to="." method="_on_user_label_line_edit_text_submitted"]
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/DiameterSpinBox" to="." method="_on_diameter_spin_box_value_changed"]
-[connection signal="toggled" from="VBoxContainer/PropertiesList/FlowSourceCheckBox" to="." method="_on_flow_source_check_box_toggled"]
-[connection signal="value_changed" from="VBoxContainer/PropertiesList/SrcPressureSpinBox" to="." method="_on_src_pressure_spin_box_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/PropertiesList/SrcFlowRateSpinBox" to="." method="_on_src_flow_rate_spin_box_value_changed"]
 [connection signal="item_selected" from="VBoxContainer/PropertiesList/MaterialOption" to="." method="_on_material_option_item_selected"]
 [connection signal="color_changed" from="VBoxContainer/PropertiesList/PipeColorPicker" to="." method="_on_pipe_color_picker_color_changed"]
 [connection signal="popup_closed" from="VBoxContainer/PropertiesList/PipeColorPicker" to="." method="_on_pipe_color_picker_popup_closed"]

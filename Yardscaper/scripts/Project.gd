@@ -35,6 +35,7 @@ var has_edits = false :
 		if old_value != has_edits and not _suppress_self_edit_signals:
 			has_edits_changed.emit(has_edits)
 var layout_pref := LayoutPreferences.new()
+var fsys : FSystem = FSystem.new()
 
 var _auto_save_timer := Timer.new()
 var _auto_save_thread : Thread = null
@@ -53,7 +54,6 @@ func reset() -> void:
 	project_name = ""
 	_suppress_self_edit_signals = false
 	has_edits = false
-	TheFluidSimulator.reset()
 	closed.emit()
 
 func is_opened() -> bool:
@@ -189,9 +189,6 @@ func add_object(obj: WorldObject) -> bool:
 		push_warning("obj '%s' is already added to project. ignoring add." % obj.name)
 		return false
 	
-	if obj is Pipe:
-		TheFluidSimulator.add_pipe(obj)
-	
 	# connect signal handlers
 	obj.property_changed.connect(_on_node_property_changed)
 	obj.moved.connect(_on_node_moved)
@@ -210,9 +207,6 @@ func remove_object(obj: WorldObject, free_it: bool = true) -> bool:
 	# disconnect signal handlers
 	obj.property_changed.disconnect(_on_node_property_changed)
 	obj.moved.disconnect(_on_node_moved)
-	
-	if obj is Pipe:
-		TheFluidSimulator.remove_pipe(obj)
 	
 	node_changed.emit(obj, ChangeType.REMOVE, [])
 	if free_it:
@@ -279,8 +273,9 @@ func deserialize(data: Dictionary, dir: String) -> void:
 		if wobj:
 			add_object(wobj)
 	
+	# TODO restore pipe connection logic
 	# notify all pipes to restore attachments to their flow sources
-	TheFluidSimulator.initialize_pipe_flow_sources()
+	#TheFluidSimulator.initialize_pipe_flow_sources()
 	
 	project_name = _get_project_name(data, dir)
 	_suppress_self_edit_signals = false

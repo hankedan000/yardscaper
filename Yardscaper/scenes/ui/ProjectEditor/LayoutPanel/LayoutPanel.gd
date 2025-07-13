@@ -134,7 +134,6 @@ func _ready():
 	TheProject.node_changed.connect(_on_TheProject_node_changed)
 	TheProject.opened.connect(_on_TheProject_opened)
 	TheProject.layout_pref.view_show_state_changed.connect(_on_LayoutPref_view_show_state_changed)
-	TheProject.layout_pref.pipe_colorize_changed.connect(_on_LayoutPref_pipe_colorize_changed)
 	_selection_controller.item_selected.connect(_on_selection_controller_item_selected)
 	_selection_controller.item_deselected.connect(_on_selection_controller_item_deselected)
 	sprink_prop_list.visible = false
@@ -192,12 +191,6 @@ func start_batch_edit(prop_name: StringName) -> void:
 func stop_batch_edit() -> void:
 	_batch_edits_for_prop = &""
 	_curr_batch_undo_op = null
-
-func get_pipe_colorize() -> Pipe.Colorize:
-	for idx in range(pipe_colorize_popupmenu.item_count):
-		if pipe_colorize_popupmenu.is_item_checked(idx):
-			return pipe_colorize_popupmenu.get_item_id(idx) as Pipe.Colorize
-	return Pipe.Colorize.Normal
 
 func _handle_left_click_release(pos_in_world_px: Vector2):
 	match mode:
@@ -407,8 +400,6 @@ func _on_obj_added(obj: WorldObject) -> void:
 		false)) # is_remove
 	obj.picked_state_changed.connect(_on_pickable_object_pick_state_changed.bind(obj))
 	obj.undoable_edit.connect(_on_world_obj_undoable_edit)
-	if obj is Pipe:
-		obj.colorize = get_pipe_colorize()
 	_selection_controller.clear_selection()
 	obj.picked = true
 
@@ -505,7 +496,6 @@ func _on_TheProject_opened():
 	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Sprinklers, layout_prefs.show_sprinklers)
 	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Pipes, layout_prefs.show_pipes)
 	Utils.set_item_checked_by_id(pipe_view_popupmenu, PipeViewMenuIds.ShowFlowDirection, layout_prefs.show_pipe_flow_direction)
-	Utils.set_item_checked_by_id(pipe_colorize_popupmenu, int(layout_prefs.pipe_colorize), true)
 	Utils.set_item_checked_by_id(grid_view_popupmenu, GridViewMenuIds.ShowGrid, layout_prefs.show_grid)
 	
 	# restore world view preferences
@@ -548,11 +538,6 @@ func _on_LayoutPref_view_show_state_changed(property: StringName, new_value: boo
 			for obj in world_view.objects.get_children():
 				if obj is Pipe:
 					obj.show_flow_arrows = new_value
-
-func _on_LayoutPref_pipe_colorize_changed(colorize: Pipe.Colorize) -> void:
-	for obj in world_view.objects.get_children():
-		if obj is Pipe:
-			obj.colorize = colorize
 
 func _on_img_dialog_file_selected(path) -> void:
 	if img_import_wizard.load_img(path):
@@ -701,9 +686,6 @@ func _on_pipe_colorize_popup_menu_id_pressed(id: int) -> void:
 		pipe_colorize_popupmenu.set_item_checked(item_idx, false)
 	var idx := pipe_colorize_popupmenu.get_item_index(id) as int
 	pipe_colorize_popupmenu.toggle_item_checked(idx)
-	
-	TheProject.layout_pref.pipe_colorize =  id as Pipe.Colorize
-	
 
 func _on_objects_view_popup_menu_id_pressed(id: int) -> void:
 	var idx := obj_view_popupmenu.get_item_index(id) as int

@@ -19,6 +19,7 @@ const PROP_KEY_POSITION_LOCKED = &"position_locked"
 @onready var pick_coll_shape : CollisionShape2D = $PickArea/CollisionShape2D
 
 var world : WorldViewportContainer = null
+var parent_project : Project = null
 
 var user_label : String = "" :
 	set(value):
@@ -64,6 +65,18 @@ var deferred_prop_change : DeferredPropertyChange = DeferredPropertyChange.new(s
 
 var _is_ready = false
 var _global_pos_at_move_start = null
+
+# @return true if initialization was successful, false otherwise
+func _init_world_obj(new_parent_project: Project) -> bool:
+	if is_instance_valid(parent_project):
+		push_warning("world object already initialize")
+		return false
+	elif ! is_instance_valid(new_parent_project):
+		push_error("new_parent_project must be valid")
+		return false
+	
+	parent_project = new_parent_project
+	return true
 
 func _ready():
 	# locate our parent WorldViewportContainer

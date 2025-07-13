@@ -38,8 +38,6 @@ class AddOrRemove:
 		var wobj := TheProject.instance_world_obj(_ser_obj)
 		if wobj and TheProject.add_object(wobj):
 			wobj.set_order_in_world(_from_idx)
-			if wobj is Pipe:
-				wobj.init_flow_source(TheFluidSimulator.get_all_pipes())
 			return true
 		return false
 	

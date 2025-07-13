@@ -1,15 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://cscoufmvhk6tk"]
+[gd_scene load_steps=3 format=3 uid="uid://cscoufmvhk6tk"]
 
 [ext_resource type="PackedScene" uid="uid://db8wvn8xh27x0" path="res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn" id="1_m6rx2"]
 [ext_resource type="Script" path="res://scenes/world_objects/Pipe/Pipe.gd" id="2_y5374"]
-[ext_resource type="PackedScene" uid="uid://brata3rmbc6sg" path="res://scenes/world_objects/Pipe/PipeFlowSource.tscn" id="3_x3gvd"]
-
-[sub_resource type="Curve2D" id="Curve2D_cvvec"]
-resource_local_to_scene = true
-_data = {
-"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-}
-point_count = 2
 
 [node name="Pipe" groups=["pipes"] instance=ExtResource("1_m6rx2")]
 script = ExtResource("2_y5374")
@@ -25,14 +17,3 @@ modulate = Color(1, 0.463814, 0.411516, 1)
 label_text_mode = 1
 label_show_mode = 5
 magnetic_physics_mask = 4
-
-[node name="FlowSource" parent="." index="3" instance=ExtResource("3_x3gvd")]
-visible = false
-
-[node name="Path2D" type="Path2D" parent="." index="4" groups=["pipe_paths"]]
-curve = SubResource("Curve2D_cvvec")
-
-[connection signal="attached" from="FlowSource" to="." method="_on_flow_source_attached"]
-[connection signal="dettached" from="FlowSource" to="." method="_on_flow_source_dettached"]
-[connection signal="flow_property_changed" from="FlowSource" to="." method="_on_flow_source_flow_property_changed"]
-[connection signal="moved" from="FlowSource" to="." method="_on_flow_source_moved"]

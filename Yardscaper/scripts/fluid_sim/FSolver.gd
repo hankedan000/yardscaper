@@ -146,13 +146,11 @@ static func solve_system(fsys: FSystem, settings:=Settings.new()) -> FSystemSolv
 
 static func solve_sub_system(ssys: SubSystem, settings:=Settings.new()) -> Math.FSolveResult:
 	if ! is_instance_valid(ssys):
-		push_error("ssys must be valid")
 		return Math.FSolveResult.new()
 	
 	# make sure system is Well constrainted
 	var ctype := ssys.constrain_type()
 	if ctype != ConstrainType.Well:
-		push_error("SubSystem must be well constrained. ctype = %s" % ctype)
 		return Math.FSolveResult.new()
 	
 	# solve the system of equations

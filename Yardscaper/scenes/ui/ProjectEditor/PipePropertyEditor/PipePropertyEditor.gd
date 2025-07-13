@@ -3,11 +3,6 @@ extends PanelContainer
 
 @onready var user_label_lineedit      : LineEdit = $VBoxContainer/PropertiesList/UserLabelLineEdit
 @onready var diameter_spinbox         : SpinBox = $VBoxContainer/PropertiesList/DiameterSpinBox
-@onready var flow_src_checkbox        : CheckBox = $VBoxContainer/PropertiesList/FlowSourceCheckBox
-@onready var src_pressure_label       : Label = $VBoxContainer/PropertiesList/SrcPressureLabel
-@onready var src_pressure_spinbox     : SpinBox = $VBoxContainer/PropertiesList/SrcPressureSpinBox
-@onready var src_flow_rate_label      : Label = $VBoxContainer/PropertiesList/SrcFlowRateLabel
-@onready var src_flow_rate_spinbox    : SpinBox = $VBoxContainer/PropertiesList/SrcFlowRateSpinBox
 @onready var material_option          : OptionButton = $VBoxContainer/PropertiesList/MaterialOption
 @onready var pipe_color_picker        := $VBoxContainer/PropertiesList/PipeColorPicker
 @onready var multi_edit_warning       := $VBoxContainer/MultiEditWarning
@@ -68,9 +63,6 @@ func _sync_ui():
 	_ignore_internal_edits = true
 	user_label_lineedit.text = ref_pipe.user_label if single_edit else "---"
 	diameter_spinbox.value = ref_pipe.diameter_inches
-	flow_src_checkbox.button_pressed = ref_pipe.is_flow_source
-	src_pressure_spinbox.value = ref_pipe.src_pressure_psi
-	src_flow_rate_spinbox.value = ref_pipe.src_flow_rate_gpm
 	_select_material_option(ref_pipe.material_type)
 	pipe_color_picker.color = ref_pipe.pipe_color
 	_ignore_internal_edits = false
@@ -90,19 +82,6 @@ func _select_material_option(material_type: PipeTables.MaterialType) -> void:
 
 func _on_user_label_line_edit_text_submitted(new_text):
 	_apply_prop_edit(WorldObject.PROP_KEY_USER_LABEL, new_text)
-
-func _on_flow_source_check_box_toggled(toggled_on: bool) -> void:
-	src_pressure_label.visible = toggled_on
-	src_pressure_spinbox.visible = toggled_on
-	src_flow_rate_label.visible = toggled_on
-	src_flow_rate_spinbox.visible = toggled_on
-	_apply_prop_edit(Pipe.PROP_KEY_IS_FLOW_SRC, toggled_on)
-
-func _on_src_pressure_spin_box_value_changed(value: float) -> void:
-	_apply_prop_edit(Pipe.PROP_KEY_SRC_PRESSURE_PSI, value)
-
-func _on_src_flow_rate_spin_box_value_changed(value: float) -> void:
-	_apply_prop_edit(Pipe.PROP_KEY_SRC_FLOW_RATE_GPM, value)
 
 func _on_diameter_spin_box_value_changed(value: float) -> void:
 	_apply_prop_edit(Pipe.PROP_KEY_DIAMETER_INCHES, value)

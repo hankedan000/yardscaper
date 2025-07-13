@@ -9,13 +9,11 @@ const PROP_KEY_SHOW_POLYGONS = &"show_polygons"
 const PROP_KEY_SHOW_SPRINKLERS = &"show_sprinklers"
 const PROP_KEY_SHOW_PIPES = &"show_pipes"
 const PROP_KEY_SHOW_PIPE_FLOW_DIRECTION = &"show_pipe_flow_direction"
-const PROP_KEY_PIPE_COLORIZE = &"pipe_colorize"
 const PROP_KEY_CAMERA_POS = &"camera_pos"
 const PROP_KEY_ZOOM = &"zoom"
 const PROP_KEY_GRID_MAJOR_SPACING = &"grid_major_spacing_ft"
 
 signal view_show_state_changed(prop_key: StringName, new_value: bool)
-signal pipe_colorize_changed(new_colorize: Pipe.Colorize)
 
 var show_grid = true:
 	set(value):
@@ -65,12 +63,6 @@ var show_pipe_flow_direction = false:
 			return
 		show_pipe_flow_direction = value
 		view_show_state_changed.emit(PROP_KEY_SHOW_PIPE_FLOW_DIRECTION, value)
-var pipe_colorize : Pipe.Colorize = Pipe.Colorize.Normal:
-	set(value):
-		if pipe_colorize == value:
-			return
-		pipe_colorize = value
-		pipe_colorize_changed.emit(pipe_colorize)
 var camera_pos := Vector2()
 var zoom = 1.0
 var grid_major_spacing_ft := Vector2(5, 5)
@@ -85,7 +77,6 @@ func serialize():
 		PROP_KEY_SHOW_SPRINKLERS : show_sprinklers,
 		PROP_KEY_SHOW_PIPES : show_pipes,
 		PROP_KEY_SHOW_PIPE_FLOW_DIRECTION : show_pipe_flow_direction,
-		PROP_KEY_PIPE_COLORIZE : int(pipe_colorize),
 		PROP_KEY_CAMERA_POS : Utils.vect2_to_pair(camera_pos),
 		PROP_KEY_ZOOM : zoom,
 		PROP_KEY_GRID_MAJOR_SPACING : Utils.vect2_to_pair(grid_major_spacing_ft)
@@ -100,7 +91,6 @@ func deserialize(obj):
 	show_sprinklers = DictUtils.get_w_default(obj, PROP_KEY_SHOW_SPRINKLERS, true)
 	show_pipes = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPES, true)
 	show_pipe_flow_direction = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPE_FLOW_DIRECTION, false)
-	pipe_colorize = DictUtils.get_w_default(obj, PROP_KEY_PIPE_COLORIZE, int(Pipe.Colorize.Normal)) as Pipe.Colorize
 	camera_pos = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_CAMERA_POS, [0,0]))
 	zoom = DictUtils.get_w_default(obj, PROP_KEY_ZOOM, 1.0)
 	grid_major_spacing_ft = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_GRID_MAJOR_SPACING, [5,5]))
