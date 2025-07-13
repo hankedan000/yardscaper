@@ -11,4 +11,4 @@ script = ExtResource("1_aftmt")
 modulate = Color(0.477438, 0.725207, 1, 1)
 pressed_type = 1
 hover_type = 1
-show_on_hover = 2
+label_text_mode = 1

@@ -112,10 +112,8 @@ class FlowStats:
 func _ready():
 	super._ready()
 	color = Color.WHITE
-	point_a_handle.user_text = "Feed"
-	point_b_handle.user_text = "Drain"
-	point_a_handle.show_on_hover = EditorHandle.HoverShowType.UserText
-	point_b_handle.show_on_hover = EditorHandle.HoverShowType.UserText
+	_setup_pipe_handle(point_a_handle, "Feed")
+	_setup_pipe_handle(point_b_handle, "Drain")
 	flow_src.deserialize(_flow_src_data_from_disk)
 	flow_src.parent_pipe = self
 	_update_path() # match path to restored point_a and point_b values
@@ -308,6 +306,16 @@ func queue_rebake() -> void:
 		_needs_rebake = true
 		needs_rebake.emit()
 
+func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
+	handle.magnetic_physics_mask = 0x4 # TODO would be nice if could get mask by name from project settings
+	handle.get_magnet().is_collector = false
+	handle.get_magnet().disable_collection = true
+	handle.get_magnet().position_change_request.connect(_on_magnetic_area_position_change_request.bind(handle))
+	handle.user_text = user_text
+	handle.label_text_mode = EditorHandle.LabelTextMode.UserText
+	handle.get_button().button_down.connect(_on_magnetic_handle_button_down.bind(handle))
+	handle.get_button().button_up.connect(_on_magnetic_handle_button_up.bind(handle))
+
 func _predelete() -> void:
 	if is_instance_valid(flow_src):
 		flow_src.detach_from_source()
@@ -436,3 +444,13 @@ func _on_flow_source_dettached(old_src: Pipe) -> void:
 
 func _on_flow_source_flow_property_changed() -> void:
 	queue_rebake()
+
+func _on_magnetic_handle_button_down(handle: EditorHandle) -> void:
+	handle.get_magnet().disable_collection = false
+
+func _on_magnetic_handle_button_up(handle: EditorHandle) -> void:
+	handle.get_magnet().disable_collection = true
+
+func _on_magnetic_area_position_change_request(new_global_position: Vector2, handle: EditorHandle) -> void:
+	var new_position := new_global_position - global_position
+	_set_point_position(handle, new_position, true)

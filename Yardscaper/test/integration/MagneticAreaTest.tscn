@@ -50,6 +50,7 @@ position = Vector2(224, 192)
 script = SubResource("GDScript_4wn5u")
 
 [node name="MagneticArea" parent="RedMagnet" instance=ExtResource("2_1ldh0")]
+magnetic_physics_mask = 1
 is_collector = true
 metadata/_edit_lock_ = true
 
@@ -58,6 +59,7 @@ position = Vector2(384, 192)
 script = SubResource("GDScript_n7ba6")
 
 [node name="MagneticArea" parent="BlueMagnet" instance=ExtResource("2_1ldh0")]
+magnetic_physics_mask = 1
 metadata/_edit_lock_ = true
 
 [connection signal="position_change_request" from="BlueMagnet/MagneticArea" to="BlueMagnet" method="_on_magnetic_area_position_change_request"]

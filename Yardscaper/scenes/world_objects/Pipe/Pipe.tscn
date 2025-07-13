@@ -16,9 +16,15 @@ script = ExtResource("2_y5374")
 
 [node name="PointA_Handle" parent="." index="1"]
 modulate = Color(0.556863, 0.937255, 0.592157, 1)
+label_text_mode = 1
+label_show_mode = 5
+magnetic_physics_mask = 4
 
 [node name="PointB_Handle" parent="." index="2"]
 modulate = Color(1, 0.463814, 0.411516, 1)
+label_text_mode = 1
+label_show_mode = 5
+magnetic_physics_mask = 4
 
 [node name="FlowSource" parent="." index="3" instance=ExtResource("3_x3gvd")]
 visible = false

@@ -9,6 +9,13 @@ signal attachment_changed(collector: MagneticArea, collected: MagneticArea, atta
 
 const POS_CHANGE_TOL_PX : float = 1.0
 
+@export_flags_2d_physics var magnetic_physics_mask := 0:
+	set(new_value):
+		collision_layer = new_value
+		collision_mask = new_value
+	get():
+		return collision_layer
+
 # if true, this magnet will collect other magnets. if this magnet is moved, then
 # it will request it's collected magnets to be moved as well.
 @export var is_collector : bool = false:
@@ -18,11 +25,20 @@ const POS_CHANGE_TOL_PX : float = 1.0
 		is_collector = new_value
 		_update_collector_state()
 
+# this flag only pertains to non-collectors. if true, the magnet won't be
+# collected by other magnets even if it's within range.
+@export var disable_collection : bool = false
+
 @onready var _coll_shape : CollisionShape2D = $CollisionShape2D
 @onready var _circle_shape : CircleShape2D = _coll_shape.shape
 
 var _my_collector : MagneticArea = null # the magnet that 'holds' us in a collection
 var _collection : Array[MagneticArea] = [] # held magnets if marked as a 'collector'
+var _in_position_change_try := false # used to avoid recursive tries
+var _last_requested_global_position := Vector2()
+
+func _ready() -> void:
+	_update_collector_state()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
@@ -35,7 +51,16 @@ func get_radius() -> float:
 	return _circle_shape.radius
 
 func is_collected() -> bool:
-	return _my_collector != null
+	return is_instance_valid(_my_collector)
+
+func is_collectable() -> bool:
+	if is_collector:
+		return false
+	elif is_collected():
+		return false
+	elif disable_collection:
+		return false
+	return true
 
 func collect(other: MagneticArea) -> void:
 	if ! is_collector:
@@ -44,14 +69,8 @@ func collect(other: MagneticArea) -> void:
 	elif ! is_instance_valid(other):
 		push_warning("other magnet is not valid")
 		return
-	elif other.is_collector:
-		push_warning("other magnet is marked as a collector")
-		return
-	elif other.is_collected():
-		push_warning("other is already in a collection")
-		return
-	elif other in _collection:
-		push_warning("other is already in our collection")
+	elif ! other.is_collectable():
+		# could already collected (even by us), or collection is disabled
 		return
 	
 	_collection.push_back(other)
@@ -74,12 +93,21 @@ func uncollect(other: MagneticArea) -> void:
 	other._my_collector = null
 	other.attachment_changed.emit(self, other, false)
 	attachment_changed.emit(self, other, false)
+
+# @param[in] new_global_position - the new global position to try assigning
+# @return the position that was actually assigned due to potential magnetic
+# effects
+func try_position_change(new_global_position: Vector2) -> Vector2:
+	if _in_position_change_try:
+		return _last_requested_global_position
 	
-func try_position_change(new_global_position: Vector2) -> void:
+	_in_position_change_try = true
 	if is_collector:
 		_try_position_change_collector(new_global_position)
 	else:
 		_try_position_change_noncollector(new_global_position)
+	_in_position_change_try = false
+	return _last_requested_global_position
 
 func _try_position_change_collector(new_global_position: Vector2) -> void:
 	_request_position_change(new_global_position)
@@ -113,17 +141,18 @@ func _try_position_change_noncollector(new_global_position: Vector2) -> void:
 		_my_collector.uncollect(self)
 		_request_position_change(new_global_position)
 	else:
-		# snap the magnet position to the collector's position instead
+		# snap the magnet position to the collector's position instead. there's
+		# no need to call collect() because that will occur automatically via
+		# the area_entered() signal
 		_request_position_change(collector_global_pos)
 
 func _update_collector_state() -> void:
 	_release_all_attachments()
-	print("is_collector = %s" % is_collector)
 	monitoring = is_collector
 	monitorable = ! is_collector
-	if is_collector:
+	if is_collector && ! area_entered.is_connected(_on_area_entered):
 		area_entered.connect(_on_area_entered)
-	elif area_entered.is_connected(_on_area_entered):
+	elif ! is_collector && area_entered.is_connected(_on_area_entered):
 		area_entered.disconnect(_on_area_entered)
 
 func _predelete() -> void:
@@ -147,7 +176,6 @@ func _request_position_change(new_global_position: Vector2) -> void:
 		global_position = new_global_position
 
 func _on_area_entered(area: Area2D) -> void:
-	print("area_entered = %s" % area)
 	var magnet := area as MagneticArea
 	if ! magnet.is_collected():
 		collect(magnet)

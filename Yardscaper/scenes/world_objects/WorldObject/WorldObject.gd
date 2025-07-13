@@ -63,7 +63,7 @@ var short_term_position_locked : bool = false
 var deferred_prop_change : DeferredPropertyChange = DeferredPropertyChange.new(self)
 
 var _is_ready = false
-var _pos_at_move_start = null
+var _global_pos_at_move_start = null
 
 func _ready():
 	# locate our parent WorldViewportContainer
@@ -108,18 +108,18 @@ func is_movable() -> bool:
 	return true
 
 func moving() -> bool:
-	return _pos_at_move_start != null
+	return _global_pos_at_move_start != null
 
 func start_move():
 	if moving():
 		push_warning("move was already started. starting another one.")
-	_pos_at_move_start = position
+	_global_pos_at_move_start = global_position
 
 func update_move(delta):
 	if ! moving():
 		push_warning("can't update_move() when not moving")
 		return
-	position = _pos_at_move_start + delta
+	_apply_global_position(_global_pos_at_move_start + delta)
 
 func finish_move(cancel=false):
 	if not moving():
@@ -127,15 +127,15 @@ func finish_move(cancel=false):
 		return
 	
 	if cancel:
-		position = _pos_at_move_start
+		_apply_global_position(_global_pos_at_move_start)
 	else:
-		moved.emit(self, _pos_at_move_start, position)
-	_pos_at_move_start = null
+		moved.emit(self, _global_pos_at_move_start, global_position)
+	_global_pos_at_move_start = null
 
 func serialize():
 	return {
 		'subclass' : get_subclass(),
-		PROP_KEY_POSITION_FT : Utils.vect2_to_pair(Utils.px_to_ft_vec(position)),
+		PROP_KEY_POSITION_FT : Utils.vect2_to_pair(Utils.px_to_ft_vec(global_position)),
 		PROP_KEY_ROTATION_DEG : int(rotation_degrees),
 		PROP_KEY_USER_LABEL : user_label,
 		PROP_KEY_INFO_LABEL_VISIBLE : info_label.visible,
@@ -145,17 +145,22 @@ func serialize():
 func deserialize(obj):
 	if ! _is_ready:
 		await ready
-	position = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj[PROP_KEY_POSITION_FT]))
+	_apply_global_position(Utils.ft_to_px_vec(Utils.pair_to_vect2(obj[PROP_KEY_POSITION_FT])))
 	rotation_degrees = obj[PROP_KEY_ROTATION_DEG]
 	user_label = obj[PROP_KEY_USER_LABEL]
 	info_label.visible = DictUtils.get_w_default(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)
 	position_locked = DictUtils.get_w_default(obj, PROP_KEY_POSITION_LOCKED, false)
 
+# Subclasses can override this if they wish. For example, nodes that can
+# magnetize might want to pass this request through the MagneticArea node.
+func _apply_global_position(new_global_pos: Vector2) -> void:
+	global_position = new_global_pos
+
 # @return true if the value changed, false if not (does not indicate if change
 # event was fired or not)
-func _check_and_emit_prop_change(prop_name: StringName, old_value: Variant) -> bool:
+func _check_and_emit_prop_change(prop_name: StringName, old_value: Variant, force_change: bool = false) -> bool:
 	var new_value = get(prop_name)
-	var changed : bool = old_value != new_value
+	var changed : bool = force_change || (old_value != new_value)
 	if changed && ! deferred_prop_change.matches(prop_name):
 		property_changed.emit(self, prop_name, old_value, new_value)
 	return changed

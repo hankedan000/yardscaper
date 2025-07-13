@@ -394,7 +394,13 @@ func _apply_polygon_edit_mode(objs: Array[WorldObject]) -> void:
 			obj.edit_mode = _poly_edit_mode
 
 func _on_obj_added(obj: WorldObject) -> void:
-	world_view.objects.add_child(obj)
+	# add the object to the world view
+	var obj_parent := obj.get_parent()
+	if is_instance_valid(obj_parent) && obj_parent != world_view.objects:
+		obj.reparent(world_view.objects)
+	else:
+		world_view.objects.add_child(obj)
+	
 	undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.AddOrRemove.new(
 		world_view,
 		obj,

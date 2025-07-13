@@ -1,7 +1,7 @@
 class_name FluidSimulator
 extends Node
 
-var debug = true
+var debug = false
 var enable_major_losses : bool = true:
 	set(value):
 		if value == enable_major_losses:

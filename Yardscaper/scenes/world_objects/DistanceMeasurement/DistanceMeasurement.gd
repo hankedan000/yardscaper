@@ -6,23 +6,25 @@ const PROP_KEY_POINT_B := &'point_b'
 
 var color := Color.BLACK
 
+# point is relative to the distance measurement's root node
 var point_a := Vector2():
 	set(value):
-		var old_value := point_a
-		point_a = value
-		if _check_and_emit_prop_change(PROP_KEY_POINT_A, old_value):
-			queue_redraw()
+		_set_point_position(point_a_handle, value)
+	get():
+		return point_a_handle.position
 
+# point is relative to the distance measurement's root node
 var point_b := Vector2():
 	set(value):
-		var old_value := point_b
-		point_b = value
-		if _check_and_emit_prop_change(PROP_KEY_POINT_B, old_value):
-			queue_redraw()
+		_set_point_position(point_b_handle, value)
+	get():
+		return point_b_handle.position
 
 @onready var point_a_handle : EditorHandle = $PointA_Handle
 @onready var point_b_handle : EditorHandle = $PointB_Handle
 
+var _point_a_from_save := Vector2()
+var _point_b_from_save := Vector2()
 var _coll_rect := RectangleShape2D.new()
 var _handle_being_moved : EditorHandle = null
 var _handle_init_pos : Vector2 = Vector2() # init position when starting move
@@ -30,17 +32,14 @@ var _mouse_init_pos : Vector2 = Vector2() # init position when starting move
 
 func _ready():
 	super._ready()
+	point_a = _point_a_from_save
+	point_b = _point_b_from_save
+	
 	# change pick shape to a rectangle (default is ellipse)
 	pick_coll_shape.shape = _coll_rect
 	
-	# setup editor handles
-	point_a_handle.user_id = 1
-	point_b_handle.user_id = 2
-	point_a_handle.get_button().button_down.connect(_on_handle_button_down.bind(point_a_handle))
-	point_b_handle.get_button().button_down.connect(_on_handle_button_down.bind(point_b_handle))
-	point_a_handle.get_button().button_up.connect(_on_handle_button_up)
-	point_b_handle.get_button().button_up.connect(_on_handle_button_up)
-	
+	_setup_dist_handle(point_a_handle, 1)
+	_setup_dist_handle(point_b_handle, 2)
 	set_process(false)
 
 func _draw():
@@ -108,13 +107,23 @@ func serialize():
 
 func deserialize(obj):
 	super.deserialize(obj)
-	point_a = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj['point_a_ft']))
-	point_b = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj['point_b_ft']))
+	_point_a_from_save = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj['point_a_ft']))
+	_point_b_from_save = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj['point_b_ft']))
+
+func _setup_dist_handle(handle: EditorHandle, user_id: int) -> void:
+	handle.user_id = user_id
+	handle.get_button().button_down.connect(_on_handle_button_down.bind(handle))
+	handle.get_button().button_up.connect(_on_handle_button_up)
+
+func _set_point_position(handle: EditorHandle, new_position: Vector2, force_change:= false):
+	var old_value := handle.position
+	handle.try_position_change(global_position + new_position)
+	var prop_key : StringName = PROP_KEY_POINT_A if handle == point_a_handle else PROP_KEY_POINT_B
+	if _check_and_emit_prop_change(prop_key, old_value, force_change):
+		queue_redraw()
 
 func _update_handles() -> void:
 	lock_indicator.position = point_a
-	point_a_handle.position = point_a
-	point_b_handle.position = point_b
 	point_a_handle.visible = picked && ! position_locked
 	point_b_handle.visible = picked && ! position_locked
 

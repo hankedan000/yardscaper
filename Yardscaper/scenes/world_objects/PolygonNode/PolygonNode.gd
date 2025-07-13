@@ -250,6 +250,7 @@ func _update_edit_objects() -> void:
 		new_handle.user_id = point_idx
 		new_handle.normal_type = EditorHandle.HandleType.Sharp
 		new_handle.modulate_on_hover = Color.AQUA
+		new_handle.label_show_mode = EditorHandle.LabelShowMode.HoverOrPressed
 		new_handle.position = point
 		_setup_cmn_edit_handle_signals(new_handle)
 		var handle_button := new_handle.get_button()
