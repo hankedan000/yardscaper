@@ -653,9 +653,8 @@ func _on_position_unlock_button_pressed() -> void:
 	_update_position_lock_buttons()
 
 func _on_tool_tip_timer_timeout() -> void:
-	if _hovered_obj and mode == Mode.Idle:
-		var tip_text := "%s" % _hovered_obj.user_label
-		world_view.show_tooltip(tip_text)
+	if is_instance_valid(_hovered_obj) and mode == Mode.Idle:
+		world_view.show_tooltip(_hovered_obj.get_tooltip_text())
 
 func _on_view_menu_id_pressed(id: int) -> void:
 	var view_popup := view_menu_button.get_popup() as PopupMenu

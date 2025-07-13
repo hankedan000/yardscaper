@@ -62,7 +62,7 @@ func _sync_ui():
 	
 	_ignore_internal_edits = true
 	user_label_lineedit.text = ref_pipe.user_label if single_edit else "---"
-	diameter_spinbox.value = ref_pipe.diameter_inches
+	diameter_spinbox.value = Utils.ft_to_inches(ref_pipe.diameter_ft)
 	_select_material_option(ref_pipe.material_type)
 	pipe_color_picker.color = ref_pipe.pipe_color
 	_ignore_internal_edits = false
@@ -84,7 +84,7 @@ func _on_user_label_line_edit_text_submitted(new_text):
 	_apply_prop_edit(WorldObject.PROP_KEY_USER_LABEL, new_text)
 
 func _on_diameter_spin_box_value_changed(value: float) -> void:
-	_apply_prop_edit(Pipe.PROP_KEY_DIAMETER_INCHES, value)
+	_apply_prop_edit(Pipe.PROP_KEY_DIAMETER_FT, Utils.inches_to_ft(value))
 
 func _on_material_option_item_selected(index: int) -> void:
 	var key = material_option.get_item_text(index)

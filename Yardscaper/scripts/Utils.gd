@@ -6,11 +6,26 @@ const INCHES_PER_FT : float = 12.0
 const CFTPS_PER_GPM : float = 0.0022280092365745
 const SQINCH_PER_SQFT : float = 144.0
 
+const DISP_UNIT_NONE : StringName = &""
+const DISP_UNIT_IN : StringName = &"in"
+const DISP_UNIT_IN2 : StringName = &"in^2"
+const DISP_UNIT_FT : StringName = &"ft"
+const DISP_UNIT_FT2 : StringName = &"ft^2"
+const DISP_UNIT_GPM : StringName = &"gpm"
+const DISP_UNIT_PSI : StringName = &"psi"
+const DISP_UNIT_FPS : StringName = &"ft/s"
+
 static func ft_to_inches(ft: float) -> float:
 	return ft * INCHES_PER_FT
 
 static func inches_to_ft(inches: float) -> float:
 	return inches / INCHES_PER_FT
+
+static func ft2_to_in2(ft2: float) -> float:
+	return ft2 * SQINCH_PER_SQFT
+
+static func in2_to_ft2(in2: float) -> float:
+	return in2 / SQINCH_PER_SQFT
 
 static func ft_to_px(ft: float) -> float:
 	return ft * PX_PER_FT
@@ -39,6 +54,15 @@ static func psi_to_psft(psi: float) -> float:
 # pounds per square ft to pounds per square inch
 static func psft_to_psi(psft: float) -> float:
 	return psft / SQINCH_PER_SQFT
+
+static func pretty_fvar(fvar: Var, disp_unit: StringName, unit_conv: Callable =Callable()) -> String:
+	if fvar.state == Var.State.Unknown:
+		return "UNKNOWN %s" % disp_unit
+	else:
+		var value := fvar.value
+		if unit_conv.is_valid():
+			value = unit_conv.call(value)
+		return "%f %s" % [value, disp_unit]
 
 static func pretty_dist(dist_ft: float) -> String:
 	# round dist_ft to nearest inch

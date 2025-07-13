@@ -145,6 +145,9 @@ func finish_move(cancel=false):
 		moved.emit(self, _global_pos_at_move_start, global_position)
 	_global_pos_at_move_start = null
 
+func get_tooltip_text() -> String:
+	return user_label
+
 func serialize():
 	return {
 		'subclass' : get_subclass(),

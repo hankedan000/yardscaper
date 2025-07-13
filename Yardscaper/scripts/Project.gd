@@ -284,17 +284,19 @@ func instance_world_obj(ser_obj: Dictionary) -> WorldObject:
 	var wobj = null
 	match ser_obj['subclass']:
 		'Sprinkler':
-			wobj = SprinklerScene.instantiate()
+			wobj = SprinklerScene.instantiate() as Sprinkler
 		'ImageNode':
-			wobj = ImageNodeScene.instantiate()
+			wobj = ImageNodeScene.instantiate() as ImageNode
 		'DistanceMeasurement':
-			wobj = DistanceMeasurementScene.instantiate()
+			wobj = DistanceMeasurementScene.instantiate() as DistanceMeasurement
 		'PolygonNode':
-			wobj = PolygonNodeScene.instantiate()
+			wobj = PolygonNodeScene.instantiate() as PolygonNode
 		'Pipe':
-			wobj = PipeScene.instantiate()
+			wobj = PipeScene.instantiate() as Pipe
+			wobj._init_pipe(self)
 		'PipeNode':
-			wobj = PipeNodeScene.instantiate()
+			wobj = PipeNodeScene.instantiate() as PipeNode
+			wobj._init_pipe_node(self)
 		_:
 			push_warning("unimplemented subclass '%s' deserialization" % [ser_obj['subclass']])
 	if wobj:

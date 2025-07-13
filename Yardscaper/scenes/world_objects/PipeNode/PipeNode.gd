@@ -34,6 +34,17 @@ func _notification(what: int) -> void:
 func get_subclass() -> String:
 	return "PipeNode"
 
+func get_tooltip_text() -> String:
+	var text : String = "%s" % user_label
+	if ! is_instance_valid(fnode):
+		return text
+	
+	text += " (%s)" % fnode
+	text += "\nnet pressure: %s" % Utils.pretty_fvar(fnode.h_psi, Utils.DISP_UNIT_PSI)
+	text += "\nexternal flow: %s" % Utils.pretty_fvar(fnode.q_ext_cfs, Utils.DISP_UNIT_GPM, Utils.cftps_to_gpm)
+	text += "\nelevation: %s %s" % [fnode.el_ft, Utils.DISP_UNIT_FT]
+	return text
+
 func get_body_radius_px() -> float:
 	return Utils.ft_to_px(BODY_RADIUS_FT)
 

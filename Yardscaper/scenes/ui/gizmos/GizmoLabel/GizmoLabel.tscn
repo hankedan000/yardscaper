@@ -6,7 +6,7 @@
 [node name="GizmoLabel" instance=ExtResource("1_l35wl")]
 script = ExtResource("2_08ifi")
 keep_center = true
-text = null
+text = ""
 
 [node name="Label" type="Label" parent="." index="0"]
 offset_right = 1.0

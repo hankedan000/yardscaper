@@ -5,17 +5,16 @@ class_name GizmoLabel
 @export var keep_center : bool = true
 @export var text : String = "":
 	set(value):
-		if is_inside_tree():
+		if is_instance_valid(_label):
 			_label.text = value
 			if keep_center:
 				center_text()
 		else:
 			text = value
 	get():
-		if is_inside_tree():
+		if is_instance_valid(_label):
 			return _label.text
-		else:
-			return text
+		return text
 
 @onready var _label : Label = $Label
 

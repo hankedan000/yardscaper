@@ -1,19 +1,21 @@
 class_name Pipe
 extends DistanceMeasurement
 
-const PROP_KEY_DIAMETER_INCHES = &'diameter_inches'
+const PROP_KEY_DIAMETER_FT = &'diameter_ft'
 const PROP_KEY_PIPE_COLOR = &'pipe_color'
 const PROP_KEY_MATERIAL_TYPE = &'material_type'
 const PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT = &'custom_surface_roughness_ft'
 
 const PVC_SURFACE_ROUGHNESS_FT := 0.000005
 
-var diameter_inches : float = 0.75:
+var diameter_ft : float = 0.75:
 	set(value):
-		var old_value = diameter_inches
-		diameter_inches = value
-		if _check_and_emit_prop_change(PROP_KEY_DIAMETER_INCHES, old_value):
+		var old_value = fpipe.d_ft
+		fpipe.d_ft = value
+		if _check_and_emit_prop_change(PROP_KEY_DIAMETER_FT, old_value):
 			queue_redraw()
+	get():
+		return fpipe.d_ft
 
 var pipe_color : Color = Color.WHITE_SMOKE:
 	set(value):
@@ -26,6 +28,10 @@ var material_type : PipeTables.MaterialType = PipeTables.MaterialType.PVC:
 	set(value):
 		var old_value = material_type
 		material_type = value
+		if material_type == PipeTables.MaterialType.Custom:
+			fpipe.E_ft = custom_surface_roughness_ft
+		else:
+			fpipe.E_ft = PipeTables.lookup_surface_roughness(material_type)
 		if _check_and_emit_prop_change(PROP_KEY_MATERIAL_TYPE, old_value):
 			pass
 
@@ -33,6 +39,8 @@ var custom_surface_roughness_ft : float = 0.0:
 	set(value):
 		var old_value = custom_surface_roughness_ft
 		custom_surface_roughness_ft = value
+		if material_type == PipeTables.MaterialType.Custom:
+			fpipe.E_ft = custom_surface_roughness_ft
 		if _check_and_emit_prop_change(PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT, old_value):
 			pass
 
@@ -44,6 +52,11 @@ var show_flow_arrows : bool = false:
 		queue_redraw()
 
 var fpipe : FPipe = null
+
+class PropertiesFromSave extends RefCounted:
+	var diameter_ft : float = 0.5
+
+var _props_from_save := PropertiesFromSave.new()
 
 # @return true if initialization was successful, false otherwise
 func _init_pipe(new_parent_project: Project) -> bool:
@@ -58,13 +71,16 @@ func _ready():
 	color = Color.WHITE
 	_setup_pipe_handle(point_a_handle, "Feed")
 	_setup_pipe_handle(point_b_handle, "Drain")
+	
+	# restore properties from save
+	diameter_ft = _props_from_save.diameter_ft
 
 func _draw() -> void:
 	if dist_px() < 1.0:
 		return # nothing to draw
 	
 	const OUTLINE_PX := 2
-	var diameter_px := Utils.ft_to_px(Utils.inches_to_ft(diameter_inches))
+	var diameter_px := Utils.ft_to_px(diameter_ft)
 	
 	# update position/shape of the collision rectangle
 	# probably not the best place to do this, but convenient and efficient
@@ -104,9 +120,33 @@ func _notification(what: int) -> void:
 func get_subclass() -> String:
 	return "Pipe"
 
+func get_tooltip_text() -> String:
+	var text : String = "%s" % user_label
+	if ! is_instance_valid(fpipe):
+		return text
+	
+	var length_ft := dist_ft()
+	text += " (%s)" % fpipe
+	text += "\nlength: %f %s (%s)" % [length_ft, Utils.DISP_UNIT_FT, Utils.pretty_dist(length_ft)]
+	text += "\ndiameter: %f %s" % [Utils.ft_to_inches(fpipe.d_ft), Utils.DISP_UNIT_IN]
+	text += "\ncross-sectional area: %f %s" % [Utils.ft2_to_in2(fpipe.area_ft2()), Utils.DISP_UNIT_IN2]
+	text += "\nmaterial: %s" % EnumUtils.to_str(PipeTables.MaterialType, material_type)
+	text += "\nsurface roughness: %f %s (abs); %f (rel)" % [fpipe.E_ft, Utils.DISP_UNIT_FT, fpipe.relative_roughness()]
+	text += "\nflow rate: %s" % Utils.pretty_fvar(fpipe.q_cfs, Utils.DISP_UNIT_GPM, Utils.cftps_to_gpm)
+	text += "\nvelocity: %s" % Utils.pretty_fvar(fpipe.v_fps(), Utils.DISP_UNIT_FPS)
+	text += "\nReynolds number (Re): %s" % Utils.pretty_fvar(fpipe.Re(), Utils.DISP_UNIT_NONE)
+	text += "\nDarcy friction coef: %s" % Utils.pretty_fvar(fpipe.f_darcy(), Utils.DISP_UNIT_NONE)
+	text += "\nsrc pressure: %s" % Utils.pretty_fvar(fpipe.src_h_psi(), Utils.DISP_UNIT_PSI)
+	text += "\nsink pressure: %s" % Utils.pretty_fvar(fpipe.sink_h_psi(), Utils.DISP_UNIT_PSI)
+	text += "\nmajor loss: %s" % Utils.pretty_fvar(fpipe.major_loss_psi(), Utils.DISP_UNIT_PSI)
+	text += "\nentry minor loss: %s" % Utils.pretty_fvar(fpipe.entry_minor_loss_psi(), Utils.DISP_UNIT_PSI)
+	text += "\nexit minor loss: %s" % Utils.pretty_fvar(fpipe.exit_minor_loss_psi(), Utils.DISP_UNIT_PSI)
+	text += "\nnet loss: %s" % Utils.pretty_fvar(fpipe.delta_h_psi(), Utils.DISP_UNIT_PSI)
+	return text
+
 func serialize():
 	var obj = super.serialize()
-	obj[PROP_KEY_DIAMETER_INCHES] = diameter_inches
+	obj[PROP_KEY_DIAMETER_FT] = diameter_ft
 	obj[PROP_KEY_PIPE_COLOR] = pipe_color.to_html(true)
 	obj[PROP_KEY_MATERIAL_TYPE] = EnumUtils.to_str(PipeTables.MaterialType, material_type)
 	obj[PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT] = custom_surface_roughness_ft
@@ -114,29 +154,11 @@ func serialize():
 
 func deserialize(obj):
 	super.deserialize(obj)
-	diameter_inches = DictUtils.get_w_default(obj, PROP_KEY_DIAMETER_INCHES, 0.5)
+	_props_from_save.diameter_ft = DictUtils.get_w_default(obj, PROP_KEY_DIAMETER_FT, Utils.inches_to_ft(0.5))
 	pipe_color = DictUtils.get_w_default(obj, PROP_KEY_PIPE_COLOR, Color.WHITE_SMOKE)
 	var material_type_str = DictUtils.get_w_default(obj, PROP_KEY_MATERIAL_TYPE, '') as String
 	material_type = EnumUtils.from_str(PipeTables.MaterialType, PipeTables.MaterialType.PVC, material_type_str) as PipeTables.MaterialType
 	custom_surface_roughness_ft = DictUtils.get_w_default(obj, PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT, 0.0)
-
-# @return hydraulic diamter in ft
-func get_diam_h() -> float:
-	return Utils.inches_to_ft(diameter_inches)
-
-# @return hydaulic cross sectional area in ft^2
-func get_area_h() -> float:
-	return Math.area_circle(get_diam_h())
-
-# @return surface roughness in ft
-func get_surface_roughness() -> float:
-	if material_type == PipeTables.MaterialType.Custom:
-		return custom_surface_roughness_ft
-	return PipeTables.lookup_surface_roughness(material_type)
-
-# @return relative roughness k/D
-func get_relative_roughness() -> float:
-	return get_surface_roughness() / get_diam_h()
 
 func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 	handle.magnetic_physics_mask = 0x4 # TODO would be nice if could get mask by name from project settings

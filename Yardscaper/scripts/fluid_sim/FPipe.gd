@@ -60,6 +60,24 @@ func v_fps() -> Var:
 	out.value = q_cfs.value / area
 	return out
 
+func src_h_psi() -> Var:
+	var h_psi := Var.new("%s_src_h_psi" % self)
+	if ! is_instance_valid(src_node):
+		return h_psi
+	
+	h_psi.value = src_node.h_psi.value
+	h_psi.state = src_node.h_psi.state
+	return h_psi
+
+func sink_h_psi() -> Var:
+	var h_psi := Var.new("%s_sink_h_psi" % self)
+	if ! is_instance_valid(sink_node):
+		return h_psi
+	
+	h_psi.value = sink_node.h_psi.value
+	h_psi.state = sink_node.h_psi.state
+	return h_psi
+
 func delta_h_psi() -> Var:
 	var delta_h := Var.new("%s_delta_h_psi" % self)
 	if ! is_instance_valid(src_node):
