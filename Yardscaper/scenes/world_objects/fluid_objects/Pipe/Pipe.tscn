@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cscoufmvhk6tk"]
 
 [ext_resource type="PackedScene" uid="uid://db8wvn8xh27x0" path="res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn" id="1_m6rx2"]
-[ext_resource type="Script" path="res://scenes/world_objects/Pipe/Pipe.gd" id="2_y5374"]
+[ext_resource type="Script" path="res://scenes/world_objects/fluid_objects/Pipe/Pipe.gd" id="2_y5374"]
 
 [node name="Pipe" groups=["pipes"] instance=ExtResource("1_m6rx2")]
 script = ExtResource("2_y5374")

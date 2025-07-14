@@ -1,38 +1,11 @@
-extends WorldObject
-class_name PipeNode
+class_name BaseNode extends WorldObject
 
-const BODY_RADIUS_FT = 3.0 / 12.0 # 6in diameter
-
-@onready var draw_layer := $ManualDrawLayer
 @onready var magnet_area : MagneticArea = $MagneticArea
 
 var fnode : FNode = null
 
-# @return true if initialization was successful, false otherwise
-func _init_pipe_node(new_parent_project: Project) -> bool:
-	if ! _init_world_obj(new_parent_project):
-		return false
-	
-	fnode = parent_project.fsys.alloc_node()
-	return true
-
-func _ready() -> void:
-	super._ready()
-	
-	var body_radius_px := get_body_radius_px()
-	var c_shape := pick_coll_shape.shape as CircleShape2D
-	c_shape.radius = body_radius_px
-	magnet_area.set_radius(body_radius_px)
-
-func _draw() -> void:
-	draw_layer.queue_redraw()
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		_predelete()
-
-func get_subclass() -> String:
-	return "PipeNode"
+func get_type_name() -> StringName:
+	return TypeNames.BASE_NODE
 
 func get_tooltip_text() -> String:
 	var text : String = "%s" % user_label
@@ -45,12 +18,11 @@ func get_tooltip_text() -> String:
 	text += "\nelevation: %s %s" % [fnode.el_ft, Utils.DISP_UNIT_FT]
 	return text
 
-func get_body_radius_px() -> float:
-	return Utils.ft_to_px(BODY_RADIUS_FT)
-
 func _predelete() -> void:
 	if is_instance_valid(parent_project):
 		parent_project.fsys.free_node(fnode)
+	
+	super._predelete()
 
 # Overriding the WorldObject's method so we can filter the request through the
 # MagneticArea first. Actual position updates will occur via the

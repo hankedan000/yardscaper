@@ -56,8 +56,8 @@ func get_visual_center() -> Vector2:
 func img_size_px() -> Vector2:
 	return texture_rect.size
 
-func get_subclass() -> String:
-	return "ImageNode"
+func get_type_name() -> StringName:
+	return TypeNames.IMG_NODE
 
 func serialize():
 	var obj = super.serialize()

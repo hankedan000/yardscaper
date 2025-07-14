@@ -1,6 +1,6 @@
-extends WorldObject
-class_name Sprinkler
+class_name Sprinkler extends BaseNode
 
+const BODY_RADIUS_FT = 3.0 / 12.0
 const DEFAULT_MIN_DIST_FT = 8.0
 const DEFAULT_MAX_DIST_FT = 14.0
 const DEFAULT_MIN_SWEEP_DEG = 0.0
@@ -160,8 +160,8 @@ var _init_angle_to_mouse : float = 0.0
 var _init_rotation : float = 0.0
 var _init_sweep : float = 0.0
 
-func get_subclass() -> String:
-	return "Sprinkler"
+func get_type_name() -> StringName:
+	return TypeNames.SPRINKLER
 
 func serialize():
 	var obj = super.serialize()
@@ -177,9 +177,9 @@ func serialize():
 
 func deserialize(obj):
 	super.deserialize(obj)
-	sweep_deg = obj[PROP_KEY_SWEEP_DEG]
-	manufacturer = obj[PROP_KEY_MANUFACTURER]
-	model = obj[PROP_KEY_MODEL]
+	sweep_deg = DictUtils.get_w_default(obj, PROP_KEY_SWEEP_DEG, 360.0)
+	manufacturer = DictUtils.get_w_default(obj, PROP_KEY_MANUFACTURER, "")
+	model = DictUtils.get_w_default(obj, PROP_KEY_MODEL, "")
 	min_dist_ft = DictUtils.get_w_default(obj, PROP_KEY_MIN_DIST_FT, min_dist_ft)
 	max_dist_ft = DictUtils.get_w_default(obj, PROP_KEY_MAX_DIST_FT, max_dist_ft)
 	dist_ft = DictUtils.get_w_default(obj, PROP_KEY_DIST_FT, max_dist_ft)
@@ -194,6 +194,9 @@ func _ready() -> void:
 	rot_handle.get_button().button_up.connect(_on_handle_button_up)
 	sweep_handle.get_button().button_down.connect(_on_handle_button_down.bind(sweep_handle))
 	sweep_handle.get_button().button_up.connect(_on_handle_button_up)
+	
+	var body_radius_px := Utils.ft_to_px(Sprinkler.BODY_RADIUS_FT)
+	magnet_area.set_radius(body_radius_px)
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:

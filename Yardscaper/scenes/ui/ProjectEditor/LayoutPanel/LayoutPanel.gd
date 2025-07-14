@@ -30,12 +30,6 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 @onready var world_view               : WorldViewportContainer = $HSplitContainer/Layout/WorldView
 @onready var tooltip_timer            := $ToolTipTimer
 
-@export var SprinklerScene : PackedScene = null
-@export var PipeScene : PackedScene = null
-@export var PipeNodeScene : PackedScene = null
-@export var DistanceMeasurementScene : PackedScene = null
-@export var PolygonScene : PackedScene = null
-
 enum Mode {
 	Idle,
 	MovingObjects,
@@ -203,7 +197,6 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			_mouse_move_start_pos_px = null
 			mode = Mode.Idle
 		Mode.AddSprinkler:
-			TheProject.add_object(sprinkler_to_add)
 			sprinkler_to_add = null
 			mode = Mode.Idle
 		Mode.AddDistMeasureA:
@@ -212,7 +205,6 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			mode = Mode.AddDistMeasureB
 		Mode.AddDistMeasureB:
 			dist_meas_to_add.point_b = pos_in_world_px
-			TheProject.add_object(dist_meas_to_add)
 			dist_meas_to_add = null
 			mode = Mode.Idle
 		Mode.AddPolygon:
@@ -222,7 +214,6 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			_poly_edit_point_idx = poly_to_add.point_count() - 1
 			poly_to_add.set_handle_visible(_poly_edit_point_idx, false)
 		Mode.AddPipeNode:
-			TheProject.add_object(pipe_node_to_add)
 			pipe_node_to_add = null
 			mode = Mode.Idle
 
@@ -243,9 +234,7 @@ func _handle_world_object_copy(objs: Array[WorldObject]) -> void:
 
 func _handle_world_object_paste(copied_data: Array[Dictionary]) -> void:
 	for obj_data in copied_data:
-		var obj := TheProject.instance_world_obj(obj_data)
-		if obj:
-			TheProject.add_object(obj)
+		TheProject.instance_world_obj(obj_data[&'subclass'], obj_data)
 
 func _cancel_mode():
 	if mode == Mode.AddSprinkler:
@@ -272,8 +261,8 @@ func _cancel_add_polygon():
 		if _poly_edit_point_idx < poly_to_add.point_count():
 			poly_to_add.remove_point(_poly_edit_point_idx)
 		poly_to_add.picked = false
-		if poly_to_add.point_count() >= 3:
-			TheProject.add_object(poly_to_add)
+		if poly_to_add.point_count() < 3:
+			poly_to_add.queue_free()
 		poly_to_add = null
 		mode = Mode.Idle
 
@@ -386,7 +375,7 @@ func _apply_polygon_edit_mode(objs: Array[WorldObject]) -> void:
 		if obj is PolygonNode:
 			obj.edit_mode = _poly_edit_mode
 
-func _on_obj_added(obj: WorldObject) -> void:
+func _on_obj_created(obj: WorldObject) -> void:
 	# add the object to the world view
 	var obj_parent := obj.get_parent()
 	if is_instance_valid(obj_parent) && obj_parent != world_view.objects:
@@ -410,8 +399,7 @@ func _on_obj_removed(obj: WorldObject) -> void:
 		_hovered_obj = null
 
 func _on_add_sprinkler_pressed():
-	sprinkler_to_add = SprinklerScene.instantiate()
-	sprinkler_to_add.user_label = TheProject.get_unique_name('Sprinkler')
+	sprinkler_to_add = TheProject.instance_world_obj(TypeNames.SPRINKLER)
 	sprinkler_to_add.position = world_view.global_xy_to_pos_in_world(get_global_mouse_position())
 	world_view.objects.add_child(sprinkler_to_add)
 	mode = Mode.AddSprinkler
@@ -419,14 +407,12 @@ func _on_add_sprinkler_pressed():
 func _on_add_pipe_pressed() -> void:
 	# since pipes are similar to DistanceMeasurement nodes, we'll reused the
 	# "adding" logic for it. should work for now ...
-	dist_meas_to_add = PipeScene.instantiate()
-	dist_meas_to_add.user_label = TheProject.get_unique_name('Pipe')
+	dist_meas_to_add = TheProject.instance_world_obj(TypeNames.PIPE)
 	world_view.objects.add_child(dist_meas_to_add)
 	mode = Mode.AddDistMeasureA
 
 func _on_add_pipe_node_pressed() -> void:
-	pipe_node_to_add = PipeNodeScene.instantiate()
-	pipe_node_to_add.user_label = TheProject.get_unique_name('PipeNode')
+	pipe_node_to_add = TheProject.instance_world_obj(TypeNames.PIPE_NODE)
 	world_view.objects.add_child(pipe_node_to_add)
 	mode = Mode.AddPipeNode
 
@@ -434,15 +420,13 @@ func _on_add_image_pressed():
 	img_dialog.popup_centered()
 
 func _on_add_dist_measure_pressed():
-	dist_meas_to_add = DistanceMeasurementScene.instantiate()
-	dist_meas_to_add.user_label = TheProject.get_unique_name('DistanceMeasurement')
+	dist_meas_to_add = TheProject.instance_world_obj(TypeNames.DIST_MEASUREMENT)
 	world_view.objects.add_child(dist_meas_to_add)
 	mode = Mode.AddDistMeasureA
 
 func _on_add_polygon_pressed():
-	poly_to_add = PolygonScene.instantiate()
+	poly_to_add = TheProject.instance_world_obj(TypeNames.POLYGON_NODE)
 	world_view.objects.add_child(poly_to_add)
-	poly_to_add.user_label = TheProject.get_unique_name('PolygonNode')
 	poly_to_add.picked = true
 	poly_to_add.add_point(Vector2())
 	poly_to_add.set_handle_visible(0, false)
@@ -455,13 +439,13 @@ func _on_remove_button_pressed():
 			world_view,
 			obj,
 			true)) # is_remove
-		TheProject.remove_object(obj)
+		obj.queue_free()
 	_selection_controller.clear_selection()
 
 func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 	match change_type:
 		TheProject.ChangeType.ADD:
-			_on_obj_added(obj)
+			_on_obj_created(obj)
 		TheProject.ChangeType.REMOVE:
 			_on_obj_removed(obj)
 		TheProject.ChangeType.PROP_EDIT:

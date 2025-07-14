@@ -1,5 +1,4 @@
-class_name Pipe
-extends DistanceMeasurement
+class_name Pipe extends DistanceMeasurement
 
 const PROP_KEY_DIAMETER_FT = &'diameter_ft'
 const PROP_KEY_PIPE_COLOR = &'pipe_color'
@@ -58,14 +57,6 @@ class PropertiesFromSave extends RefCounted:
 
 var _props_from_save := PropertiesFromSave.new()
 
-# @return true if initialization was successful, false otherwise
-func _init_pipe(new_parent_project: Project) -> bool:
-	if ! _init_world_obj(new_parent_project):
-		return false
-	
-	fpipe = parent_project.fsys.alloc_pipe()
-	return true
-
 func _ready():
 	super._ready()
 	color = Color.WHITE
@@ -113,12 +104,8 @@ func _draw() -> void:
 		16, # font_size
 		color)
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		_predelete()
-
-func get_subclass() -> String:
-	return "Pipe"
+func get_type_name() -> StringName:
+	return TypeNames.PIPE
 
 func get_tooltip_text() -> String:
 	var text : String = "%s" % user_label
@@ -173,6 +160,8 @@ func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 func _predelete() -> void:
 	if is_instance_valid(parent_project):
 		parent_project.fsys.free_pipe(fpipe)
+	
+	super._predelete()
 	
 func _on_magnetic_handle_button_down(handle: EditorHandle) -> void:
 	handle.get_magnet().disable_collection = false

@@ -96,19 +96,21 @@ func dist_px() -> float:
 func dist_ft() -> float:
 	return Utils.px_to_ft(dist_px())
 
-func get_subclass() -> String:
-	return "DistanceMeasurement"
+func get_type_name() -> StringName:
+	return TypeNames.DIST_MEASUREMENT
 
 func serialize():
 	var obj = super.serialize()
-	obj['point_a_ft'] = Utils.vect2_to_pair(Utils.px_to_ft_vec(point_a))
-	obj['point_b_ft'] = Utils.vect2_to_pair(Utils.px_to_ft_vec(point_b))
+	obj[&'point_a_ft'] = Utils.vect2_to_pair(Utils.px_to_ft_vec(point_a))
+	obj[&'point_b_ft'] = Utils.vect2_to_pair(Utils.px_to_ft_vec(point_b))
 	return obj
 
 func deserialize(obj):
 	super.deserialize(obj)
-	_point_a_from_save = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj['point_a_ft']))
-	_point_b_from_save = Utils.ft_to_px_vec(Utils.pair_to_vect2(obj['point_b_ft']))
+	_point_a_from_save = Utils.ft_to_px_vec(
+		Utils.pair_to_vect2(DictUtils.get_w_default(obj, &'point_a_ft', [0.0, 0.0])))
+	_point_b_from_save = Utils.ft_to_px_vec(
+		Utils.pair_to_vect2(DictUtils.get_w_default(obj, &'point_b_ft', [0.0, 0.0])))
 
 func _setup_dist_handle(handle: EditorHandle, user_id: int) -> void:
 	handle.user_id = user_id

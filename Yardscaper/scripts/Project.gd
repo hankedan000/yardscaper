@@ -17,12 +17,12 @@ const VERSION_KEY := &"version"
 const PROJECT_NAME_KEY := &"project_name"
 const OBJECTS_KEY := &"objects"
 
-const SprinklerScene : PackedScene = preload("res://scenes/world_objects/Sprinkler/Sprinkler.tscn")
+const SprinklerScene : PackedScene = preload("res://scenes/world_objects/fluid_objects/Sprinkler/Sprinkler.tscn")
 const ImageNodeScene : PackedScene = preload("res://scenes/world_objects/ImageNode/ImageNode.tscn")
 const DistanceMeasurementScene : PackedScene = preload("res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn")
 const PolygonNodeScene : PackedScene = preload("res://scenes/world_objects/PolygonNode/PolygonNode.tscn")
-const PipeScene : PackedScene = preload("res://scenes/world_objects/Pipe/Pipe.tscn")
-const PipeNodeScene : PackedScene = preload("res://scenes/world_objects/PipeNode/PipeNode.tscn")
+const PipeScene : PackedScene = preload("res://scenes/world_objects/fluid_objects/Pipe/Pipe.tscn")
+const PipeNodeScene : PackedScene = preload("res://scenes/world_objects/fluid_objects/PipeNode/PipeNode.tscn")
 
 var project_path = ""
 var project_name : String = ""
@@ -50,7 +50,7 @@ func _ready() -> void:
 func reset() -> void:
 	_suppress_self_edit_signals = true
 	while not objects.is_empty():
-		remove_object(objects.front())
+		objects.front().queue_free()
 	project_name = ""
 	_suppress_self_edit_signals = false
 	has_edits = false
@@ -177,31 +177,14 @@ func save_as(dir: String) -> bool:
 	saved.emit()
 	return true
 
-func get_subclass_count(subclass: String) -> int:
+func get_type_name_count(type_name: StringName) -> int:
 	var count = 0
 	for obj in objects:
-		if obj.get_subclass() == subclass:
+		if obj.get_type_name() == type_name:
 			count += 1
 	return count
 
-func add_object(obj: WorldObject) -> bool:
-	if objects.has(obj):
-		push_warning("obj '%s' is already added to project. ignoring add." % obj.name)
-		return false
-	
-	# connect signal handlers
-	obj.property_changed.connect(_on_node_property_changed)
-	obj.moved.connect(_on_node_moved)
-	objects.append(obj)
-	node_changed.emit(obj, ChangeType.ADD, [])
-	has_edits = true
-	return true
-
-func remove_object(obj: WorldObject, free_it: bool = true) -> bool:
-	if not objects.has(obj):
-		push_warning("obj '%s' is not in the project. ignoring remove." % obj.name)
-		return false
-	
+func _remove_object(obj: WorldObject) -> void:
 	objects.erase(obj)
 	
 	# disconnect signal handlers
@@ -209,10 +192,7 @@ func remove_object(obj: WorldObject, free_it: bool = true) -> bool:
 	obj.moved.disconnect(_on_node_moved)
 	
 	node_changed.emit(obj, ChangeType.REMOVE, [])
-	if free_it:
-		obj.queue_free()
 	has_edits = true
-	return true
 
 func get_img_dir() -> String:
 	if len(project_path) == 0:
@@ -223,31 +203,8 @@ func load_image(filename: String) -> Image:
 	var img_path = get_img_dir().path_join(filename)
 	return Image.load_from_file(img_path)
 
-func get_unique_name(subclass: String) -> String:
-	return '%s%d' % [subclass, get_subclass_count(subclass)]
-
-func add_image(path: String) -> ImageNode:
-	# try to copy image into project directories img dir
-	var filename = path.get_file()
-	var img_path = get_img_dir().path_join(filename)
-	if FileAccess.file_exists(img_path):
-		# TODO warn user about importing existing?
-		pass # already exist, so don't copy
-	elif DirAccess.copy_absolute(path, img_path) != OK:
-		push_warning("failed to copy '%s' to '%s'" % [path, img_path])
-		return null
-	var img = Image.load_from_file(img_path)
-	if not (img is Image):
-		push_warning("failed to load image '%s'" % [img_path])
-		return null
-	
-	# load image and create a new ImageNode
-	var img_node : ImageNode = ImageNodeScene.instantiate()
-	img_node.filename = filename
-	img_node.user_label = get_unique_name('ImageNode')
-	add_object(img_node)
-	has_edits = true
-	return img_node
+func get_unique_name(type_name: StringName) -> String:
+	return '%s%d' % [type_name, get_type_name_count(type_name)]
 
 func serialize() -> Dictionary:
 	var objects_ser = []
@@ -269,9 +226,8 @@ func deserialize(data: Dictionary, dir: String) -> void:
 	_suppress_self_edit_signals = true
 	reset()
 	for ser_obj in DictUtils.get_w_default(data, OBJECTS_KEY, []):
-		var wobj = instance_world_obj(ser_obj)
-		if wobj:
-			add_object(wobj)
+		if ser_obj is Dictionary && &'subclass' in ser_obj:
+			instance_world_obj(ser_obj[&'subclass'], ser_obj)
 	
 	# TODO restore pipe connection logic
 	# notify all pipes to restore attachments to their flow sources
@@ -280,28 +236,60 @@ func deserialize(data: Dictionary, dir: String) -> void:
 	project_name = _get_project_name(data, dir)
 	_suppress_self_edit_signals = false
 
-func instance_world_obj(ser_obj: Dictionary) -> WorldObject:
-	var wobj = null
-	match ser_obj['subclass']:
-		'Sprinkler':
+func instance_world_obj(type_name: StringName, ser_obj: Dictionary={}) -> WorldObject:
+	var wobj : WorldObject = null
+	match type_name:
+		TypeNames.SPRINKLER:
 			wobj = SprinklerScene.instantiate() as Sprinkler
-		'ImageNode':
+			wobj.fnode = fsys.alloc_node()
+		TypeNames.IMG_NODE:
 			wobj = ImageNodeScene.instantiate() as ImageNode
-		'DistanceMeasurement':
+		TypeNames.DIST_MEASUREMENT:
 			wobj = DistanceMeasurementScene.instantiate() as DistanceMeasurement
-		'PolygonNode':
+		TypeNames.POLYGON_NODE:
 			wobj = PolygonNodeScene.instantiate() as PolygonNode
-		'Pipe':
+		TypeNames.PIPE:
 			wobj = PipeScene.instantiate() as Pipe
-			wobj._init_pipe(self)
-		'PipeNode':
+			wobj.fpipe = fsys.alloc_pipe()
+		TypeNames.PIPE_NODE:
 			wobj = PipeNodeScene.instantiate() as PipeNode
-			wobj._init_pipe_node(self)
+			wobj.fnode = fsys.alloc_node()
 		_:
 			push_warning("unimplemented subclass '%s' deserialization" % [ser_obj['subclass']])
-	if wobj:
-		wobj.deserialize(ser_obj)
+			return wobj
+	
+	if ! (WorldObject.PROP_KEY_USER_LABEL in ser_obj):
+		ser_obj[WorldObject.PROP_KEY_USER_LABEL] = TheProject.get_unique_name(type_name)
+	wobj.parent_project = self
+	wobj.deserialize(ser_obj)
+	wobj.property_changed.connect(_on_node_property_changed)
+	wobj.moved.connect(_on_node_moved)
+	objects.append(wobj)
+	node_changed.emit(wobj, ChangeType.ADD, [])
+	has_edits = true
+	
 	return wobj
+
+func add_image(path: String) -> ImageNode:
+	# try to copy image into project directories img dir
+	var filename = path.get_file()
+	var img_path = get_img_dir().path_join(filename)
+	if FileAccess.file_exists(img_path):
+		# TODO warn user about importing existing?
+		pass # already exist, so don't copy
+	elif DirAccess.copy_absolute(path, img_path) != OK:
+		push_warning("failed to copy '%s' to '%s'" % [path, img_path])
+		return null
+	var img = Image.load_from_file(img_path)
+	if not (img is Image):
+		push_warning("failed to load image '%s'" % [img_path])
+		return null
+	
+	# load image and create a new ImageNode
+	var obj_data := {&'filename' : filename}
+	var img_node := instance_world_obj(TypeNames.IMG_NODE, obj_data) as ImageNode
+	has_edits = true
+	return img_node
 
 static func _get_project_data_filepath(project_dir: String, from_auto_save: bool) -> String:
 	if from_auto_save:

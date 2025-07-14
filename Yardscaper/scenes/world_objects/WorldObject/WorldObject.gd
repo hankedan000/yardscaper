@@ -66,18 +66,6 @@ var deferred_prop_change : DeferredPropertyChange = DeferredPropertyChange.new(s
 var _is_ready = false
 var _global_pos_at_move_start = null
 
-# @return true if initialization was successful, false otherwise
-func _init_world_obj(new_parent_project: Project) -> bool:
-	if is_instance_valid(parent_project):
-		push_warning("world object already initialize")
-		return false
-	elif ! is_instance_valid(new_parent_project):
-		push_error("new_parent_project must be valid")
-		return false
-	
-	parent_project = new_parent_project
-	return true
-
 func _ready():
 	# locate our parent WorldViewportContainer
 	var parent = get_parent()
@@ -88,8 +76,12 @@ func _ready():
 		parent = parent.get_parent()
 	_is_ready = true
 
-func get_subclass() -> String:
-	return "WorldObject"
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_predelete()
+
+func get_type_name() -> StringName:
+	return TypeNames.WORLD_OBJ
 
 func get_order_in_world() -> int:
 	if ! world:
@@ -150,7 +142,7 @@ func get_tooltip_text() -> String:
 
 func serialize():
 	return {
-		'subclass' : get_subclass(),
+		'subclass' : get_type_name(),
 		PROP_KEY_POSITION_FT : Utils.vect2_to_pair(Utils.px_to_ft_vec(global_position)),
 		PROP_KEY_ROTATION_DEG : int(rotation_degrees),
 		PROP_KEY_USER_LABEL : user_label,
@@ -161,11 +153,15 @@ func serialize():
 func deserialize(obj):
 	if ! _is_ready:
 		await ready
-	_apply_global_position(Utils.ft_to_px_vec(Utils.pair_to_vect2(obj[PROP_KEY_POSITION_FT])))
-	rotation_degrees = obj[PROP_KEY_ROTATION_DEG]
+	_apply_global_position(Utils.ft_to_px_vec(
+		Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_POSITION_FT, [0.0, 0.0]))))
+	rotation_degrees = DictUtils.get_w_default(obj, PROP_KEY_ROTATION_DEG, 0.0)
 	user_label = obj[PROP_KEY_USER_LABEL]
 	info_label.visible = DictUtils.get_w_default(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)
 	position_locked = DictUtils.get_w_default(obj, PROP_KEY_POSITION_LOCKED, false)
+
+func _predelete() -> void:
+	parent_project._remove_object(self)
 
 # Subclasses can override this if they wish. For example, nodes that can
 # magnetize might want to pass this request through the MagneticArea node.

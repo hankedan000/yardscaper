@@ -35,15 +35,18 @@ class AddOrRemove:
 		})
 	
 	func _do_add_logic() -> bool:
-		var wobj := TheProject.instance_world_obj(_ser_obj)
-		if wobj and TheProject.add_object(wobj):
+		var wobj := TheProject.instance_world_obj(_ser_obj[&'subclass'], _ser_obj)
+		if is_instance_valid(wobj):
 			wobj.set_order_in_world(_from_idx)
 			return true
 		return false
 	
 	func _do_remove_logic() -> bool:
 		var wobj := _world.objects.get_child(_from_idx) as WorldObject
-		return TheProject.remove_object(wobj)
+		if is_instance_valid(wobj):
+			wobj.queue_free()
+			return true
+		return false
 
 class Reordered:
 	extends UndoController.UndoOperation

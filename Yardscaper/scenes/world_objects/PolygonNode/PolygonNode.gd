@@ -38,6 +38,7 @@ var _mouse_init_pos : Vector2 = Vector2() # init position when starting move
 var _is_new_vertex : bool = false
 var _vertex_handles : Array[EditorHandle] = []
 
+# @return true if initialization was successful, false otherwise
 func _ready() -> void:
 	super._ready()
 	set_process(false)
@@ -197,8 +198,8 @@ func get_visual_center() -> Vector2:
 		return poly.global_position
 	return poly.global_position + get_centroid_px()
 
-func get_subclass() -> String:
-	return "PolygonNode"
+func get_type_name() -> StringName:
+	return TypeNames.POLYGON_NODE
 
 func serialize():
 	var obj = super.serialize()

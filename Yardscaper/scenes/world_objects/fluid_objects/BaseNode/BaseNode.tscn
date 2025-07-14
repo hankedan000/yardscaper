@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://srclla445e3s"]
+
+[ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_h5msp"]
+[ext_resource type="Script" path="res://scenes/world_objects/fluid_objects/BaseNode/BaseNode.gd" id="2_kmik6"]
+[ext_resource type="PackedScene" uid="uid://cvkbhq0h44hq3" path="res://scenes/ui/misc/MagneticArea.tscn" id="3_xgo4r"]
+
+[node name="BaseNode" instance=ExtResource("1_h5msp")]
+script = ExtResource("2_kmik6")
+
+[node name="MagneticArea" parent="." index="0" instance=ExtResource("3_xgo4r")]
+magnetic_physics_mask = 4
+is_collector = true
+
+[connection signal="position_change_request" from="MagneticArea" to="." method="_on_magnetic_area_position_change_request"]

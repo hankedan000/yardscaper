@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://g5yh8tb0v6bk"]
 
-[ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_j5xd6"]
-[ext_resource type="Script" path="res://scenes/world_objects/Sprinkler/Sprinkler.gd" id="2_u6dch"]
+[ext_resource type="PackedScene" uid="uid://srclla445e3s" path="res://scenes/world_objects/fluid_objects/BaseNode/BaseNode.tscn" id="1_j5xd6"]
+[ext_resource type="Script" path="res://scenes/world_objects/fluid_objects/Sprinkler/Sprinkler.gd" id="2_u6dch"]
 [ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="3_ur1sa"]
 [ext_resource type="PackedScene" uid="uid://dy0t3omtev6y4" path="res://scenes/ui/gizmos/EditorHandle/EditorHandle.tscn" id="3_v1ovd"]
 
@@ -9,7 +9,6 @@
 script/source = "extends Gizmo
 
 const ARC_POINTS = 32
-const BODY_RADIUS_FT = 3.0 / 12.0
 const LINE_WIDTH_BASE_PX = 1.0
 
 var _sprink : Sprinkler = null
@@ -23,7 +22,7 @@ func _draw():
 	var stop_angle := deg_to_rad(_sprink.sweep_deg)
 	var water_color := Color.DODGER_BLUE
 	water_color.a = 0.5
-	var body_radius_px := Utils.ft_to_px(BODY_RADIUS_FT)
+	var body_radius_px := Utils.ft_to_px(Sprinkler.BODY_RADIUS_FT)
 	var max_radius := Utils.ft_to_px(_sprink.max_dist_ft)
 	var min_radius := Utils.ft_to_px(_sprink.min_dist_ft)
 	var dist_radius := Utils.ft_to_px(_sprink.dist_ft)
@@ -64,8 +63,5 @@ modulate = Color(0.225892, 1, 0.387758, 1)
 
 [node name="SweepHandle" parent="." index="2" instance=ExtResource("3_v1ovd")]
 visible = false
-
-[node name="InfoLabel" parent="." index="3"]
-text = ""
 
 [connection signal="picked_state_changed" from="." to="." method="_on_picked_state_changed"]
