@@ -50,6 +50,12 @@ func set_radius(radius_px: float) -> void:
 func get_radius() -> float:
 	return _circle_shape.radius
 
+func get_collection() -> Array[MagneticArea]:
+	return _collection.duplicate()
+
+func get_attachment_count() -> int:
+	return _collection.size()
+
 func is_collected() -> bool:
 	return is_instance_valid(_my_collector)
 

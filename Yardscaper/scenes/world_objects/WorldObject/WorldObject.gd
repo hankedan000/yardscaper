@@ -84,7 +84,7 @@ func get_type_name() -> StringName:
 	return TypeNames.WORLD_OBJ
 
 func get_order_in_world() -> int:
-	if ! world:
+	if ! is_instance_valid(world):
 		push_warning("object isn't in a world")
 		return -1
 	return world.get_object_order_idx(self)

@@ -147,6 +147,9 @@ func deserialize(obj):
 	material_type = EnumUtils.from_str(PipeTables.MaterialType, PipeTables.MaterialType.PVC, material_type_str) as PipeTables.MaterialType
 	custom_surface_roughness_ft = DictUtils.get_w_default(obj, PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT, 0.0)
 
+func is_magnet_from_src_handle(magnet: MagneticArea) -> bool:
+	return point_a_handle.get_magnet() == magnet
+
 func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 	handle.magnetic_physics_mask = 0x4 # TODO would be nice if could get mask by name from project settings
 	handle.get_magnet().is_collector = false

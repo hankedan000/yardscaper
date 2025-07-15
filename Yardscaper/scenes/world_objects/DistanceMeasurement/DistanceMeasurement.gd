@@ -99,6 +99,9 @@ func dist_ft() -> float:
 func get_type_name() -> StringName:
 	return TypeNames.DIST_MEASUREMENT
 
+func get_visual_center() -> Vector2:
+	return global_position + mid_point()
+
 func serialize():
 	var obj = super.serialize()
 	obj[&'point_a_ft'] = Utils.vect2_to_pair(Utils.px_to_ft_vec(point_a))

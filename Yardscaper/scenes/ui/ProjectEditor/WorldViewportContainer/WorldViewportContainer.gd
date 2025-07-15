@@ -46,13 +46,22 @@ var major_line_color : Color = Color.LIGHT_SLATE_GRAY:
 		major_line_color = value
 		queue_redraw()
 
+func _draw():
+	if show_grid:
+		_draw_grid(major_spacing_ft, major_line_color, MAJOR_LINE_WIDTH)
+	if show_origin:
+		_draw_origin()
+	if show_cursor_crosshairs:
+		_draw_cursor_crosshairs()
+
 func show_tooltip(text: String) -> void:
 	tooltip_label.text = text
 	tooltip_label.size = Utils.get_label_text_size(tooltip_label, text)
 	tooltip_label.show()
 
 func hide_tooltip() -> void:
-	tooltip_label.hide()
+	if is_instance_valid(tooltip_label):
+		tooltip_label.hide()
 
 # move a world object from one position to another
 # @return true if move was applied, false otherwise
@@ -89,36 +98,34 @@ func global_xy_to_pos_in_world(global_pos: Vector2) -> Vector2:
 	return pan_zoom_ctrl.local_pos_to_world(pos_rel_to_world)
 
 func get_pickable_under_cursor() -> WorldObject:
-	var cursor_pos := cursor.position
-	var smallest_dist_px = null
-	var nearest_obj : WorldObject = null
-	var highest_draw_order : int = -1
+	# build a list of pickable WorldObjects that are under the mouse
+	var pickable_objs : Array[WorldObject] = []
 	for pick_area in cursor.get_overlapping_areas():
 		var pick_obj := pick_area.get_parent() as WorldObject
-		if not pick_obj:
+		if ! is_instance_valid(pick_obj):
+			continue
+		elif ! is_instance_valid(pick_obj.world):
 			continue
 		elif not pick_obj.visible:
 			continue
-		var obj_center := pick_obj.get_visual_center()
-		var draw_order := pick_obj.get_order_in_world()
-		var dist_px = obj_center.distance_to(cursor_pos)
-		if draw_order < highest_draw_order:
-			continue
-		elif smallest_dist_px and draw_order == highest_draw_order and dist_px > smallest_dist_px:
-			continue
-		nearest_obj = pick_obj
-		smallest_dist_px = dist_px
-		highest_draw_order = draw_order
+		pickable_objs.push_back(pick_obj)
 	
-	return nearest_obj
+	# sort the array based on distance from mouse location to the obj's visual
+	# center point. objects that is closest to the mouse will be first in list.
+	pickable_objs.sort_custom(_sort_by_dist_to_poi.bind(cursor.global_position))
+	if pickable_objs.is_empty():
+		return null
+	return pickable_objs[0]
 
-func _draw():
-	if show_grid:
-		_draw_grid(major_spacing_ft, major_line_color, MAJOR_LINE_WIDTH)
-	if show_origin:
-		_draw_origin()
-	if show_cursor_crosshairs:
-		_draw_cursor_crosshairs()
+# custom sort function to order objects based on a distant to Poin Of Interest
+# @param[in] a - the first object
+# @param[in] b - the second object
+# @param[in] poi - the global position represent the Point Of Interest
+# @return true if a is closer, false if b is closer
+static func _sort_by_dist_to_poi(a: WorldObject, b: WorldObject, poi: Vector2) -> bool:
+	var vec_to_a := poi - a.get_visual_center()
+	var vec_to_b := poi - b.get_visual_center()
+	return vec_to_a.length_squared() < vec_to_b.length_squared()
 
 func _draw_origin():
 	var origin_pos_local = pan_zoom_ctrl.world_pos_to_local(Vector2(0, 0))

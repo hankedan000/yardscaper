@@ -184,6 +184,12 @@ func get_type_name_count(type_name: StringName) -> int:
 			count += 1
 	return count
 
+func get_obj_by_user_label(user_label: String) -> WorldObject:
+	for obj in objects:
+		if obj.user_label == user_label:
+			return obj
+	return null
+
 func _remove_object(obj: WorldObject) -> void:
 	objects.erase(obj)
 	
@@ -229,9 +235,11 @@ func deserialize(data: Dictionary, dir: String) -> void:
 		if ser_obj is Dictionary && &'subclass' in ser_obj:
 			instance_world_obj(ser_obj[&'subclass'], ser_obj)
 	
-	# TODO restore pipe connection logic
-	# notify all pipes to restore attachments to their flow sources
-	#TheFluidSimulator.initialize_pipe_flow_sources()
+	# notify all BaseNodes to restore their pipe connections now that all
+	# objects deserialized.
+	for obj in objects:
+		if obj is BaseNode:
+			obj.restore_pipe_connections()
 	
 	project_name = _get_project_name(data, dir)
 	_suppress_self_edit_signals = false
