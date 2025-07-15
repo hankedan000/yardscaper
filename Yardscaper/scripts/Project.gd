@@ -327,7 +327,7 @@ func _on_node_property_changed(obj: WorldObject, property_key: StringName, from:
 	has_edits = true
 
 func _on_node_moved(node, from_xy, to_xy):
-	node_changed.emit(node, ChangeType.PROP_EDIT, ['position', from_xy, to_xy])
+	node_changed.emit(node, ChangeType.PROP_EDIT, [&'global_position', from_xy, to_xy])
 	has_edits = true
 
 func __THREADED__auto_save(filepath: String, data: Dictionary) -> void:

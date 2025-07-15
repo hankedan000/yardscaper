@@ -1,5 +1,4 @@
-class_name FNode
-extends FEntity
+class_name FNode extends FEntity
 
 var h_psi           : Var = null # pressure at the node
 var q_ext_cfs       : Var = null # external flow in(+) or out(-) ft^3/s

@@ -1,5 +1,4 @@
-class_name FEntity
-extends Object
+class_name FEntity extends Object
 
 var id   : int = 1 # unique identifier
 var fsys : FSystem = null

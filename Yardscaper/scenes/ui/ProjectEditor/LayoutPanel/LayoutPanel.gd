@@ -398,22 +398,43 @@ func _on_obj_removed(obj: WorldObject) -> void:
 	if _hovered_obj == obj:
 		_hovered_obj = null
 
+func _on_obj_prop_edit(obj: WorldObject, prop_name: StringName, old_value, new_value) -> void:
+	# create the undo operation based on the prop_name
+	var undo_op : UndoController.UndoOperation = null
+	if prop_name == &'global_position':
+		undo_op = WorldObjectUndoRedoOps.GlobalPositionChange.new(
+			obj,
+			old_value as Vector2,
+			new_value as Vector2)
+	else:
+		undo_op = UndoController.PropEditUndoOperation.new(
+			obj,
+			prop_name,
+			old_value,
+			new_value)
+	
+	# push the op into the UndoController, making sure to batch it if needed
+	if prop_name == _batch_edits_for_prop:
+		if _curr_batch_undo_op != null:
+			_curr_batch_undo_op.push_op(undo_op)
+		else:
+			_curr_batch_undo_op = undo_redo_ctrl.push_undo_op(undo_op)
+	else:
+		undo_redo_ctrl.push_undo_op(undo_op)
+
 func _on_add_sprinkler_pressed():
 	sprinkler_to_add = TheProject.instance_world_obj(TypeNames.SPRINKLER)
 	sprinkler_to_add.position = world_view.global_xy_to_pos_in_world(get_global_mouse_position())
-	world_view.objects.add_child(sprinkler_to_add)
 	mode = Mode.AddSprinkler
 
 func _on_add_pipe_pressed() -> void:
 	# since pipes are similar to DistanceMeasurement nodes, we'll reused the
 	# "adding" logic for it. should work for now ...
 	dist_meas_to_add = TheProject.instance_world_obj(TypeNames.PIPE)
-	world_view.objects.add_child(dist_meas_to_add)
 	mode = Mode.AddDistMeasureA
 
 func _on_add_pipe_node_pressed() -> void:
 	pipe_node_to_add = TheProject.instance_world_obj(TypeNames.PIPE_NODE)
-	world_view.objects.add_child(pipe_node_to_add)
 	mode = Mode.AddPipeNode
 
 func _on_add_image_pressed():
@@ -421,12 +442,10 @@ func _on_add_image_pressed():
 
 func _on_add_dist_measure_pressed():
 	dist_meas_to_add = TheProject.instance_world_obj(TypeNames.DIST_MEASUREMENT)
-	world_view.objects.add_child(dist_meas_to_add)
 	mode = Mode.AddDistMeasureA
 
 func _on_add_polygon_pressed():
 	poly_to_add = TheProject.instance_world_obj(TypeNames.POLYGON_NODE)
-	world_view.objects.add_child(poly_to_add)
 	poly_to_add.picked = true
 	poly_to_add.add_point(Vector2())
 	poly_to_add.set_handle_visible(0, false)
@@ -442,7 +461,7 @@ func _on_remove_button_pressed():
 		obj.queue_free()
 	_selection_controller.clear_selection()
 
-func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
+func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args: Array):
 	match change_type:
 		TheProject.ChangeType.ADD:
 			_on_obj_created(obj)
@@ -452,19 +471,7 @@ func _on_TheProject_node_changed(obj, change_type: TheProject.ChangeType, args):
 			var prop_name : StringName = args[0]
 			var old_value = args[1]
 			var new_value = args[2]
-			var undo_op := UndoController.PropEditUndoOperation.new(
-					obj,
-					prop_name,
-					old_value,
-					new_value)
-			if prop_name == _batch_edits_for_prop:
-				# batch undo operations for a multi-object edits
-				if _curr_batch_undo_op != null:
-					_curr_batch_undo_op.push_op(undo_op)
-				else:
-					_curr_batch_undo_op = undo_redo_ctrl.push_undo_op(undo_op)
-			else:
-				undo_redo_ctrl.push_undo_op(undo_op)
+			_on_obj_prop_edit(obj, prop_name, old_value, new_value)
 
 func _on_TheProject_opened():
 	_selection_controller.clear_selection()

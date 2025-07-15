@@ -60,8 +60,8 @@ var _props_from_save := PropertiesFromSave.new()
 func _ready():
 	super._ready()
 	color = Color.WHITE
-	_setup_pipe_handle(point_a_handle, "Feed")
-	_setup_pipe_handle(point_b_handle, "Drain")
+	_setup_pipe_handle(point_a_handle, "Source")
+	_setup_pipe_handle(point_b_handle, "Sink")
 	
 	# restore properties from save
 	diameter_ft = _props_from_save.diameter_ft

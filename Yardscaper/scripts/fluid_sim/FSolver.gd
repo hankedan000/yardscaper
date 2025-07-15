@@ -1,5 +1,4 @@
-class_name FSolver
-extends Object
+class_name FSolver extends Object
 
 # Under constrained: unknown_vars > equation_count
 # Well constrained:  unknown_vars == equation_count

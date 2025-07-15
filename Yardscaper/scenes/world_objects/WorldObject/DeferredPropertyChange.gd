@@ -1,5 +1,4 @@
-extends Object
-class_name DeferredPropertyChange
+class_name DeferredPropertyChange extends RefCounted
 
 var _obj : WorldObject = null
 var _prop_name : StringName = &""

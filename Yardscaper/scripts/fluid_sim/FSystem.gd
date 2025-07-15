@@ -1,5 +1,4 @@
-class_name FSystem
-extends RefCounted
+class_name FSystem extends RefCounted
 
 var fluid_viscocity_k : float = FluidMath.WATER_VISCOCITY_K
 var fluid_density_lbft3 : float = FluidMath.WATER_DENSITY

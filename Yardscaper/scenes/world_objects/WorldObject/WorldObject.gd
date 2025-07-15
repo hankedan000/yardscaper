@@ -115,6 +115,14 @@ func is_movable() -> bool:
 func moving() -> bool:
 	return _global_pos_at_move_start != null
 
+# moves the object within the world immediately without producing any undo
+# history. if you wish to get undo history, use the start/update/finish methods.
+#
+# Subclasses can override this if they wish. For example, nodes that can
+# magnetize might want to pass this request through the MagneticArea node.
+func apply_global_position(new_global_pos: Vector2) -> void:
+	global_position = new_global_pos
+
 func start_move():
 	if moving():
 		push_warning("move was already started. starting another one.")
@@ -124,7 +132,7 @@ func update_move(delta):
 	if ! moving():
 		push_warning("can't update_move() when not moving")
 		return
-	_apply_global_position(_global_pos_at_move_start + delta)
+	apply_global_position(_global_pos_at_move_start + delta)
 
 func finish_move(cancel=false):
 	if not moving():
@@ -132,7 +140,7 @@ func finish_move(cancel=false):
 		return
 	
 	if cancel:
-		_apply_global_position(_global_pos_at_move_start)
+		apply_global_position(_global_pos_at_move_start)
 	else:
 		moved.emit(self, _global_pos_at_move_start, global_position)
 	_global_pos_at_move_start = null
@@ -153,7 +161,7 @@ func serialize():
 func deserialize(obj):
 	if ! _is_ready:
 		await ready
-	_apply_global_position(Utils.ft_to_px_vec(
+	apply_global_position(Utils.ft_to_px_vec(
 		Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_POSITION_FT, [0.0, 0.0]))))
 	rotation_degrees = DictUtils.get_w_default(obj, PROP_KEY_ROTATION_DEG, 0.0)
 	user_label = obj[PROP_KEY_USER_LABEL]
@@ -162,11 +170,6 @@ func deserialize(obj):
 
 func _predelete() -> void:
 	parent_project._remove_object(self)
-
-# Subclasses can override this if they wish. For example, nodes that can
-# magnetize might want to pass this request through the MagneticArea node.
-func _apply_global_position(new_global_pos: Vector2) -> void:
-	global_position = new_global_pos
 
 # @return true if the value changed, false if not (does not indicate if change
 # event was fired or not)

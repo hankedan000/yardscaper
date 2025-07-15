@@ -100,7 +100,7 @@ func _predelete() -> void:
 # Overriding the WorldObject's method so we can filter the request through the
 # MagneticArea first. Actual position updates will occur via the
 # _on_magnetic_area_position_change_request() signal handler.
-func _apply_global_position(new_global_pos: Vector2) -> void:
+func apply_global_position(new_global_pos: Vector2) -> void:
 	magnet_area.try_position_change(new_global_pos)
 
 static func _get_magnets_world_object(magnet: MagneticArea) -> WorldObject:

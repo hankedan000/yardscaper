@@ -1,5 +1,4 @@
-class_name Var
-extends RefCounted
+class_name Var extends RefCounted
 
 enum State {
 	Unknown, # value is a guess and/or intermediate value while being solved

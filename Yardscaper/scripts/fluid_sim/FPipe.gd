@@ -1,5 +1,4 @@
-class_name FPipe
-extends FEntity
+class_name FPipe extends FEntity
 
 const NODE_SINK := true
 const NODE_SRC  := false
