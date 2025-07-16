@@ -107,6 +107,18 @@ func _draw() -> void:
 func get_type_name() -> StringName:
 	return TypeNames.PIPE
 
+func finish_move(cancel: bool = false) -> bool:
+	if ! super.finish_move(cancel):
+		return false
+	elif cancel:
+		return true # move was canceled, so no need to dettach from BaseNodes
+	
+	# moving the whole pipe should uncollect our handle magnets. this will also
+	# break the fluid entity connections as well.
+	_uncollect_pipe_handle(point_a_handle)
+	_uncollect_pipe_handle(point_b_handle)
+	return true
+
 func get_tooltip_text() -> String:
 	var text : String = "%s" % user_label
 	if ! is_instance_valid(fpipe):
@@ -159,6 +171,12 @@ func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 	handle.label_text_mode = EditorHandle.LabelTextMode.UserText
 	handle.get_button().button_down.connect(_on_magnetic_handle_button_down.bind(handle))
 	handle.get_button().button_up.connect(_on_magnetic_handle_button_up.bind(handle))
+
+func _uncollect_pipe_handle(handle: EditorHandle) -> void:
+	var handle_magnet := handle.get_magnet()
+	var collector := handle_magnet.get_collector()
+	if is_instance_valid(collector):
+		collector.uncollect(handle_magnet)
 
 func _predelete() -> void:
 	if is_instance_valid(parent_project):

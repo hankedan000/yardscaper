@@ -50,6 +50,9 @@ func set_radius(radius_px: float) -> void:
 func get_radius() -> float:
 	return _circle_shape.radius
 
+func get_collector() -> MagneticArea:
+	return _my_collector
+
 func get_collection() -> Array[MagneticArea]:
 	return _collection.duplicate()
 
@@ -59,23 +62,29 @@ func get_attachment_count() -> int:
 func is_collected() -> bool:
 	return is_instance_valid(_my_collector)
 
-func is_collectable() -> bool:
+func is_collectable(ignore_disable: bool = false) -> bool:
 	if is_collector:
 		return false
 	elif is_collected():
 		return false
-	elif disable_collection:
+	elif ! ignore_disable && disable_collection:
 		return false
 	return true
 
-func collect(other: MagneticArea) -> void:
+# @param[in] other - the magnet to collect
+# @param[in] force - will make the collection occur regardless if the other
+# magnet has its disable_collection flag set. this should only be used
+# sparingly. As an example, if you are restoring a previously broken attachment,
+# you know the magnet were attached previously, so you can safely ignore the
+# disable flag when restoring the attachment.
+func collect(other: MagneticArea, ignore_disable: bool = false) -> void:
 	if ! is_collector:
 		push_warning("this magnet is not marked as a collector")
 		return
 	elif ! is_instance_valid(other):
 		push_warning("other magnet is not valid")
 		return
-	elif ! other.is_collectable():
+	elif ! other.is_collectable(ignore_disable):
 		# could already collected (even by us), or collection is disabled
 		return
 	

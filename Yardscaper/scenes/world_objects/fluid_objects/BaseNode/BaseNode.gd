@@ -66,15 +66,10 @@ func restore_pipe_connections() -> void:
 			continue
 		
 		# make the connection via the magnetic nodes (actual fluid sim object
-		# connection will be made automatically). we stash then restore the
-		# disable_collection property because EditorHandle keep their magnets
-		# disabled unless they're being moved.
+		# connection will be made automatically). 
 		var is_src := conn[&'is_src'] as bool
 		var pipe_magnet := pipe.point_a_handle.get_magnet() if is_src else pipe.point_b_handle.get_magnet()
-		var old_disable := pipe_magnet.disable_collection # save
-		pipe_magnet.disable_collection = false
-		magnet_area.collect(pipe_magnet)
-		pipe_magnet.disable_collection = old_disable # restore
+		magnet_area.collect(pipe_magnet, true) # ignore_disable=true
 	
 	_props_from_save.pipe_connections.clear()
 
@@ -152,7 +147,10 @@ static func _get_magnet_parents(magnet: MagneticArea) -> MagnetParents:
 func _on_magnetic_area_position_change_request(new_global_position: Vector2) -> void:
 	global_position = new_global_position
 
-func _on_magnetic_area_attachment_changed(_collector: MagneticArea, collected: MagneticArea, attached: bool) -> void:
+func _on_magnetic_area_attachment_changed(collector: MagneticArea, collected: MagneticArea, attached: bool) -> void:
+	undoable_edit.emit(
+		BaseNodeUndoOps.AttachementChanged.new(collector, collected, attached))
+	
 	var other_pipe := _get_magnet_parents(collected).wobj as Pipe
 	if ! is_instance_valid(other_pipe):
 		return

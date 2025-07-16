@@ -58,8 +58,3 @@ theme/custom="res://assets/themes/MainTheme.tres"
 2d_physics/layer_1="Cursor"
 2d_physics/layer_2="WorldObjects"
 2d_physics/layer_3="MagneticPipeAreas"
-
-[rendering]
-
-renderer/rendering_method="gl_compatibility"
-renderer/rendering_method.mobile="gl_compatibility"
