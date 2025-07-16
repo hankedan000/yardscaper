@@ -99,8 +99,7 @@ var undo_redo_ctrl := UndoController.new()
 var _selection_controller : WorldObjectSelectionController = WorldObjectSelectionController.new()
 var _can_start_move : bool = false
 var _mouse_move_start_pos_px = null
-var _batch_edits_for_prop : StringName = &""
-var _curr_batch_undo_op : UndoController.OperationBatch = null
+var _curr_undo_batch : UndoController.OperationBatch = null
 # object that would be selected next if LEFT mouse button were pressed
 var _hovered_obj : WorldObject = null:
 	set(value):
@@ -155,6 +154,9 @@ func _ready():
 	# add shortcuts
 	remove_button.shortcut = Utils.create_shortcut(KEY_DELETE)
 
+func _process(_delta: float) -> void:
+	_curr_undo_batch = null # start a new batch each frame
+
 func _input(event):
 	if event is InputEventKey and event.is_pressed():
 		if event.keycode == KEY_ESCAPE:
@@ -176,15 +178,11 @@ func _input(event):
 			var helper := WorldObjectReorderHelper.new(_selection_controller.selected_objs())
 			helper.apply_shift_to_top(world_view)
 
-func start_batch_edit(prop_name: StringName) -> void:
-	if _batch_edits_for_prop.length() > 0:
-		push_warning("starting new batch edit for '%s', but there was an unstopped batch edit for '%s'" % [prop_name, _batch_edits_for_prop])
-	_batch_edits_for_prop = prop_name
-	_curr_batch_undo_op = null
-
-func stop_batch_edit() -> void:
-	_batch_edits_for_prop = &""
-	_curr_batch_undo_op = null
+func _push_undo_op(op: UndoController.UndoOperation) -> void:
+	if _curr_undo_batch != null:
+		_curr_undo_batch.push_op(op)
+	else:
+		_curr_undo_batch = undo_redo_ctrl.push_undo_op(op)
 
 func _handle_left_click_release(pos_in_world_px: Vector2):
 	match mode:
@@ -193,7 +191,6 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 		Mode.MovingObjects:
 			for obj in _selection_controller.selected_objs():
 				obj.finish_move()
-			stop_batch_edit()
 			_mouse_move_start_pos_px = null
 			mode = Mode.Idle
 		Mode.AddSprinkler:
@@ -383,7 +380,7 @@ func _on_obj_created(obj: WorldObject) -> void:
 	else:
 		world_view.objects.add_child(obj)
 	
-	undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.AddOrRemove.new(
+	_push_undo_op(WorldObjectUndoRedoOps.AddOrRemove.new(
 		world_view,
 		obj,
 		false)) # is_remove
@@ -413,14 +410,7 @@ func _on_obj_prop_edit(obj: WorldObject, prop_name: StringName, old_value, new_v
 			old_value,
 			new_value)
 	
-	# push the op into the UndoController, making sure to batch it if needed
-	if prop_name == _batch_edits_for_prop:
-		if _curr_batch_undo_op != null:
-			_curr_batch_undo_op.push_op(undo_op)
-		else:
-			_curr_batch_undo_op = undo_redo_ctrl.push_undo_op(undo_op)
-	else:
-		undo_redo_ctrl.push_undo_op(undo_op)
+	_push_undo_op(undo_op)
 
 func _on_add_sprinkler_pressed():
 	sprinkler_to_add = TheProject.instance_world_obj(TypeNames.SPRINKLER)
@@ -454,7 +444,7 @@ func _on_add_polygon_pressed():
 
 func _on_remove_button_pressed():
 	for obj in _selection_controller.selected_objs():
-		undo_redo_ctrl.push_undo_op(WorldObjectUndoRedoOps.AddOrRemove.new(
+		_push_undo_op(WorldObjectUndoRedoOps.AddOrRemove.new(
 			world_view,
 			obj,
 			true)) # is_remove
@@ -545,7 +535,7 @@ func _on_world_object_reordered(from_idx: int, to_idx: int):
 		world_view,
 		from_idx,
 		to_idx)
-	undo_redo_ctrl.push_undo_op(undo_op)
+	_push_undo_op(undo_op)
 	TheProject.has_edits = true
 
 func _on_pickable_object_pick_state_changed(obj: WorldObject) -> void:
@@ -555,7 +545,7 @@ func _on_pickable_object_pick_state_changed(obj: WorldObject) -> void:
 		_selection_controller.remove_from_selection(obj)
 
 func _on_world_obj_undoable_edit(undo_op: UndoController.UndoOperation) -> void:
-	undo_redo_ctrl.push_undo_op(undo_op)
+	_push_undo_op(undo_op)
 	TheProject.has_edits = true
 
 func _on_preference_update_timer_timeout():
@@ -617,7 +607,6 @@ func _on_world_view_gui_input(event: InputEvent):
 			
 			# start move operations if all objects are movable
 			if all_movable && selected_objs.size() > 0:
-				start_batch_edit(&"position")
 				for obj in selected_objs:
 					obj.start_move()
 				mode = Mode.MovingObjects

@@ -115,6 +115,23 @@ func deserialize(obj):
 	_point_b_from_save = Utils.ft_to_px_vec(
 		Utils.pair_to_vect2(DictUtils.get_w_default(obj, &'point_b_ft', [0.0, 0.0])))
 
+func start_handle_move(handle: EditorHandle) -> void:
+	if ! (handle == point_a_handle || handle == point_b_handle):
+		push_warning("handle must be owned by this node")
+		return
+	
+	_handle_being_moved = handle
+	var prop_key := _handle_to_prop_key(handle)
+	deferred_prop_change.push(prop_key)
+
+func stop_handle_move() -> void:
+	if ! is_instance_valid(_handle_being_moved):
+		return
+	
+	var prop_key := _handle_to_prop_key(_handle_being_moved)
+	deferred_prop_change.pop(prop_key)
+	_handle_being_moved = null
+
 func _setup_dist_handle(handle: EditorHandle, user_id: int) -> void:
 	handle.user_id = user_id
 	handle.get_button().button_down.connect(_on_handle_button_down.bind(handle))
@@ -138,17 +155,13 @@ func _handle_to_prop_key(handle: EditorHandle) -> StringName:
 	return PROP_KEY_POINT_B
 
 func _on_handle_button_down(handle: EditorHandle) -> void:
-	_handle_being_moved = handle
 	_handle_init_pos = handle.position
 	_mouse_init_pos = get_global_mouse_position()
-	var prop_key := _handle_to_prop_key(_handle_being_moved)
-	deferred_prop_change.push(prop_key)
+	start_handle_move(handle)
 	set_process(true)
 
 func _on_handle_button_up() -> void:
-	var prop_key := _handle_to_prop_key(_handle_being_moved)
-	deferred_prop_change.pop(prop_key)
-	_handle_being_moved = null
+	stop_handle_move()
 	set_process(false)
 
 func _on_property_changed(_obj: WorldObject, property_key: StringName, _from: Variant, _to: Variant) -> void:

@@ -209,8 +209,20 @@ func load_image(filename: String) -> Image:
 	var img_path = get_img_dir().path_join(filename)
 	return Image.load_from_file(img_path)
 
+func is_user_label_unique(user_label: String) -> bool:
+	for obj in objects:
+		if user_label == obj.user_label:
+			return false
+	return true
+
 func get_unique_name(type_name: StringName) -> String:
-	return '%s%d' % [type_name, get_type_name_count(type_name)]
+	var id : int = 0
+	while true:
+		var user_label := type_name + str(id)
+		if is_user_label_unique(user_label):
+			return user_label
+		id += 1
+	return "" # should never get here
 
 func serialize() -> Dictionary:
 	var objects_ser = []

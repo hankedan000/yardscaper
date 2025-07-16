@@ -123,27 +123,29 @@ func moving() -> bool:
 func apply_global_position(new_global_pos: Vector2) -> void:
 	global_position = new_global_pos
 
-func start_move():
+func start_move() -> void:
 	if moving():
 		push_warning("move was already started. starting another one.")
 	_global_pos_at_move_start = global_position
 
-func update_move(delta):
+func update_move(delta: Vector2) -> bool:
 	if ! moving():
 		push_warning("can't update_move() when not moving")
-		return
+		return false
 	apply_global_position(_global_pos_at_move_start + delta)
+	return true
 
-func finish_move(cancel=false):
+func finish_move(cancel: bool = false) -> bool:
 	if not moving():
 		push_warning("move was never started")
-		return
+		return false
 	
 	if cancel:
 		apply_global_position(_global_pos_at_move_start)
 	else:
 		moved.emit(self, _global_pos_at_move_start, global_position)
 	_global_pos_at_move_start = null
+	return true
 
 func get_tooltip_text() -> String:
 	return user_label

@@ -19,6 +19,17 @@ func _ready() -> void:
 func get_type_name() -> StringName:
 	return TypeNames.BASE_NODE
 
+func start_move() -> void:
+	super.start_move()
+	_notify_attached_pipes_of_handle_move(true) # is_start=true
+
+func finish_move(cancel: bool = false) -> bool:
+	if ! super.finish_move(cancel):
+		return false
+	
+	_notify_attached_pipes_of_handle_move(false) # is_start=false
+	return true
+
 func get_tooltip_text() -> String:
 	var text : String = "%s" % user_label
 	if ! is_instance_valid(fnode):
@@ -67,20 +78,36 @@ func restore_pipe_connections() -> void:
 	
 	_props_from_save.pipe_connections.clear()
 
-func get_attached_pipes() -> Array[Pipe]:
-	var pipes : Array[Pipe] = []
+func get_attached_magnet_parents() -> Array[MagnetParents]:
+	var parents_out : Array[MagnetParents] = []
 	for magnet in magnet_area.get_collection():
-		var magnets_pipe := _get_magnets_world_object(magnet) as Pipe
-		if is_instance_valid(magnets_pipe):
-			pipes.push_back(magnets_pipe)
-	return pipes
+		parents_out.push_back(_get_magnet_parents(magnet))
+	return parents_out
 
 func get_attachment_count() -> int:
 	return magnet_area.get_attachment_count()
 
+# This method notifies connected Pipes that we're starting or stopping a move
+# operation on one of its editor handles. Doing so, allows the movement edit
+# to get deferred until the operation is completed; thereby, preventing the
+# undo history from being flooded with incrmental updates.
+func _notify_attached_pipes_of_handle_move(is_start: bool) -> void:
+	for mag_parents in get_attached_magnet_parents():
+		var pipe := mag_parents.wobj as Pipe
+		if ! is_instance_valid(pipe):
+			continue
+		if is_start:
+			pipe.start_handle_move(mag_parents.handle)
+		else:
+			pipe.stop_handle_move()
+
 func _build_pipe_connection_list() -> Array[Dictionary]:
 	var list_out : Array[Dictionary] = []
-	for pipe in get_attached_pipes():
+	for mag_parents in get_attached_magnet_parents():
+		var pipe := mag_parents.wobj as Pipe
+		if ! is_instance_valid(pipe):
+			continue
+		
 		list_out.push_back({
 			&'user_label' : pipe.user_label,
 			&'is_src' : pipe.fpipe.src_node == fnode
@@ -103,17 +130,30 @@ func _predelete() -> void:
 func apply_global_position(new_global_pos: Vector2) -> void:
 	magnet_area.try_position_change(new_global_pos)
 
-static func _get_magnets_world_object(magnet: MagneticArea) -> WorldObject:
-	var mag_parent := magnet.get_parent()
-	while is_instance_valid(mag_parent) && ! (mag_parent is WorldObject):
+class MagnetParents extends RefCounted:
+	var magnet : MagneticArea = null
+	var handle : EditorHandle = null
+	var wobj : WorldObject = null
+
+static func _get_magnet_parents(magnet: MagneticArea) -> MagnetParents:
+	var mag_parents := MagnetParents.new()
+	mag_parents.magnet = magnet
+	
+	var mag_parent : Node = magnet.get_parent()
+	while is_instance_valid(mag_parent):
+		if mag_parent is EditorHandle:
+			mag_parents.handle = mag_parent as EditorHandle
+		elif mag_parent is WorldObject:
+			mag_parents.wobj = mag_parent as WorldObject
+			break
 		mag_parent = mag_parent.get_parent()
-	return mag_parent
+	return mag_parents
 
 func _on_magnetic_area_position_change_request(new_global_position: Vector2) -> void:
 	global_position = new_global_position
 
 func _on_magnetic_area_attachment_changed(_collector: MagneticArea, collected: MagneticArea, attached: bool) -> void:
-	var other_pipe := _get_magnets_world_object(collected) as Pipe
+	var other_pipe := _get_magnet_parents(collected).wobj as Pipe
 	if ! is_instance_valid(other_pipe):
 		return
 	
