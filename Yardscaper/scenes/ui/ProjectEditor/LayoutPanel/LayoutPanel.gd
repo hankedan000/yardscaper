@@ -185,6 +185,11 @@ func _push_undo_op(op: UndoController.UndoOperation) -> void:
 	else:
 		_curr_undo_batch = undo_redo_ctrl.push_undo_op(op)
 
+func fit_view_to_zone(zone: int) -> void:
+	var objs := TheProject.get_objs_in_zone(zone)
+	var zone_box := Utils.get_bounding_box_around_all(objs)
+	world_view.fit_view_to_rect(zone_box, 0.1)
+
 func _handle_left_click_release(pos_in_world_px: Vector2):
 	match mode:
 		Mode.Idle:

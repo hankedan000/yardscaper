@@ -90,6 +90,10 @@ func get_type_name() -> StringName:
 func get_visual_center() -> Vector2:
 	return global_position + mid_point()
 
+func get_bounding_box() -> Rect2:
+	var box := Rect2(point_a, Vector2(1,1))
+	return box.expand(point_b)
+
 func serialize():
 	var obj = super.serialize()
 	obj[&'point_a_ft'] = Utils.vect2_to_pair(Utils.px_to_ft_vec(point_a))

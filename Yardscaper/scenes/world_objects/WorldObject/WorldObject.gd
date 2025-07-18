@@ -107,6 +107,10 @@ func set_info_label_visible(new_visible: bool) -> void:
 func get_visual_center() -> Vector2:
 	return global_position
 
+# @returns a bounding box around the object in global pixel space
+func get_bounding_box() -> Rect2:
+	return Rect2(get_visual_center(), Vector2(1,1))
+
 func is_movable() -> bool:
 	if position_locked || short_term_position_locked:
 		return false

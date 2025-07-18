@@ -226,6 +226,25 @@ func get_unique_name(type_name: StringName) -> String:
 		id += 1
 	return "" # should never get here
 
+# @return a dict containing lists of WorldObjects keyed by their zone #
+func get_objs_by_zone() -> Dictionary:
+	var objs_by_zone := {}
+	for obj in objects:
+		if &"zone" in obj:
+			if obj.zone in objs_by_zone:
+				objs_by_zone[obj.zone].push_back(obj)
+			else:
+				objs_by_zone[obj.zone] = [obj] as Array[WorldObject]
+	return objs_by_zone
+
+# @param[in] zone - the zone # to search for
+# @return a list of WorldObjects that are in the specified zone #
+func get_objs_in_zone(zone: int) -> Array[WorldObject]:
+	var objs_by_zone := get_objs_by_zone()
+	if zone in objs_by_zone:
+		return objs_by_zone[zone]
+	return []
+
 func serialize() -> Dictionary:
 	var objects_ser = []
 	if len(objects) > 0:

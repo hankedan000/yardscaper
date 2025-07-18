@@ -93,6 +93,40 @@ func get_object_order_idx(obj: WorldObject) -> int:
 func get_image_of_current_view() -> Image:
 	return viewport.get_texture().get_image()
 
+func get_zone_images(zone_rects: Array[Rect2]) -> Array[Image]:
+	# create a new vieport that we can use for rendering
+	var export_viewport := SubViewport.new()
+	export_viewport.size = viewport.size
+	export_viewport.disable_3d = true
+	export_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	add_child(export_viewport)
+	
+	# create a camera for the viewport
+	var export_camera := Camera2D.new()
+	export_camera.position = camera2d.position
+	export_camera.zoom = camera2d.zoom
+	export_viewport.add_child(export_camera)
+	
+	# duplicate all the WorldObjects into the new viewport
+	for obj in objects.get_children():
+		export_viewport.add_child(obj.duplicate())
+	
+	var imgs: Array[Image] = []
+	
+	for zone_rect in zone_rects:
+		Utils.fit_camera_to_rect(export_camera, zone_rect, 0.1)
+		
+		# i expected to wait for at least 1 frame so it could rerender, but
+		# for some reason it needed 2 frames.
+		await get_tree().process_frame
+		await get_tree().process_frame
+		
+		imgs.push_back(export_viewport.get_texture().get_image())
+	
+	export_viewport.queue_free()
+	
+	return imgs
+
 func global_xy_to_pos_in_world(global_pos: Vector2) -> Vector2:
 	var pos_rel_to_world := global_pos - self.global_position
 	return pan_zoom_ctrl.local_pos_to_world(pos_rel_to_world)
@@ -126,6 +160,20 @@ static func _sort_by_dist_to_poi(a: WorldObject, b: WorldObject, poi: Vector2) -
 	var vec_to_a := poi - a.get_visual_center()
 	var vec_to_b := poi - b.get_visual_center()
 	return vec_to_a.length_squared() < vec_to_b.length_squared()
+
+# @param[in] rect - the rectangle to fit the view to
+# @param[in] padding - ratio to grow the box by on each side
+func fit_view_to_rect(rect: Rect2, padding: float = 0.0) -> void:
+	Utils.fit_camera_to_rect(camera2d, rect, padding)
+	queue_redraw()
+
+func _draw():
+	if show_grid:
+		_draw_grid(major_spacing_ft, major_line_color, MAJOR_LINE_WIDTH)
+	if show_origin:
+		_draw_origin()
+	if show_cursor_crosshairs:
+		_draw_cursor_crosshairs()
 
 func _draw_origin():
 	var origin_pos_local = pan_zoom_ctrl.world_pos_to_local(Vector2(0, 0))

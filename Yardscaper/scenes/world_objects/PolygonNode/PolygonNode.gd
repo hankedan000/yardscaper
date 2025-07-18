@@ -201,6 +201,14 @@ func get_visual_center() -> Vector2:
 func get_type_name() -> StringName:
 	return TypeNames.POLYGON_NODE
 
+func get_bounding_box() -> Rect2:
+	if poly.polygon.size() == 0:
+		return super.get_bounding_box()
+	var box := Rect2(poly.polygon[0], Vector2(1,1))
+	for idx in range(1, poly.polygon.size()):
+		box = box.expand(poly.polygon[idx])
+	return box
+
 func serialize():
 	var obj = super.serialize()
 	var points_ft = []

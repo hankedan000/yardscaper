@@ -163,6 +163,11 @@ var _init_sweep : float = 0.0
 func get_type_name() -> StringName:
 	return TypeNames.SPRINKLER
 
+func get_bounding_box() -> Rect2:
+	var box_width := Utils.ft_to_px(max_dist_ft * 2.0)
+	var box_size = Vector2(box_width, box_width)
+	return Rect2(get_visual_center() - box_size / 2.0, box_size)
+
 func serialize():
 	var obj = super.serialize()
 	obj[PROP_KEY_DIST_FT] = dist_ft
