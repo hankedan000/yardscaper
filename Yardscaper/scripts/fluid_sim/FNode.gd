@@ -20,6 +20,17 @@ func is_inward_pipe(p: FPipe) -> bool:
 		return p.sink_node == self
 	return false
 
+func is_my_var(v: Var) -> bool:
+	if v == h_psi:
+		return true
+	elif v == q_ext_cfs:
+		return true
+	return false
+
+func reset_solved_vars() -> void:
+	h_psi.reset_if_solved()
+	q_ext_cfs.reset_if_solved()
+
 func _to_string() -> String:
 	return "N%d" % id
 

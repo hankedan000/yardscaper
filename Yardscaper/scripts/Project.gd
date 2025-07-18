@@ -332,6 +332,14 @@ func add_image(path: String) -> ImageNode:
 	has_edits = true
 	return img_node
 
+func lookup_fvar_parent_obj(fvar: Var) -> WorldObject:
+	for obj in objects:
+		if obj is Pipe && obj.fpipe.is_my_var(fvar):
+			return obj
+		elif obj is BaseNode && obj.fnode.is_my_var(fvar):
+			return obj
+	return null
+
 func lookup_fentity_parent_obj(fentity: FEntity) -> WorldObject:
 	if fentity is FNode:
 		return lookup_fnode_parent_obj(fentity)

@@ -18,6 +18,10 @@ func reset() -> void:
 	value = 0.0
 	state = State.Unknown
 
+func reset_if_solved() -> void:
+	if state == State.Solved:
+		reset()
+
 func set_known(v: float) -> void:
 	value = v
 	state = State.Known

@@ -112,7 +112,7 @@ static func _make_separator_line(
 	var n_left_fill_chars : int = 0
 	var n_right_fill_chars : int = 0
 	if fill_chars_needed > 0:
-		n_left_fill_chars = int(fill_chars_needed / 2)
+		n_left_fill_chars = int(fill_chars_needed / 2.0)
 		n_right_fill_chars = fill_chars_needed - n_left_fill_chars
 	
 	var out_str := begin_txt

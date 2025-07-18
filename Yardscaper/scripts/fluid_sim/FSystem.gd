@@ -47,6 +47,12 @@ func free_node(n: FNode) -> void:
 		n._predelete()
 		n.free()
 
+func reset_solved_vars() -> void:
+	for node in _nodes:
+		node.reset_solved_vars()
+	for pipe in _pipes:
+		pipe.reset_solved_vars()
+
 func clear() -> void:
 	for p in _pipes:
 		free_pipe(p)

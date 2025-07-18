@@ -195,6 +195,10 @@ func _ready() -> void:
 	super._ready()
 	set_process_input(false)
 	
+	# be helpful to the user, and set this to 0.0 since the majority of
+	# sprinkler will be venting to atmospheric pressure.
+	fnode.h_psi.set_known(0.0)
+	
 	rot_handle.get_button().button_down.connect(_on_handle_button_down.bind(rot_handle))
 	rot_handle.get_button().button_up.connect(_on_handle_button_up)
 	sweep_handle.get_button().button_down.connect(_on_handle_button_down.bind(sweep_handle))

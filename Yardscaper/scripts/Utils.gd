@@ -175,7 +175,7 @@ static func reparent_as_submenu(menu: PopupMenu, new_parent_menu: PopupMenu, new
 	menu.get_parent().remove_child(menu)
 	new_parent_menu.set_item_submenu_node(item_index, menu)
 
-func get_bounding_box_around_all(objs: Array[WorldObject]) -> Rect2:
+static func get_bounding_box_around_all(objs: Array[WorldObject]) -> Rect2:
 	if objs.is_empty():
 		push_error("objs can't be empty")
 		return Rect2()
@@ -185,7 +185,7 @@ func get_bounding_box_around_all(objs: Array[WorldObject]) -> Rect2:
 		box = box.merge(objs[idx].get_bounding_box())
 	return box
 
-func fit_camera_to_rect(camera: Camera2D, rect: Rect2, padding: float = 0.0) -> void:
+static func fit_camera_to_rect(camera: Camera2D, rect: Rect2, padding: float = 0.0) -> void:
 	# Get the size of the viewport (window) in pixels
 	var viewport_size = camera.get_viewport_rect().size
 

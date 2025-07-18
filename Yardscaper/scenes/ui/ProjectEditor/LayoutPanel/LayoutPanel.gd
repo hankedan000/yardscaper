@@ -378,6 +378,16 @@ func _apply_polygon_edit_mode(objs: Array[WorldObject]) -> void:
 		if obj is PolygonNode:
 			obj.edit_mode = _poly_edit_mode
 
+func _focus_on_objs(objs: Array[WorldObject]) -> void:
+	if objs.is_empty():
+		return
+	
+	var bound_box := Utils.get_bounding_box_around_all(objs)
+	world_view.fit_view_to_rect(bound_box, 0.1)
+	_selection_controller.clear_selection()
+	for obj in objs:
+		_selection_controller.add_to_selection(obj)
+
 func _on_obj_created(obj: WorldObject) -> void:
 	# add the object to the world view
 	var obj_parent := obj.get_parent()
@@ -738,16 +748,21 @@ func _on_curve_remove_button_pressed() -> void:
 	_apply_polygon_edit_mode(_selection_controller.selected_objs())
 
 func _on_solve_button_pressed() -> void:
+	# solve the system while timing how long it takes
+	TheProject.fsys.reset_solved_vars()
 	var start_ticks_msec := Time.get_ticks_msec()
 	var res := FSolver.solve_system(TheProject.fsys)
 	var solve_time_msec := Time.get_ticks_msec() - start_ticks_msec
 	
+	# display results to user
 	solve_summary_dialog.show_summary(solve_time_msec, res)
 
 func _on_solve_summary_dialog_entity_clicked(entity: FEntity) -> void:
 	var wobj := TheProject.lookup_fentity_parent_obj(entity)
 	if is_instance_valid(wobj):
-		pass
+		_focus_on_objs([wobj])
 
 func _on_solve_summary_dialog_unknown_var_clicked(uvar: Var) -> void:
-	pass # Replace with function body.
+	var wobj := TheProject.lookup_fvar_parent_obj(uvar)
+	if is_instance_valid(wobj):
+		_focus_on_objs([wobj])

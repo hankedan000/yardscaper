@@ -45,6 +45,14 @@ func connect_node(n: FNode, node_type: bool) -> void:
 		n.connected_pipes.push_back(self)
 		sink_node = n
 
+func is_my_var(v: Var) -> bool:
+	if v == q_cfs:
+		return true
+	return false
+
+func reset_solved_vars() -> void:
+	q_cfs.reset_if_solved()
+
 # cross sectional area of the pipe inf square feet
 func area_ft2() -> float:
 	var r_ft := d_ft / 2.0

@@ -7,6 +7,11 @@ const BODY_RADIUS_FT = 3.0 / 12.0 # 6in diameter
 func _ready() -> void:
 	super._ready()
 	
+	# be helpful to the user, and set this to 0.0 since the majority of the
+	# nodes they're making will be for connecting pipes together which will
+	# have no external flows.
+	fnode.q_ext_cfs.set_known(0.0)
+	
 	var body_radius_px := get_body_radius_px()
 	magnet_area.set_radius(body_radius_px)
 

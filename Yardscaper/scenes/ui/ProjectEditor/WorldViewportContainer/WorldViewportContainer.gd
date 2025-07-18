@@ -167,14 +167,6 @@ func fit_view_to_rect(rect: Rect2, padding: float = 0.0) -> void:
 	Utils.fit_camera_to_rect(camera2d, rect, padding)
 	queue_redraw()
 
-func _draw():
-	if show_grid:
-		_draw_grid(major_spacing_ft, major_line_color, MAJOR_LINE_WIDTH)
-	if show_origin:
-		_draw_origin()
-	if show_cursor_crosshairs:
-		_draw_cursor_crosshairs()
-
 func _draw_origin():
 	var origin_pos_local = pan_zoom_ctrl.world_pos_to_local(Vector2(0, 0))
 	var visible_rect_size := viewport.get_visible_rect().size
