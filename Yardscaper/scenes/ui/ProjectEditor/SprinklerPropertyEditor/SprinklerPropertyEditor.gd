@@ -110,10 +110,8 @@ func _sync_option_to_text(option_button: OptionButton, text: String):
 func _apply_prop_edit(prop_name: StringName, new_value: Variant) -> void:
 	if _ignore_internal_edits:
 		return
-	_layout_panel.start_batch_edit(prop_name)
 	for s in _sprinklers:
 		s.set(prop_name, new_value)
-	_layout_panel.stop_batch_edit()
 
 func _on_user_label_line_edit_text_submitted(new_text):
 	_apply_prop_edit(WorldObject.PROP_KEY_USER_LABEL, new_text)

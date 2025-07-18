@@ -7,6 +7,7 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 @onready var img_dialog               := $ImgDialog
 @onready var img_import_wizard        := $ImageImportWizard
 @onready var grid_spacing_dialog      : GridSpacingDialog = $GridSpacingDialog
+@onready var solve_summary_dialog     : SolveSummaryDialog = $SolveSummaryDialog
 
 @onready var sprink_prop_list         : SprinklerPropertyEditor = $HSplitContainer/LeftPane/Properties/SprinklerPropertiesList
 @onready var img_prop_list            : ImageNodePropertyEditor = $HSplitContainer/LeftPane/Properties/ImageNodePropertiesList
@@ -53,11 +54,11 @@ enum PipeViewMenuIds {
 }
 
 enum ObjectViewMenuIds {
-	Images = 0,
 	Measurements = 1,
 	Polygons = 2,
 	Sprinklers = 3,
-	Pipes = 4
+	Pipes = 4,
+	Images = 5
 }
 
 enum GridViewMenuIds {
@@ -730,3 +731,18 @@ func _on_curve_edit_button_pressed() -> void:
 func _on_curve_remove_button_pressed() -> void:
 	_poly_edit_mode = PolygonNode.EditMode.Remove
 	_apply_polygon_edit_mode(_selection_controller.selected_objs())
+
+func _on_solve_button_pressed() -> void:
+	var start_ticks_msec := Time.get_ticks_msec()
+	var res := FSolver.solve_system(TheProject.fsys)
+	var solve_time_msec := Time.get_ticks_msec() - start_ticks_msec
+	
+	solve_summary_dialog.show_summary(solve_time_msec, res)
+
+func _on_solve_summary_dialog_entity_clicked(entity: FEntity) -> void:
+	var wobj := TheProject.lookup_fentity_parent_obj(entity)
+	if is_instance_valid(wobj):
+		pass
+
+func _on_solve_summary_dialog_unknown_var_clicked(uvar: Var) -> void:
+	pass # Replace with function body.

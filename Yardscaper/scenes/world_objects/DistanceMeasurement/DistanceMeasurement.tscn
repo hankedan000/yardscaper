@@ -7,6 +7,10 @@
 [node name="DistanceMeasurement" instance=ExtResource("1_gjd6h")]
 script = ExtResource("2_skq7c")
 
+[node name="InfoLabel" parent="." index="0"]
+visible = true
+vert_alignment = 2
+
 [node name="PointA_Handle" parent="." index="1" instance=ExtResource("3_4r0ad")]
 visible = false
 pressed_type = 1

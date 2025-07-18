@@ -49,8 +49,10 @@ func _ready() -> void:
 
 func reset() -> void:
 	_suppress_self_edit_signals = true
-	while not objects.is_empty():
-		objects.front().queue_free()
+	for obj in objects:
+		obj.queue_free()
+	objects.clear()
+	fsys.clear()
 	project_name = ""
 	_suppress_self_edit_signals = false
 	has_edits = false
@@ -310,6 +312,25 @@ func add_image(path: String) -> ImageNode:
 	var img_node := instance_world_obj(TypeNames.IMG_NODE, obj_data) as ImageNode
 	has_edits = true
 	return img_node
+
+func lookup_fentity_parent_obj(fentity: FEntity) -> WorldObject:
+	if fentity is FNode:
+		return lookup_fnode_parent_obj(fentity)
+	elif fentity is FPipe:
+		return lookup_fpipe_parent_obj(fentity)
+	return null
+
+func lookup_fpipe_parent_obj(fpipe: FPipe) -> Pipe:
+	for obj in objects:
+		if obj is Pipe && obj.fpipe == fpipe:
+			return obj
+	return null
+
+func lookup_fnode_parent_obj(fnode: FNode) -> BaseNode:
+	for obj in objects:
+		if obj is BaseNode && obj.fnode == fnode:
+			return obj
+	return null
 
 static func _get_project_data_filepath(project_dir: String, from_auto_save: bool) -> String:
 	if from_auto_save:

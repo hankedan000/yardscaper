@@ -70,10 +70,8 @@ func _sync_ui():
 func _apply_prop_edit(prop_name: StringName, new_value: Variant) -> void:
 	if _ignore_internal_edits:
 		return
-	_layout_panel.start_batch_edit(prop_name)
 	for pipe in _pipes:
 		pipe.set(prop_name, new_value)
-	_layout_panel.stop_batch_edit()
 
 func _select_material_option(material_type: PipeTables.MaterialType) -> void:
 	for idx in range(material_option.item_count):

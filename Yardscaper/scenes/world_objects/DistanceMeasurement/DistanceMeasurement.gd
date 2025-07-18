@@ -48,8 +48,8 @@ func _draw():
 	
 	# update position/shape of the collision rectangle
 	# probably not the best place to do this, but convenient and efficient
-	var midpoint = mid_point()
-	var delta_vec = point_b - point_a
+	var midpoint := mid_point()
+	var delta_vec := point_b - point_a
 	_coll_rect.size.x = delta_vec.length()
 	_coll_rect.size.y = 10
 	pick_area.rotation = delta_vec.angle()
@@ -63,18 +63,6 @@ func _draw():
 	
 	# draw measurement line
 	draw_line(point_a, point_b, color, 1)
-	
-	# draw distance label at midpoint of line
-	var font : Font = ThemeDB.fallback_font
-	var pretty_dist = Utils.pretty_dist(dist_ft())
-	draw_string(
-		font,
-		midpoint,
-		pretty_dist,
-		HORIZONTAL_ALIGNMENT_LEFT,
-		-1, # width
-		16, # font_size
-		color)
 
 func _process(_delta: float) -> void:
 	if _handle_being_moved:
@@ -132,6 +120,13 @@ func stop_handle_move() -> void:
 	deferred_prop_change.pop(prop_key)
 	_handle_being_moved = null
 
+func _bias_text_rotation_upright(angle_rad: float) -> float:
+	var angle_deg := rad_to_deg(angle_rad)
+	if angle_deg >= 90.0 || angle_deg < -90.0:
+		return angle_rad + PI
+	return angle_rad
+	
+
 func _setup_dist_handle(handle: EditorHandle, user_id: int) -> void:
 	handle.user_id = user_id
 	handle.get_button().button_down.connect(_on_handle_button_down.bind(handle))
@@ -142,7 +137,26 @@ func _set_point_position(handle: EditorHandle, new_position: Vector2, force_chan
 	handle.try_position_change(global_position + new_position)
 	var prop_key : StringName = PROP_KEY_POINT_A if handle == point_a_handle else PROP_KEY_POINT_B
 	if _check_and_emit_prop_change(prop_key, old_value, force_change):
+		_update_info_label()
 		queue_redraw()
+
+func _update_info_label() -> void:
+	_update_info_label_text()
+	_update_info_label_position()
+
+func _update_info_label_text() -> void:
+	var pretty_dist = Utils.pretty_dist(dist_ft())
+	info_label.text = "L=%s" % pretty_dist
+
+# update the rotation and position of the label so the text runs along the
+# length of the line and always resides above (upwards)
+func _update_info_label_position() -> void:
+	var midpoint := mid_point()
+	var delta_vec := point_b - point_a
+	var baseline_angle := _bias_text_rotation_upright(delta_vec.angle())
+	info_label.hide_if_wider_than = delta_vec.length()
+	info_label.position = midpoint
+	info_label.rotation = baseline_angle
 
 func _update_handles() -> void:
 	lock_indicator.position = point_a

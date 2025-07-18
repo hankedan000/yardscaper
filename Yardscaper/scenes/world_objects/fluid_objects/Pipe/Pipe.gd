@@ -91,18 +91,6 @@ func _draw() -> void:
 	
 	# draw the pipe body
 	draw_line(point_a, point_b, pipe_color, diameter_px)
-	
-	# draw distance label at midpoint of pipe
-	var font : Font = ThemeDB.fallback_font
-	var pretty_dist = Utils.pretty_dist(dist_ft())
-	draw_string(
-		font,
-		midpoint,
-		pretty_dist,
-		HORIZONTAL_ALIGNMENT_LEFT,
-		-1, # width
-		16, # font_size
-		color)
 
 func get_type_name() -> StringName:
 	return TypeNames.PIPE
@@ -161,6 +149,12 @@ func deserialize(obj):
 
 func is_magnet_from_src_handle(magnet: MagneticArea) -> bool:
 	return point_a_handle.get_magnet() == magnet
+
+# override from DistanceMeasurement
+func _update_info_label_text() -> void:
+	var text := "L=%.3f%s" % [dist_ft(), Utils.DISP_UNIT_FT]
+	#text += "; Q=%s" % Utils.pretty_fvar(fpipe.q_cfs, Utils.DISP_UNIT_GPM, Utils.cftps_to_gpm)
+	info_label.text = text
 
 func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 	handle.magnetic_physics_mask = 0x4 # TODO would be nice if could get mask by name from project settings

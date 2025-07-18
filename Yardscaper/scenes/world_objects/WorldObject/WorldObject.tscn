@@ -11,7 +11,6 @@ script = ExtResource("1_2eqnw")
 
 [node name="InfoLabel" parent="." instance=ExtResource("2_ctmgo")]
 visible = false
-text = ""
 
 [node name="LockIndicator" parent="." instance=ExtResource("2_akkxm")]
 visible = false

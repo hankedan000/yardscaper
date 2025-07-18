@@ -48,11 +48,11 @@ func free_node(n: FNode) -> void:
 		n.free()
 
 func clear() -> void:
-	for p in _pipes.duplicate():
+	for p in _pipes:
 		free_pipe(p)
 	_pipes.clear()
 	_next_pipe_id = 0
-	for n in _nodes.duplicate():
+	for n in _nodes:
 		free_node(n)
 	_nodes.clear()
 	_next_node_id = 0

@@ -1,6 +1,7 @@
-[gd_scene load_steps=23 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=25 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
+[ext_resource type="PackedScene" uid="uid://lmlsf61h6k62" path="res://scenes/ui/dialogs/SolveSummaryDialog/SolveSummaryDialog.tscn" id="2_pkvch"]
 [ext_resource type="PackedScene" uid="uid://co2gtkorldd8j" path="res://scenes/ui/ProjectEditor/SprinklerPropertyEditor/SprinklerPropertyEditor.tscn" id="3_itpjk"]
 [ext_resource type="PackedScene" uid="uid://bujgf1ym2asal" path="res://scenes/ui/ProjectEditor/ImageNodePropertyEditor/ImageNodePropertyEditor.tscn" id="4_legmd"]
 [ext_resource type="PackedScene" uid="uid://cn8j4nj6r83we" path="res://scenes/ui/dialogs/ImageImportWizard/ImageImportWizard.tscn" id="5_3cenq"]
@@ -21,6 +22,7 @@
 [ext_resource type="ButtonGroup" uid="uid://b664mtqybvxmi" path="res://scenes/ui/ProjectEditor/LayoutPanel/CurveEditButtonGroup.tres" id="18_emdii"]
 [ext_resource type="Texture2D" uid="uid://cgi7x2mrycjj0" path="res://assets/icons/CurveEdit.svg" id="20_pfhm2"]
 [ext_resource type="Texture2D" uid="uid://gbukq6uonk0u" path="res://assets/icons/CurveDelete.svg" id="21_j3b3p"]
+[ext_resource type="Texture2D" uid="uid://b3ns4uq06n44i" path="res://assets/icons/Reload.svg" id="21_ueesn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60egv"]
 bg_color = Color(0.105882, 0.113725, 0.12549, 1)
@@ -52,6 +54,9 @@ filters = PackedStringArray("*.jpg", "*.png", "*.bmp", "*.jpeg")
 visible = false
 
 [node name="GridSpacingDialog" parent="." instance=ExtResource("6_lbneg")]
+visible = false
+
+[node name="SolveSummaryDialog" parent="." instance=ExtResource("2_pkvch")]
 visible = false
 
 [node name="HSplitContainer" type="HSplitContainer" parent="."]
@@ -218,7 +223,7 @@ item_1/id = 4
 item_2/text = "Images"
 item_2/checkable = 1
 item_2/checked = true
-item_2/id = 2
+item_2/id = 5
 item_3/text = "Measurements"
 item_3/checkable = 1
 item_3/checked = true
@@ -298,6 +303,19 @@ button_group = ExtResource("18_emdii")
 icon = ExtResource("21_j3b3p")
 icon_alignment = 1
 
+[node name="VSeparator4" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons"]
+layout_mode = 2
+
+[node name="SolveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(65, 0)
+layout_mode = 2
+tooltip_text = "Solve fluid system."
+focus_mode = 0
+theme = ExtResource("11_w0qvw")
+theme_override_constants/align_to_largest_stylebox = 0
+text = "Solve"
+icon = ExtResource("21_ueesn")
+
 [node name="WorldView" parent="HSplitContainer/Layout" instance=ExtResource("9_xrpqu")]
 layout_mode = 2
 size_flags_vertical = 3
@@ -309,6 +327,8 @@ size_flags_vertical = 3
 [connection signal="apply" from="GridSpacingDialog" to="." method="_on_grid_spacing_dialog_apply"]
 [connection signal="cancel" from="GridSpacingDialog" to="." method="_on_grid_spacing_dialog_cancel"]
 [connection signal="spacing_changed" from="GridSpacingDialog" to="." method="_on_grid_spacing_dialog_spacing_changed"]
+[connection signal="entity_clicked" from="SolveSummaryDialog" to="." method="_on_solve_summary_dialog_entity_clicked"]
+[connection signal="unknown_var_clicked" from="SolveSummaryDialog" to="." method="_on_solve_summary_dialog_unknown_var_clicked"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPipe" to="." method="_on_add_pipe_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPipeNode" to="." method="_on_add_pipe_node_pressed"]
@@ -325,6 +345,7 @@ size_flags_vertical = 3
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons/CurveCreateButton" to="." method="_on_curve_create_button_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons/CurveEditButton" to="." method="_on_curve_edit_button_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons/CurveRemoveButton" to="." method="_on_curve_remove_button_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/SolveButton" to="." method="_on_solve_button_pressed"]
 [connection signal="gui_input" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_view_gui_input"]
 [connection signal="pan_state_changed" from="HSplitContainer/Layout/WorldView" to="." method="_on_viewport_container_pan_state_changed"]
 [connection signal="world_object_reordered" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_object_reordered"]
