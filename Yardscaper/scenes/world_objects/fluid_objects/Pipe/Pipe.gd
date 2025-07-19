@@ -131,21 +131,23 @@ func get_tooltip_text() -> String:
 	text += "\nnet loss: %s" % Utils.pretty_fvar(fpipe.delta_h_psi(), Utils.DISP_UNIT_PSI)
 	return text
 
-func serialize():
-	var obj = super.serialize()
-	obj[PROP_KEY_DIAMETER_FT] = diameter_ft
-	obj[PROP_KEY_PIPE_COLOR] = pipe_color.to_html(true)
-	obj[PROP_KEY_MATERIAL_TYPE] = EnumUtils.to_str(PipeTables.MaterialType, material_type)
-	obj[PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT] = custom_surface_roughness_ft
-	return obj
+func serialize() -> Dictionary:
+	var data = super.serialize()
+	Utils.fpipe_into_dict(fpipe, data)
+	data[PROP_KEY_DIAMETER_FT] = diameter_ft
+	data[PROP_KEY_PIPE_COLOR] = pipe_color.to_html(true)
+	data[PROP_KEY_MATERIAL_TYPE] = EnumUtils.to_str(PipeTables.MaterialType, material_type)
+	data[PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT] = custom_surface_roughness_ft
+	return data
 
-func deserialize(obj):
-	super.deserialize(obj)
-	_props_from_save.diameter_ft = DictUtils.get_w_default(obj, PROP_KEY_DIAMETER_FT, Utils.inches_to_ft(0.5))
-	pipe_color = DictUtils.get_w_default(obj, PROP_KEY_PIPE_COLOR, Color.WHITE_SMOKE)
-	var material_type_str = DictUtils.get_w_default(obj, PROP_KEY_MATERIAL_TYPE, '') as String
+func deserialize(data: Dictionary) -> void:
+	super.deserialize(data)
+	Utils.fpipe_from_dict(fpipe, data)
+	_props_from_save.diameter_ft = DictUtils.get_w_default(data, PROP_KEY_DIAMETER_FT, Utils.inches_to_ft(0.5))
+	pipe_color = DictUtils.get_w_default(data, PROP_KEY_PIPE_COLOR, Color.WHITE_SMOKE)
+	var material_type_str = DictUtils.get_w_default(data, PROP_KEY_MATERIAL_TYPE, '') as String
 	material_type = EnumUtils.from_str(PipeTables.MaterialType, PipeTables.MaterialType.PVC, material_type_str) as PipeTables.MaterialType
-	custom_surface_roughness_ft = DictUtils.get_w_default(obj, PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT, 0.0)
+	custom_surface_roughness_ft = DictUtils.get_w_default(data, PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT, 0.0)
 
 func is_magnet_from_src_handle(magnet: MagneticArea) -> bool:
 	return point_a_handle.get_magnet() == magnet

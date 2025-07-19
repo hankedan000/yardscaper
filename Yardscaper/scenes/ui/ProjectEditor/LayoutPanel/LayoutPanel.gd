@@ -274,11 +274,13 @@ func _update_ui_after_selection_change():
 	_update_position_lock_buttons()
 	remove_button.disabled = selected_objs.is_empty()
 	sprink_prop_list.hide()
-	sprink_prop_list.clear_sprinklers()
+	sprink_prop_list.clear_objects()
 	img_prop_list.hide()
+	img_prop_list.clear_objects()
 	poly_prop_list.hide()
+	poly_prop_list.clear_objects()
 	pipe_prop_list.hide()
-	pipe_prop_list.clear_pipes()
+	pipe_prop_list.clear_objects()
 	curve_edit_buttons.hide()
 	
 	if selected_objs.size() == 0:
@@ -329,23 +331,24 @@ func _update_ui_after_selection_change():
 			all_distances = false
 			all_pipes = false
 	
-	var is_single_select = selected_objs.size() == 1
 	if all_sprinklers:
 		for obj in selected_objs:
-			sprink_prop_list.add_sprinkler(obj)
+			sprink_prop_list.add_object(obj)
 		sprink_prop_list.show()
-	elif all_images && is_single_select:
-		img_prop_list.img_node = selected_objs[0]
+	elif all_images:
+		for obj in selected_objs:
+			img_prop_list.add_object(obj)
 		img_prop_list.show()
-	elif all_distances && is_single_select:
+	elif all_distances:
 		pass
-	elif all_polygons && is_single_select:
-		poly_prop_list.poly_node = selected_objs[0]
+	elif all_polygons:
+		for obj in selected_objs:
+			poly_prop_list.add_object(obj)
 		poly_prop_list.show()
 		curve_edit_buttons.show()
 	elif all_pipes:
 		for obj in selected_objs:
-			pipe_prop_list.add_pipe(obj)
+			pipe_prop_list.add_object(obj)
 		pipe_prop_list.show()
 	elif all_pipe_nodes:
 		pass # TODO add PipeNode property editor
@@ -750,8 +753,10 @@ func _on_curve_remove_button_pressed() -> void:
 func _on_solve_button_pressed() -> void:
 	# solve the system while timing how long it takes
 	TheProject.fsys.reset_solved_vars()
+	var settings := FSolver.Settings.new()
+	settings.set_basic_console_printer()
 	var start_ticks_msec := Time.get_ticks_msec()
-	var res := FSolver.solve_system(TheProject.fsys)
+	var res := FSolver.solve_system(TheProject.fsys, settings)
 	var solve_time_msec := Time.get_ticks_msec() - start_ticks_msec
 	
 	# display results to user

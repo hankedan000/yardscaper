@@ -1,0 +1,36 @@
+[gd_scene load_steps=3 format=3 uid="uid://bujgf1ym2asal"]
+
+[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/obj_editors/ImageNodePropertyEditor/ImageNodePropertyEditor.gd" id="1_kmjym"]
+[ext_resource type="PackedScene" uid="uid://dinchpfl3oh55" path="res://scenes/ui/ProjectEditor/obj_editors/WorldObjectPropertyEditor/WorldObjectPropertyEditor.tscn" id="2_kcywm"]
+
+[node name="ImageNodePropertiesList" instance=ExtResource("2_kcywm")]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_kmjym")
+
+[node name="Label2" type="Label" parent="VBoxContainer/PropertiesList" index="2"]
+layout_mode = 2
+text = "Width: "
+
+[node name="WidthSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="3"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Total spray angle or rotor's swept angle"
+max_value = 10000.0
+step = 0.001
+suffix = "ft"
+
+[node name="Label3" type="Label" parent="VBoxContainer/PropertiesList" index="4"]
+layout_mode = 2
+text = "Height: "
+
+[node name="HeightSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="5"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Total spray angle or rotor's swept angle"
+max_value = 10000.0
+step = 0.001
+suffix = "ft"
+
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/WidthSpinBox" to="." method="_on_width_spin_box_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/HeightSpinBox" to="." method="_on_height_spin_box_value_changed"]

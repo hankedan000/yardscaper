@@ -13,15 +13,17 @@ func show_summary(solve_time_msec: int, res: FSolver.FSystemSolveResult) -> void
 static func _append_summary_text(rt: RichTextLabel, solve_time_msec: int, res: FSolver.FSystemSolveResult) -> void:
 	# analyze results
 	var num_subsystems := res.sub_systems.size()
-	var unsolved_subsystems :Array[FSolver.SubSystem]= []
+	var unsolved_subsystems : Array[FSolver.SubSystem] = []
+	var unsolved_fsolve_results : Array[Math.FSolveResult] = []
 	for i in range(num_subsystems):
 		var sub_res := res.sub_system_results[i]
 		if ! sub_res.converged:
 			unsolved_subsystems.push_back(res.sub_systems[i])
+			unsolved_fsolve_results.push_back(res.sub_system_results[i])
 	
 	var num_solved_subsystems := num_subsystems - unsolved_subsystems.size()
 	_append_main_summary(rt, num_subsystems, num_solved_subsystems, solve_time_msec)
-	_append_unsolved_summaries(rt, unsolved_subsystems)
+	_append_unsolved_summaries(rt, unsolved_subsystems, unsolved_fsolve_results)
 
 static func _append_main_summary(rt: RichTextLabel, num_subsystems: int, num_solved_subsystems: int, solve_time_msec: int) -> void:
 	rt.append_text("Overall Status: ")
@@ -35,26 +37,33 @@ static func _append_main_summary(rt: RichTextLabel, num_subsystems: int, num_sol
 		rt.push_color(Color.ORANGE)
 		rt.append_text("Partially Solved")
 	rt.pop() # color
-	rt.append_text("\n# of Subsystems: %d (%d solved)" % [num_subsystems, num_solved_subsystems])
+	rt.append_text("\nSolved Subsystems: %d of %d" % [num_solved_subsystems, num_subsystems])
 	rt.append_text("\nSolve Time: %d ms" % solve_time_msec)
 
-static func _append_unsolved_summaries(rt: RichTextLabel, unsolved_subsystems :Array[FSolver.SubSystem]) -> void:
-	if unsolved_subsystems.is_empty():
+const CONSTRAINT_STATUS_HINT := "Under: # of unknown vars > # of equations\nWell: # of unknown vars = # of equations\nOver: # of unknown vars < # of equations"
+
+static func _append_unsolved_summaries(
+		rt: RichTextLabel,
+		subsystems : Array[FSolver.SubSystem],
+		fsolve_results: Array[Math.FSolveResult]) -> void:
+	if subsystems.is_empty():
 		return
 	
 	rt.push_mono()
 	rt.append_text("\n" + _make_block_separator("Unsolved Subsystem Summaries"))
 	
-	for i in range(unsolved_subsystems.size()):
-		var ssys := unsolved_subsystems[i]
+	for i in range(subsystems.size()):
+		var ssys := subsystems[i]
+		var res := fsolve_results[i]
 		var sub_title := " Subsystem %d " % (i+1)
 		var sep_line := _make_separator_line(sub_title, &"-")
 		rt.append_text("\n" + sep_line)
 		var c_type := ssys.constrain_type()
-		rt.append_text("\nunsolved rationale: ")
-		rt.push_hint(_get_constraint_hint(c_type))
-		rt.append_text("%s Constrained" % EnumUtils.to_str(FSolver.ConstrainType, c_type))
+		rt.push_hint(CONSTRAINT_STATUS_HINT)
+		rt.append_text("\nConstrained Status")
 		rt.pop() # hint
+		rt.append_text(": %s" % EnumUtils.to_str(FSolver.ConstrainType, c_type))
+		rt.append_text("\nSolver iterations: %d of %d max" % [res.iters, res.max_iter])
 		rt.append_text("\n# of unknown variables: %d" % ssys.unknown_vars.size())
 		rt.append_text("\n# of equations: %d" % ssys.equations.size())
 		rt.append_text("\nnodes: ")
@@ -82,16 +91,6 @@ static func _append_fluid_entity_list(rt: RichTextLabel, entities: Array) -> voi
 		rt.pop() # meta
 		comma = &","
 	rt.append_text("]")
-
-static func _get_constraint_hint(c_type: FSolver.ConstrainType) -> String:
-	match c_type:
-		FSolver.ConstrainType.Under:
-			return "# of unknown vars > # of equations"
-		FSolver.ConstrainType.Well:
-			return "# of unknown vars = # of equations"
-		FSolver.ConstrainType.Over:
-			return "# of unknown vars < # of equations"
-	return ""
 
 const DEFAULT_SEP_LINE_WIDTH := 60
 static func _make_separator_line(

@@ -94,13 +94,13 @@ func get_bounding_box() -> Rect2:
 	var box := Rect2(point_a, Vector2(1,1))
 	return box.expand(point_b)
 
-func serialize():
+func serialize() -> Dictionary:
 	var obj = super.serialize()
 	obj[&'point_a_ft'] = Utils.vect2_to_pair(Utils.px_to_ft_vec(point_a))
 	obj[&'point_b_ft'] = Utils.vect2_to_pair(Utils.px_to_ft_vec(point_b))
 	return obj
 
-func deserialize(obj):
+func deserialize(obj: Dictionary) -> void:
 	super.deserialize(obj)
 	_point_a_from_save = Utils.ft_to_px_vec(
 		Utils.pair_to_vect2(DictUtils.get_w_default(obj, &'point_a_ft', [0.0, 0.0])))

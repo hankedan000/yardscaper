@@ -302,6 +302,7 @@ func instance_world_obj(type_name: StringName, ser_obj: Dictionary={}) -> WorldO
 	if ! (WorldObject.PROP_KEY_USER_LABEL in ser_obj):
 		ser_obj[WorldObject.PROP_KEY_USER_LABEL] = TheProject.get_unique_name(type_name)
 	wobj.parent_project = self
+	wobj._init_world_obj()
 	wobj.deserialize(ser_obj)
 	wobj.property_changed.connect(_on_node_property_changed)
 	wobj.moved.connect(_on_node_moved)

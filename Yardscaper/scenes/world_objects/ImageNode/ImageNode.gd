@@ -62,14 +62,14 @@ func img_size_px() -> Vector2:
 func get_type_name() -> StringName:
 	return TypeNames.IMG_NODE
 
-func serialize():
+func serialize() -> Dictionary:
 	var obj = super.serialize()
 	obj['filename'] = filename
 	obj[PROP_KEY_WIDTH_FT] = width_ft
 	obj[PROP_KEY_HEIGHT_FT] = height_ft
 	return obj
 
-func deserialize(obj):
+func deserialize(obj: Dictionary) -> void:
 	super.deserialize(obj)
 	filename = obj['filename']
 	width_ft = DictUtils.get_w_default(obj, PROP_KEY_WIDTH_FT, 0)

@@ -63,7 +63,12 @@ var short_term_position_locked : bool = false
 
 var deferred_prop_change : DeferredPropertyChange = DeferredPropertyChange.new(self)
 
-var _is_ready = false
+class WObjPropsFromSave extends RefCounted:
+	var global_position = null
+	var info_label_visible = null
+	var positon_locked = null
+
+var _wobj_props_from_save : WObjPropsFromSave = WObjPropsFromSave.new()
 var _global_pos_at_move_start = null
 
 func _ready():
@@ -74,7 +79,17 @@ func _ready():
 			world = parent
 			break
 		parent = parent.get_parent()
-	_is_ready = true
+	
+	# restore items from deserialize() that needed to wait for _ready()
+	if _wobj_props_from_save.global_position is Vector2:
+		apply_global_position(_wobj_props_from_save.global_position)
+		_wobj_props_from_save.global_position = null
+	if _wobj_props_from_save.info_label_visible is bool:
+		info_label.visible = _wobj_props_from_save.info_label_visible
+		_wobj_props_from_save.info_label_visible = null
+	if _wobj_props_from_save.positon_locked is bool:
+		position_locked = _wobj_props_from_save.positon_locked
+		_wobj_props_from_save.positon_locked = null
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
@@ -154,7 +169,7 @@ func finish_move(cancel: bool = false) -> bool:
 func get_tooltip_text() -> String:
 	return user_label
 
-func serialize():
+func serialize() -> Dictionary:
 	return {
 		'subclass' : get_type_name(),
 		PROP_KEY_POSITION_FT : Utils.vect2_to_pair(Utils.px_to_ft_vec(global_position)),
@@ -164,15 +179,18 @@ func serialize():
 		PROP_KEY_POSITION_LOCKED : position_locked
 	}
 
-func deserialize(obj):
-	if ! _is_ready:
-		await ready
-	apply_global_position(Utils.ft_to_px_vec(
-		Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_POSITION_FT, [0.0, 0.0]))))
+func deserialize(obj: Dictionary) -> void:
+	_wobj_props_from_save.global_position = Utils.ft_to_px_vec(
+		Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_POSITION_FT, [0.0, 0.0])))
 	rotation_degrees = DictUtils.get_w_default(obj, PROP_KEY_ROTATION_DEG, 0.0)
 	user_label = obj[PROP_KEY_USER_LABEL]
-	info_label.visible = DictUtils.get_w_default(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)
-	position_locked = DictUtils.get_w_default(obj, PROP_KEY_POSITION_LOCKED, false)
+	_wobj_props_from_save.info_label_visible = DictUtils.get_w_default(obj, PROP_KEY_INFO_LABEL_VISIBLE, false)
+	_wobj_props_from_save.positon_locked = DictUtils.get_w_default(obj, PROP_KEY_POSITION_LOCKED, false)
+
+# a method for the WorldObject to perform any necessary initialization logic
+# after the Project has instantiated, but before it has deserialized it
+func _init_world_obj() -> void:
+	pass
 
 func _predelete() -> void:
 	parent_project._remove_object(self)

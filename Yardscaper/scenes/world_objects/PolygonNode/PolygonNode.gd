@@ -209,7 +209,7 @@ func get_bounding_box() -> Rect2:
 		box = box.expand(poly.polygon[idx])
 	return box
 
-func serialize():
+func serialize() -> Dictionary:
 	var obj = super.serialize()
 	var points_ft = []
 	for point in poly.polygon:

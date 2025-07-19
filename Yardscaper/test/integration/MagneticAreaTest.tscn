@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://wxns6gfy76u4"]
 
-[ext_resource type="PackedScene" uid="uid://cvkbhq0h44hq3" path="res://scenes/ui/misc/MagneticArea.tscn" id="2_1ldh0"]
+[ext_resource type="PackedScene" uid="uid://cvkbhq0h44hq3" path="res://scenes/ui/widgets/MagneticArea/MagneticArea.tscn" id="2_1ldh0"]
 
 [sub_resource type="GDScript" id="GDScript_vq13b"]
 script/source = "extends Node2D

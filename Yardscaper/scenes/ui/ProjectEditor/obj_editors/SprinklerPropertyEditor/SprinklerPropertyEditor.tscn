@@ -1,0 +1,96 @@
+[gd_scene load_steps=3 format=3 uid="uid://co2gtkorldd8j"]
+
+[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/obj_editors/SprinklerPropertyEditor/SprinklerPropertyEditor.gd" id="1_0j0oi"]
+[ext_resource type="PackedScene" uid="uid://ckvkogi4jo41k" path="res://scenes/ui/ProjectEditor/obj_editors/BaseNodePropertyEditor/BaseNodePropertyEditor.tscn" id="2_oybtd"]
+
+[node name="SprinklerPropertyEditor" instance=ExtResource("2_oybtd")]
+script = ExtResource("1_0j0oi")
+
+[node name="Label4" type="Label" parent="VBoxContainer/PropertiesList" index="2"]
+layout_mode = 2
+text = "Manufacturer: "
+
+[node name="ManufacturerOption" type="OptionButton" parent="VBoxContainer/PropertiesList" index="3"]
+layout_mode = 2
+
+[node name="Label5" type="Label" parent="VBoxContainer/PropertiesList" index="4"]
+layout_mode = 2
+text = "Model: "
+
+[node name="ModelOption" type="OptionButton" parent="VBoxContainer/PropertiesList" index="5"]
+layout_mode = 2
+
+[node name="Label9" type="Label" parent="VBoxContainer/PropertiesList" index="6"]
+layout_mode = 2
+text = "Zone: "
+
+[node name="ZoneSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="7"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "The watering zone this sprinkler belongs to."
+
+[node name="Label3" type="Label" parent="VBoxContainer/PropertiesList" index="8"]
+layout_mode = 2
+text = "Sweep: "
+
+[node name="SweepSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="9"]
+layout_mode = 2
+tooltip_text = "Total spray angle or rotor's swept angle"
+max_value = 360.0
+suffix = "deg"
+
+[node name="Label6" type="Label" parent="VBoxContainer/PropertiesList" index="10"]
+layout_mode = 2
+text = "Rotation: "
+
+[node name="RotationSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="11"]
+layout_mode = 2
+tooltip_text = "Angle sprinkler body"
+min_value = -360.0
+max_value = 360.0
+suffix = "deg"
+
+[node name="Label7" type="Label" parent="VBoxContainer/PropertiesList" index="12"]
+modulate = Color(1, 0.188235, 0.215686, 1)
+layout_mode = 2
+text = "Min Distance: "
+
+[node name="MinDistanceSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="13"]
+layout_mode = 2
+suffix = "ft"
+
+[node name="Label8" type="Label" parent="VBoxContainer/PropertiesList" index="14"]
+modulate = Color(0.39, 1, 0.4205, 1)
+layout_mode = 2
+text = "Max Distance: "
+
+[node name="MaxDistanceSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="15"]
+layout_mode = 2
+suffix = "ft"
+
+[node name="Label10" type="Label" parent="VBoxContainer/PropertiesList" index="16"]
+layout_mode = 2
+text = "Distance: "
+
+[node name="DistanceSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="17"]
+layout_mode = 2
+suffix = "ft"
+
+[node name="Label11" type="Label" parent="VBoxContainer/PropertiesList" index="18"]
+layout_mode = 2
+text = "Head Color:"
+
+[node name="BodyColorPicker" type="ColorPickerButton" parent="VBoxContainer/PropertiesList" index="19"]
+layout_mode = 2
+
+[connection signal="item_selected" from="VBoxContainer/PropertiesList/ManufacturerOption" to="." method="_on_manufacturer_option_item_selected"]
+[connection signal="item_selected" from="VBoxContainer/PropertiesList/ModelOption" to="." method="_on_model_option_item_selected"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/ZoneSpinBox" to="." method="_on_zone_spin_box_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/SweepSpinBox" to="." method="_on_sweep_spin_box_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/RotationSpinBox" to="." method="_on_rotation_spin_box_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/MinDistanceSpinBox" to="." method="_on_min_distance_spin_box_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/MaxDistanceSpinBox" to="." method="_on_max_distance_spin_box_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/DistanceSpinBox" to="." method="_on_distance_spin_box_value_changed"]
+[connection signal="color_changed" from="VBoxContainer/PropertiesList/BodyColorPicker" to="." method="_on_body_color_picker_color_changed"]
+[connection signal="popup_closed" from="VBoxContainer/PropertiesList/BodyColorPicker" to="." method="_on_body_color_picker_popup_closed"]
+[connection signal="pressed" from="VBoxContainer/PropertiesList/BodyColorPicker" to="." method="_on_body_color_picker_pressed"]

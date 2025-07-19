@@ -21,7 +21,7 @@ const PROP_MAX_SWEEP_DEG = &"max_sweep_deg"
 @onready var rot_handle   : EditorHandle = $RotationHandle
 @onready var sweep_handle : EditorHandle = $SweepHandle
 
-func is_set(value: float):
+static func is_set(value: float):
 	return not is_nan(value)
 
 var zone : int = 1 :
@@ -160,44 +160,9 @@ var _init_angle_to_mouse : float = 0.0
 var _init_rotation : float = 0.0
 var _init_sweep : float = 0.0
 
-func get_type_name() -> StringName:
-	return TypeNames.SPRINKLER
-
-func get_bounding_box() -> Rect2:
-	var box_width := Utils.ft_to_px(max_dist_ft * 2.0)
-	var box_size = Vector2(box_width, box_width)
-	return Rect2(get_visual_center() - box_size / 2.0, box_size)
-
-func serialize():
-	var obj = super.serialize()
-	obj[PROP_KEY_DIST_FT] = dist_ft
-	obj[PROP_KEY_MIN_DIST_FT] = min_dist_ft
-	obj[PROP_KEY_MAX_DIST_FT] = max_dist_ft
-	obj[PROP_KEY_SWEEP_DEG] = int(sweep_deg)
-	obj[PROP_KEY_MANUFACTURER] = manufacturer
-	obj[PROP_KEY_MODEL] = model
-	obj[PROP_KEY_ZONE] = zone
-	obj[PROP_KEY_BODY_COLOR] = body_color.to_html(true)
-	return obj
-
-func deserialize(obj):
-	super.deserialize(obj)
-	sweep_deg = DictUtils.get_w_default(obj, PROP_KEY_SWEEP_DEG, 360.0)
-	manufacturer = DictUtils.get_w_default(obj, PROP_KEY_MANUFACTURER, "")
-	model = DictUtils.get_w_default(obj, PROP_KEY_MODEL, "")
-	min_dist_ft = DictUtils.get_w_default(obj, PROP_KEY_MIN_DIST_FT, min_dist_ft)
-	max_dist_ft = DictUtils.get_w_default(obj, PROP_KEY_MAX_DIST_FT, max_dist_ft)
-	dist_ft = DictUtils.get_w_default(obj, PROP_KEY_DIST_FT, max_dist_ft)
-	zone = DictUtils.get_w_default(obj, PROP_KEY_ZONE, 1)
-	body_color = DictUtils.get_w_default(obj, PROP_KEY_BODY_COLOR, body_color)
-
 func _ready() -> void:
 	super._ready()
 	set_process_input(false)
-	
-	# be helpful to the user, and set this to 0.0 since the majority of
-	# sprinkler will be venting to atmospheric pressure.
-	fnode.h_psi.set_known(0.0)
 	
 	rot_handle.get_button().button_down.connect(_on_handle_button_down.bind(rot_handle))
 	rot_handle.get_button().button_up.connect(_on_handle_button_up)
@@ -219,6 +184,44 @@ func _input(event: InputEvent) -> void:
 
 func _draw() -> void:
 	draw_layer.queue_redraw()
+
+func get_type_name() -> StringName:
+	return TypeNames.SPRINKLER
+
+func get_bounding_box() -> Rect2:
+	var box_width := Utils.ft_to_px(max_dist_ft * 2.0)
+	var box_size = Vector2(box_width, box_width)
+	return Rect2(get_visual_center() - box_size / 2.0, box_size)
+
+func serialize() -> Dictionary:
+	var obj = super.serialize()
+	obj[PROP_KEY_DIST_FT] = dist_ft
+	obj[PROP_KEY_MIN_DIST_FT] = min_dist_ft
+	obj[PROP_KEY_MAX_DIST_FT] = max_dist_ft
+	obj[PROP_KEY_SWEEP_DEG] = int(sweep_deg)
+	obj[PROP_KEY_MANUFACTURER] = manufacturer
+	obj[PROP_KEY_MODEL] = model
+	obj[PROP_KEY_ZONE] = zone
+	obj[PROP_KEY_BODY_COLOR] = body_color.to_html(true)
+	return obj
+
+func deserialize(obj: Dictionary) -> void:
+	super.deserialize(obj)
+	sweep_deg = DictUtils.get_w_default(obj, PROP_KEY_SWEEP_DEG, 360.0)
+	manufacturer = DictUtils.get_w_default(obj, PROP_KEY_MANUFACTURER, "")
+	model = DictUtils.get_w_default(obj, PROP_KEY_MODEL, "")
+	min_dist_ft = DictUtils.get_w_default(obj, PROP_KEY_MIN_DIST_FT, min_dist_ft)
+	max_dist_ft = DictUtils.get_w_default(obj, PROP_KEY_MAX_DIST_FT, max_dist_ft)
+	dist_ft = DictUtils.get_w_default(obj, PROP_KEY_DIST_FT, max_dist_ft)
+	zone = DictUtils.get_w_default(obj, PROP_KEY_ZONE, 1)
+	body_color = DictUtils.get_w_default(obj, PROP_KEY_BODY_COLOR, body_color)
+
+# a method for the WorldObject to perform any necessary initialization logic
+# after the Project has instantiated, but before it has deserialized it
+func _init_world_obj() -> void:
+	# for brand new nodes, be helpful to the user, and set this to 0.0 since
+	# the majority of sprinklers will be venting to atmospheric pressure.
+	fnode.h_psi.set_known(0.0)
 
 func _cap_values():
 	if dist_ft < min_dist_ft:

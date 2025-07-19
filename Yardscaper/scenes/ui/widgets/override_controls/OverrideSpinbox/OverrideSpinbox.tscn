@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://ht8n7bsycg3f"]
+
+[ext_resource type="PackedScene" uid="uid://codsrkdnydsvu" path="res://scenes/ui/widgets/override_controls/OverrideControl/OverrideControl.tscn" id="1_5hqpe"]
+[ext_resource type="Script" path="res://scenes/ui/widgets/override_controls/OverrideSpinbox/OverrideSpinbox.gd" id="2_j0s84"]
+
+[node name="OverrideSpinbox" instance=ExtResource("1_5hqpe")]
+script = ExtResource("2_j0s84")
+suffix = ""
+control_path = NodePath("SpinBox")
+
+[node name="SpinBox" type="SpinBox" parent="." index="1"]
+layout_mode = 2
+editable = false

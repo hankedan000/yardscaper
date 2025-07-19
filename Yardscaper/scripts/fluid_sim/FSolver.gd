@@ -107,6 +107,8 @@ static func make_sub_systems(fsys: FSystem) -> Array[SubSystem]:
 	return systems
 
 static func _basic_console_printer(iter: int, x: Array[float], ssys: SubSystem) -> void:
+	print("x.size(): %d" % x.size())
+	print("unknown_vars.size(): %d" % ssys.unknown_vars.size())
 	var dbg_str := "iter[%d] - " % iter
 	var comma := ""
 	for i in range(x.size()):
@@ -134,6 +136,9 @@ static func solve_system(fsys: FSystem, settings:=Settings.new()) -> FSystemSolv
 	if ! is_instance_valid(fsys):
 		push_error("fsys must be valid")
 		return res
+	elif ! is_instance_valid(settings):
+		push_error("settings must be valid")
+		return res
 	
 	res.sub_systems = make_sub_systems(fsys)
 	res.solved = true
@@ -147,23 +152,27 @@ static func solve_sub_system(ssys: SubSystem, settings:=Settings.new()) -> Math.
 	if ! is_instance_valid(ssys):
 		return Math.FSolveResult.new()
 	
+	print("---------------------------------------")
+	print("solving system with %d node and %d pipes" % [ssys.nodes.size(), ssys.pipes.size()])
+	
 	# make sure system is Well constrainted
 	var ctype := ssys.constrain_type()
 	if ctype != ConstrainType.Well:
+		print("it's not well constrainted!")
 		return Math.FSolveResult.new()
 	
 	# solve the system of equations
 	var x0 : Array[float] = []
 	for uvar in ssys.unknown_vars:
 		x0.push_back(uvar.value)
-	settings.dbg_printer = settings.dbg_printer.bind(ssys)
+	var this_debug_printer := settings.dbg_printer.bind(ssys)
 	var res := Math.fsolve(
 		_fsolve_subsystem.bind(ssys), # f(x)
 		x0,
 		settings.tol,
 		settings.max_iters,
 		settings.max_delta,
-		settings.dbg_printer)
+		this_debug_printer)
 	
 	if res.converged:
 		for uvar in ssys.unknown_vars:

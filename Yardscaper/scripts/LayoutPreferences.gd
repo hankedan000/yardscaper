@@ -67,7 +67,7 @@ var camera_pos := Vector2()
 var zoom = 1.0
 var grid_major_spacing_ft := Vector2(5, 5)
 
-func serialize():
+func serialize() -> Dictionary:
 	return {
 		PROP_KEY_SHOW_GRID : show_grid,
 		PROP_KEY_SHOW_ORIGIN : show_origin,
@@ -82,7 +82,7 @@ func serialize():
 		PROP_KEY_GRID_MAJOR_SPACING : Utils.vect2_to_pair(grid_major_spacing_ft)
 	}
 
-func deserialize(obj):
+func deserialize(obj: Dictionary) -> void:
 	show_grid = DictUtils.get_w_default(obj, PROP_KEY_SHOW_GRID, true)
 	show_origin = DictUtils.get_w_default(obj, PROP_KEY_SHOW_ORIGIN, true)
 	show_images = DictUtils.get_w_default(obj, PROP_KEY_SHOW_IMAGES, true)

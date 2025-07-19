@@ -7,11 +7,6 @@ const BODY_RADIUS_FT = 3.0 / 12.0 # 6in diameter
 func _ready() -> void:
 	super._ready()
 	
-	# be helpful to the user, and set this to 0.0 since the majority of the
-	# nodes they're making will be for connecting pipes together which will
-	# have no external flows.
-	fnode.q_ext_cfs.set_known(0.0)
-	
 	var body_radius_px := get_body_radius_px()
 	magnet_area.set_radius(body_radius_px)
 
@@ -23,3 +18,11 @@ func get_type_name() -> StringName:
 
 func get_body_radius_px() -> float:
 	return Utils.ft_to_px(BODY_RADIUS_FT)
+
+# a method for the WorldObject to perform any necessary initialization logic
+# after the Project has instantiated, but before it has deserialized it
+func _init_world_obj() -> void:
+	# for brand new PipeNodes, be helpful to the user and set this to 0.0 since
+	# the majority of the nodes they're making will be for connecting pipes
+	# together which will have no external flows.
+	fnode.q_ext_cfs.set_known(0.0)

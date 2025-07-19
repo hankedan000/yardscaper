@@ -209,3 +209,36 @@ static func fit_camera_to_rect(camera: Camera2D, rect: Rect2, padding: float = 0
 
 	# Center the camera on the rect
 	camera.global_position = padded_rect.get_center()
+
+const PROP_KEY_FVAR_STATE := &'state'
+const PROP_KEY_FVAR_VALUE := &'value'
+
+static func fvar_to_dict(fvar: Var) -> Dictionary:
+	var data = {}
+	data[PROP_KEY_FVAR_STATE] = EnumUtils.to_str(Var.State, fvar.state)
+	data[PROP_KEY_FVAR_VALUE] = fvar.value
+	return data
+
+static func fvar_from_dict(fvar: Var, data: Dictionary) -> void:
+	var state_str := DictUtils.get_w_default(data, PROP_KEY_FVAR_STATE, 'Unknown') as String
+	fvar.state = EnumUtils.from_str(Var.State, Var.State.Unknown, state_str) as Var.State
+	fvar.value = DictUtils.get_w_default(data, PROP_KEY_FVAR_VALUE, 0.0) as float
+
+const PROP_KEY_FNODE_H_PSI := &'h_psi'
+const PROP_KEY_FNODE_Q_EXT_CFS := &'q_ext_cfs'
+
+static func fnode_into_dict(fnode: FNode, data: Dictionary) -> void:
+	data[PROP_KEY_FNODE_H_PSI] = fvar_to_dict(fnode.h_psi)
+	data[PROP_KEY_FNODE_Q_EXT_CFS] = fvar_to_dict(fnode.q_ext_cfs)
+
+static func fnode_from_dict(fnode: FNode, data: Dictionary) -> void:
+	fvar_from_dict(fnode.h_psi, DictUtils.get_w_default(data, PROP_KEY_FNODE_H_PSI, {}))
+	fvar_from_dict(fnode.q_ext_cfs, DictUtils.get_w_default(data, PROP_KEY_FNODE_Q_EXT_CFS, {}))
+
+const PROP_KEY_FPIPE_Q_CFS := &'q_cfs'
+
+static func fpipe_into_dict(fpipe: FPipe, data: Dictionary) -> void:
+	data[PROP_KEY_FPIPE_Q_CFS] = fvar_to_dict(fpipe.q_cfs)
+
+static func fpipe_from_dict(fpipe: FPipe, data: Dictionary) -> void:
+	fvar_from_dict(fpipe.q_cfs, DictUtils.get_w_default(data, PROP_KEY_FPIPE_Q_CFS, {}))

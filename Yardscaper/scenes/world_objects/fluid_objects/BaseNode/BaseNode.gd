@@ -6,10 +6,10 @@ const PROP_KEY_PIPE_CONNECTIONS := &'pipe_connections'
 
 var fnode : FNode = null
 
-class PropsFromSave extends RefCounted:
+class BaseNodePropsFromSave extends RefCounted:
 	var pipe_connections : Array = []
 
-var _props_from_save : PropsFromSave = PropsFromSave.new()
+var _base_node_props_from_save : BaseNodePropsFromSave = BaseNodePropsFromSave.new()
 
 func _ready() -> void:
 	super._ready()
@@ -41,14 +41,16 @@ func get_tooltip_text() -> String:
 	text += "\nelevation: %s %s" % [fnode.el_ft, Utils.DISP_UNIT_FT]
 	return text
 
-func serialize():
-	var obj = super.serialize()
-	obj[PROP_KEY_PIPE_CONNECTIONS] = _build_pipe_connection_list()
-	return obj
+func serialize() -> Dictionary:
+	var data = super.serialize()
+	Utils.fnode_into_dict(fnode, data)
+	data[PROP_KEY_PIPE_CONNECTIONS] = _build_pipe_connection_list()
+	return data
 
-func deserialize(obj):
-	super.deserialize(obj)
-	_props_from_save.pipe_connections = DictUtils.get_w_default(obj, PROP_KEY_PIPE_CONNECTIONS, [])
+func deserialize(data: Dictionary) -> void:
+	super.deserialize(data)
+	Utils.fnode_from_dict(fnode, data)
+	_base_node_props_from_save.pipe_connections = DictUtils.get_w_default(data, PROP_KEY_PIPE_CONNECTIONS, [])
 
 # called by Project when it's posible for us to restore our pipe connections
 # from deserialized save state.
@@ -57,7 +59,7 @@ func restore_pipe_connections() -> void:
 		push_error("parent_project must be valid")
 		return
 	
-	for conn in _props_from_save.pipe_connections:
+	for conn in _base_node_props_from_save.pipe_connections:
 		# fetch the pipe for the connection
 		var pipe_ulabel := conn[&'user_label'] as String
 		var pipe := parent_project.get_obj_by_user_label(pipe_ulabel) as Pipe
@@ -71,7 +73,7 @@ func restore_pipe_connections() -> void:
 		var pipe_magnet := pipe.point_a_handle.get_magnet() if is_src else pipe.point_b_handle.get_magnet()
 		magnet_area.collect(pipe_magnet, true) # ignore_disable=true
 	
-	_props_from_save.pipe_connections.clear()
+	_base_node_props_from_save.pipe_connections.clear()
 
 func get_attached_magnet_parents() -> Array[MagnetParents]:
 	var parents_out : Array[MagnetParents] = []

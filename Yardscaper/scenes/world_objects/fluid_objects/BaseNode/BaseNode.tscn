@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_h5msp"]
 [ext_resource type="Script" path="res://scenes/world_objects/fluid_objects/BaseNode/BaseNode.gd" id="2_kmik6"]
-[ext_resource type="PackedScene" uid="uid://cvkbhq0h44hq3" path="res://scenes/ui/misc/MagneticArea.tscn" id="3_xgo4r"]
+[ext_resource type="PackedScene" uid="uid://cvkbhq0h44hq3" path="res://scenes/ui/widgets/MagneticArea/MagneticArea.tscn" id="3_xgo4r"]
 
 [node name="BaseNode" instance=ExtResource("1_h5msp")]
 script = ExtResource("2_kmik6")

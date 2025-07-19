@@ -20,6 +20,7 @@ static func area_circle(diameter: float) -> float:
 class FSolveResult extends RefCounted:
 	var converged : bool = false # true if the solution converged, false other wise
 	var iters : int = 0 # iterations it took to solve
+	var max_iter : int = 0 # maximum iterations fsolve() was allowed to make
 	var x : Array[float] = []
 
 # Solves a system of nonlinear equations f(x) = 0 using Newton-Raphson with finite differences
@@ -30,6 +31,7 @@ class FSolveResult extends RefCounted:
 # `max_delta` pervents large jumps in x[i] per iteration
 static func fsolve(f: Callable, x0: Array[float], tol := 1e-9, max_iter := 50, max_delta := 1.0, dbg_printer:=Callable()) -> FSolveResult:
 	var res := FSolveResult.new()
+	res.max_iter = max_iter
 	res.x = x0.duplicate()
 	var n = res.x.size()
 	var h = 1e-8  # finite difference step size
