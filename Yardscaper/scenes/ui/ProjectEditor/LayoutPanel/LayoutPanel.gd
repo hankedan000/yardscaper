@@ -13,6 +13,7 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 @onready var img_prop_list            : ImageNodePropertyEditor = $HSplitContainer/LeftPane/Properties/ImageNodePropertiesList
 @onready var poly_prop_list           : PolygonNodePropertyEditor = $HSplitContainer/LeftPane/Properties/PolygonNodePropertiesList
 @onready var pipe_prop_list           : PipePropertyEditor = $HSplitContainer/LeftPane/Properties/PipePropertyEditor
+@onready var pipe_node_prop_list      : PipeNodePropertyEditor = $HSplitContainer/LeftPane/Properties/PipeNodePropertyEditor
 @onready var objects_list             := $HSplitContainer/LeftPane/Objects
 
 @onready var add_sprink_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler
@@ -136,6 +137,7 @@ func _ready():
 	poly_prop_list.visible = false
 	pipe_prop_list.visible = false
 	pipe_prop_list.set_layout_panel(self)
+	pipe_node_prop_list.visible = false
 	objects_list.world = world_view
 	img_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
 	
@@ -237,7 +239,7 @@ func _handle_world_object_copy(objs: Array[WorldObject]) -> void:
 
 func _handle_world_object_paste(copied_data: Array[Dictionary]) -> void:
 	for obj_data in copied_data:
-		TheProject.instance_world_obj(obj_data[&'subclass'], obj_data)
+		TheProject.instance_world_obj_from_data(obj_data)
 
 func _cancel_mode():
 	if mode == Mode.AddSprinkler:
@@ -281,6 +283,8 @@ func _update_ui_after_selection_change():
 	poly_prop_list.clear_objects()
 	pipe_prop_list.hide()
 	pipe_prop_list.clear_objects()
+	pipe_node_prop_list.hide()
+	pipe_node_prop_list.clear_objects()
 	curve_edit_buttons.hide()
 	
 	if selected_objs.size() == 0:
@@ -351,7 +355,9 @@ func _update_ui_after_selection_change():
 			pipe_prop_list.add_object(obj)
 		pipe_prop_list.show()
 	elif all_pipe_nodes:
-		pass # TODO add PipeNode property editor
+		for obj in selected_objs:
+			pipe_node_prop_list.add_object(obj)
+		pipe_node_prop_list.show()
 
 func _update_position_lock_buttons():
 	var selected_objs := _selection_controller.selected_objs()

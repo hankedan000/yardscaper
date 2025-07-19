@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=26 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://lmlsf61h6k62" path="res://scenes/ui/dialogs/SolveSummaryDialog/SolveSummaryDialog.tscn" id="2_pkvch"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://ug68ljbldsj5" path="res://scenes/ui/dialogs/GridSpacingDialog/GridSpacingDialog.tscn" id="6_lbneg"]
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="7_nx6cf"]
 [ext_resource type="PackedScene" uid="uid://0w6g4f1p5gwe" path="res://scenes/ui/ProjectEditor/obj_editors/PolygonNodePropertyEditor/PolygonNodePropertyEditor.tscn" id="7_u58qy"]
+[ext_resource type="PackedScene" uid="uid://dtj8ql3pq0pul" path="res://scenes/ui/ProjectEditor/obj_editors/PipeNodePropertyEditor/PipeNodePropertyEditor.tscn" id="9_5qllo"]
 [ext_resource type="Texture2D" uid="uid://b7dml04prcvb" path="res://assets/icons/Water.svg" id="9_t5ctp"]
 [ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/ui/ProjectEditor/WorldViewportContainer/WorldViewportContainer.tscn" id="9_xrpqu"]
 [ext_resource type="Texture2D" uid="uid://cn15hpoo53btg" path="res://assets/icons/Image.svg" id="10_7tkh4"]
@@ -87,6 +88,10 @@ visible = false
 layout_mode = 2
 
 [node name="PipePropertyEditor" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("11_bx27v")]
+visible = false
+layout_mode = 2
+
+[node name="PipeNodePropertyEditor" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("9_5qllo")]
 visible = false
 layout_mode = 2
 

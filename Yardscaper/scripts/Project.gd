@@ -259,14 +259,13 @@ func serialize() -> Dictionary:
 		PROJECT_NAME_KEY : project_name
 	}
 
-# @param[in] data - serialized project data
+# @param[in] proj_data - serialized project data
 # @param[in] dir - project directory path
-func deserialize(data: Dictionary, dir: String) -> void:
+func deserialize(proj_data: Dictionary, dir: String) -> void:
 	_suppress_self_edit_signals = true
 	reset()
-	for ser_obj in DictUtils.get_w_default(data, OBJECTS_KEY, []):
-		if ser_obj is Dictionary && &'subclass' in ser_obj:
-			instance_world_obj(ser_obj[&'subclass'], ser_obj)
+	for obj_data in DictUtils.get_w_default(proj_data, OBJECTS_KEY, []):
+		instance_world_obj_from_data(obj_data)
 	
 	# notify all BaseNodes to restore their pipe connections now that all
 	# objects deserialized.
@@ -274,43 +273,26 @@ func deserialize(data: Dictionary, dir: String) -> void:
 		if obj is BaseNode:
 			obj.restore_pipe_connections()
 	
-	project_name = _get_project_name(data, dir)
+	project_name = _get_project_name(proj_data, dir)
 	_suppress_self_edit_signals = false
 
-func instance_world_obj(type_name: StringName, ser_obj: Dictionary={}) -> WorldObject:
-	var wobj : WorldObject = null
-	match type_name:
-		TypeNames.SPRINKLER:
-			wobj = SprinklerScene.instantiate() as Sprinkler
-			wobj.fnode = fsys.alloc_node()
-		TypeNames.IMG_NODE:
-			wobj = ImageNodeScene.instantiate() as ImageNode
-		TypeNames.DIST_MEASUREMENT:
-			wobj = DistanceMeasurementScene.instantiate() as DistanceMeasurement
-		TypeNames.POLYGON_NODE:
-			wobj = PolygonNodeScene.instantiate() as PolygonNode
-		TypeNames.PIPE:
-			wobj = PipeScene.instantiate() as Pipe
-			wobj.fpipe = fsys.alloc_pipe()
-		TypeNames.PIPE_NODE:
-			wobj = PipeNodeScene.instantiate() as PipeNode
-			wobj.fnode = fsys.alloc_node()
-		_:
-			push_warning("unimplemented subclass '%s' deserialization" % [ser_obj['subclass']])
-			return wobj
-	
-	if ! (WorldObject.PROP_KEY_USER_LABEL in ser_obj):
-		ser_obj[WorldObject.PROP_KEY_USER_LABEL] = TheProject.get_unique_name(type_name)
-	wobj.parent_project = self
-	wobj._init_world_obj()
-	wobj.deserialize(ser_obj)
-	wobj.property_changed.connect(_on_node_property_changed)
-	wobj.moved.connect(_on_node_moved)
-	objects.append(wobj)
-	node_changed.emit(wobj, ChangeType.ADD, [])
-	has_edits = true
-	
-	return wobj
+func instance_world_obj(type_name: StringName) -> WorldObject:
+	var new_wobj := _instance_world_obj(type_name)
+	if new_wobj is WorldObject:
+		node_changed.emit(new_wobj, ChangeType.ADD, [])
+		has_edits = true
+	return new_wobj
+
+func instance_world_obj_from_data(data: Dictionary) -> WorldObject:
+	var type_name = DictUtils.get_w_default(data, WorldObject.PROP_KEY_SUBCLASS, null) as StringName
+	if ! (type_name is StringName):
+		return null
+	var new_wobj := _instance_world_obj(type_name)
+	if new_wobj is WorldObject:
+		new_wobj.deserialize(data)
+		node_changed.emit(new_wobj, ChangeType.ADD, [])
+		has_edits = true
+	return new_wobj
 
 func add_image(path: String) -> ImageNode:
 	# try to copy image into project directories img dir
@@ -327,11 +309,11 @@ func add_image(path: String) -> ImageNode:
 		push_warning("failed to load image '%s'" % [img_path])
 		return null
 	
-	# load image and create a new ImageNode
-	var obj_data := {&'filename' : filename}
-	var img_node := instance_world_obj(TypeNames.IMG_NODE, obj_data) as ImageNode
-	has_edits = true
-	return img_node
+	# create a new ImageNode
+	var obj_data := {}
+	obj_data[WorldObject.PROP_KEY_SUBCLASS] = TypeNames.IMG_NODE
+	obj_data[ImageNode.PROP_KEY_FILENAME] = filename
+	return instance_world_obj_from_data(obj_data)
 
 func lookup_fvar_parent_obj(fvar: Var) -> WorldObject:
 	for obj in objects:
@@ -359,6 +341,36 @@ func lookup_fnode_parent_obj(fnode: FNode) -> BaseNode:
 		if obj is BaseNode && obj.fnode == fnode:
 			return obj
 	return null
+
+func _instance_world_obj(type_name: StringName) -> WorldObject:
+	var wobj : WorldObject = null
+	match type_name:
+		TypeNames.SPRINKLER:
+			wobj = SprinklerScene.instantiate() as Sprinkler
+			wobj.fnode = fsys.alloc_node()
+		TypeNames.IMG_NODE:
+			wobj = ImageNodeScene.instantiate() as ImageNode
+		TypeNames.DIST_MEASUREMENT:
+			wobj = DistanceMeasurementScene.instantiate() as DistanceMeasurement
+		TypeNames.POLYGON_NODE:
+			wobj = PolygonNodeScene.instantiate() as PolygonNode
+		TypeNames.PIPE:
+			wobj = PipeScene.instantiate() as Pipe
+			wobj.fpipe = fsys.alloc_pipe()
+		TypeNames.PIPE_NODE:
+			wobj = PipeNodeScene.instantiate() as PipeNode
+			wobj.fnode = fsys.alloc_node()
+		_:
+			push_warning("unsupported subclass '%s'" % type_name)
+			return wobj
+	
+	wobj.user_label = TheProject.get_unique_name(type_name)
+	wobj.parent_project = self
+	wobj._init_world_obj()
+	wobj.property_changed.connect(_on_node_property_changed)
+	wobj.moved.connect(_on_node_moved)
+	objects.append(wobj)
+	return wobj
 
 static func _get_project_data_filepath(project_dir: String, from_auto_save: bool) -> String:
 	if from_auto_save:

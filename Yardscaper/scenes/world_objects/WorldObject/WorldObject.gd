@@ -7,6 +7,7 @@ signal moved(obj: WorldObject, from_xy: Vector2, to_xy: Vector2)
 @warning_ignore("unused_signal") # subclasses will emit this
 signal undoable_edit(undo_op: UndoController.UndoOperation)
 
+const PROP_KEY_SUBCLASS = &"subclass"
 const PROP_KEY_POSITION_FT = &"position_ft"
 const PROP_KEY_USER_LABEL = &"user_label"
 const PROP_KEY_ROTATION_DEG = &"rotation_deg"
@@ -171,7 +172,7 @@ func get_tooltip_text() -> String:
 
 func serialize() -> Dictionary:
 	return {
-		'subclass' : get_type_name(),
+		PROP_KEY_SUBCLASS : get_type_name(),
 		PROP_KEY_POSITION_FT : Utils.vect2_to_pair(Utils.px_to_ft_vec(global_position)),
 		PROP_KEY_ROTATION_DEG : int(rotation_degrees),
 		PROP_KEY_USER_LABEL : user_label,

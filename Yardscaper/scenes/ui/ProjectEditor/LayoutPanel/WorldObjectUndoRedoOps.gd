@@ -33,11 +33,14 @@ class AddOrRemove extends UndoController.UndoOperation:
 		})
 	
 	func _do_add_logic() -> bool:
-		var wobj := TheProject.instance_world_obj(_ser_obj[&'subclass'], _ser_obj)
-		if is_instance_valid(wobj):
-			wobj.set_order_in_world(_from_idx)
-			return true
-		return false
+		var wobj := TheProject.instance_world_obj_from_data(_ser_obj)
+		if ! is_instance_valid(wobj):
+			return false
+		
+		wobj.set_order_in_world(_from_idx)
+		if wobj is BaseNode:
+			wobj.restore_pipe_connections()
+		return true
 	
 	func _do_remove_logic() -> bool:
 		var wobj := _world.objects.get_child(_from_idx) as WorldObject
