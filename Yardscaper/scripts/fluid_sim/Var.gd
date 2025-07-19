@@ -26,6 +26,9 @@ func set_known(v: float) -> void:
 	value = v
 	state = State.Known
 
+func _to_string() -> String:
+	return "%s=%f (%s)" % [name, value, EnumUtils.to_str(State, state)]
+
 static func test_states_all(arr: Array[State], test_state: State) -> bool:
 	for i in arr:
 		if i != test_state:

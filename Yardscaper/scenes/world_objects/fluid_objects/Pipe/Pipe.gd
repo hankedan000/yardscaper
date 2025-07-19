@@ -5,9 +5,10 @@ const PROP_KEY_PIPE_COLOR = &'pipe_color'
 const PROP_KEY_MATERIAL_TYPE = &'material_type'
 const PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT = &'custom_surface_roughness_ft'
 
+const DEFAULT_DIAMETER_FT := 0.0416666666667 # 0.5in
 const PVC_SURFACE_ROUGHNESS_FT := 0.000005
 
-var diameter_ft : float = 0.75:
+var diameter_ft : float = DEFAULT_DIAMETER_FT:
 	set(value):
 		var old_value = fpipe.d_ft
 		fpipe.d_ft = value
@@ -53,7 +54,7 @@ var show_flow_arrows : bool = false:
 var fpipe : FPipe = null
 
 class PropertiesFromSave extends RefCounted:
-	var diameter_ft : float = 0.5
+	var diameter_ft = null
 
 var _props_from_save := PropertiesFromSave.new()
 
@@ -64,7 +65,11 @@ func _ready():
 	_setup_pipe_handle(point_b_handle, "Sink")
 	
 	# restore properties from save
-	diameter_ft = _props_from_save.diameter_ft
+	if _props_from_save.diameter_ft is float:
+		diameter_ft = _props_from_save.diameter_ft
+		_props_from_save.diameter_ft = null
+	else:
+		diameter_ft = DEFAULT_DIAMETER_FT
 
 func _draw() -> void:
 	if dist_px() < 1.0:
@@ -112,16 +117,15 @@ func get_tooltip_text() -> String:
 	if ! is_instance_valid(fpipe):
 		return text
 	
-	var length_ft := dist_ft()
 	text += " (%s)" % fpipe
-	text += "\nlength: %f %s (%s)" % [length_ft, Utils.DISP_UNIT_FT, Utils.pretty_dist(length_ft)]
+	text += "\nlength: %f %s (%s)" % [fpipe.l_ft, Utils.DISP_UNIT_FT, Utils.pretty_dist(fpipe.l_ft)]
 	text += "\ndiameter: %f %s" % [Utils.ft_to_inches(fpipe.d_ft), Utils.DISP_UNIT_IN]
 	text += "\ncross-sectional area: %f %s" % [Utils.ft2_to_in2(fpipe.area_ft2()), Utils.DISP_UNIT_IN2]
 	text += "\nmaterial: %s" % EnumUtils.to_str(PipeTables.MaterialType, material_type)
 	text += "\nsurface roughness: %f %s (abs); %f (rel)" % [fpipe.E_ft, Utils.DISP_UNIT_FT, fpipe.relative_roughness()]
 	text += "\nflow rate: %s" % Utils.pretty_fvar(fpipe.q_cfs, Utils.DISP_UNIT_GPM, Utils.cftps_to_gpm)
 	text += "\nvelocity: %s" % Utils.pretty_fvar(fpipe.v_fps(), Utils.DISP_UNIT_FPS)
-	text += "\nReynolds number (Re): %s" % Utils.pretty_fvar(fpipe.Re(), Utils.DISP_UNIT_NONE)
+	text += "\nReynolds Number (Re): %s" % Utils.pretty_fvar(fpipe.Re(), Utils.DISP_UNIT_NONE)
 	text += "\nDarcy friction coef: %s" % Utils.pretty_fvar(fpipe.f_darcy(), Utils.DISP_UNIT_NONE)
 	text += "\nsrc pressure: %s" % Utils.pretty_fvar(fpipe.src_h_psi(), Utils.DISP_UNIT_PSI)
 	text += "\nsink pressure: %s" % Utils.pretty_fvar(fpipe.sink_h_psi(), Utils.DISP_UNIT_PSI)
@@ -133,7 +137,7 @@ func get_tooltip_text() -> String:
 
 func serialize() -> Dictionary:
 	var data = super.serialize()
-	Utils.fpipe_into_dict(fpipe, data)
+	Utils.add_fpipe_knowns_to_dict(fpipe, data)
 	data[PROP_KEY_DIAMETER_FT] = diameter_ft
 	data[PROP_KEY_PIPE_COLOR] = pipe_color.to_html(true)
 	data[PROP_KEY_MATERIAL_TYPE] = EnumUtils.to_str(PipeTables.MaterialType, material_type)
@@ -142,8 +146,8 @@ func serialize() -> Dictionary:
 
 func deserialize(data: Dictionary) -> void:
 	super.deserialize(data)
-	Utils.fpipe_from_dict(fpipe, data)
-	_props_from_save.diameter_ft = DictUtils.get_w_default(data, PROP_KEY_DIAMETER_FT, Utils.inches_to_ft(0.5))
+	Utils.get_fpipe_knowns_from_dict(fpipe, data)
+	_props_from_save.diameter_ft = DictUtils.get_w_default(data, PROP_KEY_DIAMETER_FT, DEFAULT_DIAMETER_FT)
 	pipe_color = DictUtils.get_w_default(data, PROP_KEY_PIPE_COLOR, Color.WHITE_SMOKE)
 	var material_type_str = DictUtils.get_w_default(data, PROP_KEY_MATERIAL_TYPE, '') as String
 	material_type = EnumUtils.from_str(PipeTables.MaterialType, PipeTables.MaterialType.PVC, material_type_str) as PipeTables.MaterialType
@@ -167,6 +171,11 @@ func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 	handle.label_text_mode = EditorHandle.LabelTextMode.UserText
 	handle.get_button().button_down.connect(_on_magnetic_handle_button_down.bind(handle))
 	handle.get_button().button_up.connect(_on_magnetic_handle_button_up.bind(handle))
+
+# override this so we keep the fpipe's length in sync
+func _set_point_position(handle: EditorHandle, new_position: Vector2, force_change:= false):
+	super._set_point_position(handle, new_position, force_change)
+	fpipe.l_ft = dist_ft()
 
 func _uncollect_pipe_handle(handle: EditorHandle) -> void:
 	var handle_magnet := handle.get_magnet()

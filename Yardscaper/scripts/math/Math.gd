@@ -143,3 +143,15 @@ static func solve_linear(A: Array, b: Array) -> Array:
 		x[i] = (M[i][n] - sum_ax) / M[i][i]
 
 	return x
+
+static func matrix_to_wolfram_str(M: Array) -> String:
+	var wolfram_str := str(M)
+	wolfram_str = wolfram_str.replacen("[", "{")
+	wolfram_str = wolfram_str.replacen("]", "}")
+	wolfram_str = wolfram_str.replacen(" ", "")
+	return wolfram_str
+
+static func matrix_to_numpy_str(M: Array) -> String:
+	var numpy_str := str(M)
+	numpy_str = numpy_str.replacen(" ", "")
+	return numpy_str

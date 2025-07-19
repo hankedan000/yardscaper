@@ -113,10 +113,9 @@ func major_loss_psi() -> Var:
 	var _v_fps := v_fps()
 	out.state = _v_fps.state
 	
-	# if v is 0 then f_darcy would blow up to infinity. regardles if there is
+	# if v is 0 then f_darcy would blow up to infinity. regardlesa, if there is
 	# no velocity then there's no frictional losses.
 	if _v_fps.value == 0.0:
-		out.value = 0.0
 		return out
 	
 	var _Re := _calc_Re(_v_fps)

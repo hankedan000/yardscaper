@@ -107,8 +107,6 @@ static func make_sub_systems(fsys: FSystem) -> Array[SubSystem]:
 	return systems
 
 static func _basic_console_printer(iter: int, x: Array[float], ssys: SubSystem) -> void:
-	print("x.size(): %d" % x.size())
-	print("unknown_vars.size(): %d" % ssys.unknown_vars.size())
 	var dbg_str := "iter[%d] - " % iter
 	var comma := ""
 	for i in range(x.size()):
@@ -152,13 +150,9 @@ static func solve_sub_system(ssys: SubSystem, settings:=Settings.new()) -> Math.
 	if ! is_instance_valid(ssys):
 		return Math.FSolveResult.new()
 	
-	print("---------------------------------------")
-	print("solving system with %d node and %d pipes" % [ssys.nodes.size(), ssys.pipes.size()])
-	
 	# make sure system is Well constrainted
 	var ctype := ssys.constrain_type()
 	if ctype != ConstrainType.Well:
-		print("it's not well constrainted!")
 		return Math.FSolveResult.new()
 	
 	# solve the system of equations

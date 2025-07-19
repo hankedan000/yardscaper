@@ -43,13 +43,13 @@ func get_tooltip_text() -> String:
 
 func serialize() -> Dictionary:
 	var data = super.serialize()
-	Utils.fnode_into_dict(fnode, data)
+	Utils.add_fnode_knowns_to_dict(fnode, data)
 	data[PROP_KEY_PIPE_CONNECTIONS] = _build_pipe_connection_list()
 	return data
 
 func deserialize(data: Dictionary) -> void:
 	super.deserialize(data)
-	Utils.fnode_from_dict(fnode, data)
+	Utils.get_fnode_knowns_from_dict(fnode, data)
 	_base_node_props_from_save.pipe_connections = DictUtils.get_w_default(data, PROP_KEY_PIPE_CONNECTIONS, [])
 
 # called by Project when it's posible for us to restore our pipe connections

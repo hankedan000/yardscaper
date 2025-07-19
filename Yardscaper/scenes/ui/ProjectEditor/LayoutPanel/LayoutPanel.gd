@@ -760,7 +760,6 @@ func _on_solve_button_pressed() -> void:
 	# solve the system while timing how long it takes
 	TheProject.fsys.reset_solved_vars()
 	var settings := FSolver.Settings.new()
-	settings.set_basic_console_printer()
 	var start_ticks_msec := Time.get_ticks_msec()
 	var res := FSolver.solve_system(TheProject.fsys, settings)
 	var solve_time_msec := Time.get_ticks_msec() - start_ticks_msec
