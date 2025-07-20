@@ -4,7 +4,6 @@
 [ext_resource type="PackedScene" uid="uid://dinchpfl3oh55" path="res://scenes/ui/ProjectEditor/obj_editors/WorldObjectPropertyEditor/WorldObjectPropertyEditor.tscn" id="2_kcywm"]
 
 [node name="ImageNodePropertiesList" instance=ExtResource("2_kcywm")]
-size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_kmjym")
 

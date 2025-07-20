@@ -6,6 +6,7 @@
 offset_right = 24.0
 offset_bottom = 24.0
 script = ExtResource("1_fh5ya")
+override_tooltip_text = "Check to override the value."
 
 [node name="CheckBox" type="CheckBox" parent="."]
 layout_mode = 2

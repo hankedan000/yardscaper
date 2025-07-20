@@ -3,6 +3,11 @@ class_name ImageNodePropertyEditor extends WorldObjectPropertyEditor
 @onready var width_spinbox  := $VBoxContainer/PropertiesList/WidthSpinBox
 @onready var height_spinbox := $VBoxContainer/PropertiesList/HeightSpinBox
 
+func _ready() -> void:
+	super._ready()
+	_setup_long_length_spinbox(width_spinbox)
+	_setup_long_length_spinbox(height_spinbox)
+
 # override so we can validate the type
 func add_object(wobj: WorldObject) -> void:
 	if wobj is ImageNode:

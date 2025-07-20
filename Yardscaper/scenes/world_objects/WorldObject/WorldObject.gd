@@ -1,7 +1,10 @@
-extends Node2D
-class_name WorldObject
+class_name WorldObject extends Node2D
 
-signal property_changed(obj: WorldObject, property_key: StringName, from, to)
+## Emitted when a property on the object has changed.
+signal property_changed(obj: WorldObject, prop_key: StringName, from, to)
+## Emitted when a property on the object's [FEntity] has changed that would
+## impact the result of the [FSystem] simulation.
+signal fluid_property_changed(obj: WorldObject, prop_key: StringName, from, to)
 signal picked_state_changed()
 signal moved(obj: WorldObject, from_xy: Vector2, to_xy: Vector2)
 @warning_ignore("unused_signal") # subclasses will emit this
@@ -170,6 +173,24 @@ func finish_move(cancel: bool = false) -> bool:
 func get_tooltip_text() -> String:
 	return user_label
 
+func get_fluid_entity() -> FEntity:
+	return null
+
+func set_fluid_property(prop_key: StringName, new_value: Variant) -> void:
+	var prop_value = Utils.get_property_w_path(self, prop_key)
+	if ! is_instance_valid(prop_value):
+		push_error("fluid property '%s' doesn't exist" % prop_key)
+		return
+	elif prop_value is Var:
+		_do_fluid_fvar_set(prop_key, prop_value, new_value)
+	elif prop_value is float:
+		var old_value := prop_value as float
+		prop_value = new_value
+		if old_value != new_value:
+			fluid_property_changed.emit(self, prop_key, old_value, new_value)
+	else:
+		push_error("unsupported set on prop_key '%s'" % prop_key)
+
 func serialize() -> Dictionary:
 	return {
 		PROP_KEY_SUBCLASS : get_type_name(),
@@ -204,3 +225,18 @@ func _check_and_emit_prop_change(prop_name: StringName, old_value: Variant, forc
 	if changed && ! deferred_prop_change.matches(prop_name):
 		property_changed.emit(self, prop_name, old_value, new_value)
 	return changed
+
+func _do_fluid_fvar_set(prop_key: StringName, fvar: Var, new_value: Variant) -> void:
+	var old_value = null
+	if new_value is float:
+		old_value = fvar.value
+		fvar.value = new_value
+	elif new_value is Var.State:
+		old_value = fvar.state
+		fvar.state = new_value
+	else:
+		push_warning("type of 'new_value' (%s) must be float or Var.State" % new_value)
+		return
+	
+	if old_value != new_value:
+		fluid_property_changed.emit(self, prop_key, old_value, new_value)

@@ -224,21 +224,22 @@ static func get_fvar_knowns_from_dict(fvar: Var, prop_key: StringName, data: Dic
 		if value is float:
 			fvar.set_known(value)
 
-const PROP_KEY_FNODE_H_PSI := &'h_psi'
-const PROP_KEY_FNODE_Q_EXT_CFS := &'q_ext_cfs'
-
-static func add_fnode_knowns_to_dict(fnode: FNode, data: Dictionary) -> void:
-	add_fvar_knowns_into_dict(fnode.h_psi, PROP_KEY_FNODE_H_PSI, data)
-	add_fvar_knowns_into_dict(fnode.q_ext_cfs, PROP_KEY_FNODE_Q_EXT_CFS, data)
-
-static func get_fnode_knowns_from_dict(fnode: FNode, data: Dictionary) -> void:
-	get_fvar_knowns_from_dict(fnode.h_psi, PROP_KEY_FNODE_H_PSI, data)
-	get_fvar_knowns_from_dict(fnode.q_ext_cfs, PROP_KEY_FNODE_Q_EXT_CFS, data)
-
-const PROP_KEY_FPIPE_Q_CFS := &'q_cfs'
-
-static func add_fpipe_knowns_to_dict(fpipe: FPipe, data: Dictionary) -> void:
-	add_fvar_knowns_into_dict(fpipe.q_cfs, PROP_KEY_FPIPE_Q_CFS, data)
-
-static func get_fpipe_knowns_from_dict(fpipe: FPipe, data: Dictionary) -> void:
-	get_fvar_knowns_from_dict(fpipe.q_cfs, PROP_KEY_FPIPE_Q_CFS, data)
+## gets an [Object]'s property if the path contains multiple property names
+## chained together with dots.
+## Example: get_property_w_path(obj, "prop1.prop2.prop3") would return the
+## value stored in prop3.
+static func get_property_w_path(obj: Object, prop_path: StringName) -> Variant:
+	var prop_chain := prop_path.split(".", false)
+	
+	# traverse down the object property path one part at a time
+	var prop_value : Variant = obj
+	for prop_key in prop_chain:
+		if ! (prop_value is Object):
+			push_error("can't get to '%s' because previous item wasn't an object. prop_path='%s'" % [prop_key, prop_path])
+			return null
+		elif ! (prop_key in prop_value):
+			push_error("prop '%s' doesn't exist in object %s. prop_path='%s'" % [prop_key, prop_value, prop_path])
+			return null
+		prop_value = prop_value.get(prop_key)
+	
+	return prop_value

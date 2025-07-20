@@ -4,6 +4,7 @@ const PROP_KEY_DIAMETER_FT = &'diameter_ft'
 const PROP_KEY_PIPE_COLOR = &'pipe_color'
 const PROP_KEY_MATERIAL_TYPE = &'material_type'
 const PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT = &'custom_surface_roughness_ft'
+const PROP_KEY_FPIPE_Q_CFS = &'fpipe.q_psi'
 
 const DEFAULT_DIAMETER_FT := 0.0416666666667 # 0.5in
 const PVC_SURFACE_ROUGHNESS_FT := 0.000005
@@ -135,9 +136,12 @@ func get_tooltip_text() -> String:
 	text += "\nnet loss: %s" % Utils.pretty_fvar(fpipe.delta_h_psi(), Utils.DISP_UNIT_PSI)
 	return text
 
+func get_fluid_entity() -> FEntity:
+	return fpipe
+
 func serialize() -> Dictionary:
 	var data = super.serialize()
-	Utils.add_fpipe_knowns_to_dict(fpipe, data)
+	Utils.add_fvar_knowns_into_dict(fpipe.q_cfs, PROP_KEY_FPIPE_Q_CFS, data)
 	data[PROP_KEY_DIAMETER_FT] = diameter_ft
 	data[PROP_KEY_PIPE_COLOR] = pipe_color.to_html(true)
 	data[PROP_KEY_MATERIAL_TYPE] = EnumUtils.to_str(PipeTables.MaterialType, material_type)
@@ -146,7 +150,7 @@ func serialize() -> Dictionary:
 
 func deserialize(data: Dictionary) -> void:
 	super.deserialize(data)
-	Utils.get_fpipe_knowns_from_dict(fpipe, data)
+	Utils.get_fvar_knowns_from_dict(fpipe.q_cfs, PROP_KEY_FPIPE_Q_CFS, data)
 	_props_from_save.diameter_ft = DictUtils.get_w_default(data, PROP_KEY_DIAMETER_FT, DEFAULT_DIAMETER_FT)
 	pipe_color = DictUtils.get_w_default(data, PROP_KEY_PIPE_COLOR, Color.WHITE_SMOKE)
 	var material_type_str = DictUtils.get_w_default(data, PROP_KEY_MATERIAL_TYPE, '') as String

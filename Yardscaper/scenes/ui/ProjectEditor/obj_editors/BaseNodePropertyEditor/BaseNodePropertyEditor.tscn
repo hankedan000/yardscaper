@@ -13,8 +13,7 @@ text = "Pressure:"
 
 [node name="PressureSpinbox" parent="VBoxContainer/PropertiesList" index="3" instance=ExtResource("1_ukqll")]
 layout_mode = 2
-suffix = "psi"
-override_tooltip_text = "Check to set pressure as a fixed, 'known' value."
+override_tooltip_text = "Check this box to specify the node's pressure as a known value in the fluid simulation."
 
 [node name="ExtFlowLabel" type="Label" parent="VBoxContainer/PropertiesList" index="4"]
 layout_mode = 2
@@ -22,8 +21,7 @@ text = "External Flow:"
 
 [node name="ExtFlowSpinbox" parent="VBoxContainer/PropertiesList" index="5" instance=ExtResource("1_ukqll")]
 layout_mode = 2
-suffix = "gpm"
-override_tooltip_text = "Check to set a 'known' external flow rate."
+override_tooltip_text = "Check this box to specify the node's external flow rate as a known value in the fluid simulation."
 
 [connection signal="override_changed" from="VBoxContainer/PropertiesList/PressureSpinbox" to="." method="_on_pressure_spinbox_override_changed"]
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/PressureSpinbox" to="." method="_on_pressure_spinbox_value_changed"]

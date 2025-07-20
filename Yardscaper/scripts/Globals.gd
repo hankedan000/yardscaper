@@ -11,6 +11,19 @@ const RECENT_PROJECTS_FILE := &"recent_project.json"
 const GITHUB_USER := &"hankedan000"
 const GITHUB_REPO := &"yardscaper"
 
+const SHORT_LENGTH_MIN_IN := 0.0
+const SHORT_LENGTH_MAX_IN := +100.0
+const SHORT_LENGTH_STEP_IN := 0.001
+const LONG_LENGTH_MIN_IN := 0.0
+const LONG_LENGTH_MAX_IN := +10000.0
+const LONG_LENGTH_STEP_IN := 0.001
+const PRESSURE_MIN_PSI := -10000.0
+const PRESSURE_MAX_PSI := +10000.0
+const PRESSURE_STEP_PSI := 0.001
+const FLOW_MIN_GPM := -10000.0
+const FLOW_MAX_GPM := +10000.0
+const FLOW_STEP_GPM := 0.001
+
 # most recent is at the front, oldest at the back
 var _recent_projects : Array[String] = []
 

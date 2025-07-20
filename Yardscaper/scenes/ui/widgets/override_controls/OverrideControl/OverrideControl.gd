@@ -3,7 +3,9 @@ class_name OverrideControl extends HBoxContainer
 signal override_changed(new_overriden: bool)
 signal value_changed(new_value: Variant)
 
-@export var override_tooltip_text : String = "Check to override the value"
+## Tooltip text to set on the override [CheckBox].
+@export_multiline var override_tooltip_text : String = "Check to override the value"
+## Path to the [Control] node to use.
 @export_node_path("Control") var control_path : NodePath = ""
 
 @onready var _checkbox : CheckBox = $CheckBox
@@ -64,7 +66,7 @@ func _sync_checkbox_to_control() -> void:
 	if overriden:
 		control.tooltip_text = ""
 	else:
-		control.tooltip_text = "Check the box to enable editing"
+		control.tooltip_text = "Check the box to enable editing."
 	
 	if control is SpinBox:
 		control.editable = overriden

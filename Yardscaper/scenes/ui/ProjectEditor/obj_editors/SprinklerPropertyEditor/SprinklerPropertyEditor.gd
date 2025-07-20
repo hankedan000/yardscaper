@@ -14,6 +14,9 @@ var _layout_panel : LayoutPanel = null
 
 func _ready():
 	super._ready()
+	_setup_long_length_spinbox(min_dist_spinbox)
+	_setup_long_length_spinbox(max_dist_spinbox)
+	_setup_long_length_spinbox(dist_spinbox)
 	_update_ui_from_sprinkler_db()
 
 func set_layout_panel(layout_panel: LayoutPanel) -> void:

@@ -10,7 +10,8 @@ signal has_edits_changed(has_edits)
 enum ChangeType {
 	ADD,
 	REMOVE,
-	PROP_EDIT
+	PROP_EDIT,
+	FLUID_PROP_EDIT
 }
 
 const VERSION_KEY := &"version"
@@ -192,15 +193,16 @@ func get_obj_by_user_label(user_label: String) -> WorldObject:
 			return obj
 	return null
 
-func _remove_object(obj: WorldObject) -> void:
-	objects.erase(obj)
+func _remove_object(wobj: WorldObject) -> void:
+	objects.erase(wobj)
 	
 	# disconnect signal handlers
-	obj.property_changed.disconnect(_on_node_property_changed)
-	obj.moved.disconnect(_on_node_moved)
+	wobj.property_changed.disconnect(_on_node_property_changed)
+	wobj.fluid_property_changed.disconnect(_on_node_fluid_property_changed)
+	wobj.moved.disconnect(_on_node_moved)
 	
-	node_changed.emit(obj, ChangeType.REMOVE, [])
 	has_edits = true
+	node_changed.emit(wobj, ChangeType.REMOVE, [])
 
 func get_img_dir() -> String:
 	if len(project_path) == 0:
@@ -279,8 +281,8 @@ func deserialize(proj_data: Dictionary, dir: String) -> void:
 func instance_world_obj(type_name: StringName) -> WorldObject:
 	var new_wobj := _instance_world_obj(type_name)
 	if new_wobj is WorldObject:
-		node_changed.emit(new_wobj, ChangeType.ADD, [])
 		has_edits = true
+		node_changed.emit(new_wobj, ChangeType.ADD, [])
 	return new_wobj
 
 func instance_world_obj_from_data(data: Dictionary) -> WorldObject:
@@ -290,8 +292,8 @@ func instance_world_obj_from_data(data: Dictionary) -> WorldObject:
 	var new_wobj := _instance_world_obj(type_name)
 	if new_wobj is WorldObject:
 		new_wobj.deserialize(data)
-		node_changed.emit(new_wobj, ChangeType.ADD, [])
 		has_edits = true
+		node_changed.emit(new_wobj, ChangeType.ADD, [])
 	return new_wobj
 
 func add_image(path: String) -> ImageNode:
@@ -368,6 +370,7 @@ func _instance_world_obj(type_name: StringName) -> WorldObject:
 	wobj.parent_project = self
 	wobj._init_world_obj()
 	wobj.property_changed.connect(_on_node_property_changed)
+	wobj.fluid_property_changed.connect(_on_node_fluid_property_changed)
 	wobj.moved.connect(_on_node_moved)
 	objects.append(wobj)
 	return wobj
@@ -396,12 +399,16 @@ static func _get_project_name(data: Dictionary, project_dir: String) -> String:
 	return pname
 
 func _on_node_property_changed(obj: WorldObject, property_key: StringName, from: Variant, to: Variant) -> void:
+	has_edits = true
 	node_changed.emit(obj, ChangeType.PROP_EDIT, [property_key, from, to])
-	has_edits = true
 
-func _on_node_moved(node, from_xy, to_xy):
-	node_changed.emit(node, ChangeType.PROP_EDIT, [&'global_position', from_xy, to_xy])
+func _on_node_fluid_property_changed(obj: WorldObject, prop_key: StringName, from: Variant, to: Variant) -> void:
 	has_edits = true
+	node_changed.emit(obj, ChangeType.FLUID_PROP_EDIT, [prop_key, from, to])
+
+func _on_node_moved(obj: WorldObject, from_xy, to_xy):
+	has_edits = true
+	node_changed.emit(obj, ChangeType.PROP_EDIT, [&'global_position', from_xy, to_xy])
 
 func __THREADED__auto_save(filepath: String, data: Dictionary) -> void:
 	FileUtils.to_json_file(data, filepath)
