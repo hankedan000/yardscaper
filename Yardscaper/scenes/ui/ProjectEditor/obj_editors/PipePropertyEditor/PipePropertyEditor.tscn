@@ -43,6 +43,26 @@ text = "Flow Rate:"
 layout_mode = 2
 override_tooltip_text = "Check this box to specify the pipe's flow rate as a known value in the fluid simulation."
 
+[node name="Label13" type="Label" parent="VBoxContainer/PropertiesList" index="10"]
+layout_mode = 2
+text = "Entry Minor Loss Factor:"
+
+[node name="EntryMinorLossSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="11"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Minor loss coefficient at the entry to the pipe."
+step = 0.01
+
+[node name="Label14" type="Label" parent="VBoxContainer/PropertiesList" index="12"]
+layout_mode = 2
+text = "Exit Minor Loss Factor:"
+
+[node name="ExitMinorLossSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="13"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Minor loss coefficient at the exit of the pipe."
+step = 0.01
+
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/DiameterSpinBox" to="." method="_on_diameter_spin_box_value_changed"]
 [connection signal="item_selected" from="VBoxContainer/PropertiesList/MaterialOption" to="." method="_on_material_option_item_selected"]
 [connection signal="color_changed" from="VBoxContainer/PropertiesList/PipeColorPicker" to="." method="_on_pipe_color_picker_color_changed"]
@@ -50,3 +70,5 @@ override_tooltip_text = "Check this box to specify the pipe's flow rate as a kno
 [connection signal="pressed" from="VBoxContainer/PropertiesList/PipeColorPicker" to="." method="_on_pipe_color_picker_pressed"]
 [connection signal="override_changed" from="VBoxContainer/PropertiesList/FlowRateSpinBox" to="." method="_on_flow_rate_spin_box_override_changed"]
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/FlowRateSpinBox" to="." method="_on_flow_rate_spin_box_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/EntryMinorLossSpinBox" to="." method="_on_entry_minor_loss_spin_box_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/ExitMinorLossSpinBox" to="." method="_on_exit_minor_loss_spin_box_value_changed"]

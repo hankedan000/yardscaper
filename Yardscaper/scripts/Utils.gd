@@ -224,22 +224,35 @@ static func get_fvar_knowns_from_dict(fvar: Var, prop_key: StringName, data: Dic
 		if value is float:
 			fvar.set_known(value)
 
+class PropertyResult extends RefCounted:
+	var found : bool = false
+	var value : Variant = null
+	var parent_obj : Object = null
+	var last_prop_key : String = ""
+
 ## gets an [Object]'s property if the path contains multiple property names
 ## chained together with dots.
 ## Example: get_property_w_path(obj, "prop1.prop2.prop3") would return the
 ## value stored in prop3.
-static func get_property_w_path(obj: Object, prop_path: StringName) -> Variant:
+static func get_property_w_path(obj: Object, prop_path: StringName) -> PropertyResult:
+	var res := PropertyResult.new()
 	var prop_chain := prop_path.split(".", false)
 	
 	# traverse down the object property path one part at a time
-	var prop_value : Variant = obj
+	res.value = obj
+	res.parent_obj = null
+	var curr_obj : Variant = obj
 	for prop_key in prop_chain:
-		if ! (prop_value is Object):
+		if ! (curr_obj is Object):
 			push_error("can't get to '%s' because previous item wasn't an object. prop_path='%s'" % [prop_key, prop_path])
-			return null
-		elif ! (prop_key in prop_value):
-			push_error("prop '%s' doesn't exist in object %s. prop_path='%s'" % [prop_key, prop_value, prop_path])
-			return null
-		prop_value = prop_value.get(prop_key)
+			return res
+		elif ! (prop_key in curr_obj):
+			push_error("prop '%s' doesn't exist in object %s. prop_path='%s'" % [prop_key, curr_obj, prop_path])
+			return res
+		res.parent_obj = curr_obj
+		res.value = curr_obj.get(prop_key)
+		res.last_prop_key = prop_key
+		curr_obj = res.value
 	
-	return prop_value
+	res.found = true
+	return res

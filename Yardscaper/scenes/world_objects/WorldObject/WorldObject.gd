@@ -177,15 +177,15 @@ func get_fluid_entity() -> FEntity:
 	return null
 
 func set_fluid_property(prop_key: StringName, new_value: Variant) -> void:
-	var prop_value = Utils.get_property_w_path(self, prop_key)
-	if ! is_instance_valid(prop_value):
+	var res := Utils.get_property_w_path(self, prop_key)
+	if ! res.found:
 		push_error("fluid property '%s' doesn't exist" % prop_key)
 		return
-	elif prop_value is Var:
-		_do_fluid_fvar_set(prop_key, prop_value, new_value)
-	elif prop_value is float:
-		var old_value := prop_value as float
-		prop_value = new_value
+	elif res.value is Var:
+		_do_fluid_fvar_set(prop_key, res.value, new_value)
+	elif res.value is float:
+		var old_value := res.value as float
+		res.parent_obj.set(res.last_prop_key, new_value)
 		if old_value != new_value:
 			fluid_property_changed.emit(self, prop_key, old_value, new_value)
 	else:

@@ -23,6 +23,9 @@ const PRESSURE_STEP_PSI := 0.001
 const FLOW_MIN_GPM := -10000.0
 const FLOW_MAX_GPM := +10000.0
 const FLOW_STEP_GPM := 0.001
+const MINOR_LOSS_COEF_MIN := 0.0
+const MINOR_LOSS_COEF_MAX := 1000.0
+const MINOR_LOSS_COEF_STEP := 0.000000001
 
 # most recent is at the front, oldest at the back
 var _recent_projects : Array[String] = []
