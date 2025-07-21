@@ -21,7 +21,7 @@ func _draw():
 		var indic_color = Globals.SELECT_COLOR if _pipe_node.picked else Globals.HOVER_COLOR
 		draw_circle(center, body_radius_px * 2, indic_color)
 	
-	draw_circle(center, body_radius_px, Color.DARK_GRAY)
+	draw_circle(center, body_radius_px, Globals.DEFAULT_PIPE_NODE_COLOR)
 
 func on_zoom_changed(_new_zoom: float, _inv_scale: Vector2) -> void:
 	queue_redraw()

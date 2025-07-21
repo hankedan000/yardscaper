@@ -16,10 +16,12 @@ const TOOLTIP_DELAY_DURATION_SEC := 1.0
 @onready var pipe_node_prop_list      : PipeNodePropertyEditor = $HSplitContainer/LeftPane/Properties/PipeNodePropertyEditor
 @onready var objects_list             := $HSplitContainer/LeftPane/Objects
 
-@onready var add_sprink_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler
 @onready var add_img_button           := $HSplitContainer/Layout/LayoutToolbar/HBox/AddImage
-@onready var add_dist_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/AddDistMeasure
 @onready var add_poly_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon
+@onready var add_dist_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/AddDistMeasure
+@onready var add_sprink_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler
+@onready var add_pipe_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/AddPipe
+@onready var add_pipe_node_button     := $HSplitContainer/Layout/LayoutToolbar/HBox/AddPipeNode
 @onready var remove_button            := $HSplitContainer/Layout/LayoutToolbar/HBox/RemoveButton
 @onready var pos_lock_button          := $HSplitContainer/Layout/LayoutToolbar/HBox/PositionLockButton
 @onready var pos_unlock_button        := $HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton
@@ -70,10 +72,12 @@ enum GridViewMenuIds {
 var mode = Mode.Idle:
 	set(value):
 		var adds_disabled = value != Mode.Idle
-		add_sprink_button.disabled = adds_disabled
 		add_img_button.disabled = adds_disabled
-		add_dist_button.disabled = adds_disabled
 		add_poly_button.disabled = adds_disabled
+		add_dist_button.disabled = adds_disabled
+		add_sprink_button.disabled = adds_disabled
+		add_pipe_button.disabled = adds_disabled
+		add_pipe_node_button.disabled = adds_disabled
 		mode = value
 		if mode != Mode.Idle:
 			world_view.hide_tooltip()

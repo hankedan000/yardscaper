@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene load_steps=28 format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://lmlsf61h6k62" path="res://scenes/ui/dialogs/SolveSummaryDialog/SolveSummaryDialog.tscn" id="2_pkvch"]
@@ -10,13 +10,15 @@
 [ext_resource type="Texture2D" uid="uid://cphnqsvx30p2c" path="res://assets/icons/Remove.svg" id="7_nx6cf"]
 [ext_resource type="PackedScene" uid="uid://0w6g4f1p5gwe" path="res://scenes/ui/ProjectEditor/obj_editors/PolygonNodePropertyEditor/PolygonNodePropertyEditor.tscn" id="7_u58qy"]
 [ext_resource type="PackedScene" uid="uid://dtj8ql3pq0pul" path="res://scenes/ui/ProjectEditor/obj_editors/PipeNodePropertyEditor/PipeNodePropertyEditor.tscn" id="9_5qllo"]
-[ext_resource type="Texture2D" uid="uid://b7dml04prcvb" path="res://assets/icons/Water.svg" id="9_t5ctp"]
 [ext_resource type="PackedScene" uid="uid://dqfod1mptbtve" path="res://scenes/ui/ProjectEditor/WorldViewportContainer/WorldViewportContainer.tscn" id="9_xrpqu"]
 [ext_resource type="Texture2D" uid="uid://cn15hpoo53btg" path="res://assets/icons/Image.svg" id="10_7tkh4"]
 [ext_resource type="Texture2D" uid="uid://cu32v2mhfe8e5" path="res://assets/icons/Ruler.svg" id="11_6kdtp"]
 [ext_resource type="PackedScene" uid="uid://eve0n62ubtrx" path="res://scenes/ui/ProjectEditor/obj_editors/PipePropertyEditor/PipePropertyEditor.tscn" id="11_bx27v"]
 [ext_resource type="Theme" uid="uid://c42vavmyapxw2" path="res://assets/themes/ToolbarButton.tres" id="11_w0qvw"]
 [ext_resource type="Texture2D" uid="uid://bp0qj22qp5ed7" path="res://assets/icons/PolygonTool.svg" id="12_0ook5"]
+[ext_resource type="Texture2D" uid="uid://qfpkcw5rimro" path="res://assets/icons/Sprinkler.svg" id="12_3shqv"]
+[ext_resource type="Texture2D" uid="uid://qjiq68cj0nvv" path="res://assets/icons/PipeNode.svg" id="13_ehprt"]
+[ext_resource type="Texture2D" uid="uid://6ysmvbs6nq22" path="res://assets/icons/Pipe.svg" id="13_j1tmu"]
 [ext_resource type="Texture2D" uid="uid://dvsonuppgtdb7" path="res://assets/icons/Lock.svg" id="16_0llxi"]
 [ext_resource type="Texture2D" uid="uid://b2np3mm4ejoy6" path="res://assets/icons/Unlock.svg" id="17_pwsqd"]
 [ext_resource type="Texture2D" uid="uid://c0te0jgsfwqbq" path="res://assets/icons/CurveCreate.svg" id="18_3j2nk"]
@@ -110,59 +112,62 @@ layout_mode = 2
 [node name="HBox" type="HBoxContainer" parent="HSplitContainer/Layout/LayoutToolbar"]
 layout_mode = 2
 
-[node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
-custom_minimum_size = Vector2(24, 24)
-layout_mode = 2
-tooltip_text = "Add sprinkler"
-focus_mode = 0
-theme = ExtResource("11_w0qvw")
-icon = ExtResource("9_t5ctp")
-icon_alignment = 1
-
-[node name="AddPipe" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
-custom_minimum_size = Vector2(24, 24)
-layout_mode = 2
-tooltip_text = "Add pipe"
-focus_mode = 0
-theme = ExtResource("11_w0qvw")
-text = "Pipe"
-icon_alignment = 1
-
-[node name="AddPipeNode" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
-custom_minimum_size = Vector2(24, 24)
-layout_mode = 2
-tooltip_text = "Add pipe"
-focus_mode = 0
-theme = ExtResource("11_w0qvw")
-text = "Node"
-icon_alignment = 1
-
 [node name="AddImage" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
-tooltip_text = "Add image"
+tooltip_text = "Add an image."
 focus_mode = 0
 theme = ExtResource("11_w0qvw")
 icon = ExtResource("10_7tkh4")
 icon_alignment = 1
 
+[node name="AddPolygon" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "Add a polygon."
+focus_mode = 0
+theme = ExtResource("11_w0qvw")
+icon = ExtResource("12_0ook5")
+icon_alignment = 1
+
 [node name="AddDistMeasure" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
-tooltip_text = "Add distance measurement"
+tooltip_text = "Add a measurement."
 focus_mode = 0
 theme = ExtResource("11_w0qvw")
 icon = ExtResource("11_6kdtp")
 icon_alignment = 1
 
-[node name="AddPolygon" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
-tooltip_text = "Add polygon shape"
+tooltip_text = "Add a sprinkler."
 focus_mode = 0
 theme = ExtResource("11_w0qvw")
-icon = ExtResource("12_0ook5")
+icon = ExtResource("12_3shqv")
 icon_alignment = 1
+
+[node name="AddPipe" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "Add a pipe."
+focus_mode = 0
+theme = ExtResource("11_w0qvw")
+icon = ExtResource("13_j1tmu")
+icon_alignment = 1
+
+[node name="AddPipeNode" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "Add a pipe node."
+focus_mode = 0
+theme = ExtResource("11_w0qvw")
+icon = ExtResource("13_ehprt")
+icon_alignment = 1
+
+[node name="VSeparator" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+layout_mode = 2
 
 [node name="RemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 custom_minimum_size = Vector2(24, 24)
@@ -173,9 +178,6 @@ theme = ExtResource("11_w0qvw")
 disabled = true
 icon = ExtResource("7_nx6cf")
 icon_alignment = 1
-
-[node name="VSeparator" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
-layout_mode = 2
 
 [node name="PositionLockButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
 custom_minimum_size = Vector2(24, 24)
@@ -334,12 +336,12 @@ size_flags_vertical = 3
 [connection signal="spacing_changed" from="GridSpacingDialog" to="." method="_on_grid_spacing_dialog_spacing_changed"]
 [connection signal="entity_clicked" from="SolveSummaryDialog" to="." method="_on_solve_summary_dialog_entity_clicked"]
 [connection signal="unknown_var_clicked" from="SolveSummaryDialog" to="." method="_on_solve_summary_dialog_unknown_var_clicked"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddImage" to="." method="_on_add_image_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon" to="." method="_on_add_polygon_pressed"]
+[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddDistMeasure" to="." method="_on_add_dist_measure_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddSprinkler" to="." method="_on_add_sprinkler_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPipe" to="." method="_on_add_pipe_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPipeNode" to="." method="_on_add_pipe_node_pressed"]
-[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddImage" to="." method="_on_add_image_pressed"]
-[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddDistMeasure" to="." method="_on_add_dist_measure_pressed"]
-[connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/AddPolygon" to="." method="_on_add_polygon_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/RemoveButton" to="." method="_on_remove_button_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionLockButton" to="." method="_on_position_lock_button_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/PositionUnlockButton" to="." method="_on_position_unlock_button_pressed"]

@@ -20,7 +20,7 @@ var diameter_ft : float = DEFAULT_DIAMETER_FT:
 	get():
 		return fpipe.d_ft
 
-var pipe_color : Color = Color.WHITE_SMOKE:
+var pipe_color : Color = Globals.DEFAULT_PIPE_COLOR:
 	set(value):
 		var old_value = pipe_color
 		pipe_color = value
@@ -155,7 +155,7 @@ func serialize() -> Dictionary:
 func deserialize(data: Dictionary) -> void:
 	super.deserialize(data)
 	_props_from_save.diameter_ft = DictUtils.get_w_default(data, PROP_KEY_DIAMETER_FT, DEFAULT_DIAMETER_FT)
-	pipe_color = DictUtils.get_w_default(data, PROP_KEY_PIPE_COLOR, Color.WHITE_SMOKE)
+	pipe_color = DictUtils.get_w_default(data, PROP_KEY_PIPE_COLOR, Globals.DEFAULT_PIPE_COLOR)
 	var material_type_str = DictUtils.get_w_default(data, PROP_KEY_MATERIAL_TYPE, '') as String
 	material_type = EnumUtils.from_str(PipeTables.MaterialType, PipeTables.MaterialType.PVC, material_type_str) as PipeTables.MaterialType
 	custom_surface_roughness_ft = DictUtils.get_w_default(data, PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT, 0.0)
