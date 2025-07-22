@@ -1,0 +1,74 @@
+[gd_scene load_steps=4 format=3 uid="uid://eve0n62ubtrx"]
+
+[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/obj_editors/PipePropertyEditor/PipePropertyEditor.gd" id="1_s3ent"]
+[ext_resource type="PackedScene" uid="uid://ht8n7bsycg3f" path="res://scenes/ui/widgets/override_controls/OverrideSpinbox/OverrideSpinbox.tscn" id="3_0ou81"]
+[ext_resource type="PackedScene" uid="uid://dinchpfl3oh55" path="res://scenes/ui/ProjectEditor/obj_editors/WorldObjectPropertyEditor/WorldObjectPropertyEditor.tscn" id="3_xinwp"]
+
+[node name="PipePropertyEditor" instance=ExtResource("3_xinwp")]
+script = ExtResource("1_s3ent")
+
+[node name="Label11" type="Label" parent="VBoxContainer/PropertiesList" index="2"]
+layout_mode = 2
+text = "Diameter:"
+
+[node name="DiameterSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="3"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "The pipe's inner wall diameter (in inches)."
+step = 0.01
+value = 0.5
+suffix = "in"
+
+[node name="MaterialLabel" type="Label" parent="VBoxContainer/PropertiesList" index="4"]
+layout_mode = 2
+text = "Material:"
+
+[node name="MaterialOption" type="OptionButton" parent="VBoxContainer/PropertiesList" index="5"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "The fluid's nominal flow rate (in gallons per minute) at the source of the pipe."
+
+[node name="Label10" type="Label" parent="VBoxContainer/PropertiesList" index="6"]
+layout_mode = 2
+text = "Color:"
+
+[node name="PipeColorPicker" type="ColorPickerButton" parent="VBoxContainer/PropertiesList" index="7"]
+layout_mode = 2
+
+[node name="Label12" type="Label" parent="VBoxContainer/PropertiesList" index="8"]
+layout_mode = 2
+text = "Flow Rate:"
+
+[node name="FlowRateSpinBox" parent="VBoxContainer/PropertiesList" index="9" instance=ExtResource("3_0ou81")]
+layout_mode = 2
+override_tooltip_text = "Check this box to specify the pipe's flow rate as a known value in the fluid simulation."
+
+[node name="Label13" type="Label" parent="VBoxContainer/PropertiesList" index="10"]
+layout_mode = 2
+text = "Entry Minor Loss Factor:"
+
+[node name="EntryMinorLossSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="11"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Minor loss coefficient at the entry to the pipe."
+step = 0.01
+
+[node name="Label14" type="Label" parent="VBoxContainer/PropertiesList" index="12"]
+layout_mode = 2
+text = "Exit Minor Loss Factor:"
+
+[node name="ExitMinorLossSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="13"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Minor loss coefficient at the exit of the pipe."
+step = 0.01
+
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/DiameterSpinBox" to="." method="_on_diameter_spin_box_value_changed"]
+[connection signal="item_selected" from="VBoxContainer/PropertiesList/MaterialOption" to="." method="_on_material_option_item_selected"]
+[connection signal="color_changed" from="VBoxContainer/PropertiesList/PipeColorPicker" to="." method="_on_pipe_color_picker_color_changed"]
+[connection signal="popup_closed" from="VBoxContainer/PropertiesList/PipeColorPicker" to="." method="_on_pipe_color_picker_popup_closed"]
+[connection signal="pressed" from="VBoxContainer/PropertiesList/PipeColorPicker" to="." method="_on_pipe_color_picker_pressed"]
+[connection signal="override_changed" from="VBoxContainer/PropertiesList/FlowRateSpinBox" to="." method="_on_flow_rate_spin_box_override_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/FlowRateSpinBox" to="." method="_on_flow_rate_spin_box_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/EntryMinorLossSpinBox" to="." method="_on_entry_minor_loss_spin_box_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/ExitMinorLossSpinBox" to="." method="_on_exit_minor_loss_spin_box_value_changed"]

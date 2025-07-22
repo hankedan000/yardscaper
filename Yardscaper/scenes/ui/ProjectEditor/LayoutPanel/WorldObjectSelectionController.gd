@@ -66,4 +66,4 @@ func remove_from_selection(obj: WorldObject) -> bool:
 	return true
 
 func selected_objs() -> Array[WorldObject]:
-	return _selected_objs
+	return _selected_objs.duplicate()

@@ -10,17 +10,20 @@ signal has_edits_changed(has_edits)
 enum ChangeType {
 	ADD,
 	REMOVE,
-	PROP_EDIT
+	PROP_EDIT,
+	FLUID_PROP_EDIT
 }
 
 const VERSION_KEY := &"version"
 const PROJECT_NAME_KEY := &"project_name"
 const OBJECTS_KEY := &"objects"
 
-const SprinklerScene : PackedScene = preload("res://scenes/world_objects/Sprinkler/Sprinkler.tscn")
+const SprinklerScene : PackedScene = preload("res://scenes/world_objects/fluid_objects/Sprinkler/Sprinkler.tscn")
 const ImageNodeScene : PackedScene = preload("res://scenes/world_objects/ImageNode/ImageNode.tscn")
 const DistanceMeasurementScene : PackedScene = preload("res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn")
 const PolygonNodeScene : PackedScene = preload("res://scenes/world_objects/PolygonNode/PolygonNode.tscn")
+const PipeScene : PackedScene = preload("res://scenes/world_objects/fluid_objects/Pipe/Pipe.tscn")
+const PipeNodeScene : PackedScene = preload("res://scenes/world_objects/fluid_objects/PipeNode/PipeNode.tscn")
 
 var project_path = ""
 var project_name : String = ""
@@ -33,6 +36,7 @@ var has_edits = false :
 		if old_value != has_edits and not _suppress_self_edit_signals:
 			has_edits_changed.emit(has_edits)
 var layout_pref := LayoutPreferences.new()
+var fsys : FSystem = FSystem.new()
 
 var _auto_save_timer := Timer.new()
 var _auto_save_thread : Thread = null
@@ -46,8 +50,10 @@ func _ready() -> void:
 
 func reset() -> void:
 	_suppress_self_edit_signals = true
-	while not objects.is_empty():
-		remove_object(objects.front())
+	for obj in objects:
+		obj.queue_free()
+	objects.clear()
+	fsys.clear()
 	project_name = ""
 	_suppress_self_edit_signals = false
 	has_edits = false
@@ -174,40 +180,29 @@ func save_as(dir: String) -> bool:
 	saved.emit()
 	return true
 
-func get_subclass_count(subclass: String) -> int:
+func get_type_name_count(type_name: StringName) -> int:
 	var count = 0
 	for obj in objects:
-		if obj.get_subclass() == subclass:
+		if obj.get_type_name() == type_name:
 			count += 1
 	return count
 
-func add_object(obj: WorldObject) -> bool:
-	if objects.has(obj):
-		push_warning("obj '%s' is already added to project. ignoring add." % obj.name)
-		return false
-	
-	# connect signal handlers
-	obj.property_changed.connect(_on_node_property_changed)
-	obj.moved.connect(_on_node_moved)
-	objects.append(obj)
-	node_changed.emit(obj, ChangeType.ADD, [])
-	has_edits = true
-	return true
+func get_obj_by_user_label(user_label: String) -> WorldObject:
+	for obj in objects:
+		if obj.user_label == user_label:
+			return obj
+	return null
 
-func remove_object(obj: WorldObject) -> bool:
-	if not objects.has(obj):
-		push_warning("obj '%s' is not in the project. ignoring remove." % obj.name)
-		return false
-	
-	objects.erase(obj)
+func _remove_object(wobj: WorldObject) -> void:
+	objects.erase(wobj)
 	
 	# disconnect signal handlers
-	obj.property_changed.disconnect(_on_node_property_changed)
-	obj.moved.disconnect(_on_node_moved)
+	wobj.property_changed.disconnect(_on_node_property_changed)
+	wobj.fluid_property_changed.disconnect(_on_node_fluid_property_changed)
+	wobj.moved.disconnect(_on_node_moved)
 	
-	node_changed.emit(obj, ChangeType.REMOVE, [])
 	has_edits = true
-	return true
+	node_changed.emit(wobj, ChangeType.REMOVE, [])
 
 func get_img_dir() -> String:
 	if len(project_path) == 0:
@@ -218,8 +213,88 @@ func load_image(filename: String) -> Image:
 	var img_path = get_img_dir().path_join(filename)
 	return Image.load_from_file(img_path)
 
-func get_unique_name(subclass: String) -> String:
-	return '%s%d' % [subclass, get_subclass_count(subclass)]
+func is_user_label_unique(user_label: String) -> bool:
+	for obj in objects:
+		if user_label == obj.user_label:
+			return false
+	return true
+
+func get_unique_name(type_name: StringName) -> String:
+	var id : int = 0
+	while true:
+		var user_label := type_name + str(id)
+		if is_user_label_unique(user_label):
+			return user_label
+		id += 1
+	return "" # should never get here
+
+# @return a dict containing lists of WorldObjects keyed by their zone #
+func get_objs_by_zone() -> Dictionary:
+	var objs_by_zone := {}
+	for obj in objects:
+		if &"zone" in obj:
+			if obj.zone in objs_by_zone:
+				objs_by_zone[obj.zone].push_back(obj)
+			else:
+				objs_by_zone[obj.zone] = [obj] as Array[WorldObject]
+	return objs_by_zone
+
+# @param[in] zone - the zone # to search for
+# @return a list of WorldObjects that are in the specified zone #
+func get_objs_in_zone(zone: int) -> Array[WorldObject]:
+	var objs_by_zone := get_objs_by_zone()
+	if zone in objs_by_zone:
+		return objs_by_zone[zone]
+	return []
+
+func serialize() -> Dictionary:
+	var objects_ser = []
+	if len(objects) > 0:
+		# serialize all objects based on order they appear in world
+		var world : WorldViewportContainer = objects[0].world
+		for obj in world.objects.get_children():
+			objects_ser.append(obj.serialize())
+	
+	return {
+		VERSION_KEY : ProjectUtils.get_app_version(),
+		OBJECTS_KEY : objects_ser,
+		PROJECT_NAME_KEY : project_name
+	}
+
+# @param[in] proj_data - serialized project data
+# @param[in] dir - project directory path
+func deserialize(proj_data: Dictionary, dir: String) -> void:
+	_suppress_self_edit_signals = true
+	reset()
+	for obj_data in DictUtils.get_w_default(proj_data, OBJECTS_KEY, []):
+		instance_world_obj_from_data(obj_data)
+	
+	# notify all BaseNodes to restore their pipe connections now that all
+	# objects deserialized.
+	for obj in objects:
+		if obj is BaseNode:
+			obj.restore_pipe_connections()
+	
+	project_name = _get_project_name(proj_data, dir)
+	_suppress_self_edit_signals = false
+
+func instance_world_obj(type_name: StringName) -> WorldObject:
+	var new_wobj := _instance_world_obj(type_name)
+	if new_wobj is WorldObject:
+		has_edits = true
+		node_changed.emit(new_wobj, ChangeType.ADD, [])
+	return new_wobj
+
+func instance_world_obj_from_data(data: Dictionary) -> WorldObject:
+	var type_name = DictUtils.get_w_default(data, WorldObject.PROP_KEY_SUBCLASS, null) as StringName
+	if ! (type_name is StringName):
+		return null
+	var new_wobj := _instance_world_obj(type_name)
+	if new_wobj is WorldObject:
+		new_wobj.deserialize(data)
+		has_edits = true
+		node_changed.emit(new_wobj, ChangeType.ADD, [])
+	return new_wobj
 
 func add_image(path: String) -> ImageNode:
 	# try to copy image into project directories img dir
@@ -236,55 +311,68 @@ func add_image(path: String) -> ImageNode:
 		push_warning("failed to load image '%s'" % [img_path])
 		return null
 	
-	# load image and create a new ImageNode
-	var img_node : ImageNode = ImageNodeScene.instantiate()
-	img_node.filename = filename
-	img_node.user_label = get_unique_name('ImageNode')
-	add_object(img_node)
-	has_edits = true
-	return img_node
+	# create a new ImageNode
+	var obj_data := {}
+	obj_data[WorldObject.PROP_KEY_SUBCLASS] = TypeNames.IMG_NODE
+	obj_data[ImageNode.PROP_KEY_FILENAME] = filename
+	return instance_world_obj_from_data(obj_data)
 
-func serialize() -> Dictionary:
-	var objects_ser = []
-	if len(objects) > 0:
-		# serialize all objects based on order they appear in world
-		var world : WorldViewportContainer = objects[0].world
-		for obj in world.objects.get_children():
-			objects_ser.append(obj.serialize())
-	
-	return {
-		VERSION_KEY : ProjectUtils.get_app_version(),
-		OBJECTS_KEY : objects_ser,
-		PROJECT_NAME_KEY : project_name
-	}
+func lookup_fvar_parent_obj(fvar: Var) -> WorldObject:
+	for obj in objects:
+		if obj is Pipe && obj.fpipe.is_my_var(fvar):
+			return obj
+		elif obj is BaseNode && obj.fnode.is_my_var(fvar):
+			return obj
+	return null
 
-# @param[in] data - serialized project data
-# @param[in] dir - project directory path
-func deserialize(data: Dictionary, dir: String) -> void:
-	_suppress_self_edit_signals = true
-	reset()
-	for ser_obj in DictUtils.get_w_default(data, OBJECTS_KEY, []):
-		var wobj = instance_world_obj(ser_obj)
-		if wobj:
-			add_object(wobj)
-	project_name = _get_project_name(data, dir)
-	_suppress_self_edit_signals = false
+func lookup_fentity_parent_obj(fentity: FEntity) -> WorldObject:
+	if fentity is FNode:
+		return lookup_fnode_parent_obj(fentity)
+	elif fentity is FPipe:
+		return lookup_fpipe_parent_obj(fentity)
+	return null
 
-func instance_world_obj(ser_obj: Dictionary) -> WorldObject:
-	var wobj = null
-	match ser_obj['subclass']:
-		'Sprinkler':
-			wobj = SprinklerScene.instantiate()
-		'ImageNode':
-			wobj = ImageNodeScene.instantiate()
-		'DistanceMeasurement':
-			wobj = DistanceMeasurementScene.instantiate()
-		'PolygonNode':
-			wobj = PolygonNodeScene.instantiate()
+func lookup_fpipe_parent_obj(fpipe: FPipe) -> Pipe:
+	for obj in objects:
+		if obj is Pipe && obj.fpipe == fpipe:
+			return obj
+	return null
+
+func lookup_fnode_parent_obj(fnode: FNode) -> BaseNode:
+	for obj in objects:
+		if obj is BaseNode && obj.fnode == fnode:
+			return obj
+	return null
+
+func _instance_world_obj(type_name: StringName) -> WorldObject:
+	var wobj : WorldObject = null
+	match type_name:
+		TypeNames.SPRINKLER:
+			wobj = SprinklerScene.instantiate() as Sprinkler
+			wobj.fnode = fsys.alloc_node()
+		TypeNames.IMG_NODE:
+			wobj = ImageNodeScene.instantiate() as ImageNode
+		TypeNames.DIST_MEASUREMENT:
+			wobj = DistanceMeasurementScene.instantiate() as DistanceMeasurement
+		TypeNames.POLYGON_NODE:
+			wobj = PolygonNodeScene.instantiate() as PolygonNode
+		TypeNames.PIPE:
+			wobj = PipeScene.instantiate() as Pipe
+			wobj.fpipe = fsys.alloc_pipe()
+		TypeNames.PIPE_NODE:
+			wobj = PipeNodeScene.instantiate() as PipeNode
+			wobj.fnode = fsys.alloc_node()
 		_:
-			push_warning("unimplemented subclass '%s' deserialization" % [ser_obj['subclass']])
-	if wobj:
-		wobj.deserialize(ser_obj)
+			push_warning("unsupported subclass '%s'" % type_name)
+			return wobj
+	
+	wobj.user_label = TheProject.get_unique_name(type_name)
+	wobj.parent_project = self
+	wobj._init_world_obj()
+	wobj.property_changed.connect(_on_node_property_changed)
+	wobj.fluid_property_changed.connect(_on_node_fluid_property_changed)
+	wobj.moved.connect(_on_node_moved)
+	objects.append(wobj)
 	return wobj
 
 static func _get_project_data_filepath(project_dir: String, from_auto_save: bool) -> String:
@@ -311,12 +399,16 @@ static func _get_project_name(data: Dictionary, project_dir: String) -> String:
 	return pname
 
 func _on_node_property_changed(obj: WorldObject, property_key: StringName, from: Variant, to: Variant) -> void:
+	has_edits = true
 	node_changed.emit(obj, ChangeType.PROP_EDIT, [property_key, from, to])
-	has_edits = true
 
-func _on_node_moved(node, from_xy, to_xy):
-	node_changed.emit(node, ChangeType.PROP_EDIT, ['position', from_xy, to_xy])
+func _on_node_fluid_property_changed(obj: WorldObject, prop_key: StringName, from: Variant, to: Variant) -> void:
 	has_edits = true
+	node_changed.emit(obj, ChangeType.FLUID_PROP_EDIT, [prop_key, from, to])
+
+func _on_node_moved(obj: WorldObject, from_xy, to_xy):
+	has_edits = true
+	node_changed.emit(obj, ChangeType.PROP_EDIT, [&'global_position', from_xy, to_xy])
 
 func __THREADED__auto_save(filepath: String, data: Dictionary) -> void:
 	FileUtils.to_json_file(data, filepath)

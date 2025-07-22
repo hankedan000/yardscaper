@@ -22,7 +22,6 @@ boot_splash/minimum_display_time=1000
 
 [autoload]
 
-Utils="*res://scripts/Utils.gd"
 TheProject="*res://scripts/Project.gd"
 TheSprinklerDb="*res://scripts/SprinklerDB.gd"
 Globals="*res://scripts/Globals.gd"
@@ -39,9 +38,16 @@ window/subwindows/embed_subwindows=false
 naming/scene_name_casing=1
 naming/script_name_casing=1
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+
 [global_group]
 
 gizmos=""
+pipe_paths="Path2D nodes that belong to Pipe objects"
+pipes="All Pipe objects in the world"
+magnetic_areas="All MagneticArea nodes"
 
 [gui]
 
@@ -51,8 +57,4 @@ theme/custom="res://assets/themes/MainTheme.tres"
 
 2d_physics/layer_1="Cursor"
 2d_physics/layer_2="WorldObjects"
-
-[rendering]
-
-renderer/rendering_method="gl_compatibility"
-renderer/rendering_method.mobile="gl_compatibility"
+2d_physics/layer_3="MagneticPipeAreas"

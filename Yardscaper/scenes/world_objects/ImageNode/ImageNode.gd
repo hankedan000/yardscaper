@@ -1,6 +1,7 @@
 extends WorldObject
 class_name ImageNode
 
+const PROP_KEY_FILENAME = &"filename"
 const PROP_KEY_WIDTH_FT = &"width_ft"
 const PROP_KEY_HEIGHT_FT = &"height_ft"
 
@@ -53,22 +54,25 @@ func _draw():
 func get_visual_center() -> Vector2:
 	return global_position + (img_size_px() / 2.0)
 
+func get_bounding_box() -> Rect2:
+	return Rect2(global_position, img_size_px())
+
 func img_size_px() -> Vector2:
 	return texture_rect.size
 
-func get_subclass() -> String:
-	return "ImageNode"
+func get_type_name() -> StringName:
+	return TypeNames.IMG_NODE
 
-func serialize():
+func serialize() -> Dictionary:
 	var obj = super.serialize()
-	obj['filename'] = filename
+	obj[PROP_KEY_FILENAME] = filename
 	obj[PROP_KEY_WIDTH_FT] = width_ft
 	obj[PROP_KEY_HEIGHT_FT] = height_ft
 	return obj
 
-func deserialize(obj):
+func deserialize(obj: Dictionary) -> void:
 	super.deserialize(obj)
-	filename = obj['filename']
+	filename = obj[PROP_KEY_FILENAME]
 	width_ft = DictUtils.get_w_default(obj, PROP_KEY_WIDTH_FT, 0)
 	height_ft = DictUtils.get_w_default(obj, PROP_KEY_HEIGHT_FT, 0)
 

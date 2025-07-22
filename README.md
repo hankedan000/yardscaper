@@ -1,14 +1,25 @@
 # Yardscaper
 
-**Yardscaper** is a cross-platform 2D yard design tool, built with the [Godot Game Engine](https://godotengine.org/). It’s ideal for planning sprinkler layouts, measuring areas, and drafting basic landscape designs.
+**Yardscaper** is a 2D sprinkler system design tool with built-in fluid simulation. Plan out full irrigation layouts using pipes, connectors, and sprinkler heads, then simulate water flow to calculate pressures, flow rates, and head losses throughout your system. It's built with the [Godot Game Engine](https://godotengine.org/), and also includes tools for general yard planning—such as area measurement, shape drawing, and photo-based scaling.
 
-![Screenshot of layout editor in Yardscaper](graphics/docs/ChurchExample.png)
+![Screenshot of layout editor in Yardscaper](graphics/docs/HouseExample.jpg)
 
 ## 🚀 Download
 
 Get the latest version on the [Releases page](https://github.com/hankedan000/yardscaper/releases).
 
 ## ✨ Features
+
+- **Sprinkler system design**  
+  Place sprinkler heads, pipes, and connectors
+  - Sprinkle properties: sweep angle, rotation, spray distance
+  - Pipe properties: length, diameter, material
+
+- **Fluid system solver**  
+  Simulate water flow through your design to compute:
+  - Pressure at each connection
+  - Flow rates in all pipes
+  - Major and minor head losses
 
 - **Cross-platform**  
   Runs on **Linux** and **Windows** (macOS support coming soon)
@@ -18,12 +29,6 @@ Get the latest version on the [Releases page](https://github.com/hankedan000/yar
 
 - **Image import & scaling wizard**  
   Bring in site or survey photos and scale them to real-world measurements
-
-- **Sprinkler system tools**  
-  Place sprinkler heads and customize:
-  - Sweep angle
-  - Rotation
-  - Spray distance
 
 - **Polygon shape tool**  
   Draw shapes and measure square footage

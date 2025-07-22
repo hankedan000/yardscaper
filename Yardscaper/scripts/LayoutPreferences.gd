@@ -7,6 +7,8 @@ const PROP_KEY_SHOW_IMAGES = &"show_images"
 const PROP_KEY_SHOW_MEASUREMENTS = &"show_measurements"
 const PROP_KEY_SHOW_POLYGONS = &"show_polygons"
 const PROP_KEY_SHOW_SPRINKLERS = &"show_sprinklers"
+const PROP_KEY_SHOW_PIPES = &"show_pipes"
+const PROP_KEY_SHOW_PIPE_FLOW_DIRECTION = &"show_pipe_flow_direction"
 const PROP_KEY_CAMERA_POS = &"camera_pos"
 const PROP_KEY_ZOOM = &"zoom"
 const PROP_KEY_GRID_MAJOR_SPACING = &"grid_major_spacing_ft"
@@ -49,11 +51,23 @@ var show_sprinklers = true:
 			return
 		show_sprinklers = value
 		view_show_state_changed.emit(PROP_KEY_SHOW_SPRINKLERS, value)
+var show_pipes = true:
+	set(value):
+		if show_pipes == value:
+			return
+		show_pipes = value
+		view_show_state_changed.emit(PROP_KEY_SHOW_PIPES, value)
+var show_pipe_flow_direction = false:
+	set(value):
+		if show_pipe_flow_direction == value:
+			return
+		show_pipe_flow_direction = value
+		view_show_state_changed.emit(PROP_KEY_SHOW_PIPE_FLOW_DIRECTION, value)
 var camera_pos := Vector2()
 var zoom = 1.0
 var grid_major_spacing_ft := Vector2(5, 5)
 
-func serialize():
+func serialize() -> Dictionary:
 	return {
 		PROP_KEY_SHOW_GRID : show_grid,
 		PROP_KEY_SHOW_ORIGIN : show_origin,
@@ -61,18 +75,22 @@ func serialize():
 		PROP_KEY_SHOW_MEASUREMENTS : show_measurements,
 		PROP_KEY_SHOW_POLYGONS : show_polygons,
 		PROP_KEY_SHOW_SPRINKLERS : show_sprinklers,
+		PROP_KEY_SHOW_PIPES : show_pipes,
+		PROP_KEY_SHOW_PIPE_FLOW_DIRECTION : show_pipe_flow_direction,
 		PROP_KEY_CAMERA_POS : Utils.vect2_to_pair(camera_pos),
 		PROP_KEY_ZOOM : zoom,
 		PROP_KEY_GRID_MAJOR_SPACING : Utils.vect2_to_pair(grid_major_spacing_ft)
 	}
 
-func deserialize(obj):
+func deserialize(obj: Dictionary) -> void:
 	show_grid = DictUtils.get_w_default(obj, PROP_KEY_SHOW_GRID, true)
 	show_origin = DictUtils.get_w_default(obj, PROP_KEY_SHOW_ORIGIN, true)
 	show_images = DictUtils.get_w_default(obj, PROP_KEY_SHOW_IMAGES, true)
 	show_measurements = DictUtils.get_w_default(obj, PROP_KEY_SHOW_MEASUREMENTS, true)
 	show_polygons = DictUtils.get_w_default(obj, PROP_KEY_SHOW_POLYGONS, true)
 	show_sprinklers = DictUtils.get_w_default(obj, PROP_KEY_SHOW_SPRINKLERS, true)
+	show_pipes = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPES, true)
+	show_pipe_flow_direction = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPE_FLOW_DIRECTION, false)
 	camera_pos = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_CAMERA_POS, [0,0]))
 	zoom = DictUtils.get_w_default(obj, PROP_KEY_ZOOM, 1.0)
 	grid_major_spacing_ft = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_GRID_MAJOR_SPACING, [5,5]))

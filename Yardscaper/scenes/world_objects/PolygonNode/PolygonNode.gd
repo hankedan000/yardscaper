@@ -8,8 +8,6 @@ enum EditMode {
 	None, Add, Edit, Remove
 }
 
-signal edited(undo_op: UndoController.UndoOperation)
-
 @export var EditorHandleScene : PackedScene = null
 
 @onready var poly             : Polygon2D = $Polygon2D
@@ -40,6 +38,7 @@ var _mouse_init_pos : Vector2 = Vector2() # init position when starting move
 var _is_new_vertex : bool = false
 var _vertex_handles : Array[EditorHandle] = []
 
+# @return true if initialization was successful, false otherwise
 func _ready() -> void:
 	super._ready()
 	set_process(false)
@@ -199,10 +198,18 @@ func get_visual_center() -> Vector2:
 		return poly.global_position
 	return poly.global_position + get_centroid_px()
 
-func get_subclass() -> String:
-	return "PolygonNode"
+func get_type_name() -> StringName:
+	return TypeNames.POLYGON_NODE
 
-func serialize():
+func get_bounding_box() -> Rect2:
+	if poly.polygon.size() == 0:
+		return super.get_bounding_box()
+	var box := Rect2(poly.polygon[0], Vector2(1,1))
+	for idx in range(1, poly.polygon.size()):
+		box = box.expand(poly.polygon[idx])
+	return box
+
+func serialize() -> Dictionary:
 	var obj = super.serialize()
 	var points_ft = []
 	for point in poly.polygon:
@@ -252,6 +259,7 @@ func _update_edit_objects() -> void:
 		new_handle.user_id = point_idx
 		new_handle.normal_type = EditorHandle.HandleType.Sharp
 		new_handle.modulate_on_hover = Color.AQUA
+		new_handle.label_show_mode = EditorHandle.LabelShowMode.HoverOrPressed
 		new_handle.position = point
 		_setup_cmn_edit_handle_signals(new_handle)
 		var handle_button := new_handle.get_button()
@@ -295,7 +303,7 @@ func _stop_vertex_movement() -> void:
 	_handle_being_moved = null
 	_is_new_vertex = false
 	set_process_input(false)
-	edited.emit(undo_op)
+	undoable_edit.emit(undo_op)
 
 func _on_property_changed(_obj: WorldObject, property_key: StringName, _from: Variant, _to: Variant) -> void:
 	if is_inside_tree() and property_key == WorldObject.PROP_KEY_USER_LABEL:
@@ -345,7 +353,7 @@ func _on_vertex_handle_button_down(handle: EditorHandle, is_new_vertex: bool) ->
 				handle.user_id,  # idx
 				handle.position) # point
 			remove_point(handle.user_id)
-			edited.emit(undo_op)
+			undoable_edit.emit(undo_op)
 
 # located the next vertex point follow the offset location of the curve.
 # the return index is intended to be used with Curve2D.add_point().

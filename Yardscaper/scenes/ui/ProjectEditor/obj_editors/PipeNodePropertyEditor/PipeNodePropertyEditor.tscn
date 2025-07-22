@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3 uid="uid://dtj8ql3pq0pul"]
+
+[ext_resource type="PackedScene" uid="uid://ckvkogi4jo41k" path="res://scenes/ui/ProjectEditor/obj_editors/BaseNodePropertyEditor/BaseNodePropertyEditor.tscn" id="1_vd7rg"]
+[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/obj_editors/PipeNodePropertyEditor/PipeNodePropertyEditor.gd" id="2_ly6qg"]
+
+[node name="PipeNodePropertyEditor" instance=ExtResource("1_vd7rg")]
+script = ExtResource("2_ly6qg")

@@ -34,7 +34,7 @@ enum CloseType {
 @onready var proj_menu := $VBoxContainer/MenuBar/Project
 @onready var edit_menu := $VBoxContainer/MenuBar/Edit
 @onready var proj_tabs := $VBoxContainer/ProjectTabs
-@onready var layout_tab := $VBoxContainer/ProjectTabs/Layout
+@onready var layout_tab : LayoutPanel = $VBoxContainer/ProjectTabs/Layout
 
 var _requested_close_type = CloseType.None
 var _active_undo_redo_ctrl : UndoController = null:
@@ -194,10 +194,13 @@ func _on_help_id_pressed(id):
 		HelpMenuIDs.About:
 			about_dialog.popup_centered()
 	
-func _on_export_to_image_dialog_export(view_opt, _zone: int, filepath: String):
+func _on_export_to_image_dialog_export(view_opt, zone: int, filepath: String):
 	var img = null
 	match view_opt:
 		Globals.ViewOptions.Current:
+			img = layout_tab.world_view.get_image_of_current_view()
+		Globals.ViewOptions.Zone:
+			layout_tab.fit_view_to_zone(zone)
 			img = layout_tab.world_view.get_image_of_current_view()
 		_:
 			push_warning("unsupported view export option '%s'" % Globals.ViewOptions.keys()[view_opt])
@@ -213,3 +216,6 @@ func _on_export_to_image_dialog_export(view_opt, _zone: int, filepath: String):
 			img.save_webp(filepath)
 		else:
 			push_warning("unsupported image file extension '%s'" % ext)
+
+func _on_export_to_image_dialog_zone_selection_changed(zone: int) -> void:
+	layout_tab.fit_view_to_zone(zone)

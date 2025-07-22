@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://cscoufmvhk6tk"]
+
+[ext_resource type="PackedScene" uid="uid://db8wvn8xh27x0" path="res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn" id="1_m6rx2"]
+[ext_resource type="Script" path="res://scenes/world_objects/fluid_objects/Pipe/Pipe.gd" id="2_y5374"]
+
+[node name="Pipe" groups=["pipes"] instance=ExtResource("1_m6rx2")]
+script = ExtResource("2_y5374")
+
+[node name="PointA_Handle" parent="." index="1"]
+modulate = Color(0.556863, 0.937255, 0.592157, 1)
+label_text_mode = 1
+label_show_mode = 5
+magnetic_physics_mask = 4
+
+[node name="PointB_Handle" parent="." index="2"]
+modulate = Color(1, 0.463814, 0.411516, 1)
+label_text_mode = 1
+label_show_mode = 5
+magnetic_physics_mask = 4

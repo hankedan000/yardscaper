@@ -1,0 +1,65 @@
+[gd_scene load_steps=5 format=3 uid="uid://wxns6gfy76u4"]
+
+[ext_resource type="PackedScene" uid="uid://cvkbhq0h44hq3" path="res://scenes/ui/widgets/MagneticArea/MagneticArea.tscn" id="2_1ldh0"]
+
+[sub_resource type="GDScript" id="GDScript_vq13b"]
+script/source = "extends Node2D
+
+@onready var blue_magnet_area : MagneticArea = $BlueMagnet/MagneticArea
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		pass
+"
+
+[sub_resource type="GDScript" id="GDScript_4wn5u"]
+script/source = "extends Node2D
+
+@onready var magnet : MagneticArea = $MagneticArea
+
+func _draw() -> void:
+	draw_circle(Vector2(), magnet.get_radius(), Color.RED)
+"
+
+[sub_resource type="GDScript" id="GDScript_n7ba6"]
+script/source = "extends Node2D
+
+@onready var magnet : MagneticArea = $MagneticArea
+
+var _moving := false
+
+func _draw() -> void:
+	draw_circle(Vector2(), magnet.get_radius(), Color.BLUE)
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			_moving = event.pressed
+	elif event is InputEventMouseMotion and _moving:
+		magnet.try_position_change(event.global_position)
+
+func _on_magnetic_area_position_change_request(new_global_position: Vector2) -> void:
+	global_position = new_global_position
+"
+
+[node name="MagneticAreaTest" type="Node2D"]
+script = SubResource("GDScript_vq13b")
+
+[node name="RedMagnet" type="Node2D" parent="."]
+position = Vector2(224, 192)
+script = SubResource("GDScript_4wn5u")
+
+[node name="MagneticArea" parent="RedMagnet" instance=ExtResource("2_1ldh0")]
+magnetic_physics_mask = 1
+is_collector = true
+metadata/_edit_lock_ = true
+
+[node name="BlueMagnet" type="Node2D" parent="."]
+position = Vector2(384, 192)
+script = SubResource("GDScript_n7ba6")
+
+[node name="MagneticArea" parent="BlueMagnet" instance=ExtResource("2_1ldh0")]
+magnetic_physics_mask = 1
+metadata/_edit_lock_ = true
+
+[connection signal="position_change_request" from="BlueMagnet/MagneticArea" to="BlueMagnet" method="_on_magnetic_area_position_change_request"]

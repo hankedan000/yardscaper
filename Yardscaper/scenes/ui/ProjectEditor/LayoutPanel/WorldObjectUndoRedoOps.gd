@@ -1,8 +1,6 @@
-extends Object
-class_name WorldObjectUndoRedoOps
+class_name WorldObjectUndoRedoOps extends Object
 
-class AddOrRemove:
-	extends UndoController.UndoOperation
+class AddOrRemove extends UndoController.UndoOperation:
 	
 	var _world : WorldViewportContainer = null
 	var _from_idx : int = -1
@@ -35,18 +33,23 @@ class AddOrRemove:
 		})
 	
 	func _do_add_logic() -> bool:
-		var wobj := TheProject.instance_world_obj(_ser_obj)
-		if wobj and TheProject.add_object(wobj):
-			wobj.set_order_in_world(_from_idx)
-			return true
-		return false
+		var wobj := TheProject.instance_world_obj_from_data(_ser_obj)
+		if ! is_instance_valid(wobj):
+			return false
+		
+		wobj.set_order_in_world(_from_idx)
+		if wobj is BaseNode:
+			wobj.restore_pipe_connections()
+		return true
 	
 	func _do_remove_logic() -> bool:
 		var wobj := _world.objects.get_child(_from_idx) as WorldObject
-		return TheProject.remove_object(wobj)
+		if is_instance_valid(wobj):
+			wobj.queue_free()
+			return true
+		return false
 
-class Reordered:
-	extends UndoController.UndoOperation
+class Reordered extends UndoController.UndoOperation:
 	
 	var _world : WorldViewportContainer = null
 	var _from_idx = 0
@@ -68,3 +71,31 @@ class Reordered:
 			'_from_idx' : _from_idx,
 			'_to_idx': _to_idx
 		})
+
+class GlobalPositionChange extends UndoController.UndoOperation:
+	
+	var _obj : WorldObject = null
+	var _old_pos : Vector2 = Vector2()
+	var _new_pos : Vector2 = Vector2()
+	
+	func _init(obj: WorldObject, old_pos: Vector2, new_value: Vector2):
+		if obj == null:
+			push_error("obj can't be null")
+		_obj = obj
+		_old_pos = old_pos
+		_new_pos = new_value
+	
+	func undo() -> bool:
+		_obj.apply_global_position(_old_pos)
+		return true
+		
+	func redo() -> bool:
+		_obj.apply_global_position(_new_pos)
+		return true
+		
+	func pretty_str() -> String:
+		return str({
+			"obj" : str(_obj),
+			"old_pos" : str(_old_pos),
+			"new_pos" : str(_new_pos),
+			})

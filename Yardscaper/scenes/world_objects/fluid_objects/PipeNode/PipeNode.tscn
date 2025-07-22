@@ -1,0 +1,34 @@
+[gd_scene load_steps=4 format=3 uid="uid://b6mbyigugbb1q"]
+
+[ext_resource type="PackedScene" uid="uid://srclla445e3s" path="res://scenes/world_objects/fluid_objects/BaseNode/BaseNode.tscn" id="1_x3idi"]
+[ext_resource type="Script" path="res://scenes/world_objects/fluid_objects/PipeNode/PipeNode.gd" id="2_a54dx"]
+
+[sub_resource type="GDScript" id="GDScript_evpk0"]
+script/source = "extends Gizmo
+
+var _pipe_node : PipeNode = null
+
+func _ready() -> void:
+	super._ready()
+	_pipe_node = get_parent() as PipeNode
+
+func _draw():
+	var center := Vector2()
+	var body_radius_px := _pipe_node.get_body_radius_px()
+	
+	# draw indicator circle
+	if _pipe_node.picked or _pipe_node.hovering:
+		var indic_color = Globals.SELECT_COLOR if _pipe_node.picked else Globals.HOVER_COLOR
+		draw_circle(center, body_radius_px * 2, indic_color)
+	
+	draw_circle(center, body_radius_px, Globals.DEFAULT_PIPE_NODE_COLOR)
+
+func on_zoom_changed(_new_zoom: float, _inv_scale: Vector2) -> void:
+	queue_redraw()
+"
+
+[node name="PipeNode" instance=ExtResource("1_x3idi")]
+script = ExtResource("2_a54dx")
+
+[node name="ManualDrawLayer" type="Node2D" parent="." index="0"]
+script = SubResource("GDScript_evpk0")

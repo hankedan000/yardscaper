@@ -1,12 +1,14 @@
-[gd_scene load_steps=6 format=3 uid="uid://dy0t3omtev6y4"]
+[gd_scene load_steps=7 format=3 uid="uid://dy0t3omtev6y4"]
 
 [ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="1_5e9b3"]
 [ext_resource type="Script" path="res://scenes/ui/gizmos/EditorHandle/EditorHandle.gd" id="1_ya7t0"]
 [ext_resource type="Texture2D" uid="uid://clc31o5i2atbv" path="res://assets/icons/EditorPathSharpHandle.svg" id="2_qgddj"]
 [ext_resource type="Texture2D" uid="uid://chdpybwey3fyj" path="res://assets/icons/EditorHandleAdd.svg" id="3_5d0bj"]
 [ext_resource type="Texture2D" uid="uid://dfapileftgyqj" path="res://assets/icons/EditorControlAnchor.svg" id="4_pkcr2"]
+[ext_resource type="PackedScene" uid="uid://cvkbhq0h44hq3" path="res://scenes/ui/widgets/MagneticArea/MagneticArea.tscn" id="6_w0l2b"]
 
 [node name="EditorHandle" instance=ExtResource("1_5e9b3")]
+z_index = 1
 script = ExtResource("1_ya7t0")
 SharpHandleTexture = ExtResource("2_qgddj")
 AddHandleTexture = ExtResource("3_5d0bj")
@@ -14,7 +16,10 @@ ControlAnchorTexture = ExtResource("4_pkcr2")
 normal_type = 1
 pressed_type = 0
 hover_type = 0
-show_label_on_hover = true
+label_text_mode = 0
+label_show_mode = 0
+MagneticAreaScene = ExtResource("6_w0l2b")
+magnetic_physics_mask = 0
 
 [node name="TextureButton" type="TextureButton" parent="." index="0"]
 offset_left = -8.0
@@ -24,7 +29,7 @@ offset_bottom = 8.0
 texture_normal = ExtResource("2_qgddj")
 stretch_mode = 5
 
-[node name="UserIdLabel" type="Label" parent="." index="1"]
+[node name="UserLabel" type="Label" parent="." index="1"]
 visible = false
 offset_left = -20.0
 offset_top = -30.0
@@ -34,5 +39,7 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
 horizontal_alignment = 1
 
+[connection signal="button_down" from="TextureButton" to="." method="_on_texture_button_button_down"]
+[connection signal="button_up" from="TextureButton" to="." method="_on_texture_button_button_up"]
 [connection signal="mouse_entered" from="TextureButton" to="." method="_on_texture_button_mouse_entered"]
 [connection signal="mouse_exited" from="TextureButton" to="." method="_on_texture_button_mouse_exited"]

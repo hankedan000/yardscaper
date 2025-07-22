@@ -3,7 +3,7 @@ class_name ObjectsListButton
 
 var world_object : WorldObject = null:
 	set(value):
-		if world_object:
+		if is_instance_valid(world_object):
 			world_object.picked_state_changed.disconnect(_on_object_picked_state_changed)
 		
 		world_object = value
