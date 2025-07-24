@@ -64,13 +64,16 @@ class SubSystem extends RefCounted:
 		return out_vars
 	
 	func _equation_pipe(p: FPipe) -> float:
-		var delta_h_psi := p.delta_h_psi().value
+		var delta_h_psi := p._flt_delta_h_psi()
 		
 		# calculate our net losses
-		var major_loss_psi := p.major_loss_psi()
-		var entry_minor_loss_psi := p.entry_minor_loss_psi()
-		var exit_minor_loss_psi := p.exit_minor_loss_psi()
-		var net_losses = major_loss_psi.value + entry_minor_loss_psi.value + exit_minor_loss_psi.value
+		var _v_fps := p._flt_v_fps()
+		var _Re := p._flt_Re(_v_fps)
+		var _f_darcy := p._flt_f_darcy(_Re)
+		var major_loss_psi := p._flt_major_loss_psi(_v_fps, _f_darcy)
+		var entry_minor_loss_psi := p._flt_entry_minor_loss_psi(_v_fps)
+		var exit_minor_loss_psi := p._flt_exit_minor_loss_psi(_v_fps)
+		var net_losses = major_loss_psi + entry_minor_loss_psi + exit_minor_loss_psi
 		
 		# all of our losses should equation to our delta_h across our nodes
 		# calutate the final equation where ... delta_h + net_losses = 0
