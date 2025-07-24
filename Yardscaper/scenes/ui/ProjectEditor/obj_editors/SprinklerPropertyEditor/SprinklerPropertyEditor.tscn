@@ -50,37 +50,19 @@ min_value = -360.0
 max_value = 360.0
 suffix = "deg"
 
-[node name="Label7" type="Label" parent="VBoxContainer/PropertiesList" index="12"]
-modulate = Color(1, 0.188235, 0.215686, 1)
-layout_mode = 2
-text = "Min Distance: "
-
-[node name="MinDistanceSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="13"]
-layout_mode = 2
-suffix = "ft"
-
-[node name="Label8" type="Label" parent="VBoxContainer/PropertiesList" index="14"]
-modulate = Color(0.39, 1, 0.4205, 1)
-layout_mode = 2
-text = "Max Distance: "
-
-[node name="MaxDistanceSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="15"]
-layout_mode = 2
-suffix = "ft"
-
-[node name="Label10" type="Label" parent="VBoxContainer/PropertiesList" index="16"]
+[node name="Label10" type="Label" parent="VBoxContainer/PropertiesList" index="12"]
 layout_mode = 2
 text = "Distance: "
 
-[node name="DistanceSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="17"]
+[node name="DistanceSpinBox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="13"]
 layout_mode = 2
 suffix = "ft"
 
-[node name="Label11" type="Label" parent="VBoxContainer/PropertiesList" index="18"]
+[node name="Label11" type="Label" parent="VBoxContainer/PropertiesList" index="14"]
 layout_mode = 2
 text = "Head Color:"
 
-[node name="BodyColorPicker" type="ColorPickerButton" parent="VBoxContainer/PropertiesList" index="19"]
+[node name="BodyColorPicker" type="ColorPickerButton" parent="VBoxContainer/PropertiesList" index="15"]
 layout_mode = 2
 
 [connection signal="item_selected" from="VBoxContainer/PropertiesList/ManufacturerOption" to="." method="_on_manufacturer_option_item_selected"]
@@ -88,8 +70,6 @@ layout_mode = 2
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/ZoneSpinBox" to="." method="_on_zone_spin_box_value_changed"]
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/SweepSpinBox" to="." method="_on_sweep_spin_box_value_changed"]
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/RotationSpinBox" to="." method="_on_rotation_spin_box_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/PropertiesList/MinDistanceSpinBox" to="." method="_on_min_distance_spin_box_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/PropertiesList/MaxDistanceSpinBox" to="." method="_on_max_distance_spin_box_value_changed"]
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/DistanceSpinBox" to="." method="_on_distance_spin_box_value_changed"]
 [connection signal="color_changed" from="VBoxContainer/PropertiesList/BodyColorPicker" to="." method="_on_body_color_picker_color_changed"]
 [connection signal="popup_closed" from="VBoxContainer/PropertiesList/BodyColorPicker" to="." method="_on_body_color_picker_popup_closed"]

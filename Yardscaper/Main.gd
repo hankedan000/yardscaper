@@ -7,8 +7,11 @@ class_name Main
 var root_scene : Control = null
 
 func _ready():
+	Globals.main = self
 	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
 	open_project_manager()
+	
+	TheSprinklerDB.load_data()
 
 func open_project_manager():
 	swap_root_scene(

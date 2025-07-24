@@ -18,11 +18,3 @@ func get_type_name() -> StringName:
 
 func get_body_radius_px() -> float:
 	return Utils.ft_to_px(BODY_RADIUS_FT)
-
-# a method for the WorldObject to perform any necessary initialization logic
-# after the Project has instantiated, but before it has deserialized it
-func _init_world_obj() -> void:
-	# for brand new PipeNodes, be helpful to the user and set this to 0.0 since
-	# the majority of the nodes they're making will be for connecting pipes
-	# together which will have no external flows.
-	fnode.q_ext_cfs.set_known(0.0)

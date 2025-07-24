@@ -349,7 +349,6 @@ func _instance_world_obj(type_name: StringName) -> WorldObject:
 	match type_name:
 		TypeNames.SPRINKLER:
 			wobj = SprinklerScene.instantiate() as Sprinkler
-			wobj.fnode = fsys.alloc_node()
 		TypeNames.IMG_NODE:
 			wobj = ImageNodeScene.instantiate() as ImageNode
 		TypeNames.DIST_MEASUREMENT:
@@ -358,10 +357,8 @@ func _instance_world_obj(type_name: StringName) -> WorldObject:
 			wobj = PolygonNodeScene.instantiate() as PolygonNode
 		TypeNames.PIPE:
 			wobj = PipeScene.instantiate() as Pipe
-			wobj.fpipe = fsys.alloc_pipe()
 		TypeNames.PIPE_NODE:
 			wobj = PipeNodeScene.instantiate() as PipeNode
-			wobj.fnode = fsys.alloc_node()
 		_:
 			push_warning("unsupported subclass '%s'" % type_name)
 			return wobj
