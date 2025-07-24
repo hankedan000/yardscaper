@@ -5,8 +5,6 @@ class_name SprinklerPropertyEditor extends BaseNodePropertyEditor
 @onready var sweep_spinbox            := $VBoxContainer/PropertiesList/SweepSpinBox
 @onready var manu_option              := $VBoxContainer/PropertiesList/ManufacturerOption
 @onready var model_option             := $VBoxContainer/PropertiesList/ModelOption
-@onready var min_dist_spinbox         := $VBoxContainer/PropertiesList/MinDistanceSpinBox
-@onready var max_dist_spinbox         := $VBoxContainer/PropertiesList/MaxDistanceSpinBox
 @onready var dist_spinbox             := $VBoxContainer/PropertiesList/DistanceSpinBox
 @onready var body_color_picker        := $VBoxContainer/PropertiesList/BodyColorPicker
 
@@ -14,8 +12,6 @@ var _layout_panel : LayoutPanel = null
 
 func _ready():
 	super._ready()
-	_setup_long_length_spinbox(min_dist_spinbox)
-	_setup_long_length_spinbox(max_dist_spinbox)
 	_setup_long_length_spinbox(dist_spinbox)
 	_update_ui_from_sprinkler_db()
 
@@ -39,10 +35,8 @@ func _sync_ui_from_obj() -> void:
 	_sync_option_to_text(manu_option, ref_sprink.manufacturer)
 	_update_model_options(ref_sprink.manufacturer)
 	_sync_option_to_text(model_option, ref_sprink.model)
-	min_dist_spinbox.value = ref_sprink.min_dist_ft
-	max_dist_spinbox.value = ref_sprink.max_dist_ft
-	dist_spinbox.min_value = min_dist_spinbox.value
-	dist_spinbox.max_value = max_dist_spinbox.value
+	dist_spinbox.min_value = ref_sprink.min_dist_ft()
+	dist_spinbox.max_value = ref_sprink.max_dist_ft()
 	dist_spinbox.value = ref_sprink.dist_ft
 	body_color_picker.color = ref_sprink.body_color
 
@@ -50,17 +44,21 @@ func _sync_ui_from_obj() -> void:
 func _update_ui_from_sprinkler_db():
 	manu_option.clear()
 	manu_option.add_item("") # default 'none' option
-	for manu in TheSprinklerDb.get_manufacturers():
-		manu_option.add_item(manu)
+	for manu_name in TheSprinklerDB.get_manufacturer_names():
+		manu_option.add_item(manu_name)
 	_update_model_options(manu_option.get_item_text(manu_option.selected))
 	queue_ui_sync()
 
 # update model options based on the manufacturer
-func _update_model_options(manufacturer: String):
+func _update_model_options(manu_name: String):
 	model_option.clear()
 	model_option.add_item("") # default 'none' option
-	for model in TheSprinklerDb.get_head_models(manufacturer):
-		model_option.add_item(model)
+	var manu_data := TheSprinklerDB.get_manufacturer(manu_name)
+	if ! is_instance_valid(manu_data):
+		return
+	
+	for head_name in manu_data.get_head_names():
+		model_option.add_item(head_name)
 	queue_ui_sync()
 
 func _sync_option_to_text(option_button: OptionButton, text: String):
@@ -89,12 +87,6 @@ func _on_model_option_item_selected(index):
 
 func _on_distance_spin_box_value_changed(value):
 	_apply_prop_edit(Sprinkler.PROP_KEY_DIST_FT, value)
-
-func _on_min_distance_spin_box_value_changed(value):
-	_apply_prop_edit(Sprinkler.PROP_KEY_MIN_DIST_FT, value)
-
-func _on_max_distance_spin_box_value_changed(value):
-	_apply_prop_edit(Sprinkler.PROP_KEY_MAX_DIST_FT, value)
 
 func _on_body_color_picker_color_changed(color: Color) -> void:
 	_apply_prop_edit(Sprinkler.PROP_KEY_BODY_COLOR, color)

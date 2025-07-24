@@ -39,14 +39,6 @@ enum ViewOptions {
 }
 
 func _ready():
-	for c in get_tree().root.get_children():
-		if c is Main:
-			main = c
-			break
-	
-	if main == null:
-		push_warning("couldn't find main scene")
-	
 	# try to get recent projects from old "Sprinkler Designer" user:// dir
 	_try_migrate_recent_projects()
 	

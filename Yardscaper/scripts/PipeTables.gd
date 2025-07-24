@@ -93,33 +93,17 @@ static func _lookup_minor_loss_in_mat_table(mat_entry: Dictionary, fitting: Fitt
 	return LossLookupResult.from_error(LossLookupError.FittingOOR)
 
 static func _lookup_minor_loss_in_fitting_table(fitting_entry: Dictionary, diam_h: float) -> LossLookupResult:
-	var list_of_pairs := fitting_entry['loss_by_diam'] as Array
-	var list_size := list_of_pairs.size()
-	if list_size == 0:
-		return LossLookupResult.from_error(LossLookupError.EmptyLossTable)
-	elif list_size < 2:
-		return LossLookupResult.from_warn_value(LossLookupError.DiameterOOR, list_of_pairs[0][1])
+	var loss_lut := fitting_entry['loss_by_diam'] as Array
+	var search_col := 0 # diam_h
+	var return_col := 1 # loss
+	var res := LUT_Utils.lerp_lookup(loss_lut, diam_h, search_col, return_col)
 	
-	# Iterate through pairs
-	for i in range(list_size - 1):
-		var curr = list_of_pairs[i]
-		var next = list_of_pairs[i + 1]
-		
-		if diam_h < curr[0]:
-			# Target is before the first element
-			return LossLookupResult.from_warn_value(LossLookupError.DiameterOOR, curr[1])
-		
-		if curr[0] <= diam_h && diam_h < next[0]:
-			# diam_h is between two entries. interpolate to get loss factor
-			return LossLookupResult.from_ok_value(_lookup_minor_loss_lerp(curr, next, diam_h))
-	
-	# diam_h is beyond the last element return last loss factor
-	return LossLookupResult.from_warn_value(LossLookupError.DiameterOOR, list_of_pairs[list_size - 1][1])
-	
-static func _lookup_minor_loss_lerp(entry_a: Array, entry_b: Array, diam_h: float) -> float:
-	var diam_spread = entry_b[0] - entry_a[0] as float
-	var weight := (diam_h - entry_a[0]) / diam_spread  as float
-	return lerpf(entry_a[1], entry_b[1], weight)
+	match res.error:
+		LUT_Utils.LerpError.Empty:
+			return LossLookupResult.from_error(LossLookupError.EmptyLossTable)
+		LUT_Utils.LerpError.OutOfRange:
+			return LossLookupResult.from_warn_value(LossLookupError.DiameterOOR, res.value)
+	return LossLookupResult.from_ok_value(res.value)
 
 # @return -1.0 on error, else the roughness value in feet
 static func lookup_surface_roughness(material: MaterialType) -> float:

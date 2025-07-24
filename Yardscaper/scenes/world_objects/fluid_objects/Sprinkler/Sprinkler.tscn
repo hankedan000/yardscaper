@@ -23,8 +23,8 @@ func _draw():
 	var water_color := Color.DODGER_BLUE
 	water_color.a = 0.5
 	var body_radius_px := Utils.ft_to_px(Sprinkler.BODY_RADIUS_FT)
-	var max_radius := Utils.ft_to_px(_sprink.max_dist_ft)
-	var min_radius := Utils.ft_to_px(_sprink.min_dist_ft)
+	var max_radius := Utils.ft_to_px(_sprink.max_dist_ft())
+	var min_radius := Utils.ft_to_px(_sprink.min_dist_ft())
 	var dist_radius := Utils.ft_to_px(_sprink.dist_ft)
 	var center := Vector2()
 	if _sprink.show_water:
