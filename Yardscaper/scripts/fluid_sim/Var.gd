@@ -18,9 +18,11 @@ func reset() -> void:
 	value = 0.0
 	state = State.Unknown
 
-func reset_if_solved() -> void:
+func reset_if_solved(clear_value: bool = false) -> void:
 	if state == State.Solved:
-		reset()
+		state = State.Unknown
+		if clear_value:
+			value = 0.0
 
 func set_known(v: float) -> void:
 	value = v
