@@ -202,13 +202,12 @@ static func _explore_pipe(pipe: FPipe, frontier: SubSystem, subsys: SubSystem) -
 	_explore_node(pipe.src_node, frontier, subsys)
 	_explore_node(pipe.sink_node, frontier, subsys)
 
-static func _fsolve_subsystem(x: Array[float], ssys: SubSystem) -> Array[float]:
+static func _fsolve_subsystem(x: PackedFloat64Array, y_out: PackedFloat64Array, ssys: SubSystem) -> void:
 	# substitute our latest guesses into the unknown variables
 	for i in range(x.size()):
 		ssys.unknown_vars[i].value = x[i]
 	
 	# re-evaluate all of the equations in the SubSystem and returns results
-	var y : Array[float] = []
-	for eq in ssys.equations:
-		y.push_back(eq.call())
-	return y
+	var n_eq := ssys.equations.size()
+	for e in range(n_eq):
+		y_out[e] = ssys.equations[e].call()

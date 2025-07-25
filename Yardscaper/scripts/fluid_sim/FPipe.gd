@@ -50,8 +50,8 @@ func is_my_var(v: Var) -> bool:
 		return true
 	return false
 
-func reset_solved_vars() -> void:
-	q_cfs.reset_if_solved()
+func reset_solved_vars(clear_values: bool = false) -> void:
+	q_cfs.reset_if_solved(clear_values)
 
 # cross sectional area of the pipe inf square feet
 func area_ft2() -> float:

@@ -761,8 +761,11 @@ func _on_curve_remove_button_pressed() -> void:
 	_apply_polygon_edit_mode(_selection_controller.selected_objs())
 
 func _on_solve_button_pressed() -> void:
-	# solve the system while timing how long it takes
-	TheProject.fsys.reset_solved_vars()
+	# solve the system while timing how long it takes. we only reset the state
+	# of the solved variable (ie. keep their previous values) because this helps
+	# give the algorithm a better initial guess; reducing subsequent solve
+	# times (typically by half).
+	TheProject.fsys.reset_solved_vars(false) # only reset solved Var state
 	var settings := FSolver.Settings.new()
 	var start_ticks_msec := Time.get_ticks_msec()
 	var res := FSolver.solve_system(TheProject.fsys, settings)
