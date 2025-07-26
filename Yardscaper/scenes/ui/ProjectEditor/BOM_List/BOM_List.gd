@@ -84,7 +84,7 @@ func _sync_ui():
 	var parts_map = Dictionary()
 	for obj in TheProject.objects:
 		if obj is Sprinkler:
-			var key = [obj.manufacturer, obj.model]
+			var key = [obj.manufacturer, obj.head_model]
 			if key in parts_map:
 				parts_map[key]['count'] += 1
 			else:
