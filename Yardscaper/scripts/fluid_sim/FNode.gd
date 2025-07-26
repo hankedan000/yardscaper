@@ -7,8 +7,8 @@ var connected_pipes : Array[FPipe] = []
 
 func _init(e_fsys: FSystem, e_id: int) -> void:
 	super(e_fsys, e_id)
-	self.h_psi = Var.new("%s_h_psi" % self)
-	self.q_ext_cfs = Var.new("%s_q_ext_cfs" % self)
+	self.h_psi = Var.new(self, "h_psi")
+	self.q_ext_cfs = Var.new(self, "q_ext_cfs")
 
 func is_outward_pipe(p: FPipe) -> bool:
 	if is_instance_valid(p):

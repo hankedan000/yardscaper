@@ -56,11 +56,11 @@ class SubSystem extends RefCounted:
 	static func _get_pipe_vars(p: FPipe) -> Array[Var]:
 		var out_vars : Array[Var] = [p.q_cfs]
 		if ! is_instance_valid(p.src_node):
-			out_vars.push_back(Var.new("%s_src_node_h_psi" % p))
-			out_vars.push_back(Var.new("%s_src_node_q_ext_cfs" % p))
+			out_vars.push_back(Var.new(p, "src_node_h_psi"))
+			out_vars.push_back(Var.new(p, "src_node_q_ext_cfs"))
 		if ! is_instance_valid(p.sink_node):
-			out_vars.push_back(Var.new("%s_sink_node_h_psi" % p))
-			out_vars.push_back(Var.new("%s_sink_node_q_ext_cfs" % p))
+			out_vars.push_back(Var.new(p, "sink_node_h_psi"))
+			out_vars.push_back(Var.new(p, "sink_node_q_ext_cfs"))
 		return out_vars
 	
 	func _equation_pipe(p: FPipe) -> float:
@@ -114,7 +114,7 @@ static func _basic_console_printer(iter: int, x: Array[float], ssys: SubSystem) 
 	var comma := ""
 	for i in range(x.size()):
 		var uvar := ssys.unknown_vars[i]
-		dbg_str += "%s%s=%f" % [comma, uvar.name, uvar.value]
+		dbg_str += "%s%s=%f" % [comma, uvar.get_name_with_entity(), uvar.value]
 		comma = ", "
 	print(dbg_str)
 

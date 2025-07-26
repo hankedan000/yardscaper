@@ -14,7 +14,7 @@ var K_exit    : float = 0.0 # minor loss coefficient for fitting at pipe exit
 
 func _init(e_fsys: FSystem, e_id: int) -> void:
 	super(e_fsys, e_id)
-	self.q_cfs = Var.new("%s_q_cfs" % self)
+	self.q_cfs = Var.new(self, "q_cfs")
 
 func disconnect_node(n: FNode) -> void:
 	if ! is_instance_valid(n):
@@ -59,13 +59,13 @@ func area_ft2() -> float:
 	return PI * r_ft * r_ft
 
 func v_fps() -> Var:
-	var out := Var.new("%s_v_fps" % self)
+	var out := Var.new(self, "v_fps")
 	out.state = q_cfs.state
 	out.value = _flt_v_fps()
 	return out
 
 func src_h_psi() -> Var:
-	var h_psi := Var.new("%s_src_h_psi" % self)
+	var h_psi := Var.new(self, "src_h_psi")
 	if ! is_instance_valid(src_node):
 		return h_psi
 	
@@ -74,7 +74,7 @@ func src_h_psi() -> Var:
 	return h_psi
 
 func sink_h_psi() -> Var:
-	var h_psi := Var.new("%s_sink_h_psi" % self)
+	var h_psi := Var.new(self, "sink_h_psi")
 	if ! is_instance_valid(sink_node):
 		return h_psi
 	
@@ -83,7 +83,7 @@ func sink_h_psi() -> Var:
 	return h_psi
 
 func delta_h_psi() -> Var:
-	var delta_h := Var.new("%s_delta_h_psi" % self)
+	var delta_h := Var.new(self, "delta_h_psi")
 	if ! is_instance_valid(src_node):
 		return delta_h
 	elif ! is_instance_valid(sink_node):
@@ -95,7 +95,7 @@ func delta_h_psi() -> Var:
 
 # reynolds number
 func Re() -> Var:
-	var out = Var.new("%s_Re" % self)
+	var out = Var.new(self, "Re")
 	out.state = q_cfs.state
 	out.value = _flt_Re(_flt_v_fps())
 	return out
@@ -106,13 +106,13 @@ func relative_roughness() -> float:
 	return E_ft / d_ft
 
 func f_darcy() -> Var:
-	var out = Var.new("%s_f_darcy" % self)
+	var out = Var.new(self, "f_darcy")
 	out.state = q_cfs.state
 	out.value = _flt_f_darcy(_flt_Re(_flt_v_fps()))
 	return out
 
 func major_loss_psi() -> Var:
-	var out := Var.new("%s_major_loss_psi" % self)
+	var out := Var.new(self, "major_loss_psi")
 	out.state = q_cfs.state
 	var _v_fps := _flt_v_fps()
 	var _f_darcy := _flt_f_darcy(_flt_Re(_v_fps))
@@ -120,13 +120,13 @@ func major_loss_psi() -> Var:
 	return out
 
 func entry_minor_loss_psi() -> Var:
-	var out := Var.new("%s_entry_minor_loss_psi" % self)
+	var out := Var.new(self, "entry_minor_loss_psi")
 	out.value = _flt_entry_minor_loss_psi(_flt_v_fps())
 	out.state = q_cfs.state
 	return out
 
 func exit_minor_loss_psi() -> Var:
-	var out := Var.new("%s_exit_minor_loss_psi" % self)
+	var out := Var.new(self, "exit_minor_loss_psi")
 	out.value = _flt_exit_minor_loss_psi(_flt_v_fps())
 	out.state = q_cfs.state
 	return out

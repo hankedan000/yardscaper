@@ -774,12 +774,12 @@ func _on_solve_button_pressed() -> void:
 	# display results to user
 	solve_summary_dialog.show_summary(solve_time_msec, res)
 
-func _on_solve_summary_dialog_entity_clicked(entity: FEntity) -> void:
-	var wobj := TheProject.lookup_fentity_parent_obj(entity)
+func _on_solve_summary_dialog_entity_clicked(fentity: FEntity) -> void:
+	var wobj := Utils.get_wobj_from_fentity(fentity)
 	if is_instance_valid(wobj):
 		_focus_on_objs([wobj])
 
 func _on_solve_summary_dialog_unknown_var_clicked(uvar: Var) -> void:
-	var wobj := TheProject.lookup_fvar_parent_obj(uvar)
+	var wobj := Utils.get_wobj_from_fvar(uvar)
 	if is_instance_valid(wobj):
 		_focus_on_objs([wobj])
