@@ -6,6 +6,7 @@ func load_data() -> void:
 	load_builtin_data()
 
 func load_builtin_data() -> void:
+	load_manufacturer_from_dict(GenericSprinklerData.RAW_DATA)
 	load_manufacturer_from_dict(RainBirdSprinklerData.RAW_DATA)
 
 func load_manufacturer_from_dict(data: Dictionary) -> void:

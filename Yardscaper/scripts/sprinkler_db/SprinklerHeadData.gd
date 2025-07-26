@@ -1,6 +1,6 @@
 class_name SprinklerHeadData extends RefCounted
 
-var name : String = ""
+var model : String = ""
 var min_dist_ft : float = 0.0
 var max_dist_ft : float = 0.0
 var min_sweep_deg : float = 0.0
@@ -8,9 +8,9 @@ var max_sweep_deg : float = 0.0
 var compatible_bodies : Array = [] # of names
 var flow_model : SprinklerFlowModel = null
 
-static func from_dict(head_name: String, data: Dictionary) -> SprinklerHeadData:
+static func from_dict(head_model: String, data: Dictionary) -> SprinklerHeadData:
 	var out := SprinklerHeadData.new()
-	out.name = head_name
+	out.model = head_model
 	out.min_dist_ft = DictUtils.get_w_default(data, &'min_dist_ft', 0.0)
 	out.max_dist_ft = DictUtils.get_w_default(data, &'max_dist_ft', 0.0)
 	out.min_sweep_deg = DictUtils.get_w_default(data, &'min_sweep_deg', 0.0)

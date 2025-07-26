@@ -9,7 +9,8 @@ const DEFAULT_MAX_SWEEP_DEG = 360.0
 const PROP_KEY_DIST_FT = &"dist_ft"
 const PROP_KEY_SWEEP_DEG = &"sweep_deg"
 const PROP_KEY_MANUFACTURER = &"manufacturer"
-const PROP_KEY_MODEL = &"model"
+const PROP_KEY_HEAD_MODEL = &"head_model"
+const PROP_KEY_NOZZLE_OPTION = &"nozzle_option"
 const PROP_KEY_BODY_COLOR = &"body_color"
 const PROP_KEY_ZONE = &"zone"
 
@@ -54,13 +55,21 @@ var manufacturer : String = "" :
 		if _check_and_emit_prop_change(PROP_KEY_MANUFACTURER, old_value):
 			queue_redraw()
 
-var model : String = "" :
+var head_model : String = "" :
 	set(value):
-		var old_value = model
-		model = value
+		var old_value = head_model
+		head_model = value
 		_update_head_data()
 		_cap_values()
-		if _check_and_emit_prop_change(PROP_KEY_MODEL, old_value):
+		if _check_and_emit_prop_change(PROP_KEY_HEAD_MODEL, old_value):
+			queue_redraw()
+
+var nozzle_option : String = "" :
+	set(value):
+		var old_value = nozzle_option
+		nozzle_option = value
+		_update_nozzle_loss()
+		if _check_and_emit_prop_change(PROP_KEY_NOZZLE_OPTION, old_value):
 			queue_redraw()
 
 var show_min_dist := false :
@@ -148,7 +157,7 @@ func serialize() -> Dictionary:
 	obj[PROP_KEY_DIST_FT] = dist_ft
 	obj[PROP_KEY_SWEEP_DEG] = int(sweep_deg)
 	obj[PROP_KEY_MANUFACTURER] = manufacturer
-	obj[PROP_KEY_MODEL] = model
+	obj[PROP_KEY_HEAD_MODEL] = head_model
 	obj[PROP_KEY_ZONE] = zone
 	obj[PROP_KEY_BODY_COLOR] = body_color.to_html(true)
 	return obj
@@ -157,7 +166,7 @@ func deserialize(obj: Dictionary) -> void:
 	super.deserialize(obj)
 	sweep_deg = DictUtils.get_w_default(obj, PROP_KEY_SWEEP_DEG, 360.0)
 	manufacturer = DictUtils.get_w_default(obj, PROP_KEY_MANUFACTURER, "")
-	model = DictUtils.get_w_default(obj, PROP_KEY_MODEL, "")
+	head_model = DictUtils.get_w_default(obj, PROP_KEY_HEAD_MODEL, "")
 	dist_ft = DictUtils.get_w_default(obj, PROP_KEY_DIST_FT, max_dist_ft)
 	zone = DictUtils.get_w_default(obj, PROP_KEY_ZONE, 1)
 	body_color = DictUtils.get_w_default(obj, PROP_KEY_BODY_COLOR, body_color)
@@ -181,6 +190,9 @@ func max_sweep_deg() -> float:
 	if _head_data == null:
 		return DEFAULT_MAX_SWEEP_DEG
 	return _head_data.max_sweep_deg
+
+func get_head_data() -> SprinklerHeadData:
+	return _head_data
 
 # a method for the WorldObject to perform any necessary initialization logic
 # after the Project has instantiated, but before it has deserialized it
@@ -208,7 +220,7 @@ func _update_head_data() -> void:
 	var manu_data := TheSprinklerDB.get_manufacturer(manufacturer)
 	if ! is_instance_valid(manu_data):
 		return
-	_head_data = manu_data.get_head(model)
+	_head_data = manu_data.get_head(head_model)
 	_update_nozzle_loss()
 
 func _update_nozzle_loss() -> void:
