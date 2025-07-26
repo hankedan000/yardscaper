@@ -14,7 +14,7 @@ var K_exit    : float = 0.0 # minor loss coefficient for fitting at pipe exit
 
 func _init(e_fsys: FSystem, e_id: int) -> void:
 	super(e_fsys, e_id)
-	self.q_cfs = Var.new("%s_q_cfs" % self)
+	self.q_cfs = Var.new(self, "q_cfs")
 
 func disconnect_node(n: FNode) -> void:
 	if ! is_instance_valid(n):
@@ -50,8 +50,8 @@ func is_my_var(v: Var) -> bool:
 		return true
 	return false
 
-func reset_solved_vars() -> void:
-	q_cfs.reset_if_solved()
+func reset_solved_vars(clear_values: bool = false) -> void:
+	q_cfs.reset_if_solved(clear_values)
 
 # cross sectional area of the pipe inf square feet
 func area_ft2() -> float:
@@ -59,16 +59,13 @@ func area_ft2() -> float:
 	return PI * r_ft * r_ft
 
 func v_fps() -> Var:
-	var out := Var.new("%s_v_fps" % self)
-	var area := area_ft2()
-	if area == 0.0:
-		push_warning("%s area is 0" % self)
+	var out := Var.new(self, "v_fps")
 	out.state = q_cfs.state
-	out.value = q_cfs.value / area
+	out.value = _flt_v_fps()
 	return out
 
 func src_h_psi() -> Var:
-	var h_psi := Var.new("%s_src_h_psi" % self)
+	var h_psi := Var.new(self, "src_h_psi")
 	if ! is_instance_valid(src_node):
 		return h_psi
 	
@@ -77,7 +74,7 @@ func src_h_psi() -> Var:
 	return h_psi
 
 func sink_h_psi() -> Var:
-	var h_psi := Var.new("%s_sink_h_psi" % self)
+	var h_psi := Var.new(self, "sink_h_psi")
 	if ! is_instance_valid(sink_node):
 		return h_psi
 	
@@ -86,19 +83,22 @@ func sink_h_psi() -> Var:
 	return h_psi
 
 func delta_h_psi() -> Var:
-	var delta_h := Var.new("%s_delta_h_psi" % self)
+	var delta_h := Var.new(self, "delta_h_psi")
 	if ! is_instance_valid(src_node):
 		return delta_h
 	elif ! is_instance_valid(sink_node):
 		return delta_h
 	
-	delta_h.value = sink_node.h_psi.value - src_node.h_psi.value
+	delta_h.value = _flt_delta_h_psi()
 	delta_h.state = Var.merge_var_states([src_node.h_psi, sink_node.h_psi])
 	return delta_h
 
 # reynolds number
 func Re() -> Var:
-	return _calc_Re(v_fps())
+	var out = Var.new(self, "Re")
+	out.state = q_cfs.state
+	out.value = _flt_Re(_flt_v_fps())
+	return out
 
 func relative_roughness() -> float:
 	if d_ft == 0.0:
@@ -106,48 +106,63 @@ func relative_roughness() -> float:
 	return E_ft / d_ft
 
 func f_darcy() -> Var:
-	return _calc_f_darcy(Re())
+	var out = Var.new(self, "f_darcy")
+	out.state = q_cfs.state
+	out.value = _flt_f_darcy(_flt_Re(_flt_v_fps()))
+	return out
 
 func major_loss_psi() -> Var:
-	var out := Var.new("%s_major_loss_psi" % self)
-	var _v_fps := v_fps()
-	out.state = _v_fps.state
-	
-	# if v is 0 then f_darcy would blow up to infinity. regardlesa, if there is
-	# no velocity then there's no frictional losses.
-	if _v_fps.value == 0.0:
-		return out
-	
-	var _Re := _calc_Re(_v_fps)
-	var _f_darcy := _calc_f_darcy(_Re)
-	out.value = FluidMath.major_loss(_f_darcy.value, l_ft, _v_fps.value, fsys.fluid_density_lbft3, d_ft)
+	var out := Var.new(self, "major_loss_psi")
+	out.state = q_cfs.state
+	var _v_fps := _flt_v_fps()
+	var _f_darcy := _flt_f_darcy(_flt_Re(_v_fps))
+	out.value = _flt_major_loss_psi(_v_fps, _f_darcy)
 	return out
 
 func entry_minor_loss_psi() -> Var:
-	var out := Var.new("%s_entry_minor_loss_psi" % self)
-	var _v_fps := v_fps()
-	out.value = K_entry * fsys.fluid_density_lbft3 * (_v_fps.value * _v_fps.value) / 2.0
-	out.state = _v_fps.state
+	var out := Var.new(self, "entry_minor_loss_psi")
+	out.value = _flt_entry_minor_loss_psi(_flt_v_fps())
+	out.state = q_cfs.state
 	return out
 
 func exit_minor_loss_psi() -> Var:
-	var out := Var.new("%s_exit_minor_loss_psi" % self)
-	var _v_fps := v_fps()
-	out.value = K_exit * fsys.fluid_density_lbft3 * (_v_fps.value * _v_fps.value) / 2.0
-	out.state = _v_fps.state
+	var out := Var.new(self, "exit_minor_loss_psi")
+	out.value = _flt_exit_minor_loss_psi(_flt_v_fps())
+	out.state = q_cfs.state
 	return out
 
-func _calc_Re(v_fps_in: Var) -> Var:
-	var out := Var.new("%s_Re" % self)
-	out.value = FluidMath.reynolds(v_fps_in.value, d_ft, fsys.fluid_viscocity_k)
-	out.state = v_fps_in.state
-	return out
+func _flt_v_fps() -> float:
+	var area := area_ft2()
+	if area == 0.0:
+		push_warning("%s area is 0" % self)
+	return q_cfs.value / area
 
-func _calc_f_darcy(Re_in: Var) -> Var:
-	var out := Var.new("%s_f_darcy" % self)
-	out.value = FluidMath.f_darcy(Re_in.value, relative_roughness())
-	out.state = Re_in.state
-	return out
+func _flt_delta_h_psi() -> float:
+	if ! is_instance_valid(src_node):
+		return 0.0
+	elif ! is_instance_valid(sink_node):
+		return 0.0
+	
+	return sink_node.h_psi.value - src_node.h_psi.value
+
+func _flt_Re(v_fps_in: float) -> float:
+	return FluidMath.reynolds(v_fps_in, d_ft, fsys.fluid_viscocity_k)
+
+func _flt_f_darcy(Re_in: float) -> float:
+	return FluidMath.f_darcy(Re_in, relative_roughness())
+
+func _flt_major_loss_psi(v_fps_in: float, f_darcy_in: float) -> float:
+	# if v is 0 then f_darcy would blow up to infinity. regardlesa, if there is
+	# no velocity then there's no frictional losses.
+	if v_fps_in == 0.0:
+		return 0.0
+	return FluidMath.major_loss(f_darcy_in, l_ft, v_fps_in, fsys.fluid_density_lbft3, d_ft)
+
+func _flt_entry_minor_loss_psi(v_fps_in: float) -> float:
+	return K_entry * fsys.fluid_density_lbft3 * (v_fps_in * v_fps_in) / 2.0
+
+func _flt_exit_minor_loss_psi(v_fps_in: float) -> float:
+	return K_exit * fsys.fluid_density_lbft3 * (v_fps_in * v_fps_in) / 2.0
 
 func _predelete() -> void:
 	disconnect_node(src_node)

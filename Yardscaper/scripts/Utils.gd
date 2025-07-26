@@ -256,3 +256,24 @@ static func get_property_w_path(obj: Object, prop_path: StringName) -> PropertyR
 	
 	res.found = true
 	return res
+
+static func get_metadata_from_fentity(fentity: FEntity) -> FluidEntityMetadata:
+	if ! is_instance_valid(fentity):
+		return null
+	elif ! is_instance_valid(fentity.user_metadata):
+		return null
+	elif ! (fentity.user_metadata is FluidEntityMetadata):
+		return null
+	return fentity.user_metadata as FluidEntityMetadata
+
+static func get_wobj_from_fentity(fentity: FEntity) -> WorldObject:
+	var metadata := get_metadata_from_fentity(fentity)
+	if metadata == null:
+		return
+	return metadata.parent_wobj
+
+static func get_wobj_from_fvar(fvar: Var) -> WorldObject:
+	var metadata := get_metadata_from_fentity(fvar.get_parent_entity())
+	if metadata == null:
+		return
+	return metadata.parent_wobj

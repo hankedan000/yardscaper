@@ -61,6 +61,12 @@ class PropertiesFromSave extends RefCounted:
 
 var _props_from_save := PropertiesFromSave.new()
 
+# a method for the WorldObject to perform any necessary initialization logic
+# after the Project has instantiated, but before it has deserialized it
+func _init_world_obj() -> void:
+	fpipe = parent_project.fsys.alloc_pipe()
+	fpipe.user_metadata = FluidEntityMetadata.new(self, false)
+
 func _ready():
 	super._ready()
 	color = Color.WHITE

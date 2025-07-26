@@ -317,39 +317,11 @@ func add_image(path: String) -> ImageNode:
 	obj_data[ImageNode.PROP_KEY_FILENAME] = filename
 	return instance_world_obj_from_data(obj_data)
 
-func lookup_fvar_parent_obj(fvar: Var) -> WorldObject:
-	for obj in objects:
-		if obj is Pipe && obj.fpipe.is_my_var(fvar):
-			return obj
-		elif obj is BaseNode && obj.fnode.is_my_var(fvar):
-			return obj
-	return null
-
-func lookup_fentity_parent_obj(fentity: FEntity) -> WorldObject:
-	if fentity is FNode:
-		return lookup_fnode_parent_obj(fentity)
-	elif fentity is FPipe:
-		return lookup_fpipe_parent_obj(fentity)
-	return null
-
-func lookup_fpipe_parent_obj(fpipe: FPipe) -> Pipe:
-	for obj in objects:
-		if obj is Pipe && obj.fpipe == fpipe:
-			return obj
-	return null
-
-func lookup_fnode_parent_obj(fnode: FNode) -> BaseNode:
-	for obj in objects:
-		if obj is BaseNode && obj.fnode == fnode:
-			return obj
-	return null
-
 func _instance_world_obj(type_name: StringName) -> WorldObject:
 	var wobj : WorldObject = null
 	match type_name:
 		TypeNames.SPRINKLER:
 			wobj = SprinklerScene.instantiate() as Sprinkler
-			wobj.fnode = fsys.alloc_node()
 		TypeNames.IMG_NODE:
 			wobj = ImageNodeScene.instantiate() as ImageNode
 		TypeNames.DIST_MEASUREMENT:
@@ -358,10 +330,8 @@ func _instance_world_obj(type_name: StringName) -> WorldObject:
 			wobj = PolygonNodeScene.instantiate() as PolygonNode
 		TypeNames.PIPE:
 			wobj = PipeScene.instantiate() as Pipe
-			wobj.fpipe = fsys.alloc_pipe()
 		TypeNames.PIPE_NODE:
 			wobj = PipeNodeScene.instantiate() as PipeNode
-			wobj.fnode = fsys.alloc_node()
 		_:
 			push_warning("unsupported subclass '%s'" % type_name)
 			return wobj

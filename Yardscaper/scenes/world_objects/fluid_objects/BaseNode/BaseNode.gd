@@ -13,6 +13,17 @@ class BaseNodePropsFromSave extends RefCounted:
 
 var _base_node_props_from_save : BaseNodePropsFromSave = BaseNodePropsFromSave.new()
 
+# a method for the WorldObject to perform any necessary initialization logic
+# after the Project has instantiated, but before it has deserialized it
+func _init_world_obj() -> void:
+	fnode = parent_project.fsys.alloc_node()
+	fnode.user_metadata = FluidEntityMetadata.new(self, false)
+	
+	# for brand new PipeNodes, be helpful to the user and set this to 0.0 since
+	# the majority of the nodes they're making will be for connecting pipes
+	# together which will have no external flows.
+	fnode.q_ext_cfs.set_known(0.0)
+	
 func _ready() -> void:
 	super._ready()
 	var cshape := pick_coll_shape.shape as CircleShape2D

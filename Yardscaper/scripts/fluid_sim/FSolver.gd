@@ -56,21 +56,24 @@ class SubSystem extends RefCounted:
 	static func _get_pipe_vars(p: FPipe) -> Array[Var]:
 		var out_vars : Array[Var] = [p.q_cfs]
 		if ! is_instance_valid(p.src_node):
-			out_vars.push_back(Var.new("%s_src_node_h_psi" % p))
-			out_vars.push_back(Var.new("%s_src_node_q_ext_cfs" % p))
+			out_vars.push_back(Var.new(p, "src_node_h_psi"))
+			out_vars.push_back(Var.new(p, "src_node_q_ext_cfs"))
 		if ! is_instance_valid(p.sink_node):
-			out_vars.push_back(Var.new("%s_sink_node_h_psi" % p))
-			out_vars.push_back(Var.new("%s_sink_node_q_ext_cfs" % p))
+			out_vars.push_back(Var.new(p, "sink_node_h_psi"))
+			out_vars.push_back(Var.new(p, "sink_node_q_ext_cfs"))
 		return out_vars
 	
 	func _equation_pipe(p: FPipe) -> float:
-		var delta_h_psi := p.delta_h_psi().value
+		var delta_h_psi := p._flt_delta_h_psi()
 		
 		# calculate our net losses
-		var major_loss_psi := p.major_loss_psi()
-		var entry_minor_loss_psi := p.entry_minor_loss_psi()
-		var exit_minor_loss_psi := p.exit_minor_loss_psi()
-		var net_losses = major_loss_psi.value + entry_minor_loss_psi.value + exit_minor_loss_psi.value
+		var _v_fps := p._flt_v_fps()
+		var _Re := p._flt_Re(_v_fps)
+		var _f_darcy := p._flt_f_darcy(_Re)
+		var major_loss_psi := p._flt_major_loss_psi(_v_fps, _f_darcy)
+		var entry_minor_loss_psi := p._flt_entry_minor_loss_psi(_v_fps)
+		var exit_minor_loss_psi := p._flt_exit_minor_loss_psi(_v_fps)
+		var net_losses = major_loss_psi + entry_minor_loss_psi + exit_minor_loss_psi
 		
 		# all of our losses should equation to our delta_h across our nodes
 		# calutate the final equation where ... delta_h + net_losses = 0
@@ -111,7 +114,7 @@ static func _basic_console_printer(iter: int, x: Array[float], ssys: SubSystem) 
 	var comma := ""
 	for i in range(x.size()):
 		var uvar := ssys.unknown_vars[i]
-		dbg_str += "%s%s=%f" % [comma, uvar.name, uvar.value]
+		dbg_str += "%s%s=%f" % [comma, uvar.get_name_with_entity(), uvar.value]
 		comma = ", "
 	print(dbg_str)
 
@@ -199,13 +202,12 @@ static func _explore_pipe(pipe: FPipe, frontier: SubSystem, subsys: SubSystem) -
 	_explore_node(pipe.src_node, frontier, subsys)
 	_explore_node(pipe.sink_node, frontier, subsys)
 
-static func _fsolve_subsystem(x: Array[float], ssys: SubSystem) -> Array[float]:
+static func _fsolve_subsystem(x: PackedFloat64Array, y_out: PackedFloat64Array, ssys: SubSystem) -> void:
 	# substitute our latest guesses into the unknown variables
 	for i in range(x.size()):
 		ssys.unknown_vars[i].value = x[i]
 	
 	# re-evaluate all of the equations in the SubSystem and returns results
-	var y : Array[float] = []
-	for eq in ssys.equations:
-		y.push_back(eq.call())
-	return y
+	var n_eq := ssys.equations.size()
+	for e in range(n_eq):
+		y_out[e] = ssys.equations[e].call()
