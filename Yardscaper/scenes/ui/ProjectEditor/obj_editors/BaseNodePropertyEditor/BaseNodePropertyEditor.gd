@@ -1,6 +1,8 @@
 class_name BaseNodePropertyEditor extends WorldObjectPropertyEditor
 
+@onready var pressure_label           : Label = $VBoxContainer/PropertiesList/PressureLabel
 @onready var pressure_spinbox         : OverrideSpinbox = $VBoxContainer/PropertiesList/PressureSpinbox
+@onready var ext_flow_label           : Label = $VBoxContainer/PropertiesList/ExtFlowLabel
 @onready var ext_flow_spinbox         : OverrideSpinbox = $VBoxContainer/PropertiesList/ExtFlowSpinbox
 
 func _ready() -> void:

@@ -1,13 +1,23 @@
 class_name WorldObjectPropertyEditor extends PanelContainer
 
+@onready var settings_menu            : MenuButton = $VBoxContainer/TopBar/SettingsMenuButton
 @onready var user_label_lineedit      : LineEdit = $VBoxContainer/PropertiesList/UserLabelLineEdit
 @onready var multi_edit_warning       : BlinkLabel = $VBoxContainer/MultiEditWarning
 
 var _wobjs : Array[WorldObject] = []
 var _ignore_internal_edits = false
 
+enum SettingsMenuIds {
+	ShowAdvancedProperties
+}
+
 func _ready():
 	set_process(false)
+	
+	# setup the settings MenuButton
+	var settings_popup := settings_menu.get_popup() as PopupMenu
+	settings_popup.id_pressed.connect(_on_settings_menu_id_pressed)
+	_show_advanced_properties_toggled(false) # hide advanced options by default
 
 func _process(_delta: float) -> void:
 	if _wobjs.size() > 0:
@@ -124,8 +134,23 @@ func _setup_spinbox(
 	spinbox.step = step
 	spinbox.suffix = suffix
 
+func _show_advanced_properties_toggled(_toggled_on: bool) -> void:
+	pass
+
 func _on_user_label_line_edit_text_submitted(new_text: String) -> void:
 	_apply_prop_edit(WorldObject.PROP_KEY_USER_LABEL, new_text)
 
 func _on_world_object_property_changed(_obj: WorldObject, _property: StringName, _from: Variant, _to: Variant) -> void:
 	queue_ui_sync()
+
+func _on_settings_menu_id_pressed(id: int) -> void:
+	var popup := settings_menu.get_popup() as PopupMenu
+	var idx := popup.get_item_index(id) as int
+	# toggle checked state if item is checkable
+	if popup.is_item_checkable(idx):
+		popup.toggle_item_checked(idx)
+	
+	var is_checked := popup.is_item_checked(idx)
+	match id:
+		SettingsMenuIds.ShowAdvancedProperties:
+			_show_advanced_properties_toggled(is_checked)
