@@ -20,10 +20,10 @@ func test_f_darcy():
 
 func test_major_loss():
 	assert_almost_eq(
-		FluidMath.major_loss(0.01555, 19.75, 0.0, 62.285, 0.0625),
+		FluidMath.major_loss_psi(0.01555, 19.75, 0.0, 62.285, 0.0625),
 		0.00000, # expect
 		0.01)    # allowed error
 	assert_almost_eq(
-		FluidMath.major_loss(0.01555, 19.75, 36.3, 62.285, 0.0625),
-		6267.28, # expect
+		FluidMath.major_loss_psi(0.01555, 19.75, 36.3, 62.285, 0.0625),
+		43.52, # expect
 		0.01)    # allowed error

@@ -59,6 +59,7 @@ static func _colebrook_white(Re: float, rel_roughness: float) -> float:
 # @param[in] rho_lbft3 - density of the fluid (lb/ft^3)
 # @param[in] d_ft - hydraulic diameter of the pipe (ft)
 # @return pressure loss (lb/ft^2)
-@warning_ignore("shadowed_variable")
-static func major_loss(f_darcy: float, l_ft: float, v_fps: float, rho_lbft3: float, d_ft: float) -> float:
-	return (f_darcy * l_ft * v_fps * v_fps * rho_lbft3) / (2.0 * G * d_ft)
+static func major_loss_psi(arg_f_darcy: float, l_ft: float, v_fps: float, rho_lbft3: float, d_ft: float) -> float:
+	return Utils.psft_to_psi(
+		(arg_f_darcy * l_ft * v_fps * v_fps * rho_lbft3) /
+		(2.0 * G * d_ft))
