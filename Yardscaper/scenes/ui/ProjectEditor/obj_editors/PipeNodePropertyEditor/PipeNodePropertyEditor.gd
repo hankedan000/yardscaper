@@ -10,4 +10,3 @@ func _sync_ui_from_obj() -> void:
 	
 	#var ref_node := _wobjs[0] as PipeNode
 	multi_edit_warning.text = "Editing %d pipe nodes" % _wobjs.size()
-	

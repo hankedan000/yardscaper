@@ -3,6 +3,7 @@ class_name PipePropertyEditor extends WorldObjectPropertyEditor
 @onready var diameter_spinbox         : SpinBox = $VBoxContainer/PropertiesList/DiameterSpinBox
 @onready var material_option          : OptionButton = $VBoxContainer/PropertiesList/MaterialOption
 @onready var pipe_color_picker        : ColorPickerButton = $VBoxContainer/PropertiesList/PipeColorPicker
+@onready var flow_rate_label          : Label = $VBoxContainer/PropertiesList/FlowRateLabel
 @onready var flow_rate_spinbox        : OverrideSpinbox = $VBoxContainer/PropertiesList/FlowRateSpinBox
 @onready var entry_loss_spinbox       : SpinBox = $VBoxContainer/PropertiesList/EntryMinorLossSpinBox
 @onready var exit_loss_spinbox       : SpinBox = $VBoxContainer/PropertiesList/ExitMinorLossSpinBox
@@ -43,6 +44,12 @@ func _sync_material_option(material_type: PipeTables.MaterialType) -> void:
 	for idx in range(material_option.item_count):
 		if material_option.get_item_id(idx) == int(material_type):
 			material_option.select(idx)
+
+# override from WorldObjectPropertyEditor
+func _show_advanced_properties_toggled(toggled_on: bool) -> void:
+	super._show_advanced_properties_toggled(toggled_on)
+	flow_rate_label.visible = toggled_on
+	flow_rate_spinbox.visible = toggled_on
 
 func _on_user_label_line_edit_text_submitted(new_text):
 	_apply_prop_edit(WorldObject.PROP_KEY_USER_LABEL, new_text)

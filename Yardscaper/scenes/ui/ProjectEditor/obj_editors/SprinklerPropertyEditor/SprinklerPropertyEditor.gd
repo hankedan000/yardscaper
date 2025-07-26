@@ -94,6 +94,14 @@ func _sync_option_to_text(option_button: OptionButton, text: String):
 			return
 	option_button.selected = 0
 
+# override from WorldObjectPropertyEditor
+func _show_advanced_properties_toggled(toggled_on: bool) -> void:
+	super._show_advanced_properties_toggled(toggled_on)
+	pressure_label.visible = toggled_on
+	pressure_spinbox.visible = toggled_on
+	ext_flow_label.visible = toggled_on
+	ext_flow_spinbox.visible = toggled_on
+
 func _on_zone_spin_box_value_changed(value):
 	_apply_prop_edit(Sprinkler.PROP_KEY_ZONE, value)
 

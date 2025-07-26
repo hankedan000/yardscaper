@@ -35,7 +35,7 @@ text = "Color:"
 [node name="PipeColorPicker" type="ColorPickerButton" parent="VBoxContainer/PropertiesList" index="7"]
 layout_mode = 2
 
-[node name="Label12" type="Label" parent="VBoxContainer/PropertiesList" index="8"]
+[node name="FlowRateLabel" type="Label" parent="VBoxContainer/PropertiesList" index="8"]
 layout_mode = 2
 text = "Flow Rate:"
 
