@@ -65,6 +65,7 @@ var _props_from_save := PropertiesFromSave.new()
 # after the Project has instantiated, but before it has deserialized it
 func _init_world_obj() -> void:
 	fpipe = parent_project.fsys.alloc_pipe()
+	fpipe.user_metadata = FluidEntityMetadata.new(self, false)
 
 func _ready():
 	super._ready()

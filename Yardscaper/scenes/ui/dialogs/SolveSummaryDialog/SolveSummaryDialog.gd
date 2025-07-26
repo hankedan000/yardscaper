@@ -78,9 +78,15 @@ static func _append_unsolved_summaries(
 		_append_fluid_entity_list(rt, ssys.pipes)
 		rt.append_text("\nunknown variables:")
 		for uvar in ssys.unknown_vars:
+			var metadata := Utils.get_metadata_from_fentity(uvar.get_parent_entity())
+			if metadata == null:
+				continue
+			elif metadata.is_hidden_entity:
+				continue
+			
 			rt.append_text("\n  * ")
 			rt.push_meta(uvar)
-			rt.append_text(uvar.name)
+			rt.append_text(uvar.get_name_with_entity())
 			rt.pop()
 	rt.pop() # mono
 
@@ -112,8 +118,9 @@ static func _append_solved_summaries(
 static func _append_fluid_entity_list(rt: RichTextLabel, entities: Array) -> void:
 	rt.append_text("[")
 	var comma := &""
-	for e in entities:
-		if ! (e is FEntity):
+	for e: FEntity in entities:
+		var metadata := e.user_metadata as FluidEntityMetadata
+		if metadata.is_hidden_entity:
 			continue
 		
 		rt.append_text(comma)
@@ -168,7 +175,9 @@ func _on_close_button_pressed() -> void:
 	_on_close_requested()
 
 func _on_rich_text_label_meta_clicked(meta: Variant) -> void:
-	if meta is Var:
+	if ! is_instance_valid(meta):
+		return
+	elif meta is Var:
 		unknown_var_clicked.emit(meta as Var)
 	elif meta is FEntity:
 		entity_clicked.emit(meta as FEntity)

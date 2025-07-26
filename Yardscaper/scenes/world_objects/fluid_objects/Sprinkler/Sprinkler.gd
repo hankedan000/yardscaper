@@ -108,6 +108,29 @@ var _init_angle_to_mouse : float = 0.0
 var _init_rotation : float = 0.0
 var _init_sweep : float = 0.0
 
+# a method for the WorldObject to perform any necessary initialization logic
+# after the Project has instantiated, but before it has deserialized it
+func _init_world_obj() -> void:
+	super._init_world_obj()
+	
+	# allocate our vent node and have it release into atmosphere
+	_vent_fnode = parent_project.fsys.alloc_node()
+	_vent_fnode.user_metadata = FluidEntityMetadata.new(self, true)
+	_vent_fnode.h_psi.set_known(0.0) # vents to atmospher
+	
+	# allocate and init our nozzle pipe and connect to between the vent and the
+	# main 'fnode' that the user can connect pipes to.
+	_nozzle_fpipe = parent_project.fsys.alloc_pipe()
+	_nozzle_fpipe.user_metadata = FluidEntityMetadata.new(self, true)
+	_nozzle_fpipe.d_ft = SprinklerFlowModel.DEFAULT_NOZZLE_DIAMETER_FT
+	_nozzle_fpipe.l_ft = SprinklerFlowModel.DEFAULT_NOZZLE_LENGTH_FT
+	_nozzle_fpipe.K_exit = 0.0 # updated later when we know what our _head_data is
+	_nozzle_fpipe.connect_node(fnode, FPipe.NODE_SRC)
+	_nozzle_fpipe.connect_node(_vent_fnode, FPipe.NODE_SINK)
+	
+	# what comes into the sprinkler will vent to atmosphere via '_nozzle_fpipe'
+	fnode.q_ext_cfs.set_known(0.0)
+
 func _ready() -> void:
 	super._ready()
 	set_process_input(false)
@@ -193,27 +216,6 @@ func max_sweep_deg() -> float:
 
 func get_head_data() -> SprinklerHeadData:
 	return _head_data
-
-# a method for the WorldObject to perform any necessary initialization logic
-# after the Project has instantiated, but before it has deserialized it
-func _init_world_obj() -> void:
-	super._init_world_obj()
-	
-	# allocate our vent node and have it release into atmosphere
-	_vent_fnode = parent_project.fsys.alloc_node()
-	_vent_fnode.h_psi.set_known(0.0) # vents to atmospher
-	
-	# allocate and init our nozzle pipe and connect to between the vent and the
-	# main 'fnode' that the user can connect pipes to.
-	_nozzle_fpipe = parent_project.fsys.alloc_pipe()
-	_nozzle_fpipe.d_ft = SprinklerFlowModel.DEFAULT_NOZZLE_DIAMETER_FT
-	_nozzle_fpipe.l_ft = SprinklerFlowModel.DEFAULT_NOZZLE_LENGTH_FT
-	_nozzle_fpipe.K_exit = 0.0 # updated later when we know what our _head_data is
-	_nozzle_fpipe.connect_node(fnode, FPipe.NODE_SRC)
-	_nozzle_fpipe.connect_node(_vent_fnode, FPipe.NODE_SINK)
-	
-	# what comes into the sprinkler will vent to atmosphere via '_nozzle_fpipe'
-	fnode.q_ext_cfs.set_known(0.0)
 
 func _update_head_data() -> void:
 	_head_data = null
