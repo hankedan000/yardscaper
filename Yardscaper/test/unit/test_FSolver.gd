@@ -133,7 +133,7 @@ func test_solve_system_1pipe():
 	var sres0 := res.sub_system_results[0]
 	assert_true(sres0.converged)
 	assert_true(sres0.iters > 0)
-	assert_almost_eq(n0.h_psi.value,     +4.444044, 0.000001)
+	assert_almost_eq(n0.h_psi.value,     +0.030861, 0.000001)
 	assert_almost_eq(p0.q_cfs.value,     +0.022280, 0.000001)
 	assert_almost_eq(n1.q_ext_cfs.value, -0.022280, 0.000001)
 	assert_eq(n0.h_psi.state,     Var.State.Solved)
@@ -192,10 +192,10 @@ func test_solve_system_2subsys():
 	var sres1 := res.sub_system_results[1]
 	assert_false(sres1.converged)
 	assert_eq(sres1.iters, 0)
-	assert_almost_eq(n0.h_psi.value,     +13.559200, 0.000001)
+	assert_almost_eq(n0.h_psi.value,     + 0.094161, 0.000001)
 	assert_almost_eq(n0.q_ext_cfs.value, + 0.022280, 0.000001)
-	assert_almost_eq(n1.h_psi.value,     + 9.115156, 0.000001)
-	assert_almost_eq(n2.h_psi.value,     +10.427673, 0.000001)
+	assert_almost_eq(n1.h_psi.value,     + 0.063299, 0.000001)
+	assert_almost_eq(n2.h_psi.value,     + 0.072414, 0.000001)
 	assert_almost_eq(n2.q_ext_cfs.value, + 0.011140, 0.000001)
 	assert_almost_eq(p2.q_cfs.value,     + 0.033420, 0.000001)
 	assert_almost_eq(n3.q_ext_cfs.value, - 0.033420, 0.000001)

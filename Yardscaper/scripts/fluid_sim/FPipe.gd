@@ -145,24 +145,24 @@ func _flt_delta_h_psi() -> float:
 	
 	return sink_node.h_psi.value - src_node.h_psi.value
 
-func _flt_Re(v_fps_in: float) -> float:
-	return FluidMath.reynolds(v_fps_in, d_ft, fsys.fluid_viscocity_k)
+func _flt_Re(arg_v_fps: float) -> float:
+	return FluidMath.reynolds(arg_v_fps, d_ft, fsys.fluid_viscocity_k)
 
-func _flt_f_darcy(Re_in: float) -> float:
-	return FluidMath.f_darcy(Re_in, relative_roughness())
+func _flt_f_darcy(arg_Re: float) -> float:
+	return FluidMath.f_darcy(arg_Re, relative_roughness())
 
-func _flt_major_loss_psi(v_fps_in: float, f_darcy_in: float) -> float:
+func _flt_major_loss_psi(arg_v_fps: float, arg_f_darcy: float) -> float:
 	# if v is 0 then f_darcy would blow up to infinity. regardlesa, if there is
 	# no velocity then there's no frictional losses.
-	if v_fps_in == 0.0:
+	if arg_v_fps == 0.0:
 		return 0.0
-	return FluidMath.major_loss(f_darcy_in, l_ft, v_fps_in, fsys.fluid_density_lbft3, d_ft)
+	return FluidMath.major_loss_psi(arg_f_darcy, l_ft, arg_v_fps, fsys.fluid_density_lbft3, d_ft)
 
-func _flt_entry_minor_loss_psi(v_fps_in: float) -> float:
-	return K_entry * fsys.fluid_density_lbft3 * (v_fps_in * v_fps_in) / 2.0
+func _flt_entry_minor_loss_psi(arg_v_fps: float) -> float:
+	return K_entry * fsys.fluid_density_lbft3 * (arg_v_fps * arg_v_fps) / 2.0
 
-func _flt_exit_minor_loss_psi(v_fps_in: float) -> float:
-	return K_exit * fsys.fluid_density_lbft3 * (v_fps_in * v_fps_in) / 2.0
+func _flt_exit_minor_loss_psi(arg_v_fps: float) -> float:
+	return K_exit * fsys.fluid_density_lbft3 * (arg_v_fps * arg_v_fps) / 2.0
 
 func _predelete() -> void:
 	disconnect_node(src_node)
