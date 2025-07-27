@@ -23,9 +23,9 @@ boot_splash/minimum_display_time=1000
 [autoload]
 
 TheProject="*res://scripts/Project.gd"
-TheSprinklerDb="*res://scripts/sprinkler_db/SprinklerDB.gd"
 Globals="*res://scripts/Globals.gd"
 TheSprinklerDB="*res://scripts/sprinkler_db/SprinklerDB.gd"
+FittingIcons="*res://assets/icons/FittingIcons.tscn"
 
 [display]
 

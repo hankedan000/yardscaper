@@ -1,0 +1,31 @@
+[gd_scene load_steps=9 format=3 uid="uid://cr8e0efrpgn3e"]
+
+[ext_resource type="Texture2D" uid="uid://dgkiqgt4ta70u" path="res://assets/icons/FittingElbow90.svg" id="1_6dcqy"]
+[ext_resource type="Texture2D" uid="uid://dxxq3db5tva0w" path="res://assets/icons/FittingCustom.svg" id="1_ylrvj"]
+[ext_resource type="Texture2D" uid="uid://b76yewq07box5" path="res://assets/icons/FittingTeeRun.svg" id="2_hfp55"]
+[ext_resource type="Texture2D" uid="uid://bjsrfinx8gffn" path="res://assets/icons/FittingElbow45.svg" id="2_k8v7w"]
+[ext_resource type="Texture2D" uid="uid://dt347v48nxarm" path="res://assets/icons/FittingCoupling.svg" id="2_r1y3s"]
+[ext_resource type="Texture2D" uid="uid://b20wsugjnjcp5" path="res://assets/icons/FittingTeeBranchOut.svg" id="4_sp6dl"]
+[ext_resource type="Texture2D" uid="uid://caqujfovcnx2g" path="res://assets/icons/FittingTeeBranchIn.svg" id="5_ulk0l"]
+
+[sub_resource type="GDScript" id="GDScript_i8r4u"]
+script/source = "extends Node
+
+@export var CUSTOM         : Texture2D = null
+@export var COUPLING       : Texture2D = null
+@export var ELBOW_90       : Texture2D = null
+@export var ELBOW_45       : Texture2D = null
+@export var TEE_BRANCH_OUT : Texture2D = null
+@export var TEE_BRANCH_IN  : Texture2D = null
+@export var TEE_RUN        : Texture2D = null
+"
+
+[node name="FittingIcons" type="Node"]
+script = SubResource("GDScript_i8r4u")
+CUSTOM = ExtResource("1_ylrvj")
+COUPLING = ExtResource("2_r1y3s")
+ELBOW_90 = ExtResource("1_6dcqy")
+ELBOW_45 = ExtResource("2_k8v7w")
+TEE_BRANCH_OUT = ExtResource("4_sp6dl")
+TEE_BRANCH_IN = ExtResource("5_ulk0l")
+TEE_RUN = ExtResource("2_hfp55")
