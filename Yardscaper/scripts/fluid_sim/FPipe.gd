@@ -159,10 +159,13 @@ func _flt_major_loss_psi(arg_v_fps: float, arg_f_darcy: float) -> float:
 	return FluidMath.major_loss_psi(arg_f_darcy, l_ft, arg_v_fps, fsys.fluid_density_lbft3, d_ft)
 
 func _flt_entry_minor_loss_psi(arg_v_fps: float) -> float:
-	return K_entry * fsys.fluid_density_lbft3 * (arg_v_fps * arg_v_fps) / 2.0
+	return _flt_minor_loss_psi(arg_v_fps, K_entry)
 
 func _flt_exit_minor_loss_psi(arg_v_fps: float) -> float:
-	return K_exit * fsys.fluid_density_lbft3 * (arg_v_fps * arg_v_fps) / 2.0
+	return _flt_minor_loss_psi(arg_v_fps, K_exit)
+
+func _flt_minor_loss_psi(arg_v_fps: float, arg_k: float) -> float:
+	return Utils.psft_to_psi(arg_k * fsys.fluid_density_lbft3 * (arg_v_fps * arg_v_fps) / 2.0)
 
 func _predelete() -> void:
 	disconnect_node(src_node)

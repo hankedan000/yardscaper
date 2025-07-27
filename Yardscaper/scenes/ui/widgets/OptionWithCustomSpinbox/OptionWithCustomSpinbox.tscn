@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://cvywofwgqvq7"]
+
+[ext_resource type="Script" path="res://scenes/ui/widgets/OptionWithCustomSpinbox/OptionWithCustomSpinbox.gd" id="1_7723x"]
+
+[node name="OptionWithCustomSpinbox" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -559.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7723x")
+
+[node name="OptionButton" type="OptionButton" parent="."]
+layout_mode = 2
+
+[node name="CustomContainer" type="HBoxContainer" parent="."]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CustomContainer"]
+layout_mode = 2
+mouse_filter = 0
+text = "Prop:"
+
+[node name="SpinBox" type="SpinBox" parent="CustomContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[connection signal="item_selected" from="OptionButton" to="." method="_on_option_button_item_selected"]
+[connection signal="value_changed" from="CustomContainer/SpinBox" to="." method="_on_spin_box_value_changed"]

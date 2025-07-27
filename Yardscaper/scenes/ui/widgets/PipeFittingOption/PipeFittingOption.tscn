@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://bnfegti6n76d"]
+
+[ext_resource type="PackedScene" uid="uid://cvywofwgqvq7" path="res://scenes/ui/widgets/OptionWithCustomSpinbox/OptionWithCustomSpinbox.tscn" id="1_akt43"]
+[ext_resource type="Script" path="res://scenes/ui/widgets/PipeFittingOption/PipeFittingOption.gd" id="2_675cn"]
+
+[node name="PipeFittingOption" instance=ExtResource("1_akt43")]
+script = ExtResource("2_675cn")
+
+[node name="CustomContainer" parent="." index="1"]
+visible = true
+
+[node name="Label" parent="CustomContainer" index="0"]
+tooltip_text = "Minor loss coefficent
+
+minor_loss = K*p*v^2/2; where
+K = minor loss coefficient
+p = density of fluid
+v = flow velocity"
+text = "K:"

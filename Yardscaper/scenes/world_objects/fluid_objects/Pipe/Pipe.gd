@@ -1,12 +1,14 @@
 class_name Pipe extends DistanceMeasurement
 
-const PROP_KEY_DIAMETER_FT := &'diameter_ft'
-const PROP_KEY_PIPE_COLOR := &'pipe_color'
-const PROP_KEY_MATERIAL_TYPE := &'material_type'
+const PROP_KEY_DIAMETER_FT                 := &'diameter_ft'
+const PROP_KEY_PIPE_COLOR                  := &'pipe_color'
+const PROP_KEY_MATERIAL_TYPE               := &'material_type'
 const PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT := &'custom_surface_roughness_ft'
-const PROP_KEY_FPIPE_Q_CFS := &'fpipe.q_cfs'
-const PROP_KEY_FPIPE_K_ENTRY := &'fpipe.K_entry'
-const PROP_KEY_FPIPE_K_EXIT := &'fpipe.K_exit'
+const PROP_KEY_FPIPE_Q_CFS                 := &'fpipe.q_cfs'
+const PROP_KEY_ENTRY_FITTING_TYPE          := &'entry_fitting_type'
+const PROP_KEY_ENTRY_CUSTOM_K              := &'entry_custom_k'
+const PROP_KEY_EXIT_FITTING_TYPE           := &'exit_fitting_type'
+const PROP_KEY_EXIT_CUSTOM_K               := &'exit_custom_k'
 
 const DEFAULT_DIAMETER_FT := 0.0416666666667 # 0.5in
 const PVC_SURFACE_ROUGHNESS_FT := 0.000005
@@ -31,21 +33,51 @@ var material_type : PipeTables.MaterialType = PipeTables.MaterialType.PVC:
 	set(value):
 		var old_value = material_type
 		material_type = value
-		if material_type == PipeTables.MaterialType.Custom:
+		if material_type == PipeTables.MaterialType.CUSTOM:
 			fpipe.E_ft = custom_surface_roughness_ft
 		else:
 			fpipe.E_ft = PipeTables.lookup_surface_roughness(material_type)
 		if _check_and_emit_prop_change(PROP_KEY_MATERIAL_TYPE, old_value):
-			pass
+			# changing the material type can impact the minor losses
+			_update_fpipe_minor_loss(true)  # entry
+			_update_fpipe_minor_loss(false) # exit
 
 var custom_surface_roughness_ft : float = 0.0:
 	set(value):
 		var old_value = custom_surface_roughness_ft
 		custom_surface_roughness_ft = value
-		if material_type == PipeTables.MaterialType.Custom:
+		if material_type == PipeTables.MaterialType.CUSTOM:
 			fpipe.E_ft = custom_surface_roughness_ft
 		if _check_and_emit_prop_change(PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT, old_value):
 			pass
+
+var entry_fitting_type : PipeTables.FittingType = PipeTables.FittingType.NONE:
+	set(value):
+		var old_value = entry_fitting_type
+		entry_fitting_type = value
+		if _check_and_emit_prop_change(PROP_KEY_ENTRY_FITTING_TYPE, old_value):
+			_update_fpipe_minor_loss(true) # is_entry
+
+var entry_custom_k : float = 0.0:
+	set(value):
+		var old_value = entry_custom_k
+		entry_custom_k = value
+		if _check_and_emit_prop_change(PROP_KEY_ENTRY_CUSTOM_K, old_value):
+			_update_fpipe_minor_loss(true) # is_entry
+
+var exit_fitting_type : PipeTables.FittingType = PipeTables.FittingType.NONE:
+	set(value):
+		var old_value = exit_fitting_type
+		exit_fitting_type = value
+		if _check_and_emit_prop_change(PROP_KEY_EXIT_FITTING_TYPE, old_value):
+			_update_fpipe_minor_loss(false) # is_entry
+
+var exit_custom_k : float = 0.0:
+	set(value):
+		var old_value = exit_custom_k
+		exit_custom_k = value
+		if _check_and_emit_prop_change(PROP_KEY_EXIT_CUSTOM_K, old_value):
+			_update_fpipe_minor_loss(false) # is_entry
 
 var show_flow_arrows : bool = false:
 	set(value):
@@ -151,23 +183,26 @@ func serialize() -> Dictionary:
 	var data = super.serialize()
 	data[PROP_KEY_DIAMETER_FT] = diameter_ft
 	data[PROP_KEY_PIPE_COLOR] = pipe_color.to_html(true)
-	data[PROP_KEY_MATERIAL_TYPE] = EnumUtils.to_str(PipeTables.MaterialType, material_type)
+	DictUtils.put_enum(data, PROP_KEY_MATERIAL_TYPE, PipeTables.MaterialType, material_type)
 	data[PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT] = custom_surface_roughness_ft
 	Utils.add_fvar_knowns_into_dict(fpipe.q_cfs, PROP_KEY_FPIPE_Q_CFS, data)
-	data[PROP_KEY_FPIPE_K_ENTRY] = fpipe.K_entry
-	data[PROP_KEY_FPIPE_K_EXIT] = fpipe.K_exit
+	DictUtils.put_enum(data, PROP_KEY_ENTRY_FITTING_TYPE, PipeTables.FittingType, entry_fitting_type)
+	data[PROP_KEY_ENTRY_CUSTOM_K] = entry_custom_k
+	DictUtils.put_enum(data, PROP_KEY_EXIT_FITTING_TYPE, PipeTables.FittingType, exit_fitting_type)
+	data[PROP_KEY_EXIT_CUSTOM_K] = exit_custom_k
 	return data
 
 func deserialize(data: Dictionary) -> void:
 	super.deserialize(data)
 	_props_from_save.diameter_ft = DictUtils.get_w_default(data, PROP_KEY_DIAMETER_FT, DEFAULT_DIAMETER_FT)
 	pipe_color = DictUtils.get_w_default(data, PROP_KEY_PIPE_COLOR, Globals.DEFAULT_PIPE_COLOR)
-	var material_type_str = DictUtils.get_w_default(data, PROP_KEY_MATERIAL_TYPE, '') as String
-	material_type = EnumUtils.from_str(PipeTables.MaterialType, PipeTables.MaterialType.PVC, material_type_str) as PipeTables.MaterialType
+	material_type = DictUtils.get_enum_w_default(data, PROP_KEY_MATERIAL_TYPE, PipeTables.MaterialType, PipeTables.MaterialType.PVC)
 	custom_surface_roughness_ft = DictUtils.get_w_default(data, PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT, 0.0)
 	Utils.get_fvar_knowns_from_dict(fpipe.q_cfs, PROP_KEY_FPIPE_Q_CFS, data)
-	fpipe.K_entry = DictUtils.get_w_default(data, PROP_KEY_FPIPE_K_ENTRY, 0.0)
-	fpipe.K_exit = DictUtils.get_w_default(data, PROP_KEY_FPIPE_K_EXIT, 0.0)
+	entry_fitting_type = DictUtils.get_enum_w_default(data, PROP_KEY_ENTRY_FITTING_TYPE, PipeTables.FittingType, PipeTables.FittingType.NONE)
+	entry_custom_k = DictUtils.get_w_default(data, PROP_KEY_ENTRY_CUSTOM_K, 0.0)
+	exit_fitting_type = DictUtils.get_enum_w_default(data, PROP_KEY_EXIT_FITTING_TYPE, PipeTables.FittingType, PipeTables.FittingType.NONE)
+	exit_custom_k = DictUtils.get_w_default(data, PROP_KEY_EXIT_CUSTOM_K, 0.0)
 
 func is_magnet_from_src_handle(magnet: MagneticArea) -> bool:
 	return point_a_handle.get_magnet() == magnet
@@ -192,6 +227,26 @@ func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 func _set_point_position(handle: EditorHandle, new_position: Vector2, force_change:= false):
 	super._set_point_position(handle, new_position, force_change)
 	fpipe.l_ft = dist_ft()
+
+func _update_fpipe_minor_loss(is_entry: bool) -> void:
+	var fitting_type := entry_fitting_type if is_entry else exit_fitting_type
+	var new_k_value := 0.0
+	if fitting_type == PipeTables.FittingType.CUSTOM:
+		new_k_value = entry_custom_k if is_entry else exit_custom_k
+	elif fitting_type == PipeTables.FittingType.NONE:
+		new_k_value = 0.0
+	else:
+		var res := PipeTables.lookup_minor_loss(material_type, fitting_type)
+		new_k_value = res.loss_factor
+	
+	if is_entry:
+		var old_value := fpipe.K_entry
+		fpipe.K_entry = new_k_value
+		fluid_property_changed.emit(self, &'fpipe.K_entry', old_value, new_k_value)
+	else:
+		var old_value := fpipe.K_exit
+		fpipe.K_exit = new_k_value
+		fluid_property_changed.emit(self, &'fpipe.K_exit', old_value, new_k_value)
 
 func _uncollect_pipe_handle(handle: EditorHandle) -> void:
 	var handle_magnet := handle.get_magnet()
