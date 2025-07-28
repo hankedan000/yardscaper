@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://di8fok3ad2ieh"]
+
+[ext_resource type="PackedScene" uid="uid://cvywofwgqvq7" path="res://scenes/ui/widgets/OptionWithCustomSpinbox/OptionWithCustomSpinbox.tscn" id="1_2dvlh"]
+[ext_resource type="Script" path="res://scenes/ui/widgets/MaterialOption/MaterialOption.gd" id="2_868yc"]
+
+[node name="MaterialOption" instance=ExtResource("1_2dvlh")]
+script = ExtResource("2_868yc")
+
+[node name="CustomContainer" parent="." index="1"]
+visible = true
+
+[node name="Label" parent="CustomContainer" index="0"]
+tooltip_text = "Surface roughness of the material."
+text = "E:"
+
+[node name="SpinBox" parent="CustomContainer" index="1"]
+suffix = "ft"

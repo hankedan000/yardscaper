@@ -23,7 +23,8 @@ func select_option_by_id(id: int) -> void:
 	for idx in range(option_button.item_count):
 		if id == option_button.get_item_id(idx):
 			option_button.selected = idx
-			return
+			break
+	_update_spinbox_editable()
 
 func disable_custom_option() -> void:
 	_custom_option_id = null
