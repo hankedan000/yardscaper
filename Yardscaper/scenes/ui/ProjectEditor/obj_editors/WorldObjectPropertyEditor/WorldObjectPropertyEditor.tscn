@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://dinchpfl3oh55"]
+[gd_scene load_steps=5 format=3 uid="uid://dinchpfl3oh55"]
 
 [ext_resource type="Script" path="res://scenes/ui/ProjectEditor/obj_editors/WorldObjectPropertyEditor/WorldObjectPropertyEditor.gd" id="1_ow1x6"]
+[ext_resource type="PackedScene" uid="uid://p03fjlb0heho" path="res://scenes/ui/widgets/InputValidatedLineEdit/InputValidatedLineEdit.tscn" id="3_c16aj"]
 [ext_resource type="PackedScene" uid="uid://tgnf3tq05nsl" path="res://scenes/ui/widgets/BlinkLabel/BlinkLabel.tscn" id="3_o0ptq"]
 [ext_resource type="Texture2D" uid="uid://c3jxh2iaa0p30" path="res://assets/icons/Tools.svg" id="3_qvoxw"]
 
@@ -41,13 +42,11 @@ columns = 2
 layout_mode = 2
 text = "User Label: "
 
-[node name="UserLabelLineEdit" type="LineEdit" parent="VBoxContainer/PropertiesList"]
+[node name="UserLabelLineEdit" parent="VBoxContainer/PropertiesList" instance=ExtResource("3_c16aj")]
 layout_mode = 2
-size_flags_horizontal = 3
-tooltip_text = "User-definable label for this object."
 
 [node name="MultiEditWarning" parent="VBoxContainer" instance=ExtResource("3_o0ptq")]
 visible = false
 layout_mode = 2
 
-[connection signal="text_submitted" from="VBoxContainer/PropertiesList/UserLabelLineEdit" to="." method="_on_user_label_line_edit_text_submitted"]
+[connection signal="valid_text_submitted" from="VBoxContainer/PropertiesList/UserLabelLineEdit" to="." method="_on_user_label_line_edit_valid_text_submitted"]

@@ -1,7 +1,7 @@
 class_name WorldObjectPropertyEditor extends PanelContainer
 
 @onready var settings_menu            : MenuButton = $VBoxContainer/TopBar/SettingsMenuButton
-@onready var user_label_lineedit      : LineEdit = $VBoxContainer/PropertiesList/UserLabelLineEdit
+@onready var user_label_lineedit      : InputValidatedLineEdit = $VBoxContainer/PropertiesList/UserLabelLineEdit
 @onready var multi_edit_warning       : BlinkLabel = $VBoxContainer/MultiEditWarning
 
 var _wobjs : Array[WorldObject] = []
@@ -13,6 +13,7 @@ enum SettingsMenuIds {
 
 func _ready():
 	set_process(false)
+	user_label_lineedit.set_validator(_validate_user_label)
 	
 	# setup the settings MenuButton
 	var settings_popup := settings_menu.get_popup() as PopupMenu
@@ -56,6 +57,7 @@ func _sync_ui_from_obj() -> void:
 	var ref_node := _wobjs[0] as WorldObject
 	var single_edit := _wobjs.size() == 1
 	user_label_lineedit.editable = single_edit
+	user_label_lineedit.clear_w_error()
 	multi_edit_warning.visible = ! single_edit
 	multi_edit_warning.text = "Editing multiple objects"
 	
@@ -137,7 +139,20 @@ func _setup_spinbox(
 func _show_advanced_properties_toggled(_toggled_on: bool) -> void:
 	pass
 
-func _on_user_label_line_edit_text_submitted(new_text: String) -> void:
+func _validate_user_label(new_user_label: String) -> String:
+	if _wobjs.size() != 1:
+		push_error("user label editing should only occur in single-edit mode. _wobjs.size() = %d" % _wobjs.size())
+		return ""
+	var obj := _wobjs[0]
+	if new_user_label == obj.user_label:
+		return "" # label hasn't changed
+	elif new_user_label.is_empty():
+		return "Label can't be empty."
+	elif ! obj.parent_project.is_user_label_unique(new_user_label):
+		return "'%s' is not a unique label within the project." % new_user_label
+	return ""
+
+func _on_user_label_line_edit_valid_text_submitted(new_text: String) -> void:
 	_apply_prop_edit(WorldObject.PROP_KEY_USER_LABEL, new_text)
 
 func _on_world_object_property_changed(_obj: WorldObject, _property: StringName, _from: Variant, _to: Variant) -> void:
