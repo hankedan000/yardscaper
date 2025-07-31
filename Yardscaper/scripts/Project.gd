@@ -289,6 +289,15 @@ func instance_world_obj_from_data(data: Dictionary) -> WorldObject:
 	var type_name = DictUtils.get_w_default(data, WorldObject.PROP_KEY_SUBCLASS, null) as StringName
 	if ! (type_name is StringName):
 		return null
+	
+	# make sure the item we'd deserialize would have a unique name. this makes
+	# legacy projects compliant if they didn't check for this.
+	var user_label := DictUtils.get_w_default(data, WorldObject.PROP_KEY_USER_LABEL, "") as String
+	if user_label.is_empty() || ! is_user_label_unique(user_label):
+		push_warning("user label '%s' is not unique within the project. auto-correcting." % user_label)
+		data[WorldObject.PROP_KEY_USER_LABEL] = get_unique_name(type_name)
+	
+	# instance the object and deserialize its data
 	var new_wobj := _instance_world_obj(type_name)
 	if new_wobj is WorldObject:
 		new_wobj.deserialize(data)
