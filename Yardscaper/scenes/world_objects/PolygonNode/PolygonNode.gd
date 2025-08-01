@@ -92,6 +92,7 @@ func _input(event: InputEvent) -> void:
 	# vertex_point movement.
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT && ! event.pressed:
+			editor_handle_state_change.emit(self, _handle_being_moved, WorldObject.EditorHandleState.ButtonUp)
 			_stop_vertex_movement()
 
 func add_point(point: Vector2) -> void:
@@ -300,6 +301,7 @@ func _stop_vertex_movement() -> void:
 			_handle_being_moved.user_id,  # idx
 			_handle_init_pos,             # from_point
 			_handle_being_moved.position) # to_point
+	editor_handle_state_change.emit(self, _handle_being_moved, WorldObject.EditorHandleState.MoveStop)
 	_handle_being_moved = null
 	_is_new_vertex = false
 	set_process_input(false)
@@ -309,7 +311,7 @@ func _on_property_changed(_obj: WorldObject, property_key: StringName, _from: Va
 	if is_inside_tree() and property_key == WorldObject.PROP_KEY_USER_LABEL:
 		_update_info_label()
 
-func _on_picked_state_changed() -> void:
+func _on_picked_state_changed(_wobj: WorldObject, _new_state: bool) -> void:
 	if ! is_inside_tree():
 		return
 	elif point_count() < 3:
@@ -325,6 +327,7 @@ enum ClickAction {
 	}
 
 func _on_vertex_handle_button_down(handle: EditorHandle, is_new_vertex: bool) -> void:
+	editor_handle_state_change.emit(self, handle, WorldObject.EditorHandleState.ButtonDown)
 	var action := ClickAction.None
 	if edit_mode == EditMode.Remove:
 		action = ClickAction.Remove
@@ -344,6 +347,7 @@ func _on_vertex_handle_button_down(handle: EditorHandle, is_new_vertex: bool) ->
 			_handle_init_pos = handle.position
 			_is_new_vertex = is_new_vertex
 			_mouse_init_pos = get_global_mouse_position()
+			editor_handle_state_change.emit(self, _handle_being_moved, WorldObject.EditorHandleState.MoveStart)
 		ClickAction.Remove:
 			if point_count() <= 3:
 				# polygons need to keep at least 3 points to still exist

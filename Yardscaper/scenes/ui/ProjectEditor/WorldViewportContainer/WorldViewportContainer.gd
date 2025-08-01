@@ -13,7 +13,7 @@ const ORIGIN_HORZ_COLOR := Color.INDIAN_RED
 @onready var pan_zoom_ctrl     : PanZoomController = $ViewportContainer/Viewport/PanZoomController
 @onready var camera2d          : Camera2D = $ViewportContainer/Viewport/Camera2D
 @onready var cursor            : Area2D = $ViewportContainer/Viewport/Cursor
-@onready var tooltip_label     : Label = $ViewportContainer/Viewport/Cursor/ToolTipLabel
+@onready var tooltip_label     : Label = $ViewportContainer/Viewport/ToolTipLabel
 @onready var cursor_pos_label  : Label = $CursorPositionLabel
 
 var show_grid = true:
@@ -57,6 +57,7 @@ func _draw():
 func show_tooltip(text: String) -> void:
 	tooltip_label.text = text
 	tooltip_label.size = Utils.get_label_text_size(tooltip_label, text)
+	tooltip_label.position = cursor.position
 	tooltip_label.show()
 
 func hide_tooltip() -> void:
@@ -283,6 +284,7 @@ func _on_pan_zoom_controller_zoom_changed(_old_zoom: float, new_zoom: float) -> 
 	# regardless of zoom level.
 	var inv_scale := Vector2(1.0, 1.0) * (1.0 / new_zoom)
 	cursor.scale = inv_scale
+	tooltip_label.scale = inv_scale
 	
 	for gizmo in get_tree().get_nodes_in_group(&"gizmos") as Array[Node2D]:
 		gizmo.on_zoom_changed(new_zoom, inv_scale)

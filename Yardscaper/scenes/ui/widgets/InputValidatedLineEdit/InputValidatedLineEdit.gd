@@ -10,9 +10,8 @@ const ERROR_CONTENT_MARGIN := 4
 @export var submit_on_focus_exit : bool = true
 @export var release_focus_on_submit : bool = true
 
-@onready var _error_label  : Label = $CanvasLayer/Panel/Label
-@onready var _error_panel  : Panel = $CanvasLayer/Panel
-@onready var _error_canvas : CanvasLayer = $CanvasLayer
+@onready var _error_label  : Label = $Panel/Label
+@onready var _error_panel  : Panel = $Panel
 
 # user-definable callback that determines if the input is valid. the function
 # should take a single string argument that contains the new text to validate.
@@ -96,11 +95,11 @@ func _clear_error() -> void:
 	_has_error = false
 	remove_theme_stylebox_override("normal")
 	remove_theme_stylebox_override("focus")
-	_error_canvas.hide()
+	_error_panel.hide()
 
 func _show_error_popup() -> void:
 	_error_panel.global_position = global_position + Vector2(0, size.y + 4)
-	_error_canvas.show()
+	_error_panel.show()
 
 func _on_text_changed(new_text: String) -> void:
 	var error_msg := _validator.call(new_text) as String
@@ -121,6 +120,6 @@ func _on_focus_entered() -> void:
 
 func _on_focus_exited() -> void:
 	if _has_error:
-		_error_canvas.hide()
+		_error_panel.hide()
 	if submit_on_focus_exit:
 		text_submitted.emit(text)

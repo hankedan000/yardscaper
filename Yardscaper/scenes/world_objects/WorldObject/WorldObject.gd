@@ -1,12 +1,18 @@
 class_name WorldObject extends Node2D
 
+enum EditorHandleState {
+	ButtonDown, ButtonUp, MoveStart, MoveStop
+}
+
 ## Emitted when a property on the object has changed.
 signal property_changed(obj: WorldObject, prop_key: StringName, from, to)
 ## Emitted when a property on the object's [FEntity] has changed that would
 ## impact the result of the [FSystem] simulation.
 signal fluid_property_changed(obj: WorldObject, prop_key: StringName, from, to)
-signal picked_state_changed()
+signal picked_state_changed(obj: WorldObject, new_picked: bool)
 signal moved(obj: WorldObject, from_xy: Vector2, to_xy: Vector2)
+@warning_ignore("unused_signal")
+signal editor_handle_state_change(obj: WorldObject, handle: EditorHandle, new_state: EditorHandleState)
 @warning_ignore("unused_signal") # subclasses will emit this
 signal undoable_edit(undo_op: UndoController.UndoOperation)
 
@@ -48,7 +54,7 @@ var picked : bool = false:
 		var old_picked = picked
 		picked = value
 		if old_picked != picked:
-			picked_state_changed.emit()
+			picked_state_changed.emit(self, picked)
 			queue_redraw()
 
 # this property basically mirrors the built-in `rotation_degrees` property.
