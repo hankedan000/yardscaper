@@ -354,5 +354,7 @@ size_flags_vertical = 3
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons/CurveRemoveButton" to="." method="_on_curve_remove_button_pressed"]
 [connection signal="pressed" from="HSplitContainer/Layout/LayoutToolbar/HBox/SolveButton" to="." method="_on_solve_button_pressed"]
 [connection signal="gui_input" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_view_gui_input"]
+[connection signal="mouse_entered" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_view_mouse_entered"]
+[connection signal="mouse_exited" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_view_mouse_exited"]
 [connection signal="pan_state_changed" from="HSplitContainer/Layout/WorldView" to="." method="_on_viewport_container_pan_state_changed"]
 [connection signal="world_object_reordered" from="HSplitContainer/Layout/WorldView" to="." method="_on_world_object_reordered"]
