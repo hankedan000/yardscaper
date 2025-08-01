@@ -18,15 +18,14 @@ offset_right = 67.0625
 offset_bottom = 31.0
 script = ExtResource("1_m01ck")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="Panel" type="Panel" parent="."]
 visible = false
-
-[node name="Panel" type="Panel" parent="CanvasLayer"]
+top_level = true
 offset_right = 40.0
 offset_bottom = 40.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_tahp7")
 
-[node name="Label" type="Label" parent="CanvasLayer/Panel"]
+[node name="Label" type="Label" parent="Panel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

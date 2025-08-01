@@ -413,7 +413,8 @@ func _on_obj_created(obj: WorldObject) -> void:
 		world_view,
 		obj,
 		false)) # is_remove
-	obj.picked_state_changed.connect(_on_pickable_object_pick_state_changed.bind(obj))
+	obj.picked_state_changed.connect(_on_world_object_pick_state_changed)
+	obj.editor_handle_state_change.connect(_on_world_obj_editor_handle_state_change)
 	obj.undoable_edit.connect(_on_world_obj_undoable_edit)
 	_selection_controller.clear_selection()
 	obj.picked = true
@@ -567,11 +568,14 @@ func _on_world_object_reordered(from_idx: int, to_idx: int):
 	_push_undo_op(undo_op)
 	TheProject.has_edits = true
 
-func _on_pickable_object_pick_state_changed(obj: WorldObject) -> void:
-	if obj.picked:
-		_selection_controller.add_to_selection(obj)
+func _on_world_object_pick_state_changed(wobj: WorldObject, _new_state: bool) -> void:
+	if wobj.picked:
+		_selection_controller.add_to_selection(wobj)
 	else:
-		_selection_controller.remove_from_selection(obj)
+		_selection_controller.remove_from_selection(wobj)
+
+func _on_world_obj_editor_handle_state_change(_obj: WorldObject, _handle: EditorHandle, _new_state: WorldObject.EditorHandleState) -> void:
+	world_view.hide_tooltip()
 
 func _on_world_obj_undoable_edit(undo_op: UndoController.UndoOperation) -> void:
 	_push_undo_op(undo_op)
@@ -585,6 +589,7 @@ func _on_world_view_gui_input(event: InputEvent):
 	var evt_global_pos = event.global_position
 	var pos_in_world_px := world_view.global_xy_to_pos_in_world(evt_global_pos)
 	if event is InputEventMouseButton:
+		world_view.hide_tooltip()
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
 				if ! Input.is_key_pressed(KEY_ALT): # let pan take precedence (alt + click + drag)

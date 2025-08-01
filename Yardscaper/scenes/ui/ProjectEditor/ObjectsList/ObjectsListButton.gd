@@ -17,5 +17,5 @@ var world_object : WorldObject = null:
 func _on_toggled(toggled_on: bool) -> void:
 	world_object.picked = toggled_on
 
-func _on_object_picked_state_changed():
-	button_pressed = world_object.picked
+func _on_object_picked_state_changed(_wobj: WorldObject, new_state: bool) -> void:
+	button_pressed = new_state

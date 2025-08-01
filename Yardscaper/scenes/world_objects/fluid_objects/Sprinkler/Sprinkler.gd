@@ -256,7 +256,7 @@ func _angle_to_mouse() -> float:
 		angle = (PI * 2) + angle
 	return angle
 
-func _on_picked_state_changed() -> void:
+func _on_picked_state_changed(_wobj: WorldObject, _new_state: bool) -> void:
 	show_min_dist = picked
 	show_max_dist = picked
 

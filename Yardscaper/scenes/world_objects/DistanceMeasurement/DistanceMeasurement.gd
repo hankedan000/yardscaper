@@ -115,6 +115,7 @@ func start_handle_move(handle: EditorHandle) -> void:
 	_handle_being_moved = handle
 	var prop_key := _handle_to_prop_key(handle)
 	deferred_prop_change.push(prop_key)
+	editor_handle_state_change.emit(self, handle, EditorHandleState.MoveStart)
 
 func stop_handle_move() -> void:
 	if ! is_instance_valid(_handle_being_moved):
@@ -122,6 +123,7 @@ func stop_handle_move() -> void:
 	
 	var prop_key := _handle_to_prop_key(_handle_being_moved)
 	deferred_prop_change.pop(prop_key)
+	editor_handle_state_change.emit(self, _handle_being_moved, EditorHandleState.MoveStop)
 	_handle_being_moved = null
 
 func _bias_text_rotation_upright(angle_rad: float) -> float:
@@ -134,7 +136,7 @@ func _bias_text_rotation_upright(angle_rad: float) -> float:
 func _setup_dist_handle(handle: EditorHandle, user_id: int) -> void:
 	handle.user_id = user_id
 	handle.get_button().button_down.connect(_on_handle_button_down.bind(handle))
-	handle.get_button().button_up.connect(_on_handle_button_up)
+	handle.get_button().button_up.connect(_on_handle_button_up.bind(handle))
 
 func _set_point_position(handle: EditorHandle, new_position: Vector2, force_change:= false):
 	var old_value := handle.position
@@ -173,12 +175,14 @@ func _handle_to_prop_key(handle: EditorHandle) -> StringName:
 	return PROP_KEY_POINT_B
 
 func _on_handle_button_down(handle: EditorHandle) -> void:
+	editor_handle_state_change.emit(self, handle, EditorHandleState.ButtonDown)
 	_handle_init_pos = handle.position
 	_mouse_init_pos = get_global_mouse_position()
 	start_handle_move(handle)
 	set_process(true)
 
-func _on_handle_button_up() -> void:
+func _on_handle_button_up(handle: EditorHandle) -> void:
+	editor_handle_state_change.emit(self, handle, EditorHandleState.ButtonUp)
 	stop_handle_move()
 	set_process(false)
 

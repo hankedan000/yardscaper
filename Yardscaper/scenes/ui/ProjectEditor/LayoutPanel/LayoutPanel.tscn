@@ -73,7 +73,7 @@ current_tab = 0
 tab_focus_mode = 0
 
 [node name="Properties" type="ScrollContainer" parent="HSplitContainer/LeftPane"]
-custom_minimum_size = Vector2(260, 0)
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_vertical = 3
 metadata/_tab_index = 0
