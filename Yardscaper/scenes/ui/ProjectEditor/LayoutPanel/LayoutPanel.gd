@@ -105,6 +105,7 @@ var undo_redo_ctrl := UndoController.new()
 var _selection_controller : WorldObjectSelectionController = WorldObjectSelectionController.new()
 var _can_start_move : bool = false
 var _mouse_move_start_pos_px = null
+var _mouse_over_world_viewport = false
 var _curr_undo_batch : UndoController.OperationBatch = null
 # object that would be selected next if LEFT mouse button were pressed
 var _hovered_obj : WorldObject = null:
@@ -164,8 +165,8 @@ func _ready():
 func _process(_delta: float) -> void:
 	_curr_undo_batch = null # start a new batch each frame
 
-func _input(event):
-	if event is InputEventKey and event.is_pressed():
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.is_pressed() and _mouse_over_world_viewport:
 		if event.keycode == KEY_ESCAPE:
 			_cancel_mode() # will only cancel if possible
 		elif event.keycode == KEY_C and event.ctrl_pressed:
@@ -649,6 +650,12 @@ func _on_world_view_gui_input(event: InputEvent):
 		
 		if mode == Mode.MovingObjects:
 			_handle_held_obj_move(pos_in_world_px)
+
+func _on_world_view_mouse_entered() -> void:
+	_mouse_over_world_viewport = true
+
+func _on_world_view_mouse_exited() -> void:
+	_mouse_over_world_viewport = false
 
 func _on_viewport_container_pan_state_changed(panning: bool) -> void:
 	if panning:
