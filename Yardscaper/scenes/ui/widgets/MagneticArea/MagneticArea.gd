@@ -42,11 +42,15 @@ var _undo_node_ref_prior_to_deletion := UndoController.TreePathNodeRef.new()
 func _ready() -> void:
 	_update_collector_state()
 
+func _exit_tree() -> void:
+	# store path to ourselves if we're about to be deleted. this is used for
+	# magnet connection undo history later on.
+	if _deletion_imminent:
+		_undo_node_ref_prior_to_deletion = UndoController.TreePathNodeRef.new(self)
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_predelete()
-	elif what == Node.NOTIFICATION_EXIT_TREE:
-		_exit_tree()
 
 func set_radius(radius_px: float) -> void:
 	_circle_shape.radius = radius_px
@@ -185,12 +189,6 @@ func _update_collector_state() -> void:
 func _predelete() -> void:
 	# cleanup any magnetic attachments upon deletion
 	_release_all_attachments()
-
-func _exit_tree() -> void:
-	# store path to ourselves if we're about to be deleted. this used for
-	# magnet connection undo history later on.
-	if _deletion_imminent:
-		_undo_node_ref_prior_to_deletion = UndoController.TreePathNodeRef.new(self)
 
 func _release_all_attachments() -> void:
 	if is_instance_valid(_my_collector):

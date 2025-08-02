@@ -24,13 +24,18 @@ class AddOrRemove extends UndoController.UndoOperation:
 			return _do_remove_logic()
 		else:
 			return _do_add_logic()
-		
-	func pretty_str() -> String:
-		return str({
-			'_from_idx' : _from_idx,
-			'_ser_obj': _ser_obj,
-			'_is_remove': _is_remove
-		})
+	
+	func brief_name() -> String:
+		if _is_remove:
+			return "Removed Node"
+		else:
+			return "Added Node"
+	
+	func detail_summary() -> String:
+		if _is_remove:
+			return "Removed %s (%s)" % [_ser_obj[WorldObject.PROP_KEY_SUBCLASS], _ser_obj[WorldObject.PROP_KEY_USER_LABEL]]
+		else:
+			return "Added %s (%s)" % [_ser_obj[WorldObject.PROP_KEY_SUBCLASS], _ser_obj[WorldObject.PROP_KEY_USER_LABEL]]
 	
 	func _do_add_logic() -> bool:
 		var wobj := TheProject.instance_world_obj_from_data(_ser_obj)
@@ -65,37 +70,42 @@ class Reordered extends UndoController.UndoOperation:
 		
 	func redo() -> bool:
 		return _world.reorder_world_object(_from_idx, _to_idx)
-		
-	func pretty_str() -> String:
-		return str({
-			'_from_idx' : _from_idx,
-			'_to_idx': _to_idx
-		})
+	
+	func brief_name() -> String:
+		return "Reordered Node"
+	
+	func detail_summary() -> String:
+		return "Reordered %s from position %d to %d" % [
+			(_world.objects.get_child(_from_idx) as WorldObject).user_label,
+			_from_idx,
+			_to_idx]
 
 class GlobalPositionChange extends UndoController.UndoOperation:
 	
-	var _obj : WorldObject = null
+	var _node_ref := UndoController.TreePathNodeRef.new()
 	var _old_pos : Vector2 = Vector2()
 	var _new_pos : Vector2 = Vector2()
 	
 	func _init(obj: WorldObject, old_pos: Vector2, new_value: Vector2):
-		if obj == null:
-			push_error("obj can't be null")
-		_obj = obj
+		_node_ref = UndoController.TreePathNodeRef.new(obj)
 		_old_pos = old_pos
 		_new_pos = new_value
 	
 	func undo() -> bool:
-		_obj.apply_global_position(_old_pos)
-		return true
+		return _apply_position(_old_pos)
 		
 	func redo() -> bool:
-		_obj.apply_global_position(_new_pos)
+		return _apply_position(_new_pos)
+	
+	func _apply_position(new_pos: Vector2) -> bool:
+		var wobj := _node_ref.get_node() as WorldObject
+		if ! is_instance_valid(wobj):
+			return false
+		wobj.apply_global_position(new_pos)
 		return true
-		
-	func pretty_str() -> String:
-		return str({
-			"obj" : str(_obj),
-			"old_pos" : str(_old_pos),
-			"new_pos" : str(_new_pos),
-			})
+	
+	func brief_name() -> String:
+		return "Moved Node"
+	
+	func detail_summary() -> String:
+		return "Moved %s from position %s to %s" % [_node_ref.get_node_name(), _old_pos, _new_pos]
