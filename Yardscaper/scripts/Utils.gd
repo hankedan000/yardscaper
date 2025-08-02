@@ -285,8 +285,10 @@ class MagnetParents extends RefCounted:
 
 static func get_magnet_parents(magnet: MagneticArea) -> MagnetParents:
 	var mag_parents := MagnetParents.new()
-	mag_parents.magnet = magnet
+	if ! is_instance_valid(magnet):
+		return mag_parents
 	
+	mag_parents.magnet = magnet
 	var mag_parent : Node = magnet.get_parent()
 	while is_instance_valid(mag_parent):
 		if mag_parent is EditorHandle:

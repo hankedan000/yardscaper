@@ -45,9 +45,28 @@ class AttachmentChanged extends UndoController.UndoOperation:
 			collector.uncollect(collected)
 		return true
 	
-	func pretty_str() -> String:
-		return str({
-			'_collector_node_ref' : _collector_node_ref,
-			'_collected_node_ref' : _collected_node_ref,
-			'_attached' : _attached
-		})
+	func brief_name() -> String:
+		if _attached:
+			return "Pipe Attached"
+		else:
+			return "Pipe Detached"
+	
+	func detail_summary() -> String:
+		var collector_mag_parents := Utils.get_magnet_parents(_collector_node_ref.get_node() as MagneticArea)
+		var collector_user_label := "<null>"
+		if is_instance_valid(collector_mag_parents.wobj):
+			collector_user_label = collector_mag_parents.wobj.user_label
+		
+		var collected_mag_parents := Utils.get_magnet_parents(_collected_node_ref.get_node() as MagneticArea)
+		var collected_user_label := "<null>"
+		var side_text := "unknown"
+		if is_instance_valid(collected_mag_parents.wobj):
+			collected_user_label = collected_mag_parents.wobj.user_label
+			side_text = "source"
+			if (collected_mag_parents.wobj as Pipe).point_b_handle == collected_mag_parents.handle:
+				side_text = "sink"
+		
+		if _attached:
+			return "attached %s to %s side of %s" % [collector_user_label, side_text, collected_user_label]
+		else:
+			return "detached %s from %s side of %s" % [collector_user_label, side_text, collected_user_label]
