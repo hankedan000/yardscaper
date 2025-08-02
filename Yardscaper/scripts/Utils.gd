@@ -277,3 +277,22 @@ static func get_wobj_from_fvar(fvar: Var) -> WorldObject:
 	if metadata == null:
 		return
 	return metadata.parent_wobj
+
+class MagnetParents extends RefCounted:
+	var magnet : MagneticArea = null
+	var handle : EditorHandle = null
+	var wobj : WorldObject = null
+
+static func get_magnet_parents(magnet: MagneticArea) -> MagnetParents:
+	var mag_parents := MagnetParents.new()
+	mag_parents.magnet = magnet
+	
+	var mag_parent : Node = magnet.get_parent()
+	while is_instance_valid(mag_parent):
+		if mag_parent is EditorHandle:
+			mag_parents.handle = mag_parent as EditorHandle
+		elif mag_parent is WorldObject:
+			mag_parents.wobj = mag_parent as WorldObject
+			break
+		mag_parent = mag_parent.get_parent()
+	return mag_parents

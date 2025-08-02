@@ -36,6 +36,8 @@ var _my_collector : MagneticArea = null # the magnet that 'holds' us in a collec
 var _collection : Array[MagneticArea] = [] # held magnets if marked as a 'collector'
 var _in_position_change_try := false # used to avoid recursive tries
 var _last_requested_global_position := Vector2()
+var _deletion_imminent := false
+var _undo_node_ref_prior_to_deletion := UndoController.TreePathNodeRef.new()
 
 func _ready() -> void:
 	_update_collector_state()
@@ -43,12 +45,17 @@ func _ready() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_predelete()
+	elif what == Node.NOTIFICATION_EXIT_TREE:
+		_exit_tree()
 
 func set_radius(radius_px: float) -> void:
 	_circle_shape.radius = radius_px
 
 func get_radius() -> float:
 	return _circle_shape.radius
+
+func mark_deletion_imminent() -> void:
+	_deletion_imminent = true
 
 func get_collector() -> MagneticArea:
 	return _my_collector
@@ -124,6 +131,11 @@ func try_position_change(new_global_position: Vector2) -> Vector2:
 	_in_position_change_try = false
 	return _last_requested_global_position
 
+func get_undo_node_ref() -> UndoController.TreePathNodeRef:
+	if _undo_node_ref_prior_to_deletion.is_valid():
+		return _undo_node_ref_prior_to_deletion
+	return UndoController.TreePathNodeRef.new(self)
+
 func _try_position_change_collector(new_global_position: Vector2) -> void:
 	_request_position_change(new_global_position)
 	
@@ -173,6 +185,12 @@ func _update_collector_state() -> void:
 func _predelete() -> void:
 	# cleanup any magnetic attachments upon deletion
 	_release_all_attachments()
+
+func _exit_tree() -> void:
+	# store path to ourselves if we're about to be deleted. this used for
+	# magnet connection undo history later on.
+	if _deletion_imminent:
+		_undo_node_ref_prior_to_deletion = UndoController.TreePathNodeRef.new(self)
 
 func _release_all_attachments() -> void:
 	if is_instance_valid(_my_collector):

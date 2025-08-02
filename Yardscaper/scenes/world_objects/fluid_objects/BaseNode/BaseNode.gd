@@ -93,10 +93,10 @@ func restore_pipe_connections() -> void:
 	
 	_base_node_props_from_save.pipe_connections.clear()
 
-func get_attached_magnet_parents() -> Array[MagnetParents]:
-	var parents_out : Array[MagnetParents] = []
+func get_attached_magnet_parents() -> Array[Utils.MagnetParents]:
+	var parents_out : Array[Utils.MagnetParents] = []
 	for magnet in magnet_area.get_collection():
-		parents_out.push_back(_get_magnet_parents(magnet))
+		parents_out.push_back(Utils.get_magnet_parents(magnet))
 	return parents_out
 
 func get_attachment_count() -> int:
@@ -145,33 +145,14 @@ func _predelete() -> void:
 func apply_global_position(new_global_pos: Vector2) -> void:
 	magnet_area.try_position_change(new_global_pos)
 
-class MagnetParents extends RefCounted:
-	var magnet : MagneticArea = null
-	var handle : EditorHandle = null
-	var wobj : WorldObject = null
-
-static func _get_magnet_parents(magnet: MagneticArea) -> MagnetParents:
-	var mag_parents := MagnetParents.new()
-	mag_parents.magnet = magnet
-	
-	var mag_parent : Node = magnet.get_parent()
-	while is_instance_valid(mag_parent):
-		if mag_parent is EditorHandle:
-			mag_parents.handle = mag_parent as EditorHandle
-		elif mag_parent is WorldObject:
-			mag_parents.wobj = mag_parent as WorldObject
-			break
-		mag_parent = mag_parent.get_parent()
-	return mag_parents
-
 func _on_magnetic_area_position_change_request(new_global_position: Vector2) -> void:
 	global_position = new_global_position
 
 func _on_magnetic_area_attachment_changed(collector: MagneticArea, collected: MagneticArea, attached: bool) -> void:
 	undoable_edit.emit(
-		BaseNodeUndoOps.AttachementChanged.new(collector, collected, attached))
+		BaseNodeUndoOps.AttachmentChanged.new(collector, collected, attached))
 	
-	var other_pipe := _get_magnet_parents(collected).wobj as Pipe
+	var other_pipe := Utils.get_magnet_parents(collected).wobj as Pipe
 	if ! is_instance_valid(other_pipe):
 		return
 	
