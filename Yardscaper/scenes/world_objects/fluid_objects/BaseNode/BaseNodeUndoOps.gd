@@ -1,33 +1,53 @@
 class_name BaseNodeUndoOps extends Object
 
-class AttachementChanged extends UndoController.UndoOperation:
-	var _collector : MagneticArea = null
-	var _collected : MagneticArea = null
+class AttachmentChanged extends UndoController.UndoOperation:
+	var _collector_node_ref := UndoController.TreePathNodeRef.new()
+	var _collected_node_ref := UndoController.TreePathNodeRef.new()
 	var _attached : bool = false
 	
 	func _init(collector: MagneticArea, collected: MagneticArea, attached: bool):
-		_collector = collector
-		_collected = collected
+		if ! is_instance_valid(collector):
+			push_error("collector is invalid")
+			return
+		elif ! is_instance_valid(collected):
+			push_error("collected is invalid")
+			return
+		
+		_collector_node_ref = collector.get_undo_node_ref()
+		_collected_node_ref = collected.get_undo_node_ref()
 		_attached = attached
 	
 	func undo() -> bool:
-		print("undoing attachment ...")
+		var collector := _collector_node_ref.get_node() as MagneticArea
+		if ! is_instance_valid(collector):
+			return false
+		var collected := _collected_node_ref.get_node() as MagneticArea
+		if ! is_instance_valid(collected):
+			return false
+		
 		if _attached:
-			_collector.uncollect(_collected)
+			collector.uncollect(collected)
 		else:
-			_collector.collect(_collected, true) # ignore_disable=true
+			collector.collect(collected, true) # ignore_disable=true
 		return true
 		
 	func redo() -> bool:
+		var collector := _collector_node_ref.get_node() as MagneticArea
+		if ! is_instance_valid(collector):
+			return false
+		var collected := _collected_node_ref.get_node() as MagneticArea
+		if ! is_instance_valid(collected):
+			return false
+		
 		if _attached:
-			_collector.collect(_collected, true) # ignore_disable=true
+			collector.collect(collected, true) # ignore_disable=true
 		else:
-			_collector.uncollect(_collected)
+			collector.uncollect(collected)
 		return true
 	
 	func pretty_str() -> String:
 		return str({
-			'_collector' : str(_collector),
-			'_collected' : str(_collected),
+			'_collector_node_ref' : _collector_node_ref,
+			'_collected_node_ref' : _collected_node_ref,
 			'_attached' : _attached
 		})

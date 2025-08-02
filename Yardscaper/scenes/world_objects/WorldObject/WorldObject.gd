@@ -33,9 +33,11 @@ var parent_project : Project = null
 
 var user_label : String = "" :
 	set(value):
-		var old_value = user_label
-		user_label = value
+		var old_value = name
+		name = value
 		_check_and_emit_prop_change(PROP_KEY_USER_LABEL, old_value)
+	get():
+		return name
 
 var position_locked : bool = false:
 	set(value):

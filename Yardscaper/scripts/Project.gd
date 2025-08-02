@@ -282,6 +282,9 @@ func instance_world_obj(type_name: StringName) -> WorldObject:
 	var new_wobj := _instance_world_obj(type_name)
 	if new_wobj is WorldObject:
 		has_edits = true
+		new_wobj.property_changed.connect(_on_node_property_changed)
+		new_wobj.fluid_property_changed.connect(_on_node_fluid_property_changed)
+		new_wobj.moved.connect(_on_node_moved)
 		node_changed.emit(new_wobj, ChangeType.ADD, [])
 	return new_wobj
 
@@ -302,6 +305,9 @@ func instance_world_obj_from_data(data: Dictionary) -> WorldObject:
 	if new_wobj is WorldObject:
 		new_wobj.deserialize(data)
 		has_edits = true
+		new_wobj.property_changed.connect(_on_node_property_changed)
+		new_wobj.fluid_property_changed.connect(_on_node_fluid_property_changed)
+		new_wobj.moved.connect(_on_node_moved)
 		node_changed.emit(new_wobj, ChangeType.ADD, [])
 	return new_wobj
 
@@ -348,9 +354,6 @@ func _instance_world_obj(type_name: StringName) -> WorldObject:
 	wobj.user_label = TheProject.get_unique_name(type_name)
 	wobj.parent_project = self
 	wobj._init_world_obj()
-	wobj.property_changed.connect(_on_node_property_changed)
-	wobj.fluid_property_changed.connect(_on_node_fluid_property_changed)
-	wobj.moved.connect(_on_node_moved)
 	objects.append(wobj)
 	return wobj
 

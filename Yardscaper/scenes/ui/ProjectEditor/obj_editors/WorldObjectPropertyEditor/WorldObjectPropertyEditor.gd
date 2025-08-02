@@ -7,6 +7,12 @@ class_name WorldObjectPropertyEditor extends PanelContainer
 var _wobjs : Array[WorldObject] = []
 var _ignore_internal_edits = false
 
+# regex to detect chars that are not allowed in the user_label. since
+# user_labels end up becoming the 'name' attribute on the Nodes, these
+# the are chars that Godot forbits using in Node names.
+const BAD_USER_LABEL_PATTERN := r"[.:@/\"%]"
+var _user_label_regex := RegEx.new()
+
 enum SettingsMenuIds {
 	ShowAdvancedProperties
 }
@@ -14,6 +20,7 @@ enum SettingsMenuIds {
 func _ready():
 	set_process(false)
 	user_label_lineedit.set_validator(_validate_user_label)
+	_user_label_regex.compile(BAD_USER_LABEL_PATTERN)
 	
 	# setup the settings MenuButton
 	var settings_popup := settings_menu.get_popup() as PopupMenu
@@ -147,9 +154,11 @@ func _validate_user_label(new_user_label: String) -> String:
 	if new_user_label == obj.user_label:
 		return "" # label hasn't changed
 	elif new_user_label.is_empty():
-		return "Label can't be empty."
+		return "Labels can't be empty."
+	elif _user_label_regex.search(new_user_label):
+		return "Labels can't contain the following characters . : @ / \" or %."
 	elif ! obj.parent_project.is_user_label_unique(new_user_label):
-		return "'%s' is not a unique label within the project." % new_user_label
+		return "Label '%s' is not a unique within the project." % new_user_label
 	return ""
 
 func _on_user_label_line_edit_valid_text_submitted(new_text: String) -> void:

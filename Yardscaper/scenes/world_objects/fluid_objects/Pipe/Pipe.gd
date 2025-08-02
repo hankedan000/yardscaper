@@ -255,6 +255,10 @@ func _uncollect_pipe_handle(handle: EditorHandle) -> void:
 		collector.uncollect(handle_magnet)
 
 func _predelete() -> void:
+	# marking this aids in MagneticArea collect/uncollect undo logic
+	point_a_handle.get_magnet().mark_deletion_imminent()
+	point_b_handle.get_magnet().mark_deletion_imminent()
+	
 	if is_instance_valid(parent_project):
 		parent_project.fsys.free_pipe(fpipe)
 	
