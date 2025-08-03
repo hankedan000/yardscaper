@@ -53,14 +53,6 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_q6kto")
 script = ExtResource("2_rxefj")
 
-[node name="OpenDialog" type="FileDialog" parent="."]
-title = "Open a Project"
-size = Vector2i(900, 600)
-ok_button_text = "Select Current Folder"
-mode_overrides_title = false
-file_mode = 2
-access = 2
-
 [node name="SaveAsDialog" type="FileDialog" parent="."]
 title = "Save Project As ..."
 size = Vector2i(900, 600)
@@ -167,17 +159,15 @@ layout_mode = 2
 [node name="Project" type="PopupMenu" parent="VBoxContainer/MenuBar"]
 title = "Project"
 size = Vector2i(104, 116)
-item_count = 5
-item_0/text = "Open ..."
-item_0/id = 1
-item_1/text = "Save"
-item_1/id = 2
-item_2/text = "Save As ..."
-item_2/id = 3
-item_3/text = "Export to Image..."
-item_3/id = 4
-item_4/text = "Quit to Project Manager"
-item_4/id = 5
+item_count = 4
+item_0/text = "Save"
+item_0/id = 2
+item_1/text = "Save As ..."
+item_1/id = 3
+item_2/text = "Export to Image..."
+item_2/id = 4
+item_3/text = "Quit to Project Manager"
+item_3/id = 5
 
 [node name="Edit" type="PopupMenu" parent="VBoxContainer/MenuBar"]
 title = "Edit"
@@ -214,7 +204,6 @@ visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[connection signal="dir_selected" from="OpenDialog" to="." method="_on_open_dialog_dir_selected"]
 [connection signal="dir_selected" from="SaveAsDialog" to="." method="_on_save_as_dialog_dir_selected"]
 [connection signal="cancel" from="UnsavedChangesDialog" to="." method="_on_unsaved_changes_dialog_cancel"]
 [connection signal="discard" from="UnsavedChangesDialog" to="." method="_on_unsaved_changes_dialog_discard"]

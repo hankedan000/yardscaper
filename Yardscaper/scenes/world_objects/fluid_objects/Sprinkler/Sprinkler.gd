@@ -156,6 +156,14 @@ func _input(event: InputEvent) -> void:
 func _draw() -> void:
 	draw_layer.queue_redraw()
 
+func _predelete() -> void:
+	if is_instance_valid(_vent_fnode):
+		parent_project.fsys.free_node(_vent_fnode)
+	if is_instance_valid(_nozzle_fpipe):
+		parent_project.fsys.free_pipe(_nozzle_fpipe)
+	
+	super._predelete()
+
 func get_type_name() -> StringName:
 	return TypeNames.SPRINKLER
 

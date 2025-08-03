@@ -48,13 +48,17 @@ func _ready() -> void:
 	_auto_save_timer.timeout.connect(_on_auto_save_timer_timeout)
 	_auto_save_timer.start(1)
 
-func reset() -> void:
+func close() -> void:
+	if ! is_opened():
+		push_warning("project isn't opened")
+		return
+	
 	_suppress_self_edit_signals = true
 	for obj in objects:
 		obj.queue_free()
 	objects.clear()
-	fsys.clear()
 	project_name = ""
+	project_path = ""
 	_suppress_self_edit_signals = false
 	has_edits = false
 	closed.emit()
@@ -122,9 +126,23 @@ func discard_unsaved_edits() -> void:
 	static_discard_unsaved_edits(project_path)
 
 func open(dir: String) -> bool:
+	if is_opened():
+		push_error("project is already opened")
+		return false
+	
 	var project_data = _get_project_data(dir, false)
 	if project_data.is_empty():
 		return false
+	
+	# make sure fsys starts fresh. we don't do this in close() because fsys.clear()
+	# will free all enitities, and we want to defer the FEntity freeing logic to the
+	# WorldObjects that own them (ie. Sprinkler, BaseNode, Pipe). These checks are
+	# here to make sure those classes hold up their end of the bargin.
+	if fsys.get_pipe_count() != 0:
+		push_warning("fsys contained %d lingering FPipe(s). did the fluid WorldObjects not free their FEntities like they should?" % [fsys.get_pipe_count()])
+	if fsys.get_node_count() != 0:
+		push_warning("fsys contained %d lingering FNode(s). did the fluid WorldObjects not free their FEntities like they should?" % [fsys.get_node_count()])
+	fsys.clear()
 	
 	# open the project data
 	Globals.add_recent_project(dir)
@@ -265,7 +283,6 @@ func serialize() -> Dictionary:
 # @param[in] dir - project directory path
 func deserialize(proj_data: Dictionary, dir: String) -> void:
 	_suppress_self_edit_signals = true
-	reset()
 	for obj_data in DictUtils.get_w_default(proj_data, OBJECTS_KEY, []):
 		instance_world_obj_from_data(obj_data)
 	
