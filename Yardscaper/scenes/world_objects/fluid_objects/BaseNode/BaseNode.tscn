@@ -11,5 +11,4 @@ script = ExtResource("2_kmik6")
 magnetic_physics_mask = 4
 is_collector = true
 
-[connection signal="attachment_changed" from="MagneticArea" to="." method="_on_magnetic_area_attachment_changed"]
 [connection signal="position_change_request" from="MagneticArea" to="." method="_on_magnetic_area_position_change_request"]
