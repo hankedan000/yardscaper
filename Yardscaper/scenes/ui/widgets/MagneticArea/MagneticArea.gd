@@ -36,6 +36,10 @@ var _my_collector : MagneticArea = null # the magnet that 'holds' us in a collec
 var _collection : Array[MagneticArea] = [] # held magnets if marked as a 'collector'
 var _in_position_change_try := false # used to avoid recursive tries
 var _last_requested_global_position := Vector2()
+# a user-provided function used to determine if this magnet can be collected by
+# another collector. the function should take 1 parameter (the collector to
+# test), and return a boolean (true if collection is allowed, false if not).
+var _collection_filter := Callable()
 
 func _ready() -> void:
 	_update_collector_state()
@@ -49,6 +53,13 @@ func set_radius(radius_px: float) -> void:
 
 func get_radius() -> float:
 	return _circle_shape.radius
+
+func set_collection_filter(new_filter: Callable) -> void:
+	var arg_count := new_filter.get_argument_count()
+	if arg_count != 1:
+		push_error("collection filter should accept 1 arg, but takes %s" % arg_count)
+		return
+	_collection_filter = new_filter
 
 func get_collector() -> MagneticArea:
 	return _my_collector
@@ -85,7 +96,10 @@ func collect(other: MagneticArea, ignore_disable: bool = false) -> void:
 		push_warning("other magnet is not valid")
 		return
 	elif ! other.is_collectable(ignore_disable):
-		# could already collected (even by us), or collection is disabled
+		# could already be collected (even by us), or collection is disabled
+		return
+	elif other._collection_filter.is_valid() && ! other._collection_filter.call(self):
+		# user-provided collection filter said this collection is not permitted
 		return
 	
 	_collection.push_back(other)

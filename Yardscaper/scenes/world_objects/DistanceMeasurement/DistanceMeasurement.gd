@@ -59,7 +59,9 @@ func _draw():
 	if picked or hovering:
 		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
 		draw_line(point_a, point_b, indic_color, 5)
-	_update_handles()
+	
+	point_a_handle.visible = picked && ! position_locked
+	point_b_handle.visible = picked && ! position_locked
 	
 	# draw measurement line
 	draw_line(point_a, point_b, color, 1)
@@ -141,6 +143,8 @@ func _setup_dist_handle(handle: EditorHandle, user_id: int) -> void:
 func _set_point_position(handle: EditorHandle, new_position: Vector2, force_change:= false):
 	var old_value := handle.position
 	handle.try_position_change(global_position + new_position)
+	if handle == point_a_handle:
+		lock_indicator.position = point_a
 	var prop_key : StringName = PROP_KEY_POINT_A if handle == point_a_handle else PROP_KEY_POINT_B
 	if _check_and_emit_prop_change(prop_key, old_value, force_change):
 		_update_info_label()
@@ -164,11 +168,6 @@ func _update_info_label_position() -> void:
 	info_label.position = midpoint
 	info_label.rotation = baseline_angle
 
-func _update_handles() -> void:
-	lock_indicator.position = point_a
-	point_a_handle.visible = picked && ! position_locked
-	point_b_handle.visible = picked && ! position_locked
-
 func _handle_to_prop_key(handle: EditorHandle) -> StringName:
 	if handle.user_id == 1:
 		return PROP_KEY_POINT_A
@@ -185,7 +184,3 @@ func _on_handle_button_up(handle: EditorHandle) -> void:
 	editor_handle_state_change.emit(self, handle, EditorHandleState.ButtonUp)
 	stop_handle_move()
 	set_process(false)
-
-func _on_property_changed(_obj: WorldObject, property_key: StringName, _from: Variant, _to: Variant) -> void:
-	if property_key == PROP_KEY_POSITION_LOCKED:
-		_update_handles()

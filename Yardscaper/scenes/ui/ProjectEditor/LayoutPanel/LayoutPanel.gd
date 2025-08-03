@@ -40,6 +40,8 @@ enum Mode {
 	AddSprinkler,
 	AddDistMeasureA,
 	AddDistMeasureB,
+	AddPipeA,
+	AddPipeB,
 	AddPolygon,
 	AddPipeNode
 }
@@ -98,6 +100,7 @@ var mode = Mode.Idle:
 				Globals.push_cursor_shape(Input.CURSOR_CROSS)
 var sprinkler_to_add : Sprinkler = null
 var dist_meas_to_add : DistanceMeasurement = null
+var pipe_to_add : Pipe = null
 var pipe_node_to_add : PipeNode = null
 var poly_to_add : PolygonNode = null
 var undo_redo_ctrl := UndoController.new()
@@ -207,6 +210,7 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			_mouse_move_start_pos_px = null
 			mode = Mode.Idle
 		Mode.AddSprinkler:
+			_select_only_this_wobj(sprinkler_to_add)
 			sprinkler_to_add = null
 			mode = Mode.Idle
 		Mode.AddDistMeasureA:
@@ -214,8 +218,20 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			dist_meas_to_add.point_b = pos_in_world_px
 			mode = Mode.AddDistMeasureB
 		Mode.AddDistMeasureB:
+			_select_only_this_wobj(dist_meas_to_add)
 			dist_meas_to_add.point_b = pos_in_world_px
 			dist_meas_to_add = null
+			mode = Mode.Idle
+		Mode.AddPipeA:
+			pipe_to_add.point_a_handle.try_position_change(pos_in_world_px)
+			pipe_to_add.point_b_handle.try_position_change(pos_in_world_px)
+			pipe_to_add.set_edit_mode(Pipe.EditMode.PlacingPointB)
+			mode = Mode.AddPipeB
+		Mode.AddPipeB:
+			_select_only_this_wobj(pipe_to_add)
+			pipe_to_add.point_b_handle.try_position_change(pos_in_world_px)
+			pipe_to_add.set_edit_mode(Pipe.EditMode.NotEditing)
+			pipe_to_add = null
 			mode = Mode.Idle
 		Mode.AddPolygon:
 			poly_to_add.set_point(_poly_edit_point_idx, pos_in_world_px)
@@ -224,6 +240,7 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			_poly_edit_point_idx = poly_to_add.point_count() - 1
 			poly_to_add.set_handle_visible(_poly_edit_point_idx, false)
 		Mode.AddPipeNode:
+			_select_only_this_wobj(pipe_node_to_add)
 			pipe_node_to_add = null
 			mode = Mode.Idle
 
@@ -248,33 +265,33 @@ func _handle_world_object_paste(copied_data: Array[Dictionary]) -> void:
 
 func _cancel_mode():
 	if mode == Mode.AddSprinkler:
-		_cancel_add_sprinkler()
-	elif mode in [Mode.AddDistMeasureA, Mode.AddDistMeasureB]:
-		_cancel_add_distance()
-	elif mode == Mode.AddPolygon:
-		_cancel_add_polygon()
-
-func _cancel_add_distance():
-	if dist_meas_to_add:
-		dist_meas_to_add.queue_free()
-		dist_meas_to_add = null
-		mode = Mode.Idle
-
-func _cancel_add_sprinkler():
-	if sprinkler_to_add:
 		sprinkler_to_add.queue_free()
 		sprinkler_to_add = null
-		mode = Mode.Idle
+	elif mode in [Mode.AddDistMeasureA, Mode.AddDistMeasureB]:
+		dist_meas_to_add.queue_free()
+		dist_meas_to_add = null
+	elif mode in [Mode.AddPipeA, Mode.AddPipeB]:
+		pipe_to_add.queue_free()
+		pipe_to_add = null
+	elif mode == Mode.AddPolygon:
+		_cancel_add_polygon()
+	elif mode == Mode.AddPipeNode:
+		pipe_node_to_add.queue_free()
+		pipe_node_to_add = null
+	mode = Mode.Idle
 
 func _cancel_add_polygon():
-	if poly_to_add:
-		if _poly_edit_point_idx < poly_to_add.point_count():
-			poly_to_add.remove_point(_poly_edit_point_idx)
-		poly_to_add.picked = false
-		if poly_to_add.point_count() < 3:
-			poly_to_add.queue_free()
-		poly_to_add = null
-		mode = Mode.Idle
+	if poly_to_add == null:
+		return
+	
+	if _poly_edit_point_idx < poly_to_add.point_count():
+		poly_to_add.remove_point(_poly_edit_point_idx)
+	poly_to_add.picked = false
+	if poly_to_add.point_count() < 3:
+		poly_to_add.queue_free()
+	else:
+		_select_only_this_wobj(poly_to_add)
+	poly_to_add = null
 
 func _update_ui_after_selection_change():
 	var selected_objs := _selection_controller.selected_objs()
@@ -402,6 +419,10 @@ func _focus_on_objs(objs: Array[WorldObject]) -> void:
 	for obj in objs:
 		_selection_controller.add_to_selection(obj)
 
+func _select_only_this_wobj(wobj: WorldObject) -> void:
+	_selection_controller.clear_selection()
+	_selection_controller.add_to_selection(wobj)
+
 func _on_obj_created(obj: WorldObject) -> void:
 	# add the object to the world view
 	var obj_parent := obj.get_parent()
@@ -449,10 +470,9 @@ func _on_add_sprinkler_pressed():
 	mode = Mode.AddSprinkler
 
 func _on_add_pipe_pressed() -> void:
-	# since pipes are similar to DistanceMeasurement nodes, we'll reused the
-	# "adding" logic for it. should work for now ...
-	dist_meas_to_add = TheProject.instance_world_obj(TypeNames.PIPE)
-	mode = Mode.AddDistMeasureA
+	pipe_to_add = TheProject.instance_world_obj(TypeNames.PIPE)
+	pipe_to_add.set_edit_mode(Pipe.EditMode.PlacingPointA)
+	mode = Mode.AddPipeA
 
 func _on_add_pipe_node_pressed() -> void:
 	pipe_node_to_add = TheProject.instance_world_obj(TypeNames.PIPE_NODE)
@@ -625,6 +645,11 @@ func _on_world_view_gui_input(event: InputEvent):
 			sprinkler_to_add.position = pos_in_world_px
 		elif dist_meas_to_add and mode == Mode.AddDistMeasureB:
 			dist_meas_to_add.point_b = pos_in_world_px
+		elif pipe_to_add:
+			if mode == Mode.AddPipeA:
+				pipe_to_add.point_a_handle.try_position_change(pos_in_world_px)
+			else:
+				pipe_to_add.point_b_handle.try_position_change(pos_in_world_px)
 		elif poly_to_add:
 			if _poly_edit_point_idx < poly_to_add.point_count():
 				poly_to_add.set_point(_poly_edit_point_idx, pos_in_world_px)

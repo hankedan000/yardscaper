@@ -35,7 +35,10 @@ enum LabelShowMode {
 		hover_type = value
 		_set_button_texture(&"texture_hover", value)
 @export var label_text_mode : LabelTextMode = LabelTextMode.UserId
-@export var label_show_mode : LabelShowMode = LabelShowMode.Never
+@export var label_show_mode : LabelShowMode = LabelShowMode.Never:
+	set(new_value):
+		label_show_mode = new_value
+		_update_button_and_label()
 @export var MagneticAreaScene : PackedScene = null
 @export_flags_2d_physics var magnetic_physics_mask := 0:
 	set(new_value):
@@ -59,6 +62,7 @@ var _is_hovered : bool = false
 
 func _ready() -> void:
 	super._ready()
+	_update_button_and_label()
 	
 func get_button() -> BaseButton:
 	return tex_button
@@ -147,6 +151,8 @@ func _get_button_modulate_by_state() -> Color:
 	return Color.WHITE
 
 func _update_button_and_label() -> void:
+	if ! is_inside_tree(): # not _ready() yet
+		return
 	tex_button.modulate = _get_button_modulate_by_state()
 	user_label.text = _get_label_text_by_mode()
 	user_label.visible = _get_label_visible_by_mode()
