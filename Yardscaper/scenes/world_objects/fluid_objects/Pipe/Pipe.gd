@@ -92,6 +92,8 @@ class PropertiesFromSave extends RefCounted:
 	var diameter_ft = null
 
 var _props_from_save := PropertiesFromSave.new()
+var _defer_attach_undo_op := false
+var _deferred_attach_undo_op : BaseNodeUndoOps.AttachmentChanged = null
 
 # a method for the WorldObject to perform any necessary initialization logic
 # after the Project has instantiated, but before it has deserialized it
@@ -149,8 +151,8 @@ func finish_move(cancel: bool = false) -> bool:
 	
 	# moving the whole pipe should uncollect our handle magnets. this will also
 	# break the fluid entity connections as well.
-	_uncollect_pipe_handle(point_a_handle)
-	_uncollect_pipe_handle(point_b_handle)
+	_try_uncollect_pipe_handle(point_a_handle)
+	_try_uncollect_pipe_handle(point_b_handle)
 	return true
 
 func get_tooltip_text() -> String:
@@ -222,6 +224,7 @@ func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 	handle.label_text_mode = EditorHandle.LabelTextMode.UserText
 	handle.get_button().button_down.connect(_on_magnetic_handle_button_down.bind(handle))
 	handle.get_button().button_up.connect(_on_magnetic_handle_button_up.bind(handle))
+	handle.get_magnet().attachment_changed.connect(_on_magnetic_area_attachment_changed)
 
 # override this so we keep the fpipe's length in sync
 func _set_point_position(handle: EditorHandle, new_position: Vector2, force_change:= false):
@@ -248,24 +251,53 @@ func _update_fpipe_minor_loss(is_entry: bool) -> void:
 		fpipe.K_exit = new_k_value
 		fluid_property_changed.emit(self, &'fpipe.K_exit', old_value, new_k_value)
 
-func _uncollect_pipe_handle(handle: EditorHandle) -> void:
-	var handle_magnet := handle.get_magnet()
-	var collector := handle_magnet.get_collector()
-	if is_instance_valid(collector):
-		collector.uncollect(handle_magnet)
+func _try_uncollect_pipe_handle(handle: EditorHandle) -> void:
+	var magnet := handle.get_magnet()
+	if magnet.is_collected():
+		magnet.get_collector().uncollect(magnet)
+
+func _forward_attachment_change_to_fpipe(collector: MagneticArea, collected: MagneticArea, attached: bool) -> void:
+	var collector_parents := Utils.get_magnet_parents(collector)
+	var other_node := collector_parents.wobj as BaseNode
+	if ! is_instance_valid(other_node):
+		push_error("unable to determine BaseNode")
+		return
+	
+	var node_type := FPipe.NODE_SRC if is_magnet_from_src_handle(collected) else FPipe.NODE_SINK
+	if attached:
+		fpipe.connect_node(other_node.fnode, node_type)
+	else:
+		fpipe.disconnect_node(other_node.fnode)
 
 func _predelete() -> void:
-	if is_instance_valid(parent_project):
+	_try_uncollect_pipe_handle(point_a_handle)
+	_try_uncollect_pipe_handle(point_b_handle)
+	
+	if is_instance_valid(fpipe):
 		parent_project.fsys.free_pipe(fpipe)
 	
 	super._predelete()
 	
 func _on_magnetic_handle_button_down(handle: EditorHandle) -> void:
+	_defer_attach_undo_op = true
 	handle.get_magnet().disable_collection = false
 
 func _on_magnetic_handle_button_up(handle: EditorHandle) -> void:
+	_defer_attach_undo_op = false
 	handle.get_magnet().disable_collection = true
+	if _deferred_attach_undo_op != null:
+		undoable_edit.emit(_deferred_attach_undo_op)
+		_deferred_attach_undo_op = null
 
 func _on_magnetic_area_position_change_request(new_global_position: Vector2, handle: EditorHandle) -> void:
 	var new_position := new_global_position - global_position
 	_set_point_position(handle, new_position, true)
+
+func _on_magnetic_area_attachment_changed(collector: MagneticArea, collected: MagneticArea, attached: bool) -> void:
+	_forward_attachment_change_to_fpipe(collector, collected, attached)
+	
+	var undo_op := BaseNodeUndoOps.AttachmentChanged.new(collector, collected, attached)
+	if _defer_attach_undo_op:
+		_deferred_attach_undo_op = undo_op
+	else:
+		undoable_edit.emit(undo_op)

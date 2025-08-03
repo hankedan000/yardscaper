@@ -25,6 +25,15 @@ func get_pipes() -> Array[FPipe]:
 func get_nodes() -> Array[FNode]:
 	return _nodes.duplicate()
 
+func get_pipe_count() -> int:
+	return _pipes.size()
+
+func get_node_count() -> int:
+	return _nodes.size()
+
+func get_entity_count() -> int:
+	return get_pipe_count() + get_node_count()
+
 func alloc_pipe() -> FPipe:
 	var pipe := FPipe.new(self, get_next_pipe_id())
 	_pipes.append(pipe)
@@ -39,13 +48,13 @@ func free_pipe(p: FPipe) -> void:
 	if is_instance_valid(p):
 		_pipes.erase(p)
 		p._predelete()
-		p.free()
+		p.free.call_deferred()
 
 func free_node(n: FNode) -> void:
 	if is_instance_valid(n):
 		_nodes.erase(n)
 		n._predelete()
-		n.free()
+		n.free.call_deferred()
 
 func reset_solved_vars(clear_values: bool = false) -> void:
 	for node in _nodes:

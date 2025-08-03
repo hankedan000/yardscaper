@@ -101,7 +101,7 @@ func uncollect(other: MagneticArea) -> void:
 		push_warning("other magnet is not valid")
 		return
 	elif ! (other in _collection):
-		push_warning("other manget is not collected my this magnet")
+		push_warning("other manget is not collected by this magnet")
 		return
 	
 	_collection.erase(other)
