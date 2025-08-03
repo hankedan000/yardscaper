@@ -270,9 +270,8 @@ func _forward_attachment_change_to_fpipe(collector: MagneticArea, collected: Mag
 		fpipe.disconnect_node(other_node.fnode)
 
 func _predelete() -> void:
-	# marking this aids in MagneticArea collect/uncollect undo logic
-	point_a_handle.get_magnet().mark_deletion_imminent()
-	point_b_handle.get_magnet().mark_deletion_imminent()
+	_try_uncollect_pipe_handle(point_a_handle)
+	_try_uncollect_pipe_handle(point_b_handle)
 	
 	if is_instance_valid(fpipe):
 		parent_project.fsys.free_pipe(fpipe)

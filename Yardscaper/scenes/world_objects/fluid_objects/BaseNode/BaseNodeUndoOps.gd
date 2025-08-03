@@ -13,8 +13,8 @@ class AttachmentChanged extends UndoController.UndoOperation:
 			push_error("collected is invalid")
 			return
 		
-		_collector_node_ref = collector.get_undo_node_ref()
-		_collected_node_ref = collected.get_undo_node_ref()
+		_collector_node_ref = UndoController.TreePathNodeRef.new(collector)
+		_collected_node_ref = UndoController.TreePathNodeRef.new(collected)
 		_attached = attached
 	
 	func undo() -> bool:
