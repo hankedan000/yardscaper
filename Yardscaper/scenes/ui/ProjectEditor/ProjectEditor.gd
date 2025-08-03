@@ -2,7 +2,6 @@ extends PanelContainer
 class_name ProjectEditor
 
 enum ProjectMenuIDs {
-	Open = 1,
 	Save = 2,
 	SaveAs = 3,
 	ExportToImage = 4,
@@ -25,7 +24,6 @@ enum CloseType {
 	Application    = 2  # close application entirely
 }
 
-@onready var open_dialog := $OpenDialog
 @onready var save_as_dialog := $SaveAsDialog
 @onready var unsaved_changes_dialog := $UnsavedChangesDialog
 @onready var export_to_img_dialog := $ExportToImageDialog
@@ -87,7 +85,7 @@ func _do_close(type: CloseType):
 		CloseType.None:
 			pass # nothing to do
 		CloseType.ProjectManager:
-			TheProject.reset()
+			TheProject.close()
 			Globals.main.open_project_manager()
 		CloseType.Application:
 			get_tree().quit()
@@ -120,8 +118,6 @@ func _update_undo_redo_enabled(undo_redo_ctrl):
 
 func _on_project_id_pressed(id):
 	match id:
-		ProjectMenuIDs.Open:
-			open_dialog.popup_centered()
 		ProjectMenuIDs.Save:
 			TheProject.save()
 		ProjectMenuIDs.SaveAs:
@@ -137,9 +133,6 @@ func _on_save_as_dialog_dir_selected(dir: String):
 		# but requested to close the window. this is where the final close
 		# gets performed.
 		_do_close(_requested_close_type)
-
-func _on_open_dialog_dir_selected(dir):
-	TheProject.open(dir)
 
 func _on_TheProject_opened():
 	_update_window_title()
