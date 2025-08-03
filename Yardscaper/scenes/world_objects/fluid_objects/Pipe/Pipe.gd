@@ -13,6 +13,14 @@ const PROP_KEY_EXIT_CUSTOM_K               := &'exit_custom_k'
 const DEFAULT_DIAMETER_FT := 0.0416666666667 # 0.5in
 const PVC_SURFACE_ROUGHNESS_FT := 0.000005
 
+enum EditMode {
+	PlacingPointA, # point A is being placed, but B hasn't yet
+	PlacingPointB, # point B is being placed, and A already has
+	MovingPointA, # point A is being moved, and B has already been placed
+	MovingPointB, # point B is being moved, and A has already been placed
+	NotEditing
+}
+
 var diameter_ft : float = DEFAULT_DIAMETER_FT:
 	set(value):
 		var old_value = fpipe.d_ft
@@ -91,6 +99,7 @@ var fpipe : FPipe = null
 class PropertiesFromSave extends RefCounted:
 	var diameter_ft = null
 
+var _edit_mode := EditMode.NotEditing
 var _props_from_save := PropertiesFromSave.new()
 var _defer_attach_undo_op := false
 var _deferred_attach_undo_op : BaseNodeUndoOps.AttachmentChanged = null
@@ -115,6 +124,12 @@ func _ready():
 		diameter_ft = DEFAULT_DIAMETER_FT
 
 func _draw() -> void:
+	if _edit_mode == EditMode.PlacingPointA:
+		return # don't have point_a placed yet, can't draw body and stuff
+	elif _edit_mode == EditMode.NotEditing:
+		point_a_handle.visible = picked && ! position_locked
+		point_b_handle.visible = picked && ! position_locked
+	
 	if dist_px() < 1.0:
 		return # nothing to draw
 	
@@ -135,13 +150,45 @@ func _draw() -> void:
 		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
 		draw_line(point_a, point_b, indic_color, diameter_px + (OUTLINE_PX * 2))
 	
-	_update_handles()
-	
 	# draw the pipe body
 	draw_line(point_a, point_b, pipe_color, diameter_px)
 
 func get_type_name() -> StringName:
 	return TypeNames.PIPE
+
+func set_edit_mode(new_mode: EditMode) -> void:
+	_edit_mode = new_mode
+	point_a_handle.label_show_mode = EditorHandle.LabelShowMode.HoverOrPressed
+	point_b_handle.label_show_mode = EditorHandle.LabelShowMode.HoverOrPressed
+	point_a_handle.get_button().mouse_filter = Control.MOUSE_FILTER_STOP
+	point_b_handle.get_button().mouse_filter = Control.MOUSE_FILTER_STOP
+	point_a_handle.get_magnet().disable_collection = true
+	point_b_handle.get_magnet().disable_collection = true
+	match _edit_mode:
+		EditMode.PlacingPointA:
+			point_a_handle.visible = true
+			point_b_handle.visible = false
+			point_a_handle.label_show_mode = EditorHandle.LabelShowMode.Always
+			point_a_handle.get_button().mouse_filter = Control.MOUSE_FILTER_IGNORE
+			point_a_handle.get_magnet().disable_collection = false
+		EditMode.PlacingPointB:
+			point_a_handle.visible = true
+			point_b_handle.visible = true
+			point_b_handle.label_show_mode = EditorHandle.LabelShowMode.Always
+			point_a_handle.get_button().mouse_filter = Control.MOUSE_FILTER_IGNORE
+			point_b_handle.get_button().mouse_filter = Control.MOUSE_FILTER_IGNORE
+			point_b_handle.get_magnet().disable_collection = false
+		EditMode.MovingPointA:
+			point_a_handle.visible = true
+			point_b_handle.visible = true
+			point_a_handle.get_magnet().disable_collection = false
+		EditMode.MovingPointB:
+			point_a_handle.visible = true
+			point_b_handle.visible = true
+			point_b_handle.get_magnet().disable_collection = false
+		EditMode.NotEditing:
+			point_a_handle.visible = picked && ! position_locked
+			point_b_handle.visible = picked && ! position_locked
 
 func finish_move(cancel: bool = false) -> bool:
 	if ! super.finish_move(cancel):
@@ -220,11 +267,15 @@ func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 	handle.get_magnet().is_collector = false
 	handle.get_magnet().disable_collection = true
 	handle.get_magnet().position_change_request.connect(_on_magnetic_area_position_change_request.bind(handle))
+	handle.get_magnet().attachment_changed.connect(_on_magnetic_area_attachment_changed)
+	if handle == point_a_handle:
+		handle.get_magnet().set_collection_filter(_filter_handle_a_collection)
+	else:
+		handle.get_magnet().set_collection_filter(_filter_handle_b_collection)
 	handle.user_text = user_text
 	handle.label_text_mode = EditorHandle.LabelTextMode.UserText
 	handle.get_button().button_down.connect(_on_magnetic_handle_button_down.bind(handle))
-	handle.get_button().button_up.connect(_on_magnetic_handle_button_up.bind(handle))
-	handle.get_magnet().attachment_changed.connect(_on_magnetic_area_attachment_changed)
+	handle.get_button().button_up.connect(_on_magnetic_handle_button_up)
 
 # override this so we keep the fpipe's length in sync
 func _set_point_position(handle: EditorHandle, new_position: Vector2, force_change:= false):
@@ -269,6 +320,18 @@ func _forward_attachment_change_to_fpipe(collector: MagneticArea, collected: Mag
 	else:
 		fpipe.disconnect_node(other_node.fnode)
 
+func _filter_handle_a_collection(collector: MagneticArea) -> bool:
+	if collector == point_b_handle.get_magnet().get_collector():
+		# point_a can't be connected to the same node as point_b
+		return false
+	return true
+
+func _filter_handle_b_collection(collector: MagneticArea) -> bool:
+	if collector == point_a_handle.get_magnet().get_collector():
+		# point_b can't be connected to the same node as point_a
+		return false
+	return true
+
 func _predelete() -> void:
 	_try_uncollect_pipe_handle(point_a_handle)
 	_try_uncollect_pipe_handle(point_b_handle)
@@ -280,11 +343,11 @@ func _predelete() -> void:
 	
 func _on_magnetic_handle_button_down(handle: EditorHandle) -> void:
 	_defer_attach_undo_op = true
-	handle.get_magnet().disable_collection = false
+	set_edit_mode(EditMode.MovingPointA if handle == point_a_handle else EditMode.MovingPointB)
 
-func _on_magnetic_handle_button_up(handle: EditorHandle) -> void:
+func _on_magnetic_handle_button_up() -> void:
 	_defer_attach_undo_op = false
-	handle.get_magnet().disable_collection = true
+	set_edit_mode(EditMode.NotEditing)
 	if _deferred_attach_undo_op != null:
 		undoable_edit.emit(_deferred_attach_undo_op)
 		_deferred_attach_undo_op = null
