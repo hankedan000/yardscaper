@@ -39,13 +39,13 @@ func free_pipe(p: FPipe) -> void:
 	if is_instance_valid(p):
 		_pipes.erase(p)
 		p._predelete()
-		p.free()
+		p.free.call_deferred()
 
 func free_node(n: FNode) -> void:
 	if is_instance_valid(n):
 		_nodes.erase(n)
 		n._predelete()
-		n.free()
+		n.free.call_deferred()
 
 func reset_solved_vars(clear_values: bool = false) -> void:
 	for node in _nodes:
