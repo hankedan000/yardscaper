@@ -487,6 +487,7 @@ func _on_add_dist_measure_pressed():
 
 func _on_add_polygon_pressed():
 	poly_to_add = TheProject.instance_world_obj(TypeNames.POLYGON_NODE)
+	poly_to_add.edit_mode = PolygonNode.EditMode.InitialCreate
 	poly_to_add.picked = true
 	poly_to_add.add_point(Vector2())
 	poly_to_add.set_handle_visible(0, false)
@@ -619,7 +620,8 @@ func _on_world_view_gui_input(event: InputEvent):
 						mode != Mode.MovingObjects &&
 						! Input.is_key_pressed(MULTI_SELECT_KEY))
 					if event.pressed:
-						_selection_controller.on_select_button_pressed(_hovered_obj)
+						if mode == Mode.Idle:
+							_selection_controller.on_select_button_pressed(_hovered_obj)
 					else:
 						_handle_left_click_release(pos_in_world_px)
 			MOUSE_BUTTON_RIGHT:
@@ -651,8 +653,7 @@ func _on_world_view_gui_input(event: InputEvent):
 			else:
 				pipe_to_add.point_b_handle.try_position_change(pos_in_world_px)
 		elif poly_to_add:
-			if _poly_edit_point_idx < poly_to_add.point_count():
-				poly_to_add.set_point(_poly_edit_point_idx, pos_in_world_px)
+			poly_to_add.set_point(_poly_edit_point_idx, pos_in_world_px)
 		elif pipe_node_to_add:
 			pipe_node_to_add.position = pos_in_world_px
 		elif _can_start_move:
