@@ -5,7 +5,7 @@ const PROP_KEY_COLOR = &"color"
 const PROP_KEY_POINTS_FT = &"points_ft"
 
 enum EditMode {
-	None, Add, Edit, Remove
+	None, InitialCreate, Add, Edit, Remove
 }
 
 @export var EditorHandleScene : PackedScene = null
@@ -110,19 +110,29 @@ func add_point(point: Vector2) -> void:
 	queue_redraw()
 
 func set_handle_visible(idx: int, new_visible: bool) -> void:
-	if idx < _vertex_handles.size():
-		_vertex_handles[idx].visible = new_visible
+	if idx < 0:
+		push_error("idx = %d is out of bounds (must be >= 0)" % [idx])
+		return
+	elif idx >= _vertex_handles.size():
+		push_error("idx = %d is out of bounds (_vertex_handles.size() = %d)" % [idx, _vertex_handles.size()])
+		return
+	_vertex_handles[idx].visible = new_visible
 
 func set_point(idx: int, point: Vector2) -> void:
-	if idx < point_count():
-		poly.polygon[idx] = point
-		coll_poly.polygon[idx] = point
+	if idx < 0:
+		push_error("idx = %d is out of bounds (must be >= 0)" % [idx])
+		return
+	elif idx >= point_count():
+		push_error("idx = %d is out of bounds (point_count() = %d)" % [idx, point_count()])
+		return
+	
+	poly.polygon[idx] = point
+	coll_poly.polygon[idx] = point
 	
 	# update the edit-related objects
-	if idx < _vertex_handles.size():
-		_vertex_handles[idx].position = point
+	_vertex_handles[idx].position = point
 	var edit_path_point_count := edit_path.curve.point_count
-	if edit_path_point_count > 0:
+	if edit_path_point_count > 0 && idx < edit_path_point_count:
 		edit_path.curve.set_point_position(idx, point)
 		if idx == 0 and edit_path_point_count >= 3:
 			# move last point in path too to keep the circuit intact
