@@ -298,3 +298,12 @@ static func get_magnet_parents(magnet: MagneticArea) -> MagnetParents:
 			break
 		mag_parent = mag_parent.get_parent()
 	return mag_parents
+
+static func get_children_in_group(node: Node, group_name: StringName, recursive: bool = true) -> Array:
+	var result := []
+	for child in node.get_children():
+		if child.is_in_group(group_name):
+			result.append(child)
+		if recursive:
+			result.append_array(get_children_in_group(child, group_name, true))
+	return result

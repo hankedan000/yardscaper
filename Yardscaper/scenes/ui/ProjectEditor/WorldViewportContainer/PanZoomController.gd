@@ -16,7 +16,7 @@ var _camera_original_position = Vector2.ZERO
 
 const ZOOM_SPEED = 0.1
 const MIN_ZOOM = 0.1
-const MAX_ZOOM = 3.0
+const MAX_ZOOM = 100.0
 
 # local position within viwport to world position
 func local_pos_to_world(pos_local: Vector2) -> Vector2:

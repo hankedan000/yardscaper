@@ -166,7 +166,12 @@ static func _sort_by_dist_to_poi(a: WorldObject, b: WorldObject, poi: Vector2) -
 # @param[in] padding - ratio to grow the box by on each side
 func fit_view_to_rect(rect: Rect2, padding: float = 0.0) -> void:
 	Utils.fit_camera_to_rect(camera2d, rect, padding)
-	queue_redraw()
+	_sync_after_zoom_change(get_zoom())
+
+# @param[in] pos_world - the point of interest in world coordinates
+func move_camera_to(pos_world: Vector2) -> void:
+	camera2d.global_position = pos_world
+	queue_redraw() # to redraw grid & origin
 
 func _draw_origin():
 	var origin_pos_local = pan_zoom_ctrl.world_pos_to_local(Vector2(0, 0))
@@ -259,6 +264,25 @@ func _draw_horz_lines(start_y: float, step: float, width: float, n_lines: int, c
 			color,
 			line_width)
 
+static func _get_inv_scale(zoom: float) -> Vector2:
+	return Vector2(1.0, 1.0) * (1.0 / zoom)
+
+func _sync_after_zoom_change(new_zoom: float) -> void:
+	queue_redraw() # to redraw grid & origin
+	
+	# scale the cursor so that it always stays at the same size,
+	# regardless of zoom level.
+	var inv_scale := _get_inv_scale(new_zoom)
+	cursor.scale = inv_scale
+	tooltip_label.scale = inv_scale
+	
+	_notify_child_gizmos_of_zoom_changed(viewport, new_zoom, inv_scale)
+
+func _notify_child_gizmos_of_zoom_changed(node: Node, new_zoom: float, inv_scale: Vector2) -> void:
+	var gizmos := Utils.get_children_in_group(node, &"gizmos")
+	for gizmo in gizmos:
+		gizmo.on_zoom_changed(new_zoom, inv_scale)
+
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		var pos_in_world_px = global_xy_to_pos_in_world(event.global_position)
@@ -278,13 +302,14 @@ func _on_pan_zoom_controller_pan_state_changed(panning: bool) -> void:
 	pan_state_changed.emit(panning)
 
 func _on_pan_zoom_controller_zoom_changed(_old_zoom: float, new_zoom: float) -> void:
-	queue_redraw() # to redraw grid & origin
+	_sync_after_zoom_change(new_zoom)
+
+# make sure gizmo's that reside within newly added Nodes get their zoom matched
+# to the current level.
+func _on_objects_child_entered_tree(node: Node) -> void:
+	# wait a frame to make sure that node becomes ready
+	await get_tree().process_frame
 	
-	# scale the cursor so that it always stays at the same size,
-	# regardless of zoom level.
-	var inv_scale := Vector2(1.0, 1.0) * (1.0 / new_zoom)
-	cursor.scale = inv_scale
-	tooltip_label.scale = inv_scale
-	
-	for gizmo in get_tree().get_nodes_in_group(&"gizmos") as Array[Node2D]:
-		gizmo.on_zoom_changed(new_zoom, inv_scale)
+	var curr_zoom := get_zoom()
+	var inv_scale := _get_inv_scale(curr_zoom)
+	_notify_child_gizmos_of_zoom_changed(node, curr_zoom, inv_scale)
