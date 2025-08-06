@@ -4,6 +4,14 @@ class_name DistanceMeasurement
 const PROP_KEY_POINT_A := &'point_a'
 const PROP_KEY_POINT_B := &'point_b'
 
+enum EditMode {
+	PlacingPointA, # point A is being placed, but B hasn't yet
+	PlacingPointB, # point B is being placed, and A already has
+	MovingPointA, # point A is being moved, and B has already been placed
+	MovingPointB, # point B is being moved, and A has already been placed
+	NotEditing
+}
+
 var color := Color.BLACK
 
 # point is relative to the distance measurement's root node
@@ -23,6 +31,7 @@ var point_b := Vector2():
 @onready var point_a_handle : EditorHandle = $PointA_Handle
 @onready var point_b_handle : EditorHandle = $PointB_Handle
 
+var _edit_mode := EditMode.NotEditing
 var _point_a_from_save := Vector2()
 var _point_b_from_save := Vector2()
 var _coll_rect := RectangleShape2D.new()
@@ -43,8 +52,11 @@ func _ready():
 	set_process(false)
 
 func _draw():
-	if dist_px() < 1.0:
-		return # nothing to draw
+	if _edit_mode == EditMode.PlacingPointA:
+		return # don't have point_a placed yet, can't draw body and stuff
+	elif _edit_mode == EditMode.NotEditing:
+		point_a_handle.visible = picked && ! position_locked
+		point_b_handle.visible = picked && ! position_locked
 	
 	# update position/shape of the collision rectangle
 	# probably not the best place to do this, but convenient and efficient
@@ -60,9 +72,6 @@ func _draw():
 		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
 		draw_line(point_a, point_b, indic_color, 5)
 	
-	point_a_handle.visible = picked && ! position_locked
-	point_b_handle.visible = picked && ! position_locked
-	
 	# draw measurement line
 	draw_line(point_a, point_b, color, 1)
 
@@ -76,6 +85,29 @@ func _process(_delta: float) -> void:
 			point_a = _handle_init_pos + mouse_delta_pos
 		else:
 			point_b = _handle_init_pos + mouse_delta_pos
+
+func set_edit_mode(new_mode: DistanceMeasurement.EditMode) -> void:
+	_edit_mode = new_mode
+	point_a_handle.get_button().mouse_filter = Control.MOUSE_FILTER_STOP
+	point_b_handle.get_button().mouse_filter = Control.MOUSE_FILTER_STOP
+	match _edit_mode:
+		EditMode.PlacingPointA:
+			point_a_handle.visible = false
+			point_b_handle.visible = false
+		EditMode.PlacingPointB:
+			point_a_handle.visible = false
+			point_b_handle.visible = false
+		EditMode.MovingPointA:
+			point_a_handle.visible = true
+			point_b_handle.visible = true
+			point_b_handle.get_button().mouse_filter = Control.MOUSE_FILTER_IGNORE
+		EditMode.MovingPointB:
+			point_a_handle.visible = true
+			point_b_handle.visible = true
+			point_a_handle.get_button().mouse_filter = Control.MOUSE_FILTER_IGNORE
+		EditMode.NotEditing:
+			point_a_handle.visible = picked && ! position_locked
+			point_b_handle.visible = picked && ! position_locked
 
 func mid_point() -> Vector2:
 	return point_a + ((point_b - point_a) / 2.0)
@@ -145,8 +177,7 @@ func _set_point_position(handle: EditorHandle, new_position: Vector2, force_chan
 	handle.try_position_change(global_position + new_position)
 	if handle == point_a_handle:
 		lock_indicator.position = point_a
-	var prop_key : StringName = PROP_KEY_POINT_A if handle == point_a_handle else PROP_KEY_POINT_B
-	if _check_and_emit_prop_change(prop_key, old_value, force_change):
+	if force_change || old_value != handle.position:
 		_update_info_label()
 		queue_redraw()
 
@@ -175,6 +206,7 @@ func _handle_to_prop_key(handle: EditorHandle) -> StringName:
 
 func _on_handle_button_down(handle: EditorHandle) -> void:
 	editor_handle_state_change.emit(self, handle, EditorHandleState.ButtonDown)
+	set_edit_mode(EditMode.MovingPointA if handle == point_a_handle else EditMode.MovingPointB)
 	_handle_init_pos = handle.position
 	_mouse_init_pos = get_global_mouse_position()
 	start_handle_move(handle)
@@ -182,5 +214,6 @@ func _on_handle_button_down(handle: EditorHandle) -> void:
 
 func _on_handle_button_up(handle: EditorHandle) -> void:
 	editor_handle_state_change.emit(self, handle, EditorHandleState.ButtonUp)
+	set_edit_mode(EditMode.NotEditing)
 	stop_handle_move()
 	set_process(false)

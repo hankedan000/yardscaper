@@ -13,14 +13,6 @@ const PROP_KEY_EXIT_CUSTOM_K               := &'exit_custom_k'
 const DEFAULT_DIAMETER_FT := 0.0416666666667 # 0.5in
 const PVC_SURFACE_ROUGHNESS_FT := 0.000005
 
-enum EditMode {
-	PlacingPointA, # point A is being placed, but B hasn't yet
-	PlacingPointB, # point B is being placed, and A already has
-	MovingPointA, # point A is being moved, and B has already been placed
-	MovingPointB, # point B is being moved, and A has already been placed
-	NotEditing
-}
-
 var diameter_ft : float = DEFAULT_DIAMETER_FT:
 	set(value):
 		var old_value = fpipe.d_ft
@@ -99,7 +91,6 @@ var fpipe : FPipe = null
 class PropertiesFromSave extends RefCounted:
 	var diameter_ft = null
 
-var _edit_mode := EditMode.NotEditing
 var _props_from_save := PropertiesFromSave.new()
 var _defer_attach_undo_op := false
 var _deferred_attach_undo_op : BaseNodeUndoOps.AttachmentChanged = null
@@ -130,9 +121,6 @@ func _draw() -> void:
 		point_a_handle.visible = picked && ! position_locked
 		point_b_handle.visible = picked && ! position_locked
 	
-	if dist_px() < 1.0:
-		return # nothing to draw
-	
 	const OUTLINE_PX := 2
 	var diameter_px := Utils.ft_to_px(diameter_ft)
 	
@@ -156,8 +144,9 @@ func _draw() -> void:
 func get_type_name() -> StringName:
 	return TypeNames.PIPE
 
-func set_edit_mode(new_mode: EditMode) -> void:
+func set_edit_mode(new_mode: DistanceMeasurement.EditMode) -> void:
 	_edit_mode = new_mode
+	info_label.visible = true
 	point_a_handle.label_show_mode = EditorHandle.LabelShowMode.HoverOrPressed
 	point_b_handle.label_show_mode = EditorHandle.LabelShowMode.HoverOrPressed
 	point_a_handle.get_button().mouse_filter = Control.MOUSE_FILTER_STOP
@@ -166,6 +155,7 @@ func set_edit_mode(new_mode: EditMode) -> void:
 	point_b_handle.get_magnet().disable_collection = true
 	match _edit_mode:
 		EditMode.PlacingPointA:
+			info_label.visible = false
 			point_a_handle.visible = true
 			point_b_handle.visible = false
 			point_a_handle.label_show_mode = EditorHandle.LabelShowMode.Always

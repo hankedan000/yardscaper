@@ -216,21 +216,23 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 		Mode.AddDistMeasureA:
 			dist_meas_to_add.point_a = pos_in_world_px
 			dist_meas_to_add.point_b = pos_in_world_px
+			dist_meas_to_add.set_edit_mode(DistanceMeasurement.EditMode.PlacingPointB)
 			mode = Mode.AddDistMeasureB
 		Mode.AddDistMeasureB:
 			_select_only_this_wobj(dist_meas_to_add)
 			dist_meas_to_add.point_b = pos_in_world_px
+			dist_meas_to_add.set_edit_mode(DistanceMeasurement.EditMode.NotEditing)
 			dist_meas_to_add = null
 			mode = Mode.Idle
 		Mode.AddPipeA:
 			pipe_to_add.point_a_handle.try_position_change(pos_in_world_px)
 			pipe_to_add.point_b_handle.try_position_change(pos_in_world_px)
-			pipe_to_add.set_edit_mode(Pipe.EditMode.PlacingPointB)
+			pipe_to_add.set_edit_mode(DistanceMeasurement.EditMode.PlacingPointB)
 			mode = Mode.AddPipeB
 		Mode.AddPipeB:
 			_select_only_this_wobj(pipe_to_add)
 			pipe_to_add.point_b_handle.try_position_change(pos_in_world_px)
-			pipe_to_add.set_edit_mode(Pipe.EditMode.NotEditing)
+			pipe_to_add.set_edit_mode(DistanceMeasurement.EditMode.NotEditing)
 			pipe_to_add = null
 			mode = Mode.Idle
 		Mode.AddPolygon:
@@ -474,7 +476,7 @@ func _on_add_sprinkler_pressed():
 
 func _on_add_pipe_pressed() -> void:
 	pipe_to_add = TheProject.instance_world_obj(TypeNames.PIPE)
-	pipe_to_add.set_edit_mode(Pipe.EditMode.PlacingPointA)
+	pipe_to_add.set_edit_mode(DistanceMeasurement.EditMode.PlacingPointA)
 	mode = Mode.AddPipeA
 
 func _on_add_pipe_node_pressed() -> void:
@@ -486,6 +488,7 @@ func _on_add_image_pressed():
 
 func _on_add_dist_measure_pressed():
 	dist_meas_to_add = TheProject.instance_world_obj(TypeNames.DIST_MEASUREMENT)
+	dist_meas_to_add.set_edit_mode(DistanceMeasurement.EditMode.PlacingPointA)
 	mode = Mode.AddDistMeasureA
 
 func _on_add_polygon_pressed():
