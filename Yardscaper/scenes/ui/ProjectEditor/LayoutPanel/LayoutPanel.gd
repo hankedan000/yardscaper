@@ -409,12 +409,15 @@ func _apply_polygon_edit_mode(objs: Array[WorldObject]) -> void:
 		if obj is PolygonNode:
 			obj.edit_mode = _poly_edit_mode
 
-func _focus_on_objs(objs: Array[WorldObject]) -> void:
+func _focus_on_objs(objs: Array[WorldObject], zoom_to_fit: bool = false) -> void:
 	if objs.is_empty():
 		return
 	
 	var bound_box := Utils.get_bounding_box_around_all(objs)
-	world_view.fit_view_to_rect(bound_box, 0.1)
+	if zoom_to_fit:
+		world_view.fit_view_to_rect(bound_box, 0.1)
+	else:
+		world_view.move_camera_to(bound_box.get_center())
 	_selection_controller.clear_selection()
 	for obj in objs:
 		_selection_controller.add_to_selection(obj)
