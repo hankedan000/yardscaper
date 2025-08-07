@@ -98,6 +98,7 @@ var mode = Mode.Idle:
 				Globals.push_cursor_shape(Input.CURSOR_CROSS)
 			Mode.AddPipeNode:
 				Globals.push_cursor_shape(Input.CURSOR_CROSS)
+
 var sprinkler_to_add : Sprinkler = null
 var dist_meas_to_add : DistanceMeasurement = null
 var pipe_to_add : Pipe = null
@@ -122,6 +123,12 @@ var _hovered_obj : WorldObject = null:
 				tooltip_timer.start(TOOLTIP_DELAY_DURATION_SEC)
 # serialized versions of all copied world objects
 var _copied_world_objs : Array[Dictionary] = []
+# this flag will defer the "add object" logic (obj add undo history, connect
+# signals, etc.) when complex objects are instantiated that require multi-step
+# user input to fully define (ie. pipes, polygons, and measurements). the add
+# logic will be executed once the user has finished all steps to fully define
+# the object.
+var _defer_add_till_fully_created := false
 
 # vars for editing PolygonNode points
 var _poly_edit_point_idx = 0
@@ -219,9 +226,9 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			dist_meas_to_add.set_edit_mode(DistanceMeasurement.EditMode.PlacingPointB)
 			mode = Mode.AddDistMeasureB
 		Mode.AddDistMeasureB:
-			_select_only_this_wobj(dist_meas_to_add)
 			dist_meas_to_add.point_b = pos_in_world_px
 			dist_meas_to_add.set_edit_mode(DistanceMeasurement.EditMode.NotEditing)
+			_add_fully_created(dist_meas_to_add)
 			dist_meas_to_add = null
 			mode = Mode.Idle
 		Mode.AddPipeA:
@@ -230,9 +237,9 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			pipe_to_add.set_edit_mode(DistanceMeasurement.EditMode.PlacingPointB)
 			mode = Mode.AddPipeB
 		Mode.AddPipeB:
-			_select_only_this_wobj(pipe_to_add)
 			pipe_to_add.point_b_handle.try_position_change(pos_in_world_px)
 			pipe_to_add.set_edit_mode(DistanceMeasurement.EditMode.NotEditing)
+			_add_fully_created(pipe_to_add)
 			pipe_to_add = null
 			mode = Mode.Idle
 		Mode.AddPolygon:
@@ -292,7 +299,7 @@ func _cancel_add_polygon():
 	if poly_to_add.point_count() < 3:
 		poly_to_add.queue_free()
 	else:
-		_select_only_this_wobj(poly_to_add)
+		_add_fully_created(poly_to_add)
 	poly_to_add = null
 
 func _update_ui_after_selection_change():
@@ -428,28 +435,31 @@ func _select_only_this_wobj(wobj: WorldObject) -> void:
 	_selection_controller.clear_selection()
 	_selection_controller.add_to_selection(wobj)
 
-func _on_obj_created(obj: WorldObject) -> void:
-	# add the object to the world view
-	var obj_parent := obj.get_parent()
-	if is_instance_valid(obj_parent) && obj_parent != world_view.objects:
-		obj.reparent(world_view.objects)
-	else:
-		world_view.objects.add_child(obj)
-	
+func _add_fully_created(wobj: WorldObject) -> void:
 	_push_undo_op(WorldObjectUndoRedoOps.AddOrRemove.new(
 		world_view,
-		obj,
+		wobj,
 		false)) # is_remove
-	obj.picked_state_changed.connect(_on_world_object_pick_state_changed)
-	obj.editor_handle_state_change.connect(_on_world_obj_editor_handle_state_change)
-	obj.undoable_edit.connect(_on_world_obj_undoable_edit)
-	_selection_controller.clear_selection()
-	obj.picked = true
+	wobj.picked_state_changed.connect(_on_world_object_pick_state_changed)
+	wobj.editor_handle_state_change.connect(_on_world_obj_editor_handle_state_change)
+	wobj.undoable_edit.connect(_on_world_obj_undoable_edit)
+	_select_only_this_wobj(wobj)
 
-func _on_obj_removed(obj: WorldObject) -> void:
-	world_view.objects.remove_child(obj)
-	_selection_controller.remove_from_selection(obj)
-	if _hovered_obj == obj:
+func _on_obj_created(wobj: WorldObject) -> void:
+	# add the object to the world view
+	var obj_parent := wobj.get_parent()
+	if is_instance_valid(obj_parent) && obj_parent != world_view.objects:
+		wobj.reparent(world_view.objects)
+	else:
+		world_view.objects.add_child(wobj)
+	
+	if ! _defer_add_till_fully_created:
+		_add_fully_created(wobj)
+
+func _on_obj_removed(wobj: WorldObject) -> void:
+	world_view.objects.remove_child(wobj)
+	_selection_controller.remove_from_selection(wobj)
+	if _hovered_obj == wobj:
 		_hovered_obj = null
 
 func _on_obj_prop_edit(obj: WorldObject, prop_name: StringName, old_value, new_value) -> void:
@@ -475,7 +485,9 @@ func _on_add_sprinkler_pressed():
 	mode = Mode.AddSprinkler
 
 func _on_add_pipe_pressed() -> void:
+	_defer_add_till_fully_created = true
 	pipe_to_add = TheProject.instance_world_obj(TypeNames.PIPE)
+	_defer_add_till_fully_created = false
 	pipe_to_add.set_edit_mode(DistanceMeasurement.EditMode.PlacingPointA)
 	mode = Mode.AddPipeA
 
@@ -487,12 +499,16 @@ func _on_add_image_pressed():
 	img_dialog.popup_centered()
 
 func _on_add_dist_measure_pressed():
+	_defer_add_till_fully_created = true
 	dist_meas_to_add = TheProject.instance_world_obj(TypeNames.DIST_MEASUREMENT)
+	_defer_add_till_fully_created = false
 	dist_meas_to_add.set_edit_mode(DistanceMeasurement.EditMode.PlacingPointA)
 	mode = Mode.AddDistMeasureA
 
 func _on_add_polygon_pressed():
+	_defer_add_till_fully_created = true
 	poly_to_add = TheProject.instance_world_obj(TypeNames.POLYGON_NODE)
+	_defer_add_till_fully_created = false
 	poly_to_add.edit_mode = PolygonNode.EditMode.InitialCreate
 	poly_to_add.picked = true
 	poly_to_add.add_point(Vector2())
