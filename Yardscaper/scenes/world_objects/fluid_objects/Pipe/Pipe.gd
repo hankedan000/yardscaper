@@ -19,6 +19,9 @@ var diameter_ft : float = DEFAULT_DIAMETER_FT:
 		fpipe.d_ft = value
 		if _check_and_emit_prop_change(PROP_KEY_DIAMETER_FT, old_value):
 			queue_redraw()
+			# changing the diameter can impact the minor losses
+			_update_fpipe_minor_loss(true)  # entry
+			_update_fpipe_minor_loss(false) # exit
 	get():
 		return fpipe.d_ft
 
@@ -280,7 +283,7 @@ func _update_fpipe_minor_loss(is_entry: bool) -> void:
 	elif fitting_type == PipeTables.FittingType.NONE:
 		new_k_value = 0.0
 	else:
-		var res := PipeTables.lookup_minor_loss(material_type, fitting_type)
+		var res := PipeTables.lookup_minor_loss(material_type, fitting_type, diameter_ft)
 		new_k_value = res.loss_factor
 	
 	if is_entry:

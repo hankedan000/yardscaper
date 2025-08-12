@@ -70,9 +70,9 @@ class SubSystem extends RefCounted:
 		var _v_fps := p._flt_v_fps()
 		var _Re := p._flt_Re(_v_fps)
 		var _f_darcy := p._flt_f_darcy(_Re)
-		var major_loss_psi := p._flt_major_loss_psi(_v_fps, _f_darcy)
-		var entry_minor_loss_psi := p._flt_entry_minor_loss_psi(_v_fps)
-		var exit_minor_loss_psi := p._flt_exit_minor_loss_psi(_v_fps)
+		var major_loss_psi := p._flt_major_loss_psi(_v_fps, _f_darcy, p.l_ft)
+		var entry_minor_loss_psi := p._flt_entry_minor_loss_psi(_v_fps, _f_darcy)
+		var exit_minor_loss_psi := p._flt_exit_minor_loss_psi(_v_fps, _f_darcy)
 		var net_losses = major_loss_psi + entry_minor_loss_psi + exit_minor_loss_psi
 		
 		# all of our losses should equation to our delta_h across our nodes
