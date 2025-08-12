@@ -124,13 +124,13 @@ func _setup_flow_rate_spinbox(spinbox: SpinBox) -> void:
 		Globals.FLOW_STEP_GPM,
 		Utils.DISP_UNIT_GPM)
 
-func _setup_minor_loss_spinbox(spinbox: SpinBox) -> void:
+func _setup_eq_length_spinbox(spinbox: SpinBox) -> void:
 	_setup_spinbox(
 		spinbox,
-		Globals.MINOR_LOSS_COEF_MIN,
-		Globals.MINOR_LOSS_COEF_MAX,
-		Globals.MINOR_LOSS_COEF_STEP,
-		Utils.DISP_UNIT_NONE)
+		Globals.EQ_LENGTH_FT_MIN,
+		Globals.EQ_LENGTH_FT_MAX,
+		Globals.EQ_LENGTH_FT_STEP,
+		Utils.DISP_UNIT_FT)
 
 func _setup_spinbox(
 		spinbox: SpinBox,

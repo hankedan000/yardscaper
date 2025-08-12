@@ -10,10 +10,7 @@ script = ExtResource("2_675cn")
 visible = true
 
 [node name="Label" parent="CustomContainer" index="0"]
-tooltip_text = "Minor loss coefficent
+tooltip_text = "Equivalent Length
 
-minor_loss = K*p*v^2/2; where
-K = minor loss coefficient
-p = density of fluid
-v = flow velocity"
-text = "K:"
+The fitting’s loss is modeled as the same head loss as a straight pipe of this equivalent length."
+text = "L_eq:"
