@@ -6,9 +6,9 @@ const PROP_KEY_MATERIAL_TYPE               := &'material_type'
 const PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT := &'custom_surface_roughness_ft'
 const PROP_KEY_FPIPE_Q_CFS                 := &'fpipe.q_cfs'
 const PROP_KEY_ENTRY_FITTING_TYPE          := &'entry_fitting_type'
-const PROP_KEY_ENTRY_CUSTOM_K              := &'entry_custom_k'
+const PROP_KEY_ENTRY_CUSTOM_L_EQ_FT        := &'entry_custom_L_eq_ft'
 const PROP_KEY_EXIT_FITTING_TYPE           := &'exit_fitting_type'
-const PROP_KEY_EXIT_CUSTOM_K               := &'exit_custom_k'
+const PROP_KEY_EXIT_CUSTOM_L_EQ_FT         := &'exit_custom_L_eq_ft'
 
 const DEFAULT_DIAMETER_FT := 0.0416666666667 # 0.5in
 const PVC_SURFACE_ROUGHNESS_FT := 0.000005
@@ -19,6 +19,9 @@ var diameter_ft : float = DEFAULT_DIAMETER_FT:
 		fpipe.d_ft = value
 		if _check_and_emit_prop_change(PROP_KEY_DIAMETER_FT, old_value):
 			queue_redraw()
+			# changing the diameter can impact the minor losses
+			_update_fpipe_minor_loss(true)  # entry
+			_update_fpipe_minor_loss(false) # exit
 	get():
 		return fpipe.d_ft
 
@@ -58,11 +61,11 @@ var entry_fitting_type : PipeTables.FittingType = PipeTables.FittingType.NONE:
 		if _check_and_emit_prop_change(PROP_KEY_ENTRY_FITTING_TYPE, old_value):
 			_update_fpipe_minor_loss(true) # is_entry
 
-var entry_custom_k : float = 0.0:
+var entry_custom_L_eq_ft : float = 0.0:
 	set(value):
-		var old_value = entry_custom_k
-		entry_custom_k = value
-		if _check_and_emit_prop_change(PROP_KEY_ENTRY_CUSTOM_K, old_value):
+		var old_value = entry_custom_L_eq_ft
+		entry_custom_L_eq_ft = value
+		if _check_and_emit_prop_change(PROP_KEY_ENTRY_CUSTOM_L_EQ_FT, old_value):
 			_update_fpipe_minor_loss(true) # is_entry
 
 var exit_fitting_type : PipeTables.FittingType = PipeTables.FittingType.NONE:
@@ -72,11 +75,11 @@ var exit_fitting_type : PipeTables.FittingType = PipeTables.FittingType.NONE:
 		if _check_and_emit_prop_change(PROP_KEY_EXIT_FITTING_TYPE, old_value):
 			_update_fpipe_minor_loss(false) # is_entry
 
-var exit_custom_k : float = 0.0:
+var exit_custom_L_eq_ft : float = 0.0:
 	set(value):
-		var old_value = exit_custom_k
-		exit_custom_k = value
-		if _check_and_emit_prop_change(PROP_KEY_EXIT_CUSTOM_K, old_value):
+		var old_value = exit_custom_L_eq_ft
+		exit_custom_L_eq_ft = value
+		if _check_and_emit_prop_change(PROP_KEY_EXIT_CUSTOM_L_EQ_FT, old_value):
 			_update_fpipe_minor_loss(false) # is_entry
 
 var show_flow_arrows : bool = false:
@@ -226,9 +229,9 @@ func serialize() -> Dictionary:
 	data[PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT] = custom_surface_roughness_ft
 	Utils.add_fvar_knowns_into_dict(fpipe.q_cfs, PROP_KEY_FPIPE_Q_CFS, data)
 	DictUtils.put_enum(data, PROP_KEY_ENTRY_FITTING_TYPE, PipeTables.FittingType, entry_fitting_type)
-	data[PROP_KEY_ENTRY_CUSTOM_K] = entry_custom_k
+	data[PROP_KEY_ENTRY_CUSTOM_L_EQ_FT] = entry_custom_L_eq_ft
 	DictUtils.put_enum(data, PROP_KEY_EXIT_FITTING_TYPE, PipeTables.FittingType, exit_fitting_type)
-	data[PROP_KEY_EXIT_CUSTOM_K] = exit_custom_k
+	data[PROP_KEY_EXIT_CUSTOM_L_EQ_FT] = exit_custom_L_eq_ft
 	return data
 
 func deserialize(data: Dictionary) -> void:
@@ -239,9 +242,9 @@ func deserialize(data: Dictionary) -> void:
 	custom_surface_roughness_ft = DictUtils.get_w_default(data, PROP_KEY_CUSTOM_SURFACE_ROUGHNESS_FT, 0.0)
 	Utils.get_fvar_knowns_from_dict(fpipe.q_cfs, PROP_KEY_FPIPE_Q_CFS, data)
 	entry_fitting_type = DictUtils.get_enum_w_default(data, PROP_KEY_ENTRY_FITTING_TYPE, PipeTables.FittingType, PipeTables.FittingType.NONE)
-	entry_custom_k = DictUtils.get_w_default(data, PROP_KEY_ENTRY_CUSTOM_K, 0.0)
+	entry_custom_L_eq_ft = DictUtils.get_w_default(data, PROP_KEY_ENTRY_CUSTOM_L_EQ_FT, 0.0)
 	exit_fitting_type = DictUtils.get_enum_w_default(data, PROP_KEY_EXIT_FITTING_TYPE, PipeTables.FittingType, PipeTables.FittingType.NONE)
-	exit_custom_k = DictUtils.get_w_default(data, PROP_KEY_EXIT_CUSTOM_K, 0.0)
+	exit_custom_L_eq_ft = DictUtils.get_w_default(data, PROP_KEY_EXIT_CUSTOM_L_EQ_FT, 0.0)
 
 func is_magnet_from_src_handle(magnet: MagneticArea) -> bool:
 	return point_a_handle.get_magnet() == magnet
@@ -274,23 +277,23 @@ func _set_point_position(handle: EditorHandle, new_position: Vector2, force_chan
 
 func _update_fpipe_minor_loss(is_entry: bool) -> void:
 	var fitting_type := entry_fitting_type if is_entry else exit_fitting_type
-	var new_k_value := 0.0
+	var new_value := 0.0
 	if fitting_type == PipeTables.FittingType.CUSTOM:
-		new_k_value = entry_custom_k if is_entry else exit_custom_k
+		new_value = entry_custom_L_eq_ft if is_entry else exit_custom_L_eq_ft
 	elif fitting_type == PipeTables.FittingType.NONE:
-		new_k_value = 0.0
+		new_value = 0.0
 	else:
-		var res := PipeTables.lookup_minor_loss(material_type, fitting_type)
-		new_k_value = res.loss_factor
+		var res := PipeTables.lookup_minor_loss(material_type, fitting_type, diameter_ft)
+		new_value = res.loss_factor
 	
 	if is_entry:
-		var old_value := fpipe.K_entry
-		fpipe.K_entry = new_k_value
-		fluid_property_changed.emit(self, &'fpipe.K_entry', old_value, new_k_value)
+		var old_value := fpipe.L_eq_entry_ft
+		fpipe.L_eq_entry_ft = new_value
+		fluid_property_changed.emit(self, &'fpipe.L_eq_entry_ft', old_value, new_value)
 	else:
-		var old_value := fpipe.K_exit
-		fpipe.K_exit = new_k_value
-		fluid_property_changed.emit(self, &'fpipe.K_exit', old_value, new_k_value)
+		var old_value := fpipe.L_eq_exit_ft
+		fpipe.L_eq_exit_ft = new_value
+		fluid_property_changed.emit(self, &'fpipe.L_eq_exit_ft', old_value, new_value)
 
 func _try_uncollect_pipe_handle(handle: EditorHandle) -> void:
 	var magnet := handle.get_magnet()

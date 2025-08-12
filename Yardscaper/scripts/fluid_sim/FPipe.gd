@@ -3,14 +3,14 @@ class_name FPipe extends FEntity
 const NODE_SINK := true
 const NODE_SRC  := false
 
-var src_node  : FNode = null
-var sink_node : FNode = null
-var q_cfs     : Var = null
-var d_ft      : float = 0.0 # hydraulic diameter
-var l_ft      : float = 0.0 # length of the pipe
-var E_ft      : float = 0.0 # absolute roughness of pipe material
-var K_entry   : float = 0.0 # minor loss coefficient for fitting at pipe entry
-var K_exit    : float = 0.0 # minor loss coefficient for fitting at pipe exit
+var src_node      : FNode = null
+var sink_node     : FNode = null
+var q_cfs         : Var = null
+var d_ft          : float = 0.0 # hydraulic diameter
+var l_ft          : float = 0.0 # length of the pipe
+var E_ft          : float = 0.0 # absolute roughness of pipe material
+var L_eq_entry_ft : float = 0.0 # equivalent length of entry fitting (for minor loss)
+var L_eq_exit_ft  : float = 0.0 # equivalent length of exit fitting (for minor loss)
 
 func _init(e_fsys: FSystem, e_id: int) -> void:
 	super(e_fsys, e_id)
@@ -116,18 +116,22 @@ func major_loss_psi() -> Var:
 	out.state = q_cfs.state
 	var _v_fps := _flt_v_fps()
 	var _f_darcy := _flt_f_darcy(_flt_Re(_v_fps))
-	out.value = _flt_major_loss_psi(_v_fps, _f_darcy)
+	out.value = _flt_major_loss_psi(_v_fps, _f_darcy, l_ft)
 	return out
 
 func entry_minor_loss_psi() -> Var:
 	var out := Var.new(self, "entry_minor_loss_psi")
-	out.value = _flt_entry_minor_loss_psi(_flt_v_fps())
+	var _v_fps := _flt_v_fps()
+	var _f_darcy := _flt_f_darcy(_flt_Re(_v_fps))
+	out.value = _flt_entry_minor_loss_psi(_v_fps, _f_darcy)
 	out.state = q_cfs.state
 	return out
 
 func exit_minor_loss_psi() -> Var:
 	var out := Var.new(self, "exit_minor_loss_psi")
-	out.value = _flt_exit_minor_loss_psi(_flt_v_fps())
+	var _v_fps := _flt_v_fps()
+	var _f_darcy := _flt_f_darcy(_flt_Re(_v_fps))
+	out.value = _flt_exit_minor_loss_psi(_v_fps, _f_darcy)
 	out.state = q_cfs.state
 	return out
 
@@ -151,18 +155,18 @@ func _flt_Re(arg_v_fps: float) -> float:
 func _flt_f_darcy(arg_Re: float) -> float:
 	return FluidMath.f_darcy(arg_Re, relative_roughness())
 
-func _flt_major_loss_psi(arg_v_fps: float, arg_f_darcy: float) -> float:
+func _flt_major_loss_psi(arg_v_fps: float, arg_f_darcy: float, arg_l_ft: float) -> float:
 	# if v is 0 then f_darcy would blow up to infinity. regardlesa, if there is
 	# no velocity then there's no frictional losses.
 	if arg_v_fps == 0.0:
 		return 0.0
-	return FluidMath.major_loss_psi(arg_f_darcy, l_ft, arg_v_fps, fsys.fluid_density_lbft3, d_ft)
+	return FluidMath.major_loss_psi(arg_f_darcy, arg_l_ft, arg_v_fps, fsys.fluid_density_lbft3, d_ft)
 
-func _flt_entry_minor_loss_psi(arg_v_fps: float) -> float:
-	return _flt_minor_loss_psi(arg_v_fps, K_entry)
+func _flt_entry_minor_loss_psi(arg_v_fps: float, arg_f_darcy: float) -> float:
+	return _flt_major_loss_psi(arg_v_fps, arg_f_darcy, L_eq_entry_ft)
 
-func _flt_exit_minor_loss_psi(arg_v_fps: float) -> float:
-	return _flt_minor_loss_psi(arg_v_fps, K_exit)
+func _flt_exit_minor_loss_psi(arg_v_fps: float, arg_f_darcy: float) -> float:
+	return _flt_major_loss_psi(arg_v_fps, arg_f_darcy, L_eq_exit_ft)
 
 func _flt_minor_loss_psi(arg_v_fps: float, arg_k: float) -> float:
 	return Utils.psft_to_psi(arg_k * fsys.fluid_density_lbft3 * (arg_v_fps * arg_v_fps) / 2.0)

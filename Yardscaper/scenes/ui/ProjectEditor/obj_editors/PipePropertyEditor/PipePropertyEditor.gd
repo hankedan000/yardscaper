@@ -14,8 +14,8 @@ func _ready() -> void:
 	super._ready()
 	_setup_short_length_spinbox(diameter_spinbox)
 	_setup_flow_rate_spinbox(flow_rate_spinbox.control as SpinBox)
-	_setup_minor_loss_spinbox(entry_fitting_option.spinbox)
-	_setup_minor_loss_spinbox(exit_fitting_option.spinbox)
+	_setup_eq_length_spinbox(entry_fitting_option.spinbox)
+	_setup_eq_length_spinbox(exit_fitting_option.spinbox)
 
 func set_layout_panel(layout_panel: LayoutPanel) -> void:
 	_layout_panel = layout_panel
@@ -37,9 +37,9 @@ func _sync_ui_from_obj() -> void:
 	pipe_color_picker.color = ref_pipe.pipe_color
 	_sync_fvar_to_spinbox(ref_pipe.fpipe.q_cfs, flow_rate_spinbox, Utils.cftps_to_gpm)
 	entry_fitting_option.select_option_by_id(ref_pipe.entry_fitting_type)
-	entry_fitting_option.spinbox.value = ref_pipe.fpipe.K_entry
+	entry_fitting_option.spinbox.value = ref_pipe.fpipe.L_eq_entry_ft
 	exit_fitting_option.select_option_by_id(ref_pipe.exit_fitting_type)
-	exit_fitting_option.spinbox.value = ref_pipe.fpipe.K_exit
+	exit_fitting_option.spinbox.value = ref_pipe.fpipe.L_eq_exit_ft
 
 # override from WorldObjectPropertyEditor
 func _show_advanced_properties_toggled(toggled_on: bool) -> void:
@@ -82,11 +82,11 @@ func _on_entry_fitting_option_option_changed(_option_text: String, option_id: in
 	_apply_prop_edit(Pipe.PROP_KEY_ENTRY_FITTING_TYPE, fitting_type)
 
 func _on_entry_fitting_option_custom_value_changed(new_value: float) -> void:
-	_apply_prop_edit(Pipe.PROP_KEY_ENTRY_CUSTOM_K, new_value)
+	_apply_prop_edit(Pipe.PROP_KEY_ENTRY_CUSTOM_L_EQ_FT, new_value)
 
 func _on_exit_fitting_option_option_changed(_option_text: String, option_id: int) -> void:
 	var fitting_type := option_id as PipeTables.FittingType
 	_apply_prop_edit(Pipe.PROP_KEY_EXIT_FITTING_TYPE, fitting_type)
 
 func _on_exit_fitting_option_custom_value_changed(new_value: float) -> void:
-	_apply_prop_edit(Pipe.PROP_KEY_EXIT_CUSTOM_K, new_value)
+	_apply_prop_edit(Pipe.PROP_KEY_EXIT_CUSTOM_L_EQ_FT, new_value)
