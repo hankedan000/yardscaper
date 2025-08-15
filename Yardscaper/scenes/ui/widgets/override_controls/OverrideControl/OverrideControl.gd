@@ -4,7 +4,11 @@ signal override_changed(new_overriden: bool)
 signal value_changed(new_value: Variant)
 
 ## Tooltip text to set on the override [CheckBox].
-@export_multiline var override_tooltip_text : String = "Check to override the value"
+@export_multiline var override_tooltip_text : String = "Check to override the value":
+	set(value):
+		override_tooltip_text = value
+		if is_instance_valid(_checkbox):
+			_checkbox.tooltip_text = value
 ## Path to the [Control] node to use.
 @export_node_path("Control") var control_path : NodePath = ""
 
@@ -57,6 +61,14 @@ func set_overriden(new_overriden: bool) -> void:
 
 func is_overriden() -> bool:
 	return _checkbox.button_pressed
+
+func set_disabled(disabled: bool) -> void:
+	_checkbox.disabled = disabled
+	if &'disabled' in control:
+		control.disabled = disabled
+
+func get_disabled() -> bool:
+	return _checkbox.disabled
 
 func _sync_checkbox_to_control() -> void:
 	if ! is_instance_valid(control):

@@ -9,7 +9,7 @@ enum ModelType {
 
 var model_type : ModelType = ModelType.Unknown
 
-func get_minor_loss(_sprink: Sprinkler) -> LUT_Utils.LerpResult:
+func get_K_s(_sprink: Sprinkler) -> LUT_Utils.LerpResult:
 	var res := LUT_Utils.LerpResult.new()
 	res.error = LUT_Utils.LerpError.Empty
 	res.value = 0.0
@@ -28,7 +28,7 @@ static func instance_model(type: ModelType, flow_table: Array) -> SprinklerFlowM
 	return SprinklerFlowModel.new()
 
 class Fan extends SprinklerFlowModel:
-	# minor loss lookup table
+	# K-factor lookup table where K = flow_cfs / sqrt(pressure_psi)
 	var _K_lut : Array = [] # [[sweep_deg1, K1], [sweep_deg2, K2], ...]
 	
 	const DATA_IDX_PRESSURE   := 0
@@ -42,9 +42,7 @@ class Fan extends SprinklerFlowModel:
 	static func from_flow_table(flow_table: Array) -> Fan:
 		var out := Fan.new()
 		
-		# populate _K_lut: computing minor loss coeff at each sweep angle
-		var radius_ft := DEFAULT_NOZZLE_DIAMETER_FT / 2.0
-		var area_ft2 := PI * radius_ft * radius_ft
+		# populate _K_lut: computing K_s at each sweep angle
 		for flow_entry in flow_table:
 			var sweep_deg := flow_entry[&'sweep_deg'] as float
 			var K_avg := 0.0 # average minor loss across all data entries
@@ -52,8 +50,7 @@ class Fan extends SprinklerFlowModel:
 			for data_entry: Array in flow_data:
 				var h_psi := data_entry[DATA_IDX_PRESSURE] as float
 				var q_cfs := Utils.gpm_to_cftps(data_entry[DATA_IDX_FLOW] as float)
-				var v_fps := q_cfs / area_ft2
-				var K := h_psi * 2.0 / (v_fps * v_fps * FluidMath.WATER_DENSITY)
+				var K := q_cfs / sqrt(h_psi)
 				K_avg += K
 			if flow_data.size() > 0:
 				K_avg /= flow_data.size()
@@ -64,15 +61,15 @@ class Fan extends SprinklerFlowModel:
 		
 		return out
 
-	func get_minor_loss_at_sweep(sweep_deg: float) -> LUT_Utils.LerpResult:
+	func get_K_s_at_sweep(sweep_deg: float) -> LUT_Utils.LerpResult:
 		return LUT_Utils.lerp_lookup(_K_lut, sweep_deg, K_LUT_IDX_SWEEP, K_LUT_IDX_K)
 
-	func get_minor_loss(sprink: Sprinkler) -> LUT_Utils.LerpResult:
-		return get_minor_loss_at_sweep(sprink.sweep_deg)
+	func get_K_s(sprink: Sprinkler) -> LUT_Utils.LerpResult:
+		return get_K_s_at_sweep(sprink.sweep_deg)
 
 class Rotary extends SprinklerFlowModel:
-	# minor loss lookup table
-	var _K_lut : Dictionary = {} # key: nozzle_option, value: K
+	# K-factor lookup table where K = flow_cfs / sqrt(pressure_psi)
+	var _K_lut : Dictionary = {} # key: nozzle_option, value: K_s
 	
 	const DATA_IDX_PRESSURE   := 0
 	const DATA_IDX_DIST       := 1
@@ -82,9 +79,7 @@ class Rotary extends SprinklerFlowModel:
 	static func from_flow_table(flow_table: Array) -> Rotary:
 		var out := Rotary.new()
 		
-		# populate _K_lut: computing minor loss coeff for each nozzle
-		var radius_ft := DEFAULT_NOZZLE_DIAMETER_FT / 2.0
-		var area_ft2 := PI * radius_ft * radius_ft
+		# populate _K_lut: computing K_s for each nozzle
 		for flow_entry in flow_table:
 			var nozzle_option := flow_entry[&'nozzle'] as String
 			var K_avg := 0.0 # average minor loss across all data entries
@@ -92,8 +87,7 @@ class Rotary extends SprinklerFlowModel:
 			for data_entry: Array in flow_data:
 				var h_psi := data_entry[DATA_IDX_PRESSURE] as float
 				var q_cfs := Utils.gpm_to_cftps(data_entry[DATA_IDX_FLOW] as float)
-				var v_fps := q_cfs / area_ft2
-				var K := h_psi * 2.0 / (v_fps * v_fps * FluidMath.WATER_DENSITY)
+				var K := q_cfs / sqrt(h_psi)
 				K_avg += K
 			if flow_data.size() > 0:
 				K_avg /= flow_data.size()
@@ -101,7 +95,7 @@ class Rotary extends SprinklerFlowModel:
 		
 		return out
 
-	func get_minor_loss_with_nozzle(nozzle_option: String) -> LUT_Utils.LerpResult:
+	func get_K_s_with_nozzle(nozzle_option: String) -> LUT_Utils.LerpResult:
 		var res := LUT_Utils.LerpResult.new()
 		res.error = LUT_Utils.LerpError.OutOfRange
 		res.value = 0.0
@@ -112,8 +106,8 @@ class Rotary extends SprinklerFlowModel:
 			res.value = _K_lut[nozzle_option]
 		return res
 
-	func get_minor_loss(sprink: Sprinkler) -> LUT_Utils.LerpResult:
-		return get_minor_loss_with_nozzle(sprink.nozzle_option)
+	func get_K_s(sprink: Sprinkler) -> LUT_Utils.LerpResult:
+		return get_K_s_with_nozzle(sprink.nozzle_option)
 
 	func get_nozzle_options() -> Array[String]:
 		var out_options : Array[String] = []
