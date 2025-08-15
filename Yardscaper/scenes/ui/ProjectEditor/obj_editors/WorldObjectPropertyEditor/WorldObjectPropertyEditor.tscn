@@ -6,11 +6,11 @@
 [ext_resource type="Texture2D" uid="uid://c3jxh2iaa0p30" path="res://assets/icons/Tools.svg" id="3_qvoxw"]
 
 [node name="WorldObjectPropertyEditor" type="PanelContainer"]
-anchors_preset = -1
-anchor_right = 0.297
-anchor_bottom = 0.825
-offset_right = -0.167007
-offset_bottom = -3.05176e-05
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_horizontal = 3
 script = ExtResource("1_ow1x6")
 
@@ -44,6 +44,7 @@ text = "User Label: "
 
 [node name="UserLabelLineEdit" parent="VBoxContainer/PropertiesList" instance=ExtResource("3_c16aj")]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MultiEditWarning" parent="VBoxContainer" instance=ExtResource("3_o0ptq")]
 visible = false
