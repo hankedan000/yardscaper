@@ -7,10 +7,15 @@ enum State {
 }
 
 var name   : String = ""
-var value  : float = 0.0
+var value  : float = 0.0:
+	set(new_value):
+		value = new_value
+		if _value_change_listeners.size() > 0:
+			_notify_value_change()
 var state  : State = State.Unknown
 
 var _parent_entity : WeakRef = null
+var _value_change_listeners : Array[Callable] = []
 
 func _init(new_entity: FEntity, new_name: String) -> void:
 	_parent_entity = weakref(new_entity)
@@ -35,6 +40,30 @@ func get_parent_entity() -> FEntity:
 
 func get_name_with_entity() -> String:
 	return "%s_%s" % [str(get_parent_entity()), name]
+
+func add_value_change_listener(listener: Callable) -> void:
+	if ! listener.is_valid():
+		return
+	elif listener in _value_change_listeners:
+		return # don't double add
+	_value_change_listeners.append(listener)
+
+func remove_value_change_listener(listener: Callable) -> void:
+	_value_change_listeners.erase(listener)
+
+func value_change_listener_count() -> int:
+	return _value_change_listeners.size()
+
+func _notify_value_change() -> void:
+	var dead_listeners : Array[Callable] = []
+	for listener in _value_change_listeners:
+		if ! listener.is_valid():
+			dead_listeners.append(listener)
+		else:
+			listener.call()
+	# prune the dead listener we discovered
+	for listener in dead_listeners:
+		_value_change_listeners.erase(listener)
 
 func _to_string() -> String:
 	return "%s=%f (%s)" % [get_name_with_entity(), value, EnumUtils.to_str(State, state)]

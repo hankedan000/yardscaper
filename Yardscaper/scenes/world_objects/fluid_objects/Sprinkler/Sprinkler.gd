@@ -96,12 +96,6 @@ var body_color : Color = Color.BLACK :
 
 var _head_data : SprinklerHeadData = null
 
-# we simulate the minor losses of the sprinkler nozzle by connecting the main
-# 'fnode' we get from the BaseNode object to a node that vents to atmosphere
-# via a narrow & short piece of pipe.
-var _vent_fnode : FNode = null
-var _nozzle_fpipe : FPipe = null
-
 # variable used to track handle movement
 var _handle_being_moved : EditorHandle = null
 var _init_angle_to_mouse : float = 0.0
@@ -112,24 +106,7 @@ var _init_sweep : float = 0.0
 # after the Project has instantiated, but before it has deserialized it
 func _init_world_obj() -> void:
 	super._init_world_obj()
-	
-	# allocate our vent node and have it release into atmosphere
-	_vent_fnode = parent_project.fsys.alloc_node()
-	_vent_fnode.user_metadata = FluidEntityMetadata.new(self, true)
-	_vent_fnode.h_psi.set_known(0.0) # vents to atmospher
-	
-	# allocate and init our nozzle pipe and connect to between the vent and the
-	# main 'fnode' that the user can connect pipes to.
-	_nozzle_fpipe = parent_project.fsys.alloc_pipe()
-	_nozzle_fpipe.user_metadata = FluidEntityMetadata.new(self, true)
-	_nozzle_fpipe.d_ft = SprinklerFlowModel.DEFAULT_NOZZLE_DIAMETER_FT
-	_nozzle_fpipe.l_ft = SprinklerFlowModel.DEFAULT_NOZZLE_LENGTH_FT
-	_nozzle_fpipe.K_exit = 0.0 # updated later when we know what our _head_data is
-	_nozzle_fpipe.connect_node(fnode, FPipe.NODE_SRC)
-	_nozzle_fpipe.connect_node(_vent_fnode, FPipe.NODE_SINK)
-	
-	# what comes into the sprinkler will vent to atmosphere via '_nozzle_fpipe'
-	fnode.q_ext_cfs.set_known(0.0)
+	fnode.set_type(FNode.Type.Sprink)
 
 func _ready() -> void:
 	super._ready()
@@ -156,20 +133,12 @@ func _input(event: InputEvent) -> void:
 func _draw() -> void:
 	draw_layer.queue_redraw()
 
-func _predelete() -> void:
-	if is_instance_valid(_vent_fnode):
-		parent_project.fsys.free_node(_vent_fnode)
-	if is_instance_valid(_nozzle_fpipe):
-		parent_project.fsys.free_pipe(_nozzle_fpipe)
-	
-	super._predelete()
-
 func get_type_name() -> StringName:
 	return TypeNames.SPRINKLER
 
 func get_tooltip_text() -> String:
 	var text : String = "%s" % user_label
-	if ! is_instance_valid(fnode) || ! is_instance_valid(_vent_fnode):
+	if ! is_instance_valid(fnode):
 		return text
 	
 	text += " (%s)" % fnode
@@ -178,7 +147,7 @@ func get_tooltip_text() -> String:
 	if nozzle_option.length() > 0:
 		text += "\nnozzle: %s" % head_model
 	text += "\nnet pressure: %s" % Utils.pretty_fvar(fnode.h_psi, Utils.DISP_UNIT_PSI)
-	text += "\nexternal flow: %s" % Utils.pretty_fvar(_vent_fnode.q_ext_cfs, Utils.DISP_UNIT_GPM, Utils.cftps_to_gpm)
+	text += "\nexternal flow: %s" % Utils.pretty_fvar(fnode.q_ext_cfs, Utils.DISP_UNIT_GPM, Utils.cftps_to_gpm)
 	text += "\nelevation: %s %s" % [fnode.el_ft, Utils.DISP_UNIT_FT]
 	return text
 
@@ -238,12 +207,11 @@ func _update_head_data() -> void:
 	_update_nozzle_loss()
 
 func _update_nozzle_loss() -> void:
-	var new_minor_loss : float = 0.0
+	var new_K_s : float = 0.0
 	if is_instance_valid(_head_data):
-		var res := _head_data.flow_model.get_minor_loss(self)
-		new_minor_loss = res.value
-	
-	_nozzle_fpipe.K_exit = new_minor_loss
+		var res := _head_data.flow_model.get_K_s(self)
+		new_K_s = res.value
+	fnode.K_s = new_K_s
 
 func _cap_values():
 	if dist_ft < min_dist_ft():
