@@ -16,6 +16,8 @@ func _ready():
 	super._ready()
 	_setup_long_length_spinbox(dist_spinbox)
 	_update_ui_from_sprinkler_db()
+	ext_flow_spinbox.set_disabled(true)
+	ext_flow_spinbox.override_tooltip_text = "Sprinklers can only have their pressures set/calculated. The external flow will be derived from the pressure using a K-factor model."
 
 func set_layout_panel(layout_panel: LayoutPanel) -> void:
 	_layout_panel = layout_panel

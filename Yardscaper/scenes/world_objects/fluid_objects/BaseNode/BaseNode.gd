@@ -17,6 +17,7 @@ var _base_node_props_from_save : BaseNodePropsFromSave = BaseNodePropsFromSave.n
 # after the Project has instantiated, but before it has deserialized it
 func _init_world_obj() -> void:
 	fnode = parent_project.fsys.alloc_node()
+	fnode.set_type(FNode.Type.Normal)
 	fnode.user_metadata = FluidEntityMetadata.new(self, false)
 	
 	# for brand new PipeNodes, be helpful to the user and set this to 0.0 since
