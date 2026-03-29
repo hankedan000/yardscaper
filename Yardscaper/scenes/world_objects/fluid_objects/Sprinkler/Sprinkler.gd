@@ -162,6 +162,7 @@ func serialize() -> Dictionary:
 	obj[PROP_KEY_SWEEP_DEG] = int(sweep_deg)
 	obj[PROP_KEY_MANUFACTURER] = manufacturer
 	obj[PROP_KEY_HEAD_MODEL] = head_model
+	obj[PROP_KEY_NOZZLE_OPTION] = nozzle_option
 	obj[PROP_KEY_ZONE] = zone
 	obj[PROP_KEY_BODY_COLOR] = body_color.to_html(true)
 	return obj
@@ -171,27 +172,31 @@ func deserialize(obj: Dictionary) -> void:
 	sweep_deg = DictUtils.get_w_default(obj, PROP_KEY_SWEEP_DEG, 360.0)
 	manufacturer = DictUtils.get_w_default(obj, PROP_KEY_MANUFACTURER, "")
 	head_model = DictUtils.get_w_default(obj, PROP_KEY_HEAD_MODEL, "")
+	# Note: we must gett the default nozzle_option after we've restored the
+	# manufacturer and head_model data because we're basing the default off the
+	# first nozzle in the _head_data database entry.
+	nozzle_option = DictUtils.get_w_default(obj, PROP_KEY_NOZZLE_OPTION, _get_default_nozzle_option())
 	dist_ft = DictUtils.get_w_default(obj, PROP_KEY_DIST_FT, max_dist_ft)
 	zone = DictUtils.get_w_default(obj, PROP_KEY_ZONE, 1)
 	body_color = DictUtils.get_w_default(obj, PROP_KEY_BODY_COLOR, body_color)
 
 func min_dist_ft() -> float:
-	if _head_data == null:
+	if ! is_instance_valid(_head_data):
 		return DEFAULT_MIN_DIST_FT
 	return _head_data.min_dist_ft
 
 func max_dist_ft() -> float:
-	if _head_data == null:
+	if ! is_instance_valid(_head_data):
 		return DEFAULT_MAX_DIST_FT
 	return _head_data.max_dist_ft
 
 func min_sweep_deg() -> float:
-	if _head_data == null:
+	if ! is_instance_valid(_head_data):
 		return DEFAULT_MIN_SWEEP_DEG
 	return _head_data.min_sweep_deg
 
 func max_sweep_deg() -> float:
-	if _head_data == null:
+	if ! is_instance_valid(_head_data):
 		return DEFAULT_MAX_SWEEP_DEG
 	return _head_data.max_sweep_deg
 
@@ -200,10 +205,20 @@ func get_head_data() -> SprinklerHeadData:
 
 func _update_head_data() -> void:
 	_head_data = null
+	
+	# lookup _head_data based manufacturer and head_model
 	var manu_data := TheSprinklerDB.get_manufacturer(manufacturer)
 	if ! is_instance_valid(manu_data):
 		return
 	_head_data = manu_data.get_head(head_model)
+	
+	# set nozzle_option to a default if it's not set yet, or the nozzle_option
+	# we have isn't in the current flow_model.
+	if is_instance_valid(_head_data) && is_instance_valid(_head_data.flow_model):
+		var nozzle_options := _head_data.flow_model.get_nozzle_options()
+		if (nozzle_option not in nozzle_options) && nozzle_options.size() > 0:
+			nozzle_option = nozzle_options[0] # use 1st option as default
+	
 	_update_nozzle_loss()
 
 func _update_nozzle_loss() -> void:
@@ -212,6 +227,17 @@ func _update_nozzle_loss() -> void:
 		var res := _head_data.flow_model.get_K_s(self)
 		new_K_s = res.value
 	fnode.K_s = new_K_s
+
+# returns the default nozzle for our current sprinkler model's head_data
+func _get_default_nozzle_option() -> String:
+	if ! is_instance_valid(_head_data):
+		return ""
+	if ! is_instance_valid(_head_data.flow_model):
+		return ""
+	var nozzle_options = _head_data.flow_model.get_nozzle_options()
+	if nozzle_options.is_empty():
+		return ""
+	return nozzle_options[0]
 
 func _cap_values():
 	if dist_ft < min_dist_ft():
