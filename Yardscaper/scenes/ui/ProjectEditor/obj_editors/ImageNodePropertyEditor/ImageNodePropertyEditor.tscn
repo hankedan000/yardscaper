@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bujgf1ym2asal"]
 
-[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/obj_editors/ImageNodePropertyEditor/ImageNodePropertyEditor.gd" id="1_kmjym"]
+[ext_resource type="Script" uid="uid://ckn6iypx5x6nq" path="res://scenes/ui/ProjectEditor/obj_editors/ImageNodePropertyEditor/ImageNodePropertyEditor.gd" id="1_kmjym"]
 [ext_resource type="PackedScene" uid="uid://dinchpfl3oh55" path="res://scenes/ui/ProjectEditor/obj_editors/WorldObjectPropertyEditor/WorldObjectPropertyEditor.tscn" id="2_kcywm"]
 
 [node name="ImageNodePropertiesList" instance=ExtResource("2_kcywm")]

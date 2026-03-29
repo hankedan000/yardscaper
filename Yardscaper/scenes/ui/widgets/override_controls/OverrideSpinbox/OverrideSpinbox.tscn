@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://ht8n7bsycg3f"]
 
 [ext_resource type="PackedScene" uid="uid://codsrkdnydsvu" path="res://scenes/ui/widgets/override_controls/OverrideControl/OverrideControl.tscn" id="1_5hqpe"]
-[ext_resource type="Script" path="res://scenes/ui/widgets/override_controls/OverrideSpinbox/OverrideSpinbox.gd" id="2_j0s84"]
+[ext_resource type="Script" uid="uid://dp2h0k4giteui" path="res://scenes/ui/widgets/override_controls/OverrideSpinbox/OverrideSpinbox.gd" id="2_j0s84"]
 
 [node name="OverrideSpinbox" instance=ExtResource("1_5hqpe")]
 offset_right = 208.0

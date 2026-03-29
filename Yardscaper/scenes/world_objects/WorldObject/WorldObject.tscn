@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://yvp357wae8et"]
 
-[ext_resource type="Script" path="res://scenes/world_objects/WorldObject/WorldObject.gd" id="1_2eqnw"]
+[ext_resource type="Script" uid="uid://dyu5ncsul4lxi" path="res://scenes/world_objects/WorldObject/WorldObject.gd" id="1_2eqnw"]
 [ext_resource type="PackedScene" uid="uid://1dad06jhn1o3" path="res://scenes/ui/gizmos/LockIndicator/LockIndicator.tscn" id="2_akkxm"]
 [ext_resource type="PackedScene" uid="uid://c7fqgbd66tu6n" path="res://scenes/ui/gizmos/GizmoLabel/GizmoLabel.tscn" id="2_ctmgo"]
 

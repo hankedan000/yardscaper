@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://p03fjlb0heho"]
 
-[ext_resource type="Script" path="res://scenes/ui/widgets/InputValidatedLineEdit/InputValidatedLineEdit.gd" id="1_m01ck"]
+[ext_resource type="Script" uid="uid://dafrf0u0hqtl4" path="res://scenes/ui/widgets/InputValidatedLineEdit/InputValidatedLineEdit.gd" id="1_m01ck"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tahp7"]
 bg_color = Color(0.19, 0.19, 0.19, 1)

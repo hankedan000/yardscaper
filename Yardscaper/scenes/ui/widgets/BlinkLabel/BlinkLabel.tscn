@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://tgnf3tq05nsl"]
 
-[ext_resource type="Script" path="res://scenes/ui/widgets/BlinkLabel/BlinkLabel.gd" id="1_j0yh5"]
+[ext_resource type="Script" uid="uid://b2e40t11uj1tp" path="res://scenes/ui/widgets/BlinkLabel/BlinkLabel.gd" id="1_j0yh5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nnkdy"]
 bg_color = Color(0, 0, 0, 0)

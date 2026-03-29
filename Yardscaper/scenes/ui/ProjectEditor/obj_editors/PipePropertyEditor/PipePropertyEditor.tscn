@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://eve0n62ubtrx"]
 
-[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/obj_editors/PipePropertyEditor/PipePropertyEditor.gd" id="1_s3ent"]
+[ext_resource type="Script" uid="uid://k42m1f0335p8" path="res://scenes/ui/ProjectEditor/obj_editors/PipePropertyEditor/PipePropertyEditor.gd" id="1_s3ent"]
 [ext_resource type="PackedScene" uid="uid://ht8n7bsycg3f" path="res://scenes/ui/widgets/override_controls/OverrideSpinbox/OverrideSpinbox.tscn" id="3_0ou81"]
 [ext_resource type="PackedScene" uid="uid://di8fok3ad2ieh" path="res://scenes/ui/widgets/MaterialOption/MaterialOption.tscn" id="3_lofyw"]
 [ext_resource type="PackedScene" uid="uid://dinchpfl3oh55" path="res://scenes/ui/ProjectEditor/obj_editors/WorldObjectPropertyEditor/WorldObjectPropertyEditor.tscn" id="3_xinwp"]

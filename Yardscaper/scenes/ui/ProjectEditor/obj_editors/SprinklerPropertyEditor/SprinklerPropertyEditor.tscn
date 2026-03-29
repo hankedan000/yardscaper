@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://co2gtkorldd8j"]
 
-[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/obj_editors/SprinklerPropertyEditor/SprinklerPropertyEditor.gd" id="1_0j0oi"]
+[ext_resource type="Script" uid="uid://ujom8pvvy5r8" path="res://scenes/ui/ProjectEditor/obj_editors/SprinklerPropertyEditor/SprinklerPropertyEditor.gd" id="1_0j0oi"]
 [ext_resource type="PackedScene" uid="uid://ckvkogi4jo41k" path="res://scenes/ui/ProjectEditor/obj_editors/BaseNodePropertyEditor/BaseNodePropertyEditor.tscn" id="2_oybtd"]
 
 [node name="SprinklerPropertyEditor" instance=ExtResource("2_oybtd")]

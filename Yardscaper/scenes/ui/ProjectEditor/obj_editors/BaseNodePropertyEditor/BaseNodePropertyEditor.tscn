@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://ckvkogi4jo41k"]
 
 [ext_resource type="PackedScene" uid="uid://ht8n7bsycg3f" path="res://scenes/ui/widgets/override_controls/OverrideSpinbox/OverrideSpinbox.tscn" id="1_ukqll"]
-[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/obj_editors/BaseNodePropertyEditor/BaseNodePropertyEditor.gd" id="2_vavjd"]
+[ext_resource type="Script" uid="uid://bgpyelsy06hwu" path="res://scenes/ui/ProjectEditor/obj_editors/BaseNodePropertyEditor/BaseNodePropertyEditor.gd" id="2_vavjd"]
 [ext_resource type="PackedScene" uid="uid://dinchpfl3oh55" path="res://scenes/ui/ProjectEditor/obj_editors/WorldObjectPropertyEditor/WorldObjectPropertyEditor.tscn" id="4_wjvdl"]
 
 [node name="BaseNodePropertyEditor" instance=ExtResource("4_wjvdl")]

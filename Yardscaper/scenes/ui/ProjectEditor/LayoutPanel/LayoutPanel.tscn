@@ -1,6 +1,6 @@
 [gd_scene load_steps=28 format=3 uid="uid://xyp0got3c5dp"]
 
-[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
+[ext_resource type="Script" uid="uid://uiairi0qvysh" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://lmlsf61h6k62" path="res://scenes/ui/dialogs/SolveSummaryDialog/SolveSummaryDialog.tscn" id="2_pkvch"]
 [ext_resource type="PackedScene" uid="uid://co2gtkorldd8j" path="res://scenes/ui/ProjectEditor/obj_editors/SprinklerPropertyEditor/SprinklerPropertyEditor.tscn" id="3_itpjk"]
 [ext_resource type="PackedScene" uid="uid://bujgf1ym2asal" path="res://scenes/ui/ProjectEditor/obj_editors/ImageNodePropertyEditor/ImageNodePropertyEditor.tscn" id="4_legmd"]

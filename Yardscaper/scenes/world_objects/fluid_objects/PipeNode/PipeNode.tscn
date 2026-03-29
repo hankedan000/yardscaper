@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://b6mbyigugbb1q"]
 
 [ext_resource type="PackedScene" uid="uid://srclla445e3s" path="res://scenes/world_objects/fluid_objects/BaseNode/BaseNode.tscn" id="1_x3idi"]
-[ext_resource type="Script" path="res://scenes/world_objects/fluid_objects/PipeNode/PipeNode.gd" id="2_a54dx"]
+[ext_resource type="Script" uid="uid://bkq5ce535y4uv" path="res://scenes/world_objects/fluid_objects/PipeNode/PipeNode.gd" id="2_a54dx"]
 
 [sub_resource type="GDScript" id="GDScript_evpk0"]
 script/source = "extends Gizmo

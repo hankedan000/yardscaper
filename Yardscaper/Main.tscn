@@ -1,13 +1,13 @@
-[gd_scene load_steps=5 format=3 uid="uid://dbfndsyttfrr0"]
+[gd_scene format=3 uid="uid://dbfndsyttfrr0"]
 
-[ext_resource type="Script" path="res://Main.gd" id="1_bcdjs"]
+[ext_resource type="Script" uid="uid://bygpb4l7sxg0j" path="res://Main.gd" id="1_bcdjs"]
 [ext_resource type="PackedScene" uid="uid://u1375je75c1f" path="res://scenes/ui/ProjectEditor/ProjectEditor.tscn" id="2_5j2jp"]
 [ext_resource type="PackedScene" uid="uid://cqfa5mme82onl" path="res://scenes/ui/ProjectManager/ProjectManager.tscn" id="3_1qthf"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_knxo1"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
 
-[node name="Main" type="PanelContainer"]
+[node name="Main" type="PanelContainer" unique_id=634957776]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

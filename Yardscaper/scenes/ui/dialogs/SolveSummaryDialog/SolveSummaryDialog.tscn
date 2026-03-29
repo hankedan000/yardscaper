@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://lmlsf61h6k62"]
 
-[ext_resource type="Script" path="res://scenes/ui/dialogs/SolveSummaryDialog/SolveSummaryDialog.gd" id="1_rab6b"]
+[ext_resource type="Script" uid="uid://baeh78m4nju5" path="res://scenes/ui/dialogs/SolveSummaryDialog/SolveSummaryDialog.gd" id="1_rab6b"]
 [ext_resource type="FontFile" uid="uid://dbc572y3do6t1" path="res://assets/fonts/RobotoMono-VariableFont_wght.ttf" id="2_v67a2"]
 
 [sub_resource type="Theme" id="Theme_b3hji"]

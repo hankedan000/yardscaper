@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cvywofwgqvq7"]
 
-[ext_resource type="Script" path="res://scenes/ui/widgets/OptionWithCustomSpinbox/OptionWithCustomSpinbox.gd" id="1_7723x"]
+[ext_resource type="Script" uid="uid://k7f6focufspq" path="res://scenes/ui/widgets/OptionWithCustomSpinbox/OptionWithCustomSpinbox.gd" id="1_7723x"]
 
 [node name="OptionWithCustomSpinbox" type="VBoxContainer"]
 anchors_preset = 15

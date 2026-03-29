@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://0w6g4f1p5gwe"]
 
-[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/obj_editors/PolygonNodePropertyEditor/PolygonNodePropertyEditor.gd" id="1_st6t6"]
+[ext_resource type="Script" uid="uid://c8lgv3kvtsnm7" path="res://scenes/ui/ProjectEditor/obj_editors/PolygonNodePropertyEditor/PolygonNodePropertyEditor.gd" id="1_st6t6"]
 [ext_resource type="PackedScene" uid="uid://dinchpfl3oh55" path="res://scenes/ui/ProjectEditor/obj_editors/WorldObjectPropertyEditor/WorldObjectPropertyEditor.tscn" id="2_xptek"]
 
 [node name="PolygonNodePropertiesList" instance=ExtResource("2_xptek")]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://ug68ljbldsj5"]
 
-[ext_resource type="Script" path="res://scenes/ui/dialogs/GridSpacingDialog/GridSpacingDialog.gd" id="1_5f4uy"]
+[ext_resource type="Script" uid="uid://bj7pgktfx1byv" path="res://scenes/ui/dialogs/GridSpacingDialog/GridSpacingDialog.gd" id="1_5f4uy"]
 
 [node name="GridSpacingDialog" type="Window"]
 title = "Grid Spacing"

@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://dinchpfl3oh55"]
 
-[ext_resource type="Script" path="res://scenes/ui/ProjectEditor/obj_editors/WorldObjectPropertyEditor/WorldObjectPropertyEditor.gd" id="1_ow1x6"]
+[ext_resource type="Script" uid="uid://ubt2kh8g1k11" path="res://scenes/ui/ProjectEditor/obj_editors/WorldObjectPropertyEditor/WorldObjectPropertyEditor.gd" id="1_ow1x6"]
 [ext_resource type="PackedScene" uid="uid://p03fjlb0heho" path="res://scenes/ui/widgets/InputValidatedLineEdit/InputValidatedLineEdit.tscn" id="3_c16aj"]
 [ext_resource type="PackedScene" uid="uid://tgnf3tq05nsl" path="res://scenes/ui/widgets/BlinkLabel/BlinkLabel.tscn" id="3_o0ptq"]
 [ext_resource type="Texture2D" uid="uid://c3jxh2iaa0p30" path="res://assets/icons/Tools.svg" id="3_qvoxw"]

@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://d3cwej23wp4gk"]
 
 [ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_r5s32"]
-[ext_resource type="Script" path="res://scenes/world_objects/ImageNode/ImageNode.gd" id="2_dfkcr"]
+[ext_resource type="Script" uid="uid://bka3am0a3pfjt" path="res://scenes/world_objects/ImageNode/ImageNode.gd" id="2_dfkcr"]
 [ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="3_rk1d2"]
 
 [sub_resource type="GDScript" id="GDScript_jercw"]

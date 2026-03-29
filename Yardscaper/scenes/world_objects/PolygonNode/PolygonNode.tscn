@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://cmr73cpklqypc"]
 
 [ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_7o48a"]
-[ext_resource type="Script" path="res://scenes/world_objects/PolygonNode/PolygonNode.gd" id="2_1ojob"]
+[ext_resource type="Script" uid="uid://bbnvdj8a7yyqy" path="res://scenes/world_objects/PolygonNode/PolygonNode.gd" id="2_1ojob"]
 [ext_resource type="PackedScene" uid="uid://dy0t3omtev6y4" path="res://scenes/ui/gizmos/EditorHandle/EditorHandle.tscn" id="3_t8ynx"]
 [ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="4_qxojn"]
 

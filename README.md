@@ -56,7 +56,7 @@ To run Yardscaper from source:
 
 ## Requirements
 
-- [Godot Engine 4.3](https://godotengine.org/download/archive/4.3-stable/)
+- [Godot Engine 4.6.1](https://godotengine.org/download/archive/4.6.1-stable/)
 
 ---
 
