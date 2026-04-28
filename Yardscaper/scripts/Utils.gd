@@ -244,10 +244,10 @@ static func get_property_w_path(obj: Object, prop_path: StringName) -> PropertyR
 	var curr_obj : Variant = obj
 	for prop_key in prop_chain:
 		if ! (curr_obj is Object):
-			push_error("can't get to '%s' because previous item wasn't an object. prop_path='%s'" % [prop_key, prop_path])
+			push_warning("can't get to '%s' because previous item wasn't an object. prop_path='%s'" % [prop_key, prop_path])
 			return res
 		elif ! (prop_key in curr_obj):
-			push_error("prop '%s' doesn't exist in object %s. prop_path='%s'" % [prop_key, curr_obj, prop_path])
+			push_warning("prop '%s' doesn't exist in object %s. prop_path='%s'" % [prop_key, curr_obj, prop_path])
 			return res
 		res.parent_obj = curr_obj
 		res.value = curr_obj.get(prop_key)
