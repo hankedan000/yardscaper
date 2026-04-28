@@ -112,7 +112,7 @@ func _destroy_magnet() -> void:
 	_magnet = null
 
 func _create_magnet(new_physic_mask) -> void:
-	_magnet = MagneticAreaScene.instantiate()
+	_magnet = MagneticAreaScene.instantiate() as MagneticArea
 	_magnet.magnetic_physics_mask = new_physic_mask
 	_magnet.position_change_request.connect(_on_magnet_position_change_request)
 	add_child(_magnet)
