@@ -6,7 +6,7 @@ extends Object
 const WATER_VISCOCITY_K : float = 0.00001023 # ft^2/s
 # density of water at 72 deg F
 # https://www.engineeringtoolbox.com/water-density-specific-weight-d_595.html
-const WATER_DENSITY : float = 62.285 # lb/ft^3
+const WATER_MASS_DENSITY : float = 1.9357 # slugs/ft^3
 # accelration due to gravity
 const G : float = 32.174 # ft/s^2
 
@@ -56,10 +56,10 @@ static func _colebrook_white(Re: float, rel_roughness: float) -> float:
 # @param[in] f_darcy - the darcy friction factor
 # @param[in] l_ft - length of the pipe (ft)
 # @param[in] v_fps - velocity of fluid in the pipe (ft/s)
-# @param[in] rho_lbft3 - density of the fluid (lb/ft^3)
+# @param[in] rho_slugsft3 - mass density of the fluid (slugs/ft^3)
 # @param[in] d_ft - hydraulic diameter of the pipe (ft)
 # @return pressure loss (lb/ft^2)
-static func major_loss_psi(arg_f_darcy: float, l_ft: float, v_fps: float, rho_lbft3: float, d_ft: float) -> float:
+static func major_loss_psi(arg_f_darcy: float, l_ft: float, v_fps: float, rho_slugsft3: float, d_ft: float) -> float:
 	return Utils.psft_to_psi(
-		(arg_f_darcy * l_ft * v_fps * v_fps * rho_lbft3) /
-		(2.0 * G * d_ft))
+		(arg_f_darcy * l_ft * v_fps * v_fps * rho_slugsft3) /
+		(2.0 * d_ft))

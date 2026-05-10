@@ -127,15 +127,44 @@ func test_solve_system_1pipe():
 	p0.l_ft = 1.0
 	p0.d_ft = 1.0 / 12.0
 	
+	# make sure system's max elevation is 0
+	assert_almost_eq(fsys.max_el_ft(), 0.0, 0.000001)
+	
+	# solve and assess
 	var res := FSolver.solve_system(fsys)
 	assert_eq(res.solved, true)
 	assert_eq(res.sub_systems.size(), 1)
 	var sres0 := res.sub_system_results[0]
 	assert_true(sres0.converged)
 	assert_true(sres0.iters > 0)
-	assert_almost_eq(n0.h_psi.value,     +0.030861, 0.000001)
-	assert_almost_eq(p0.q_cfs.value,     +0.022280, 0.000001)
-	assert_almost_eq(n1.q_ext_cfs.value, -0.022280, 0.000001)
+	assert_almost_eq(n0.h_psi.value,                +0.030858, 0.000001)
+	assert_almost_eq(p0.q_cfs.value,                +0.022280, 0.000001)
+	assert_almost_eq(p0.delta_static_h_psi().value, +0.000000, 0.000001)
+	assert_almost_eq(n1.q_ext_cfs.value,            -0.022280, 0.000001)
+	assert_eq(n0.h_psi.state,     Var.State.Solved)
+	assert_eq(p0.q_cfs.state,     Var.State.Solved)
+	assert_eq(n1.q_ext_cfs.state, Var.State.Solved)
+	
+	# put n0 at a higher elevation and resolve
+	n0.el_ft = 5.0
+	assert_almost_eq(fsys.max_el_ft(), 5.0, 0.000001)
+	
+	# solve again and reassess
+	fsys.reset_solved_vars()
+	res = FSolver.solve_system(fsys)
+	assert_eq(res.solved, true)
+	assert_eq(res.sub_systems.size(), 1)
+	sres0 = res.sub_system_results[0]
+	assert_true(sres0.converged)
+	assert_true(sres0.iters > 0)
+	assert_almost_eq(n0.delta_el_ft(),              +0.000000, 0.000001)
+	assert_almost_eq(n0.static_h_psi(),             +0.000000, 0.000001)
+	assert_almost_eq(n1.delta_el_ft(),              +5.000000, 0.000001)
+	assert_almost_eq(n1.static_h_psi(),             +2.162472, 0.000001)
+	assert_almost_eq(n0.h_psi.value,                -2.131614, 0.000001)
+	assert_almost_eq(p0.delta_static_h_psi().value, +2.162472, 0.000001)
+	assert_almost_eq(p0.q_cfs.value,                +0.022280, 0.000001)
+	assert_almost_eq(n1.q_ext_cfs.value,            -0.022280, 0.000001)
 	assert_eq(n0.h_psi.state,     Var.State.Solved)
 	assert_eq(p0.q_cfs.state,     Var.State.Solved)
 	assert_eq(n1.q_ext_cfs.state, Var.State.Solved)
@@ -192,10 +221,10 @@ func test_solve_system_2subsys():
 	var sres1 := res.sub_system_results[1]
 	assert_false(sres1.converged)
 	assert_eq(sres1.iters, 0)
-	assert_almost_eq(n0.h_psi.value,     + 0.094161, 0.000001)
+	assert_almost_eq(n0.h_psi.value,     + 0.094152, 0.000001)
 	assert_almost_eq(n0.q_ext_cfs.value, + 0.022280, 0.000001)
-	assert_almost_eq(n1.h_psi.value,     + 0.063299, 0.000001)
-	assert_almost_eq(n2.h_psi.value,     + 0.072414, 0.000001)
+	assert_almost_eq(n1.h_psi.value,     + 0.063294, 0.000001)
+	assert_almost_eq(n2.h_psi.value,     + 0.072408, 0.000001)
 	assert_almost_eq(n2.q_ext_cfs.value, + 0.011140, 0.000001)
 	assert_almost_eq(p2.q_cfs.value,     + 0.033420, 0.000001)
 	assert_almost_eq(n3.q_ext_cfs.value, - 0.033420, 0.000001)

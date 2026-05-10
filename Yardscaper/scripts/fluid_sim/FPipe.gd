@@ -82,6 +82,7 @@ func sink_h_psi() -> Var:
 	h_psi.state = sink_node.h_psi.state
 	return h_psi
 
+# net pressure loss from source to sink
 func delta_h_psi() -> Var:
 	var delta_h := Var.new(self, "delta_h_psi")
 	if ! is_instance_valid(src_node):
@@ -91,6 +92,18 @@ func delta_h_psi() -> Var:
 	
 	delta_h.value = _flt_delta_h_psi()
 	delta_h.state = Var.merge_var_states([src_node.h_psi, sink_node.h_psi])
+	return delta_h
+
+# net static pressure loss from source to sink
+func delta_static_h_psi() -> Var:
+	var delta_h := Var.new(self, "delta_static_h_psi")
+	if ! is_instance_valid(src_node):
+		return delta_h
+	elif ! is_instance_valid(sink_node):
+		return delta_h
+	
+	delta_h.value = _flt_delta_static_h_psi()
+	delta_h.state = Var.State.Known
 	return delta_h
 
 # reynolds number
@@ -149,6 +162,14 @@ func _flt_delta_h_psi() -> float:
 	
 	return sink_node.h_psi.value - src_node.h_psi.value
 
+func _flt_delta_static_h_psi() -> float:
+	if ! is_instance_valid(src_node):
+		return 0.0
+	elif ! is_instance_valid(sink_node):
+		return 0.0
+	
+	return sink_node.static_h_psi() - src_node.static_h_psi()
+
 func _flt_Re(arg_v_fps: float) -> float:
 	return FluidMath.reynolds(arg_v_fps, d_ft, fsys.fluid_viscocity_k)
 
@@ -160,7 +181,7 @@ func _flt_major_loss_psi(arg_v_fps: float, arg_f_darcy: float, arg_l_ft: float) 
 	# no velocity then there's no frictional losses.
 	if arg_v_fps == 0.0:
 		return 0.0
-	return FluidMath.major_loss_psi(arg_f_darcy, arg_l_ft, arg_v_fps, fsys.fluid_density_lbft3, d_ft)
+	return FluidMath.major_loss_psi(arg_f_darcy, arg_l_ft, arg_v_fps, fsys.fluid_density_slugft3, d_ft)
 
 func _flt_entry_minor_loss_psi(arg_v_fps: float, arg_f_darcy: float) -> float:
 	return _flt_major_loss_psi(arg_v_fps, arg_f_darcy, L_eq_entry_ft)
