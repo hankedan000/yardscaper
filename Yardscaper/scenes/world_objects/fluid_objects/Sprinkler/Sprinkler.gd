@@ -147,6 +147,7 @@ func get_tooltip_text() -> String:
 	if nozzle_option.length() > 0:
 		text += "\nnozzle: %s" % head_model
 	text += "\nnet pressure: %s" % Utils.pretty_fvar(fnode.h_psi, Utils.DISP_UNIT_PSI)
+	text += "\nstatic pressure: %s %s" % [fnode.static_h_psi(), Utils.DISP_UNIT_PSI]
 	text += "\nexternal flow: %s" % Utils.pretty_fvar(fnode.q_ext_cfs, Utils.DISP_UNIT_GPM, Utils.cftps_to_gpm)
 	text += "\nelevation: %s %s" % [fnode.el_ft, Utils.DISP_UNIT_FT]
 	return text

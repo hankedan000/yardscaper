@@ -3,6 +3,7 @@ class_name BaseNode extends WorldObject
 const PROP_KEY_PIPE_CONNECTIONS := &'pipe_connections'
 const PROP_KEY_FNODE_H_PSI := &'fnode.h_psi'
 const PROP_KEY_FNODE_Q_EXT_CFS := &'fnode.q_ext_cfs'
+const PROP_KEY_FNODE_EL_FT := &'fnode.el_ft'
 
 @onready var magnet_area : MagneticArea = $MagneticArea
 
@@ -51,6 +52,7 @@ func get_tooltip_text() -> String:
 	
 	text += " (%s)" % fnode
 	text += "\nnet pressure: %s" % Utils.pretty_fvar(fnode.h_psi, Utils.DISP_UNIT_PSI)
+	text += "\nstatic pressure: %s %s" % [fnode.static_h_psi(), Utils.DISP_UNIT_PSI]
 	text += "\nexternal flow: %s" % Utils.pretty_fvar(fnode.q_ext_cfs, Utils.DISP_UNIT_GPM, Utils.cftps_to_gpm)
 	text += "\nelevation: %s %s" % [fnode.el_ft, Utils.DISP_UNIT_FT]
 	return text
@@ -62,6 +64,7 @@ func serialize() -> Dictionary:
 	var data = super.serialize()
 	Utils.add_fvar_knowns_into_dict(fnode.h_psi, PROP_KEY_FNODE_H_PSI, data)
 	Utils.add_fvar_knowns_into_dict(fnode.q_ext_cfs, PROP_KEY_FNODE_Q_EXT_CFS, data)
+	data[PROP_KEY_FNODE_EL_FT] = fnode.el_ft
 	data[PROP_KEY_PIPE_CONNECTIONS] = _build_pipe_connection_list()
 	return data
 
@@ -69,6 +72,7 @@ func deserialize(data: Dictionary) -> void:
 	super.deserialize(data)
 	Utils.get_fvar_knowns_from_dict(fnode.h_psi, PROP_KEY_FNODE_H_PSI, data)
 	Utils.get_fvar_knowns_from_dict(fnode.q_ext_cfs, PROP_KEY_FNODE_Q_EXT_CFS, data)
+	fnode.el_ft = DictUtils.get_w_default(data, PROP_KEY_FNODE_EL_FT, 0.0)
 	_base_node_props_from_save.pipe_connections = DictUtils.get_w_default(data, PROP_KEY_PIPE_CONNECTIONS, [])
 
 # called by Project when it's posible for us to restore our pipe connections
