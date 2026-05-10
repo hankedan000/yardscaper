@@ -1,29 +1,41 @@
-[gd_scene load_steps=4 format=3 uid="uid://ckvkogi4jo41k"]
+[gd_scene format=3 uid="uid://ckvkogi4jo41k"]
 
 [ext_resource type="PackedScene" uid="uid://ht8n7bsycg3f" path="res://scenes/ui/widgets/override_controls/OverrideSpinbox/OverrideSpinbox.tscn" id="1_ukqll"]
 [ext_resource type="Script" uid="uid://bgpyelsy06hwu" path="res://scenes/ui/ProjectEditor/obj_editors/BaseNodePropertyEditor/BaseNodePropertyEditor.gd" id="2_vavjd"]
 [ext_resource type="PackedScene" uid="uid://dinchpfl3oh55" path="res://scenes/ui/ProjectEditor/obj_editors/WorldObjectPropertyEditor/WorldObjectPropertyEditor.tscn" id="4_wjvdl"]
 
-[node name="BaseNodePropertyEditor" instance=ExtResource("4_wjvdl")]
+[node name="BaseNodePropertyEditor" unique_id=800818629 instance=ExtResource("4_wjvdl")]
 script = ExtResource("2_vavjd")
 
-[node name="PressureLabel" type="Label" parent="VBoxContainer/PropertiesList" index="2"]
+[node name="SettingsMenuButton" parent="VBoxContainer/TopBar" index="1"]
+popup/item_0/id = 0
+
+[node name="PressureLabel" type="Label" parent="VBoxContainer/PropertiesList" index="2" unique_id=1350451382]
 layout_mode = 2
 text = "Pressure:"
 
-[node name="PressureSpinbox" parent="VBoxContainer/PropertiesList" index="3" instance=ExtResource("1_ukqll")]
+[node name="PressureSpinbox" parent="VBoxContainer/PropertiesList" index="3" unique_id=183503812 instance=ExtResource("1_ukqll")]
 layout_mode = 2
 override_tooltip_text = "Check this box to specify the node's pressure as a known value in the fluid simulation."
 
-[node name="ExtFlowLabel" type="Label" parent="VBoxContainer/PropertiesList" index="4"]
+[node name="ExtFlowLabel" type="Label" parent="VBoxContainer/PropertiesList" index="4" unique_id=1921240936]
 layout_mode = 2
 text = "External Flow:"
 
-[node name="ExtFlowSpinbox" parent="VBoxContainer/PropertiesList" index="5" instance=ExtResource("1_ukqll")]
+[node name="ExtFlowSpinbox" parent="VBoxContainer/PropertiesList" index="5" unique_id=297112096 instance=ExtResource("1_ukqll")]
 layout_mode = 2
 override_tooltip_text = "Check this box to specify the node's external flow rate as a known value in the fluid simulation."
+
+[node name="ElevationLabel" type="Label" parent="VBoxContainer/PropertiesList" index="6" unique_id=718182838]
+layout_mode = 2
+text = "Elevation:"
+
+[node name="ElevationSpinbox" type="SpinBox" parent="VBoxContainer/PropertiesList" index="7" unique_id=1326764816]
+layout_mode = 2
+suffix = "ft"
 
 [connection signal="override_changed" from="VBoxContainer/PropertiesList/PressureSpinbox" to="." method="_on_pressure_spinbox_override_changed"]
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/PressureSpinbox" to="." method="_on_pressure_spinbox_value_changed"]
 [connection signal="override_changed" from="VBoxContainer/PropertiesList/ExtFlowSpinbox" to="." method="_on_ext_flow_spinbox_override_changed"]
 [connection signal="value_changed" from="VBoxContainer/PropertiesList/ExtFlowSpinbox" to="." method="_on_ext_flow_spinbox_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/PropertiesList/ElevationSpinbox" to="." method="_on_elevation_spinbox_value_changed"]

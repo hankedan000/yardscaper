@@ -4,9 +4,12 @@ enum Type {
 	Normal, Sprink
 }
 
-var h_psi           : Var = null   # pressure at the node
+var h_psi           : Var = null   # net pressure at the node
 var q_ext_cfs       : Var = null   # external flow in(+) or out(-) ft^3/s
-var el_ft           : float = 0.0  # elevation of the node
+var el_ft           : float = 0.0: # elevation of the node
+	set(value):
+		el_ft = value
+		fsys._update_max_elevation()
 var connected_pipes : Array[FPipe] = []
 var K_s             : float = 0.0: # used only if type = Sprink. used to solve
 								   # for q_ext_cfs = K_s * sqrt(h_psi)
@@ -21,6 +24,13 @@ func _init(e_fsys: FSystem, e_id: int) -> void:
 	super(e_fsys, e_id)
 	self.h_psi = Var.new(self, "h_psi")
 	self.q_ext_cfs = Var.new(self, "q_ext_cfs")
+
+func delta_el_ft() -> float:
+	return fsys.max_el_ft() - el_ft
+
+# static pressure due to node's elevation relative to system's max elevation
+func static_h_psi() -> float:
+	return Utils.psft_to_psi(fsys.fluid_density_slugft3 * FluidMath.G * delta_el_ft())
 
 func set_type(new_type: Type) -> void:
 	_type = new_type

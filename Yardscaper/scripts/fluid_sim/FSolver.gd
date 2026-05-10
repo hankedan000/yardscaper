@@ -64,7 +64,10 @@ class SubSystem extends RefCounted:
 		return out_vars
 	
 	func _equation_pipe(p: FPipe) -> float:
-		var delta_h_psi := p._flt_delta_h_psi()
+		# delta_h_psi is the net pressure drop across the pipe. we must
+		# subtract the static pressure due to gravity to get the net dynamic
+		# pressure due to losses accross the pipe.
+		var dynamic_h_psi := p._flt_delta_h_psi() - p._flt_delta_static_h_psi()
 		
 		# calculate our net losses
 		var _v_fps := p._flt_v_fps()
@@ -75,9 +78,9 @@ class SubSystem extends RefCounted:
 		var exit_minor_loss_psi := p._flt_exit_minor_loss_psi(_v_fps, _f_darcy)
 		var net_losses = major_loss_psi + entry_minor_loss_psi + exit_minor_loss_psi
 		
-		# all of our losses should equation to our delta_h across our nodes
-		# calutate the final equation where ... delta_h + net_losses = 0
-		return delta_h_psi + net_losses
+		# all of our losses should equation to our dynamic_h across our pipe.
+		# calutate the final equation where ... dynamic_h + net_losses = 0
+		return dynamic_h_psi + net_losses
 	
 	func _equation_node(n: FNode) -> float:
 		# all of our net flow rates in/out of the node should equal 0

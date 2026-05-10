@@ -1,13 +1,14 @@
 class_name FSystem extends RefCounted
 
 var fluid_viscocity_k : float = FluidMath.WATER_VISCOCITY_K
-var fluid_density_lbft3 : float = FluidMath.WATER_DENSITY
+var fluid_density_slugft3 : float = FluidMath.WATER_MASS_DENSITY
 
 var _pipes : Array[FPipe] = []
 var _nodes : Array[FNode] = []
 
 var _next_pipe_id : int = 0
 var _next_node_id : int = 0
+var _max_el_ft : float = 0.0 # highest elevation of all nodes in the system
 
 func get_next_pipe_id() -> int:
 	var pid := _next_pipe_id
@@ -34,6 +35,9 @@ func get_node_count() -> int:
 func get_entity_count() -> int:
 	return get_pipe_count() + get_node_count()
 
+func max_el_ft() -> float:
+	return _max_el_ft
+
 func alloc_pipe() -> FPipe:
 	var pipe := FPipe.new(self, get_next_pipe_id())
 	_pipes.append(pipe)
@@ -42,6 +46,7 @@ func alloc_pipe() -> FPipe:
 func alloc_node() -> FNode:
 	var node := FNode.new(self, get_next_node_id())
 	_nodes.append(node)
+	_update_max_elevation()
 	return node
 
 func free_pipe(p: FPipe) -> void:
@@ -71,6 +76,17 @@ func clear() -> void:
 		free_node(n)
 	_nodes.clear()
 	_next_node_id = 0
+
+func _update_max_elevation() -> void:
+	if _nodes.is_empty():
+		_max_el_ft = 0.0
+		return
+	
+	for i in range(_nodes.size()):
+		if i == 0:
+			_max_el_ft = _nodes[i].el_ft
+		else:
+			_max_el_ft = max(_max_el_ft, _nodes[i].el_ft)
 
 func _notification(what: int) -> void:
 	if what != NOTIFICATION_PREDELETE:
