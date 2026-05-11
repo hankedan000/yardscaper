@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://cojeq6ah4kvjj"]
+[gd_scene format=3 uid="uid://cojeq6ah4kvjj"]
 
 [ext_resource type="Theme" uid="uid://b7bms6qoy7yfq" path="res://assets/themes/MainTheme.tres" id="1_5kpy6"]
 [ext_resource type="Texture2D" uid="uid://bsdi85ji5cbjt" path="res://assets/icons/FolderCreate.svg" id="2_jijt3"]
@@ -6,7 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://dr5hpsc6fcmd0" path="res://scenes/ui/widgets/StatusIcon/StatusIcon.tscn" id="3_8qet5"]
 [ext_resource type="Texture2D" uid="uid://bn2moa7a5e8ks" path="res://assets/icons/FolderBrowse.svg" id="4_3cmjo"]
 
-[node name="CreateProjectDialog" type="Window"]
+[node name="CreateProjectDialog" type="Window" unique_id=1504904303]
+oversampling_override = 1.0
 title = "Create Project"
 initial_position = 4
 size = Vector2i(600, 230)
@@ -14,67 +15,67 @@ unresizable = true
 theme = ExtResource("1_5kpy6")
 script = ExtResource("2_stvum")
 
-[node name="BrowseDialog" type="FileDialog" parent="."]
+[node name="BrowseDialog" type="FileDialog" parent="." unique_id=1752210964]
+oversampling_override = 1.0
 title = "Open a Directory"
 initial_position = 4
-size = Vector2i(510, 180)
+size = Vector2i(800, 600)
 ok_button_text = "Select Current Folder"
 file_mode = 2
 access = 2
-use_native_dialog = true
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=18538779]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=1948740216]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer" unique_id=1581030457]
 layout_mode = 2
 text = "Project Name:"
 
-[node name="ProjectNameLineEdit" type="LineEdit" parent="PanelContainer/VBoxContainer"]
+[node name="ProjectNameLineEdit" type="LineEdit" parent="PanelContainer/VBoxContainer" unique_id=1977867276]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=447313958]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=839059142]
 layout_mode = 2
 text = "Project Path:"
 
-[node name="Control" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+[node name="Control" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=587380340]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CreateFolderCheckButton" type="CheckButton" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+[node name="CreateFolderCheckButton" type="CheckButton" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=1516372598]
 layout_mode = 2
 button_pressed = true
 text = "Create Folder"
 icon = ExtResource("2_jijt3")
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=909317387]
 layout_mode = 2
 
-[node name="ProjectPathLineEdit" type="LineEdit" parent="PanelContainer/VBoxContainer/HBoxContainer2"]
+[node name="ProjectPathLineEdit" type="LineEdit" parent="PanelContainer/VBoxContainer/HBoxContainer2" unique_id=1687674672]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="StatusIcon" parent="PanelContainer/VBoxContainer/HBoxContainer2" instance=ExtResource("3_8qet5")]
+[node name="StatusIcon" parent="PanelContainer/VBoxContainer/HBoxContainer2" unique_id=253981467 instance=ExtResource("3_8qet5")]
 layout_mode = 2
 
-[node name="BrowseButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer2"]
+[node name="BrowseButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer2" unique_id=327541454]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 text = "Browse"
 icon = ExtResource("4_3cmjo")
 
-[node name="StatusTextLabel" type="Label" parent="PanelContainer/VBoxContainer"]
+[node name="StatusTextLabel" type="Label" parent="PanelContainer/VBoxContainer" unique_id=980197133]
 modulate = Color(0.517647, 1, 0.52549, 1)
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
@@ -83,28 +84,28 @@ text = "The project folder fill be automatically created.
 HelloWorld"
 horizontal_alignment = 1
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=1419091483]
 layout_mode = 2
 
-[node name="Control" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+[node name="Control" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer3" unique_id=386634442]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+[node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer3" unique_id=547980113]
 custom_minimum_size = Vector2(125, 0)
 layout_mode = 2
 text = "Cancel"
 
-[node name="Control2" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+[node name="Control2" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer3" unique_id=2012354713]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CreateButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+[node name="CreateButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer3" unique_id=1685434091]
 custom_minimum_size = Vector2(125, 0)
 layout_mode = 2
 text = "Create & Edit"
 
-[node name="Control3" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer3"]
+[node name="Control3" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer3" unique_id=1835040777]
 layout_mode = 2
 size_flags_horizontal = 3
 
