@@ -17,6 +17,7 @@ enum ChangeType {
 const VERSION_KEY := &"version"
 const PROJECT_NAME_KEY := &"project_name"
 const OBJECTS_KEY := &"objects"
+const PREF_FILENAME := &"preferences.json"
 
 const SprinklerScene : PackedScene = preload("res://scenes/world_objects/fluid_objects/Sprinkler/Sprinkler.tscn")
 const ImageNodeScene : PackedScene = preload("res://scenes/world_objects/ImageNode/ImageNode.tscn")
@@ -35,7 +36,7 @@ var has_edits = false :
 		_has_edits_since_auto_save = value
 		if old_value != has_edits and not _suppress_self_edit_signals:
 			has_edits_changed.emit(has_edits)
-var layout_pref := LayoutPreferences.new()
+var pref := ProjectPreferences.new()
 var fsys : FSystem = FSystem.new()
 
 var _auto_save_timer := Timer.new()
@@ -150,11 +151,15 @@ func open(dir: String) -> bool:
 	deserialize(project_data, dir)
 	has_edits = false
 	
-	# load layout preferences
-	var layout_pref_filepath = dir.path_join('layout_pref.json')
-	var layout_pref_data = FileUtils.from_json_file(layout_pref_filepath)
-	if layout_pref_data:
-		layout_pref.deserialize(layout_pref_data)
+	# attempt to load project preferences
+	var pref_filepath = dir.path_join(PREF_FILENAME)
+	if ! FileAccess.file_exists(pref_filepath):
+		# fallback to legacy file path
+		push_warning('falling back to legacy preferences file ...')
+		pref_filepath = dir.path_join('layout_pref.json')
+	var pref_data = FileUtils.from_json_file(pref_filepath)
+	if pref_data:
+		pref.deserialize(pref_data)
 	
 	opened.emit()
 	return true
@@ -164,8 +169,8 @@ func save() -> bool:
 
 func save_preferences() -> void:
 	# save layout preferences
-	var layout_pref_filepath = project_path.path_join('layout_pref.json')
-	FileUtils.to_json_file(layout_pref.serialize(), layout_pref_filepath)
+	var pref_filepath = project_path.path_join(PREF_FILENAME)
+	FileUtils.to_json_file(pref.serialize(), pref_filepath)
 
 func save_as(dir: String) -> bool:
 	if DirAccess.make_dir_recursive_absolute(dir) != OK:

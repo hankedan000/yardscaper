@@ -1,5 +1,5 @@
 extends Object
-class_name LayoutPreferences
+class_name ProjectPreferences
 
 const PROP_KEY_SHOW_GRID = &"show_grid"
 const PROP_KEY_SHOW_ORIGIN = &"show_origin"
