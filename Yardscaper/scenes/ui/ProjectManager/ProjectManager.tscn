@@ -59,7 +59,18 @@ visible = false
 exclusive = true
 
 [node name="RecoverProjectDialog" parent="." unique_id=40021843 instance=ExtResource("6_8w3w3")]
+oversampling_override = 1.0
 visible = false
+
+[node name="MigrateConfirmationDialog" type="ConfirmationDialog" parent="." unique_id=807636574]
+oversampling_override = 1.0
+title = "Confirm Project Migration..."
+size = Vector2i(500, 158)
+unresizable = true
+popup_window = true
+ok_button_text = "Migrate"
+dialog_text = "This project needs to be migrated to the current Yardscaper version. This process is irreversible. It's recommended that you make a backup copy before continuing."
+dialog_autowrap = true
 
 [node name="GithubRequest" parent="." unique_id=1088742658 instance=ExtResource("11_r52mt")]
 
@@ -160,6 +171,7 @@ label_settings = ExtResource("10_1eadb")
 [connection signal="project_renamed" from="RenameProjectDialog" to="." method="_on_rename_project_dialog_project_renamed"]
 [connection signal="no" from="RecoverProjectDialog" to="." method="_on_recover_project_dialog_no"]
 [connection signal="yes" from="RecoverProjectDialog" to="." method="_on_recover_project_dialog_yes"]
+[connection signal="confirmed" from="MigrateConfirmationDialog" to="." method="_on_migrate_confirmation_dialog_confirmed"]
 [connection signal="received_latest_release" from="GithubRequest" to="." method="_on_github_request_received_latest_release"]
 [connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/TopButtonBar/CreateProjectButton" to="." method="_on_create_project_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/MainPanel/VBoxContainer/TopButtonBar/ImportProjectButton" to="." method="_on_import_project_button_pressed"]

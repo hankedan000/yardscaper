@@ -7,6 +7,7 @@ class_name BootMenu
 @onready var create_project_dialog := $CreateProjectDialog
 @onready var rename_project_dialog := $RenameProjectDialog
 @onready var recover_project_dialog := $RecoverProjectDialog
+@onready var migrate_confirm_dialog := $MigrateConfirmationDialog
 @onready var github_request : GithubRequest = $GithubRequest
 @onready var previous_projects := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/ScrollContainer/PreviousProjects
 @onready var open_button := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/OpenButton
@@ -14,6 +15,8 @@ class_name BootMenu
 @onready var remove_button := $VBoxContainer/MainPanel/VBoxContainer/HBoxContainer/VBoxContainer/RemoveButton
 @onready var new_version_label : RichTextLabel = $VBoxContainer/BottomBar/NewVersionLabel
 @onready var version_label := $VBoxContainer/BottomBar/VersionLabel
+
+var _migrator := ProjectMigrator.new()
 
 var selected_project_item : PreviousProjectItem = null:
 	set(value):
@@ -62,11 +65,21 @@ func _on_recent_project_selected(item: PreviousProjectItem):
 
 func _on_recent_project_opened(item: PreviousProjectItem):
 	if not item.has_recovery_data:
-		# open project immediately
-		Globals.main.open_project_editor(item.get_project_path())
+		_check_for_migration_before_open(item)
 	else:
 		# ask user if they want to recover auto-saved data
 		recover_project_dialog.popup_centered()
+
+func _check_for_migration_before_open(item: PreviousProjectItem) -> void:
+	var project_dir = item.get_project_path()
+	
+	# if migrations are required, ask for user permission before continuing
+	if _migrator.needs_migration_to_current(project_dir):
+		migrate_confirm_dialog.popup_centered()
+		return
+	
+	# no migrations requied, so just open it now
+	Globals.main.open_project_editor(project_dir)
 
 func _on_import_project_dialog_dir_selected(dir: String) -> void:
 	# use get_quick_info() to make sure project is valid
@@ -109,18 +122,31 @@ func _on_new_version_label_meta_clicked(meta: Variant) -> void:
 	OS.shell_open(meta)
 
 func _on_recover_project_dialog_yes() -> void:
-	if selected_project_item == null:
-		push_warning("selected_project_item is null")
+	if ! is_instance_valid(selected_project_item):
+		push_warning("selected_project_item is invalid")
+		return
 	
 	# recover the data and then open the project
 	Project.recover_from_auto_save(selected_project_item.get_project_path())
-	Globals.main.open_project_editor(selected_project_item.get_project_path())
+	_check_for_migration_before_open(selected_project_item)
 
 func _on_recover_project_dialog_no() -> void:
-	if selected_project_item == null:
-		push_warning("selected_project_item is null")
+	if ! is_instance_valid(selected_project_item):
+		push_warning("selected_project_item is invalid")
+		return
 	
 	# user doesn't want to recover from auto-save data, so discard it and then
 	# open the project per-usual.
 	Project.static_discard_unsaved_edits(selected_project_item.get_project_path())
-	Globals.main.open_project_editor(selected_project_item.get_project_path())
+	_check_for_migration_before_open(selected_project_item)
+
+func _on_migrate_confirmation_dialog_confirmed() -> void:
+	if ! is_instance_valid(selected_project_item):
+		push_warning("selected_project_item is invalid")
+		return
+	
+	var project_dir := selected_project_item.get_project_path()
+	if _migrator.migrate_to_current(project_dir):
+		Globals.main.open_project_editor(project_dir)
+	else:
+		push_warning("migration failed!")
