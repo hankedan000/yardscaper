@@ -24,10 +24,11 @@ func _on_export_button_pressed():
 		view_opt = Globals.ViewOptions.Zone
 	
 	var zone = zone_option.get_item_id(zone_option.selected)
-	var filename = file_lineedit.text
+	var filepath = file_lineedit.text
 	
 	hide()
-	export.emit(view_opt, zone, filename)
+	TheProject.pref.last_img_export_path = filepath
+	export.emit(view_opt, zone, filepath)
 
 func _on_zone_view_check_box_toggled(toggled_on):
 	zone_selection.visible = toggled_on
@@ -43,11 +44,18 @@ func _on_about_to_popup() -> void:
 	if file_lineedit.text.length() > 0:
 		return
 	
-	var default_file_name := TheProject.project_name + ".jpg"
-	var default_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
-	file_dialog.current_dir = default_dir
-	file_dialog.current_file = default_file_name
-	file_lineedit.text = default_dir.path_join(default_file_name)
+	if FileAccess.file_exists(TheProject.pref.last_img_export_path):
+		# setup using historical last export path
+		var filepath := TheProject.pref.last_img_export_path
+		file_dialog.current_dir = filepath.get_base_dir()
+		file_dialog.current_file = filepath.get_file()
+		file_lineedit.text = filepath
+	else:
+		var default_file_name := TheProject.project_name + ".jpg"
+		var default_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
+		file_dialog.current_dir = default_dir
+		file_dialog.current_file = default_file_name
+		file_lineedit.text = default_dir.path_join(default_file_name)
 	
 	# ----------------------------------
 	# setup zoned export UI elements

@@ -12,6 +12,7 @@ const PROP_KEY_SHOW_PIPE_FLOW_DIRECTION = &"show_pipe_flow_direction"
 const PROP_KEY_CAMERA_POS = &"camera_pos"
 const PROP_KEY_ZOOM = &"zoom"
 const PROP_KEY_GRID_MAJOR_SPACING = &"grid_major_spacing_ft"
+const PROP_KEY_LAST_IMG_EXPORT_PATH = &"last_img_export_path"
 
 signal view_show_state_changed(prop_key: StringName, new_value: bool)
 
@@ -66,6 +67,7 @@ var show_pipe_flow_direction = false:
 var camera_pos := Vector2()
 var zoom = 1.0
 var grid_major_spacing_ft := Vector2(5, 5)
+var last_img_export_path := ""
 
 func serialize() -> Dictionary:
 	return {
@@ -79,7 +81,8 @@ func serialize() -> Dictionary:
 		PROP_KEY_SHOW_PIPE_FLOW_DIRECTION : show_pipe_flow_direction,
 		PROP_KEY_CAMERA_POS : Utils.vect2_to_pair(camera_pos),
 		PROP_KEY_ZOOM : zoom,
-		PROP_KEY_GRID_MAJOR_SPACING : Utils.vect2_to_pair(grid_major_spacing_ft)
+		PROP_KEY_GRID_MAJOR_SPACING : Utils.vect2_to_pair(grid_major_spacing_ft),
+		PROP_KEY_LAST_IMG_EXPORT_PATH : last_img_export_path
 	}
 
 func deserialize(obj: Dictionary) -> void:
@@ -94,3 +97,4 @@ func deserialize(obj: Dictionary) -> void:
 	camera_pos = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_CAMERA_POS, [0,0]))
 	zoom = DictUtils.get_w_default(obj, PROP_KEY_ZOOM, 1.0)
 	grid_major_spacing_ft = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_GRID_MAJOR_SPACING, [5,5]))
+	last_img_export_path = DictUtils.get_w_default(obj, PROP_KEY_LAST_IMG_EXPORT_PATH, "")
