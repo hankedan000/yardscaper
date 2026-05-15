@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://g5yh8tb0v6bk"]
+[gd_scene format=3 uid="uid://g5yh8tb0v6bk"]
 
 [ext_resource type="PackedScene" uid="uid://srclla445e3s" path="res://scenes/world_objects/fluid_objects/BaseNode/BaseNode.tscn" id="1_j5xd6"]
 [ext_resource type="Script" uid="uid://drhqmuvjirrnd" path="res://scenes/world_objects/fluid_objects/Sprinkler/Sprinkler.gd" id="2_u6dch"]
@@ -13,6 +13,7 @@ const LINE_WIDTH_BASE_PX = 1.0
 
 var _sprink : Sprinkler = null
 var _line_width : float = LINE_WIDTH_BASE_PX
+var _outline_width : float = Globals.OUTLINE_BASE_WIDTH_PX
 
 func _ready() -> void:
 	super._ready()
@@ -36,7 +37,7 @@ func _draw():
 	# draw indicator circle
 	if _sprink.picked or _sprink.hovering:
 		var indic_color = Globals.SELECT_COLOR if _sprink.picked else Globals.HOVER_COLOR
-		draw_circle(center, body_radius_px * 2, indic_color)
+		draw_circle(center, body_radius_px + _outline_width, indic_color)
 	# draw body
 	draw_circle(center, body_radius_px, _sprink.body_color)
 	
@@ -48,20 +49,21 @@ func _draw():
 
 func on_zoom_changed(new_zoom: float, _inv_scale: Vector2) -> void:
 	_line_width = LINE_WIDTH_BASE_PX / new_zoom
+	_outline_width = Globals.OUTLINE_BASE_WIDTH_PX / new_zoom
 	queue_redraw()
 "
 
-[node name="Sprinkler" instance=ExtResource("1_j5xd6")]
+[node name="Sprinkler" unique_id=818950719 instance=ExtResource("1_j5xd6")]
 script = ExtResource("2_u6dch")
 
-[node name="ManualDrawLayer" parent="." index="0" instance=ExtResource("3_ur1sa")]
+[node name="ManualDrawLayer" parent="." index="0" unique_id=1616029159 instance=ExtResource("3_ur1sa")]
 script = SubResource("GDScript_m2jro")
 
-[node name="RotationHandle" parent="." index="1" instance=ExtResource("3_v1ovd")]
+[node name="RotationHandle" parent="." index="1" unique_id=926015453 instance=ExtResource("3_v1ovd")]
 visible = false
 modulate = Color(0.225892, 1, 0.387758, 1)
 
-[node name="SweepHandle" parent="." index="2" instance=ExtResource("3_v1ovd")]
+[node name="SweepHandle" parent="." index="2" unique_id=1290050049 instance=ExtResource("3_v1ovd")]
 visible = false
 
 [connection signal="picked_state_changed" from="." to="." method="_on_picked_state_changed"]

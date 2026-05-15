@@ -124,11 +124,9 @@ func _draw() -> void:
 		point_a_handle.visible = picked && ! position_locked
 		point_b_handle.visible = picked && ! position_locked
 	
-	const OUTLINE_PX := 2
-	var diameter_px := Utils.ft_to_px(diameter_ft)
-	
 	# update position/shape of the collision rectangle
 	# probably not the best place to do this, but convenient and efficient
+	var diameter_px := Utils.ft_to_px(diameter_ft)
 	var midpoint = mid_point()
 	var delta_vec = point_b - point_a
 	_coll_rect.size.x = delta_vec.length()
@@ -136,13 +134,7 @@ func _draw() -> void:
 	pick_area.rotation = delta_vec.angle()
 	pick_area.position = midpoint
 	
-	# draw indicator outline
-	if picked or hovering:
-		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
-		draw_line(point_a, point_b, indic_color, diameter_px + (OUTLINE_PX * 2))
-	
-	# draw the pipe body
-	draw_line(point_a, point_b, pipe_color, diameter_px)
+	draw_layer.queue_redraw()
 
 func get_type_name() -> StringName:
 	return TypeNames.PIPE

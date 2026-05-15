@@ -1,18 +1,47 @@
-[gd_scene load_steps=3 format=3 uid="uid://cscoufmvhk6tk"]
+[gd_scene format=3 uid="uid://cscoufmvhk6tk"]
 
 [ext_resource type="PackedScene" uid="uid://db8wvn8xh27x0" path="res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn" id="1_m6rx2"]
 [ext_resource type="Script" uid="uid://bpl5kf4b2noyc" path="res://scenes/world_objects/fluid_objects/Pipe/Pipe.gd" id="2_y5374"]
 
-[node name="Pipe" groups=["pipes"] instance=ExtResource("1_m6rx2")]
+[sub_resource type="GDScript" id="GDScript_4hxwg"]
+script/source = "extends Gizmo
+
+var _pipe : Pipe = null
+var _outline_width : float = Globals.OUTLINE_BASE_WIDTH_PX
+
+func _ready() -> void:
+	super._ready()
+	_pipe = get_parent() as Pipe
+
+func _draw():
+	var diameter_px := Utils.ft_to_px(_pipe.diameter_ft)
+	
+	# draw indicator outline
+	if _pipe.picked or _pipe.hovering:
+		var indic_color = Globals.SELECT_COLOR if _pipe.picked else Globals.HOVER_COLOR
+		draw_line(_pipe.point_a, _pipe.point_b, indic_color, diameter_px + (_outline_width * 2))
+	
+	# draw the pipe body
+	draw_line(_pipe.point_a, _pipe.point_b, _pipe.pipe_color, diameter_px)
+
+func on_zoom_changed(new_zoom: float, _inv_scale: Vector2) -> void:
+	_outline_width = Globals.OUTLINE_BASE_WIDTH_PX / new_zoom
+	queue_redraw()
+"
+
+[node name="Pipe" unique_id=1813883998 groups=["pipes"] instance=ExtResource("1_m6rx2")]
 script = ExtResource("2_y5374")
 
-[node name="PointA_Handle" parent="." index="1"]
+[node name="ManualDrawLayer" parent="." index="0" unique_id=803222316]
+script = SubResource("GDScript_4hxwg")
+
+[node name="PointA_Handle" parent="." index="2" unique_id=579783683]
 modulate = Color(0.556863, 0.937255, 0.592157, 1)
 label_text_mode = 1
 label_show_mode = 5
 magnetic_physics_mask = 4
 
-[node name="PointB_Handle" parent="." index="2"]
+[node name="PointB_Handle" parent="." index="3" unique_id=586983700]
 modulate = Color(1, 0.463814, 0.411516, 1)
 label_text_mode = 1
 label_show_mode = 5

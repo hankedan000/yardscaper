@@ -1,12 +1,14 @@
-[gd_scene load_steps=4 format=3 uid="uid://b6mbyigugbb1q"]
+[gd_scene format=3 uid="uid://b6mbyigugbb1q"]
 
 [ext_resource type="PackedScene" uid="uid://srclla445e3s" path="res://scenes/world_objects/fluid_objects/BaseNode/BaseNode.tscn" id="1_x3idi"]
 [ext_resource type="Script" uid="uid://bkq5ce535y4uv" path="res://scenes/world_objects/fluid_objects/PipeNode/PipeNode.gd" id="2_a54dx"]
+[ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="3_ur2ta"]
 
 [sub_resource type="GDScript" id="GDScript_evpk0"]
 script/source = "extends Gizmo
 
 var _pipe_node : PipeNode = null
+var _outline_width : float = Globals.OUTLINE_BASE_WIDTH_PX
 
 func _ready() -> void:
 	super._ready()
@@ -19,16 +21,17 @@ func _draw():
 	# draw indicator circle
 	if _pipe_node.picked or _pipe_node.hovering:
 		var indic_color = Globals.SELECT_COLOR if _pipe_node.picked else Globals.HOVER_COLOR
-		draw_circle(center, body_radius_px * 2, indic_color)
+		draw_circle(center, body_radius_px + _outline_width, indic_color)
 	
 	draw_circle(center, body_radius_px, Globals.DEFAULT_PIPE_NODE_COLOR)
 
-func on_zoom_changed(_new_zoom: float, _inv_scale: Vector2) -> void:
+func on_zoom_changed(new_zoom: float, _inv_scale: Vector2) -> void:
+	_outline_width = Globals.OUTLINE_BASE_WIDTH_PX / new_zoom
 	queue_redraw()
 "
 
-[node name="PipeNode" instance=ExtResource("1_x3idi")]
+[node name="PipeNode" unique_id=891395215 instance=ExtResource("1_x3idi")]
 script = ExtResource("2_a54dx")
 
-[node name="ManualDrawLayer" type="Node2D" parent="." index="0"]
+[node name="ManualDrawLayer" parent="." index="0" unique_id=347084292 instance=ExtResource("3_ur2ta")]
 script = SubResource("GDScript_evpk0")

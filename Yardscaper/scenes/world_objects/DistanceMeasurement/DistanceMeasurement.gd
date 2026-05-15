@@ -28,6 +28,7 @@ var point_b := Vector2():
 	get():
 		return point_b_handle.position
 
+@onready var draw_layer := $ManualDrawLayer
 @onready var point_a_handle : EditorHandle = $PointA_Handle
 @onready var point_b_handle : EditorHandle = $PointB_Handle
 
@@ -67,13 +68,7 @@ func _draw():
 	pick_area.rotation = delta_vec.angle()
 	pick_area.position = midpoint
 	
-	# draw indicator outline
-	if picked or hovering:
-		var indic_color = Globals.SELECT_COLOR if picked else Globals.HOVER_COLOR
-		draw_line(point_a, point_b, indic_color, 5)
-	
-	# draw measurement line
-	draw_line(point_a, point_b, color, 1)
+	draw_layer.queue_redraw()
 
 func _process(_delta: float) -> void:
 	if _handle_being_moved:

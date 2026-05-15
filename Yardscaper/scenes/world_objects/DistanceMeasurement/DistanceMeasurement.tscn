@@ -1,22 +1,52 @@
-[gd_scene load_steps=4 format=3 uid="uid://db8wvn8xh27x0"]
+[gd_scene format=3 uid="uid://db8wvn8xh27x0"]
 
 [ext_resource type="PackedScene" uid="uid://yvp357wae8et" path="res://scenes/world_objects/WorldObject/WorldObject.tscn" id="1_gjd6h"]
 [ext_resource type="Script" uid="uid://c7rjk8cbc0s1e" path="res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.gd" id="2_skq7c"]
 [ext_resource type="PackedScene" uid="uid://dy0t3omtev6y4" path="res://scenes/ui/gizmos/EditorHandle/EditorHandle.tscn" id="3_4r0ad"]
+[ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="3_ehygo"]
 
-[node name="DistanceMeasurement" instance=ExtResource("1_gjd6h")]
+[sub_resource type="GDScript" id="GDScript_ehygo"]
+script/source = "extends Gizmo
+
+const LINE_WIDTH := 1
+
+var _measurement : DistanceMeasurement = null
+var _outline_width : float = Globals.OUTLINE_BASE_WIDTH_PX
+
+func _ready() -> void:
+	super._ready()
+	_measurement = get_parent() as DistanceMeasurement
+
+func _draw():
+	# draw indicator outline
+	if _measurement.picked or _measurement.hovering:
+		var indic_color = Globals.SELECT_COLOR if _measurement.picked else Globals.HOVER_COLOR
+		draw_line(_measurement.point_a, _measurement.point_b, indic_color, LINE_WIDTH + (_outline_width * 2))
+	
+	# draw measurement line
+	draw_line(_measurement.point_a, _measurement.point_b, _measurement.color, LINE_WIDTH)
+
+func on_zoom_changed(new_zoom: float, _inv_scale: Vector2) -> void:
+	_outline_width = Globals.OUTLINE_BASE_WIDTH_PX / new_zoom
+	queue_redraw()
+"
+
+[node name="DistanceMeasurement" unique_id=534920444 instance=ExtResource("1_gjd6h")]
 script = ExtResource("2_skq7c")
 
-[node name="InfoLabel" parent="." index="0"]
+[node name="ManualDrawLayer" parent="." index="0" unique_id=803222316 instance=ExtResource("3_ehygo")]
+script = SubResource("GDScript_ehygo")
+
+[node name="InfoLabel" parent="." index="1"]
 visible = true
 vert_alignment = 2
 
-[node name="PointA_Handle" parent="." index="1" instance=ExtResource("3_4r0ad")]
+[node name="PointA_Handle" parent="." index="2" unique_id=579783683 instance=ExtResource("3_4r0ad")]
 visible = false
 pressed_type = 1
 hover_type = 1
 
-[node name="PointB_Handle" parent="." index="2" instance=ExtResource("3_4r0ad")]
+[node name="PointB_Handle" parent="." index="3" unique_id=586983700 instance=ExtResource("3_4r0ad")]
 visible = false
 pressed_type = 1
 hover_type = 1
