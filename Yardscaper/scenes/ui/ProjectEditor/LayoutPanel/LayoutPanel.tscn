@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://xyp0got3c5dp"]
+[gd_scene format=3 uid="uid://xyp0got3c5dp"]
 
 [ext_resource type="Script" uid="uid://uiairi0qvysh" path="res://scenes/ui/ProjectEditor/LayoutPanel/LayoutPanel.gd" id="1_o5pl2"]
 [ext_resource type="PackedScene" uid="uid://lmlsf61h6k62" path="res://scenes/ui/dialogs/SolveSummaryDialog/SolveSummaryDialog.tscn" id="2_pkvch"]
@@ -30,7 +30,7 @@
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60egv"]
 bg_color = Color(0.105882, 0.113725, 0.12549, 1)
 
-[node name="LayoutPanel" type="PanelContainer"]
+[node name="LayoutPanel" type="PanelContainer" unique_id=2142664960]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -39,13 +39,13 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_60egv")
 script = ExtResource("1_o5pl2")
 
-[node name="PreferenceUpdateTimer" type="Timer" parent="."]
+[node name="PreferenceUpdateTimer" type="Timer" parent="." unique_id=1703705046]
 autostart = true
 
-[node name="ToolTipTimer" type="Timer" parent="."]
+[node name="ToolTipTimer" type="Timer" parent="." unique_id=1457106685]
 one_shot = true
 
-[node name="ImgDialog" type="FileDialog" parent="."]
+[node name="ImgDialog" type="FileDialog" parent="." unique_id=619697271]
 title = "Open a File"
 size = Vector2i(900, 600)
 ok_button_text = "Open"
@@ -53,66 +53,66 @@ file_mode = 0
 access = 2
 filters = PackedStringArray("*.jpg", "*.png", "*.bmp", "*.jpeg")
 
-[node name="ImageImportWizard" parent="." instance=ExtResource("5_3cenq")]
+[node name="ImageImportWizard" parent="." unique_id=1548144694 instance=ExtResource("5_3cenq")]
 visible = false
 
-[node name="GridSpacingDialog" parent="." instance=ExtResource("6_lbneg")]
+[node name="GridSpacingDialog" parent="." unique_id=364195926 instance=ExtResource("6_lbneg")]
 visible = false
 
-[node name="SolveSummaryDialog" parent="." instance=ExtResource("2_pkvch")]
+[node name="SolveSummaryDialog" parent="." unique_id=628933883 instance=ExtResource("2_pkvch")]
 visible = false
 
-[node name="HSplitContainer" type="HSplitContainer" parent="."]
+[node name="HSplitContainer" type="HSplitContainer" parent="." unique_id=864600522]
 layout_mode = 2
 theme_override_constants/separation = 0
 theme_override_constants/autohide = 0
 
-[node name="LeftPane" type="TabContainer" parent="HSplitContainer"]
+[node name="LeftPane" type="TabContainer" parent="HSplitContainer" unique_id=1975499615]
 layout_mode = 2
 current_tab = 0
 tab_focus_mode = 0
 
-[node name="Properties" type="ScrollContainer" parent="HSplitContainer/LeftPane"]
+[node name="Properties" type="ScrollContainer" parent="HSplitContainer/LeftPane" unique_id=546774190]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_vertical = 3
 metadata/_tab_index = 0
 
-[node name="SprinklerPropertiesList" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("3_itpjk")]
+[node name="SprinklerPropertiesList" parent="HSplitContainer/LeftPane/Properties" unique_id=1966715534 instance=ExtResource("3_itpjk")]
 layout_mode = 2
 
-[node name="ImageNodePropertiesList" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("4_legmd")]
+[node name="ImageNodePropertiesList" parent="HSplitContainer/LeftPane/Properties" unique_id=582570184 instance=ExtResource("4_legmd")]
 visible = false
 layout_mode = 2
 
-[node name="PolygonNodePropertiesList" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("7_u58qy")]
+[node name="PolygonNodePropertiesList" parent="HSplitContainer/LeftPane/Properties" unique_id=451630597 instance=ExtResource("7_u58qy")]
 visible = false
 layout_mode = 2
 
-[node name="PipePropertyEditor" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("11_bx27v")]
+[node name="PipePropertyEditor" parent="HSplitContainer/LeftPane/Properties" unique_id=831125939 instance=ExtResource("11_bx27v")]
 visible = false
 layout_mode = 2
 
-[node name="PipeNodePropertyEditor" parent="HSplitContainer/LeftPane/Properties" instance=ExtResource("9_5qllo")]
+[node name="PipeNodePropertyEditor" parent="HSplitContainer/LeftPane/Properties" unique_id=1658273762 instance=ExtResource("9_5qllo")]
 visible = false
 layout_mode = 2
 
-[node name="Objects" parent="HSplitContainer/LeftPane" instance=ExtResource("5_p3ckg")]
+[node name="Objects" parent="HSplitContainer/LeftPane" unique_id=916242301 instance=ExtResource("5_p3ckg")]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="Layout" type="VBoxContainer" parent="HSplitContainer"]
+[node name="Layout" type="VBoxContainer" parent="HSplitContainer" unique_id=1600031219]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="LayoutToolbar" type="PanelContainer" parent="HSplitContainer/Layout"]
+[node name="LayoutToolbar" type="PanelContainer" parent="HSplitContainer/Layout" unique_id=1099795770]
 layout_mode = 2
 
-[node name="HBox" type="HBoxContainer" parent="HSplitContainer/Layout/LayoutToolbar"]
+[node name="HBox" type="HBoxContainer" parent="HSplitContainer/Layout/LayoutToolbar" unique_id=541211824]
 layout_mode = 2
 
-[node name="AddImage" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="AddImage" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=1885885464]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add an image."
@@ -121,7 +121,7 @@ theme = ExtResource("11_w0qvw")
 icon = ExtResource("10_7tkh4")
 icon_alignment = 1
 
-[node name="AddPolygon" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="AddPolygon" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=1573259847]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add a polygon."
@@ -130,7 +130,7 @@ theme = ExtResource("11_w0qvw")
 icon = ExtResource("12_0ook5")
 icon_alignment = 1
 
-[node name="AddDistMeasure" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="AddDistMeasure" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=1223312204]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add a measurement."
@@ -139,7 +139,7 @@ theme = ExtResource("11_w0qvw")
 icon = ExtResource("11_6kdtp")
 icon_alignment = 1
 
-[node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="AddSprinkler" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=2124204317]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add a sprinkler."
@@ -148,7 +148,7 @@ theme = ExtResource("11_w0qvw")
 icon = ExtResource("12_3shqv")
 icon_alignment = 1
 
-[node name="AddPipe" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="AddPipe" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=1441716976]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add a pipe."
@@ -157,7 +157,7 @@ theme = ExtResource("11_w0qvw")
 icon = ExtResource("13_j1tmu")
 icon_alignment = 1
 
-[node name="AddPipeNode" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="AddPipeNode" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=2002487409]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Add a pipe node."
@@ -166,10 +166,10 @@ theme = ExtResource("11_w0qvw")
 icon = ExtResource("13_ehprt")
 icon_alignment = 1
 
-[node name="VSeparator" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="VSeparator" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=1774780576]
 layout_mode = 2
 
-[node name="RemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="RemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=52598928]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Remove item(s)."
@@ -179,7 +179,7 @@ disabled = true
 icon = ExtResource("7_nx6cf")
 icon_alignment = 1
 
-[node name="PositionLockButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="PositionLockButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=1761743527]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Enable position lock on selected object(s)."
@@ -189,7 +189,7 @@ disabled = true
 icon = ExtResource("16_0llxi")
 icon_alignment = 1
 
-[node name="PositionUnlockButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="PositionUnlockButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=895863894]
 visible = false
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
@@ -199,16 +199,17 @@ theme = ExtResource("11_w0qvw")
 icon = ExtResource("17_pwsqd")
 icon_alignment = 1
 
-[node name="VSeparator2" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="VSeparator2" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=222200018]
 layout_mode = 2
 
-[node name="ViewMenuButton" type="MenuButton" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="ViewMenuButton" type="MenuButton" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=1005279829]
 layout_mode = 2
 text = "View"
 item_count = 4
 popup/item_0/text = "Show Origin"
 popup/item_0/checkable = 1
 popup/item_0/checked = true
+popup/item_0/id = 0
 popup/item_1/text = "Object Visibility"
 popup/item_1/id = 2
 popup/item_2/text = "Pipes"
@@ -216,7 +217,7 @@ popup/item_2/id = 4
 popup/item_3/text = "Grid"
 popup/item_3/id = 3
 
-[node name="ObjectsViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
+[node name="ObjectsViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton" unique_id=1663026375]
 size = Vector2i(173, 116)
 item_count = 5
 item_0/text = "Sprinklers"
@@ -240,21 +241,23 @@ item_4/checkable = 1
 item_4/checked = true
 item_4/id = 2
 
-[node name="PipeViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
+[node name="PipeViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton" unique_id=1530320898]
 auto_translate_mode = 1
 size = Vector2i(173, 116)
 item_count = 2
 item_0/text = "Show Flow Direction"
 item_0/checkable = 1
+item_0/id = 0
 item_1/text = "Colorize"
 item_1/id = 1
 
-[node name="PipeColorizePopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
+[node name="PipeColorizePopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton" unique_id=296247692]
 auto_translate_mode = 1
 size = Vector2i(173, 116)
 item_count = 3
 item_0/text = "Normal"
 item_0/checkable = 2
+item_0/id = 0
 item_1/text = "By pressure"
 item_1/checkable = 2
 item_1/id = 1
@@ -262,22 +265,23 @@ item_2/text = "By flow rate"
 item_2/checkable = 2
 item_2/id = 2
 
-[node name="GridViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton"]
+[node name="GridViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton" unique_id=1381675478]
 size = Vector2i(162, 100)
 item_count = 2
 item_0/text = "Show"
 item_0/checkable = 1
+item_0/id = 0
 item_1/text = "Spacing ..."
 item_1/id = 1
 
-[node name="VSeparator3" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="VSeparator3" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=570506336]
 layout_mode = 2
 
-[node name="CurveEditButtons" type="HBoxContainer" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="CurveEditButtons" type="HBoxContainer" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=1447880369]
 visible = false
 layout_mode = 2
 
-[node name="CurveCreateButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons"]
+[node name="CurveCreateButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons" unique_id=1185050909]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Create points."
@@ -287,7 +291,7 @@ button_group = ExtResource("18_emdii")
 icon = ExtResource("18_3j2nk")
 icon_alignment = 1
 
-[node name="CurveEditButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons"]
+[node name="CurveEditButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons" unique_id=442171638]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Edit points.
@@ -300,7 +304,7 @@ button_group = ExtResource("18_emdii")
 icon = ExtResource("20_pfhm2")
 icon_alignment = 1
 
-[node name="CurveRemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons"]
+[node name="CurveRemoveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons" unique_id=2015259489]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "Remove points."
@@ -310,10 +314,10 @@ button_group = ExtResource("18_emdii")
 icon = ExtResource("21_j3b3p")
 icon_alignment = 1
 
-[node name="VSeparator4" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons"]
+[node name="VSeparator4" type="VSeparator" parent="HSplitContainer/Layout/LayoutToolbar/HBox/CurveEditButtons" unique_id=283461814]
 layout_mode = 2
 
-[node name="SolveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox"]
+[node name="SolveButton" type="Button" parent="HSplitContainer/Layout/LayoutToolbar/HBox" unique_id=645488513]
 custom_minimum_size = Vector2(65, 0)
 layout_mode = 2
 tooltip_text = "Solve fluid system."
@@ -323,7 +327,7 @@ theme_override_constants/align_to_largest_stylebox = 0
 text = "Solve"
 icon = ExtResource("21_ueesn")
 
-[node name="WorldView" parent="HSplitContainer/Layout" instance=ExtResource("9_xrpqu")]
+[node name="WorldView" parent="HSplitContainer/Layout" unique_id=1250844960 instance=ExtResource("9_xrpqu")]
 layout_mode = 2
 size_flags_vertical = 3
 

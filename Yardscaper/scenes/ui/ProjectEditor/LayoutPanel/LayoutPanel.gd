@@ -143,7 +143,7 @@ func _set_all_cursors(ctrl: Control, cursor_shape: CursorShape) -> void:
 func _ready():
 	TheProject.node_changed.connect(_on_TheProject_node_changed)
 	TheProject.opened.connect(_on_TheProject_opened)
-	TheProject.layout_pref.view_show_state_changed.connect(_on_LayoutPref_view_show_state_changed)
+	TheProject.pref.view_show_state_changed.connect(_on_ProjectPref_view_show_state_changed)
 	_selection_controller.item_selected.connect(_on_selection_controller_item_selected)
 	_selection_controller.item_deselected.connect(_on_selection_controller_item_deselected)
 	sprink_prop_list.visible = false
@@ -543,53 +543,53 @@ func _on_TheProject_opened():
 	
 	# restore "View" options
 	var view_popup := view_menu_button.get_popup() as PopupMenu
-	var layout_prefs := TheProject.layout_pref
-	Utils.set_item_checked_by_id(view_popup, ViewMenuIds.ShowOrigin, layout_prefs.show_origin)
-	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Images, layout_prefs.show_images)
-	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Measurements, layout_prefs.show_measurements)
-	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Polygons, layout_prefs.show_polygons)
-	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Sprinklers, layout_prefs.show_sprinklers)
-	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Pipes, layout_prefs.show_pipes)
-	Utils.set_item_checked_by_id(pipe_view_popupmenu, PipeViewMenuIds.ShowFlowDirection, layout_prefs.show_pipe_flow_direction)
-	Utils.set_item_checked_by_id(grid_view_popupmenu, GridViewMenuIds.ShowGrid, layout_prefs.show_grid)
+	var prefs := TheProject.pref
+	Utils.set_item_checked_by_id(view_popup, ViewMenuIds.ShowOrigin, prefs.show_origin)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Images, prefs.show_images)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Measurements, prefs.show_measurements)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Polygons, prefs.show_polygons)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Sprinklers, prefs.show_sprinklers)
+	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Pipes, prefs.show_pipes)
+	Utils.set_item_checked_by_id(pipe_view_popupmenu, PipeViewMenuIds.ShowFlowDirection, prefs.show_pipe_flow_direction)
+	Utils.set_item_checked_by_id(grid_view_popupmenu, GridViewMenuIds.ShowGrid, prefs.show_grid)
 	
 	# restore world view preferences
-	world_view.show_grid = TheProject.layout_pref.show_grid
-	world_view.show_origin = TheProject.layout_pref.show_origin
-	world_view.major_spacing_ft = TheProject.layout_pref.grid_major_spacing_ft
-	world_view.camera2d.position = TheProject.layout_pref.camera_pos
-	world_view.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.layout_pref.zoom
-	world_view._on_pan_zoom_controller_zoom_changed(1.0, TheProject.layout_pref.zoom)
+	world_view.show_grid = TheProject.pref.show_grid
+	world_view.show_origin = TheProject.pref.show_origin
+	world_view.major_spacing_ft = TheProject.pref.grid_major_spacing_ft
+	world_view.camera2d.position = TheProject.pref.camera_pos
+	world_view.camera2d.zoom = Vector2(1.0, 1.0) * TheProject.pref.zoom
+	world_view._on_pan_zoom_controller_zoom_changed(1.0, TheProject.pref.zoom)
 
-func _on_LayoutPref_view_show_state_changed(property: StringName, new_value: bool) -> void:
+func _on_ProjectPref_view_show_state_changed(property: StringName, new_value: bool) -> void:
 	match property:
-		LayoutPreferences.PROP_KEY_SHOW_GRID:
+		ProjectPreferences.PROP_KEY_SHOW_GRID:
 			world_view.show_grid = new_value
-		LayoutPreferences.PROP_KEY_SHOW_ORIGIN:
+		ProjectPreferences.PROP_KEY_SHOW_ORIGIN:
 			world_view.show_origin = new_value
-		LayoutPreferences.PROP_KEY_SHOW_IMAGES:
+		ProjectPreferences.PROP_KEY_SHOW_IMAGES:
 			for obj in world_view.objects.get_children():
 				if obj is ImageNode:
 					obj.visible = new_value
-		LayoutPreferences.PROP_KEY_SHOW_MEASUREMENTS:
+		ProjectPreferences.PROP_KEY_SHOW_MEASUREMENTS:
 			for obj in world_view.objects.get_children():
 				if obj is Pipe:
 					pass # Pipes inherit from DistanceMeasurement, so ignore
 				elif obj is DistanceMeasurement:
 					obj.visible = new_value
-		LayoutPreferences.PROP_KEY_SHOW_POLYGONS:
+		ProjectPreferences.PROP_KEY_SHOW_POLYGONS:
 			for obj in world_view.objects.get_children():
 				if obj is PolygonNode:
 					obj.visible = new_value
-		LayoutPreferences.PROP_KEY_SHOW_SPRINKLERS:
+		ProjectPreferences.PROP_KEY_SHOW_SPRINKLERS:
 			for obj in world_view.objects.get_children():
 				if obj is Sprinkler:
 					obj.visible = new_value
-		LayoutPreferences.PROP_KEY_SHOW_PIPES:
+		ProjectPreferences.PROP_KEY_SHOW_PIPES:
 			for obj in world_view.objects.get_children():
 				if obj is Pipe:
 					obj.visible = new_value
-		LayoutPreferences.PROP_KEY_SHOW_PIPE_FLOW_DIRECTION:
+		ProjectPreferences.PROP_KEY_SHOW_PIPE_FLOW_DIRECTION:
 			for obj in world_view.objects.get_children():
 				if obj is Pipe:
 					obj.show_flow_arrows = new_value
@@ -626,8 +626,8 @@ func _on_world_obj_undoable_edit(undo_op: UndoController.UndoOperation) -> void:
 	TheProject.has_edits = true
 
 func _on_preference_update_timer_timeout():
-	TheProject.layout_pref.camera_pos = world_view.camera2d.position
-	TheProject.layout_pref.zoom = world_view.camera2d.zoom.x
+	TheProject.pref.camera_pos = world_view.camera2d.position
+	TheProject.pref.zoom = world_view.camera2d.zoom.x
 
 func _on_world_view_gui_input(event: InputEvent):
 	var evt_global_pos = event.global_position
@@ -736,7 +736,7 @@ func _on_view_menu_id_pressed(id: int) -> void:
 	match id:
 		ViewMenuIds.ShowOrigin:
 			world_view.show_origin = is_checked
-			TheProject.layout_pref.show_origin = is_checked
+			TheProject.pref.show_origin = is_checked
 
 func _on_pipe_view_popup_menu_id_pressed(id: int) -> void:
 	var idx := pipe_view_popupmenu.get_item_index(id) as int
@@ -747,7 +747,7 @@ func _on_pipe_view_popup_menu_id_pressed(id: int) -> void:
 	var is_checked := pipe_view_popupmenu.is_item_checked(idx) as bool
 	match id:
 		PipeViewMenuIds.ShowFlowDirection:
-			TheProject.layout_pref.show_pipe_flow_direction = is_checked
+			TheProject.pref.show_pipe_flow_direction = is_checked
 
 func _on_pipe_colorize_popup_menu_id_pressed(id: int) -> void:
 	for item_idx in range(pipe_colorize_popupmenu.item_count):
@@ -764,15 +764,15 @@ func _on_objects_view_popup_menu_id_pressed(id: int) -> void:
 	var is_checked := obj_view_popupmenu.is_item_checked(idx) as bool
 	match id:
 		ObjectViewMenuIds.Images:
-			TheProject.layout_pref.show_images = is_checked
+			TheProject.pref.show_images = is_checked
 		ObjectViewMenuIds.Measurements:
-			TheProject.layout_pref.show_measurements = is_checked
+			TheProject.pref.show_measurements = is_checked
 		ObjectViewMenuIds.Polygons:
-			TheProject.layout_pref.show_polygons = is_checked
+			TheProject.pref.show_polygons = is_checked
 		ObjectViewMenuIds.Sprinklers:
-			TheProject.layout_pref.show_sprinklers = is_checked
+			TheProject.pref.show_sprinklers = is_checked
 		ObjectViewMenuIds.Pipes:
-			TheProject.layout_pref.show_pipes = is_checked
+			TheProject.pref.show_pipes = is_checked
 
 func _on_grid_view_popup_menu_id_pressed(id: int) -> void:
 	var idx := grid_view_popupmenu.get_item_index(id) as int
@@ -784,14 +784,14 @@ func _on_grid_view_popup_menu_id_pressed(id: int) -> void:
 	match id:
 		GridViewMenuIds.ShowGrid:
 			world_view.show_grid = is_checked
-			TheProject.layout_pref.show_grid = is_checked
+			TheProject.pref.show_grid = is_checked
 		GridViewMenuIds.Spacing:
 			grid_spacing_dialog.setup(world_view.major_spacing_ft)
 			grid_spacing_dialog.popup_centered()
 
 func _on_grid_spacing_dialog_apply(major_spacing_ft: Vector2) -> void:
 	world_view.major_spacing_ft = major_spacing_ft
-	TheProject.layout_pref.grid_major_spacing_ft = major_spacing_ft
+	TheProject.pref.grid_major_spacing_ft = major_spacing_ft
 
 func _on_grid_spacing_dialog_cancel(original_major_spacing_ft: Vector2) -> void:
 	world_view.major_spacing_ft = original_major_spacing_ft
