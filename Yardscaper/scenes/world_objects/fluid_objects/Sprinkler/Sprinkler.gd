@@ -129,9 +129,19 @@ func _input(event: InputEvent) -> void:
 			rotation = _init_rotation + delta_angle
 		elif _handle_being_moved == sweep_handle:
 			sweep_deg = rad_to_deg(_init_sweep + delta_angle)
+		draw_layer.queue_redraw()
+		
 
 func _draw() -> void:
 	draw_layer.queue_redraw()
+	
+	# position the edit handles
+	var dist_radius := Utils.ft_to_px(dist_ft)
+	var sweep_rad := deg_to_rad(sweep_deg)
+	rot_handle.visible = picked
+	sweep_handle.visible = picked
+	rot_handle.position = Vector2(dist_radius, 0)
+	sweep_handle.position = Vector2(dist_radius, 0).rotated(sweep_rad)
 
 func get_type_name() -> StringName:
 	return TypeNames.SPRINKLER
@@ -153,9 +163,30 @@ func get_tooltip_text() -> String:
 	return text
 
 func get_bounding_box() -> Rect2:
-	var box_width := Utils.ft_to_px(max_dist_ft() * 2.0)
-	var box_size = Vector2(box_width, box_width)
-	return Rect2(get_visual_center() - box_size / 2.0, box_size)
+	var upper_left := Vector2()
+	var lower_right := Vector2()
+	const SWEEP_STEP := deg_to_rad(10)
+	const MAX_STEPS := (2 * PI) / SWEEP_STEP
+	var end_angle := rotation + deg_to_rad(sweep_deg)
+	var curr_angle := rotation
+	for i in range(MAX_STEPS):
+		var done := false
+		if curr_angle >= end_angle:
+			curr_angle = end_angle
+			done = true
+		var pos := Vector2(cos(curr_angle), sin(curr_angle))
+		upper_left.x = min(upper_left.x, pos.x)
+		upper_left.y = min(upper_left.y, pos.y)
+		lower_right.x = max(lower_right.x, pos.x)
+		lower_right.y = max(lower_right.y, pos.y)
+		curr_angle += SWEEP_STEP
+		if done:
+			break
+	
+	var radius_px := Utils.ft_to_px(dist_ft)
+	upper_left *= radius_px
+	lower_right *= radius_px
+	return Rect2(position + upper_left, lower_right - upper_left)
 
 func serialize() -> Dictionary:
 	var obj = super.serialize()

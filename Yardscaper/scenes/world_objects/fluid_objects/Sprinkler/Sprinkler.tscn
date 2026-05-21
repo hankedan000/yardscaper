@@ -20,7 +20,10 @@ func _ready() -> void:
 	_sprink = get_parent() as Sprinkler
 
 func _draw():
-	var stop_angle := deg_to_rad(_sprink.sweep_deg)
+	global_rotation = 0
+	
+	var start_angle := _sprink.rotation
+	var stop_angle := start_angle + deg_to_rad(_sprink.sweep_deg)
 	var water_color := Color.DODGER_BLUE
 	water_color.a = 0.5
 	var body_radius_px := Utils.ft_to_px(Sprinkler.BODY_RADIUS_FT)
@@ -29,23 +32,24 @@ func _draw():
 	var dist_radius := Utils.ft_to_px(_sprink.dist_ft)
 	var center := Vector2()
 	if _sprink.show_water:
-		Utils.draw_sector(self, center, dist_radius, 0, stop_angle, ARC_POINTS, water_color)
+		Utils.draw_sector(self, center, dist_radius,start_angle, stop_angle, ARC_POINTS, water_color)
 	if _sprink.show_min_dist:
-		draw_arc(center, min_radius, 0, stop_angle, ARC_POINTS, Color.RED, _line_width)
+		draw_arc(center, min_radius, start_angle, stop_angle, ARC_POINTS, Color.RED, _line_width)
 	if _sprink.show_max_dist:
-		draw_arc(center, max_radius, 0, stop_angle, ARC_POINTS, Color.LIME_GREEN, _line_width)
+		draw_arc(center, max_radius, start_angle, stop_angle, ARC_POINTS, Color.LIME_GREEN, _line_width)
 	# draw indicator circle
 	if _sprink.picked or _sprink.hovering:
+		const OUTLINE_WITH_BOX := false
 		var indic_color = Globals.SELECT_COLOR if _sprink.picked else Globals.HOVER_COLOR
-		draw_circle(center, body_radius_px + _outline_width, indic_color)
+		if OUTLINE_WITH_BOX:
+			var box := _sprink.get_bounding_box()
+			box.position -= _sprink.position
+			draw_rect(box, indic_color, false, _outline_width)
+		else:
+			draw_circle(center, body_radius_px + _outline_width, indic_color)
+	
 	# draw body
 	draw_circle(center, body_radius_px, _sprink.body_color)
-	
-	# position the edit handles
-	_sprink.rot_handle.visible = _sprink.picked
-	_sprink.sweep_handle.visible = _sprink.picked
-	_sprink.rot_handle.position = Vector2(dist_radius, 0)
-	_sprink.sweep_handle.position = Vector2(dist_radius, 0).rotated(stop_angle)
 
 func on_zoom_changed(new_zoom: float, _inv_scale: Vector2) -> void:
 	_line_width = LINE_WIDTH_BASE_PX / new_zoom
