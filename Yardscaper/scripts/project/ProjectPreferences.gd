@@ -16,6 +16,10 @@ const PROP_KEY_LAST_IMG_EXPORT_PATH = &"last_img_export_path"
 
 signal view_show_state_changed(prop_key: StringName, new_value: bool)
 
+enum PipeColorizeType {
+	Normal, ByPressure, ByFlow
+}
+
 var show_grid = true:
 	set(value):
 		if show_grid == value:
@@ -64,6 +68,7 @@ var show_pipe_flow_direction = false:
 			return
 		show_pipe_flow_direction = value
 		view_show_state_changed.emit(PROP_KEY_SHOW_PIPE_FLOW_DIRECTION, value)
+var pipe_colorize_type : PipeColorizeType = PipeColorizeType.ByFlow
 var camera_pos := Vector2()
 var zoom = 1.0
 var grid_major_spacing_ft := Vector2(5, 5)

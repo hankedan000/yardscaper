@@ -307,3 +307,11 @@ static func get_children_in_group(node: Node, group_name: StringName, recursive:
 		if recursive:
 			result.append_array(get_children_in_group(child, group_name, true))
 	return result
+
+static func ratio(min_value: float, max_value: float, value: float) -> float:
+	if value < min_value:
+		return 0.0
+	elif value > max_value:
+		return 1.0
+	else:
+		return (value - min_value) / (max_value - min_value)
