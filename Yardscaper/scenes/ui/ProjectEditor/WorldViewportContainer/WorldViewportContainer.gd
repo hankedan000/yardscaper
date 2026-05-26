@@ -82,6 +82,11 @@ func reorder_world_object(from_idx: int, to_idx: int) -> bool:
 	world_object_reordered.emit(from_idx, to_idx)
 	return true
 
+func queue_redraw_pipes() -> void:
+	for obj in objects.get_children():
+		if obj is Pipe:
+			obj.queue_redraw()
+
 func get_zoom() -> float:
 	return camera2d.zoom.x
 

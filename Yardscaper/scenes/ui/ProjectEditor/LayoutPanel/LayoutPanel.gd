@@ -71,6 +71,12 @@ enum GridViewMenuIds {
 	Spacing = 1
 }
 
+enum PipeColorizeMenuIds {
+	Normal = 0,
+	ByPressure = 1,
+	ByFlow = 2
+}
+
 var mode = Mode.Idle:
 	set(value):
 		var adds_disabled = value != Mode.Idle
@@ -552,6 +558,15 @@ func _on_TheProject_opened():
 	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Pipes, prefs.show_pipes)
 	Utils.set_item_checked_by_id(pipe_view_popupmenu, PipeViewMenuIds.ShowFlowDirection, prefs.show_pipe_flow_direction)
 	Utils.set_item_checked_by_id(grid_view_popupmenu, GridViewMenuIds.ShowGrid, prefs.show_grid)
+	match prefs.pipe_colorize_type:
+		ProjectPreferences.PipeColorizeType.Normal:
+			Utils.set_item_checked_by_id(pipe_colorize_popupmenu, PipeColorizeMenuIds.Normal, true)
+		ProjectPreferences.PipeColorizeType.ByPressure:
+			Utils.set_item_checked_by_id(pipe_colorize_popupmenu, PipeColorizeMenuIds.ByPressure, true)
+		ProjectPreferences.PipeColorizeType.ByFlow:
+			Utils.set_item_checked_by_id(pipe_colorize_popupmenu, PipeColorizeMenuIds.ByFlow, true)
+		_: # default cause
+			Utils.set_item_checked_by_id(pipe_colorize_popupmenu, PipeColorizeMenuIds.Normal, true)
 	
 	# restore world view preferences
 	world_view.show_grid = TheProject.pref.show_grid
@@ -754,6 +769,15 @@ func _on_pipe_colorize_popup_menu_id_pressed(id: int) -> void:
 		pipe_colorize_popupmenu.set_item_checked(item_idx, false)
 	var idx := pipe_colorize_popupmenu.get_item_index(id) as int
 	pipe_colorize_popupmenu.toggle_item_checked(idx)
+	
+	match id:
+		PipeColorizeMenuIds.Normal:
+			TheProject.pref.pipe_colorize_type = ProjectPreferences.PipeColorizeType.Normal
+		PipeColorizeMenuIds.ByPressure:
+			TheProject.pref.pipe_colorize_type = ProjectPreferences.PipeColorizeType.ByPressure
+		PipeColorizeMenuIds.ByFlow:
+			TheProject.pref.pipe_colorize_type = ProjectPreferences.PipeColorizeType.ByFlow
+	world_view.queue_redraw_pipes()
 
 func _on_objects_view_popup_menu_id_pressed(id: int) -> void:
 	var idx := obj_view_popupmenu.get_item_index(id) as int
@@ -833,6 +857,10 @@ func _on_solve_button_pressed() -> void:
 	
 	# display results to user
 	solve_summary_dialog.show_summary(solve_time_msec, res)
+	
+	# redraw pipe colors after solving
+	if TheProject.pref.pipe_colorize_type != ProjectPreferences.PipeColorizeType.Normal:
+		world_view.queue_redraw_pipes()
 
 func _on_solve_summary_dialog_entity_clicked(fentity: FEntity) -> void:
 	var wobj := Utils.get_wobj_from_fentity(fentity)
