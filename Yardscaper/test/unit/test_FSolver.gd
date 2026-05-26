@@ -30,7 +30,7 @@ func test_constraints_2pipes_1subsys():
 	var sys0 := systems[0]
 	assert_eq(sys0.unknown_vars.size(), 8)
 	assert_eq(sys0.equations.size(), 5)
-	assert_eq(sys0.constrain_type(), FSolver.ConstrainType.Under)
+	assert_eq(sys0.constrain_type(), FSubSystem.ConstrainType.Under)
 	
 	fsys.clear()
 
@@ -61,12 +61,12 @@ func test_constraints_2pipes_2subsys():
 	var sys0 := systems[0]
 	assert_eq(sys0.unknown_vars.size(), 5)
 	assert_eq(sys0.equations.size(), 2)
-	assert_eq(sys0.constrain_type(), FSolver.ConstrainType.Under)
+	assert_eq(sys0.constrain_type(), FSubSystem.ConstrainType.Under)
 	
 	var sys1 := systems[1]
 	assert_eq(sys1.unknown_vars.size(), 5)
 	assert_eq(sys1.equations.size(), 3)
-	assert_eq(sys1.constrain_type(), FSolver.ConstrainType.Under)
+	assert_eq(sys1.constrain_type(), FSubSystem.ConstrainType.Under)
 
 func test_make_sub_systems_3pipes_1subsys():
 	#           p0              p1
@@ -107,7 +107,7 @@ func test_make_sub_systems_3pipes_1subsys():
 	var sys0 := systems[0]
 	assert_eq(sys0.unknown_vars.size(), 7)
 	assert_eq(sys0.equations.size(), 7)
-	assert_eq(sys0.constrain_type(), FSolver.ConstrainType.Well)
+	assert_eq(sys0.constrain_type(), FSubSystem.ConstrainType.Well)
 
 func test_solve_system_1pipe():
 	#           p0
@@ -127,9 +127,6 @@ func test_solve_system_1pipe():
 	p0.l_ft = 1.0
 	p0.d_ft = 1.0 / 12.0
 	
-	# make sure system's max elevation is 0
-	assert_almost_eq(fsys.max_el_ft(), 0.0, 0.000001)
-	
 	# solve and assess
 	var res := FSolver.solve_system(fsys)
 	assert_eq(res.solved, true)
@@ -137,6 +134,8 @@ func test_solve_system_1pipe():
 	var sres0 := res.sub_system_results[0]
 	assert_true(sres0.converged)
 	assert_true(sres0.iters > 0)
+	var subsys0 := res.sub_systems[0]
+	assert_almost_eq(subsys0.max_el_ft(), 0.0, 0.000001)
 	assert_almost_eq(n0.h_psi.value,                +0.030858, 0.000001)
 	assert_almost_eq(p0.q_cfs.value,                +0.022280, 0.000001)
 	assert_almost_eq(p0.delta_static_h_psi().value, +0.000000, 0.000001)
@@ -147,7 +146,6 @@ func test_solve_system_1pipe():
 	
 	# put n0 at a higher elevation and resolve
 	n0.el_ft = 5.0
-	assert_almost_eq(fsys.max_el_ft(), 5.0, 0.000001)
 	
 	# solve again and reassess
 	fsys.reset_solved_vars()
@@ -157,6 +155,8 @@ func test_solve_system_1pipe():
 	sres0 = res.sub_system_results[0]
 	assert_true(sres0.converged)
 	assert_true(sres0.iters > 0)
+	subsys0 = res.sub_systems[0]
+	assert_almost_eq(subsys0.max_el_ft(), 5.0, 0.000001)
 	assert_almost_eq(n0.delta_el_ft(),              +0.000000, 0.000001)
 	assert_almost_eq(n0.static_h_psi(),             +0.000000, 0.000001)
 	assert_almost_eq(n1.delta_el_ft(),              +5.000000, 0.000001)

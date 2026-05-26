@@ -43,13 +43,17 @@ func _draw_colorized_by_pressure(diameter_px: float) -> void:
 	var src_h_psi := _pipe.fpipe.src_h_psi()
 	var sink_h_psi := _pipe.fpipe.sink_h_psi()
 	
-	# default to drawing 'normal' body if pressure at each end isn't known
-	if src_h_psi.state == Var.State.Unknown || sink_h_psi.state == Var.State.Unknown:
+	# default to drawing 'normal' body if we don't know enough about solved state
+	var do_normal_body := false
+	do_normal_body = do_normal_body || src_h_psi.state == Var.State.Unknown
+	do_normal_body = do_normal_body || sink_h_psi.state == Var.State.Unknown
+	do_normal_body = do_normal_body || ! is_instance_valid(_pipe.fpipe)
+	if do_normal_body:
 		_draw_normal_body(diameter_px, _pipe.pipe_color)
 		return
 	
-	var fsys_min_psi := _pipe.fpipe.fsys.min_h_psi()
-	var fsys_max_psi := _pipe.fpipe.fsys.max_h_psi()
+	var fsys_min_psi := _pipe.fpipe.fsubsys.min_h_psi()
+	var fsys_max_psi := _pipe.fpipe.fsubsys.max_h_psi()
 	var seg_step := (_pipe.point_b - _pipe.point_a) / GRADIENT_STEPS
 	var progress_step := 1.0 / GRADIENT_STEPS
 	var seg_start := _pipe.point_a
@@ -66,13 +70,16 @@ func _draw_colorized_by_pressure(diameter_px: float) -> void:
 func _draw_colorized_by_flow(diameter_px: float) -> void:
 	var q_cfs := _pipe.fpipe.q_cfs
 	
-	# default to drawing 'normal' body if flow rate isn't known
-	if q_cfs.state == Var.State.Unknown:
+	# default to drawing 'normal' body if we don't know enough about solved state
+	var do_normal_body := false
+	do_normal_body = do_normal_body || q_cfs.state == Var.State.Unknown
+	do_normal_body = do_normal_body || ! is_instance_valid(_pipe.fpipe)
+	if do_normal_body:
 		_draw_normal_body(diameter_px, _pipe.pipe_color)
 		return
 	
-	var fsys_min_cfs := _pipe.fpipe.fsys.min_q_cfs()
-	var fsys_max_cfs := _pipe.fpipe.fsys.max_q_cfs()
+	var fsys_min_cfs := _pipe.fpipe.fsubsys.min_q_cfs()
+	var fsys_max_cfs := _pipe.fpipe.fsubsys.max_q_cfs()
 	var cfs_ratio := Utils.ratio(fsys_min_cfs, fsys_max_cfs, q_cfs.value)
 	var flow_color := lerp(GRADIENT_MIN_COLOR, GRADIENT_MAX_COLOR, cfs_ratio) as Color
 	_draw_normal_body(diameter_px, flow_color)

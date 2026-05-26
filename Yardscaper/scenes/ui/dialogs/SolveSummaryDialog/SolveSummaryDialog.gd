@@ -13,9 +13,9 @@ func show_summary(solve_time_msec: int, res: FSolver.FSystemSolveResult) -> void
 static func _append_summary_text(rt: RichTextLabel, solve_time_msec: int, res: FSolver.FSystemSolveResult) -> void:
 	# organize results so it easier to display
 	var num_subsystems := res.sub_systems.size()
-	var unsolved_subsystems : Array[FSolver.SubSystem] = []
+	var unsolved_subsystems : Array[FSubSystem] = []
 	var unsolved_fsolve_results : Array[Math.FSolveResult] = []
-	var solved_subsystems : Array[FSolver.SubSystem] = []
+	var solved_subsystems : Array[FSubSystem] = []
 	var solved_fsolve_results : Array[Math.FSolveResult] = []
 	for i in range(num_subsystems):
 		var sub_res := res.sub_system_results[i]
@@ -50,7 +50,7 @@ const CONSTRAINT_STATUS_HINT := "Under: # of unknown vars > # of equations\nWell
 
 static func _append_unsolved_summaries(
 		rt: RichTextLabel,
-		subsystems : Array[FSolver.SubSystem],
+		subsystems : Array[FSubSystem],
 		fsolve_results: Array[Math.FSolveResult]) -> void:
 	if subsystems.is_empty():
 		return
@@ -68,7 +68,7 @@ static func _append_unsolved_summaries(
 		rt.push_hint(CONSTRAINT_STATUS_HINT)
 		rt.append_text("\nConstrained Status")
 		rt.pop() # hint
-		rt.append_text(": %s" % EnumUtils.to_str(FSolver.ConstrainType, c_type))
+		rt.append_text(": %s" % EnumUtils.to_str(FSubSystem.ConstrainType, c_type))
 		rt.append_text("\nSolver iterations: %d of %d max" % [res.iters, res.max_iter])
 		rt.append_text("\n# of unknown variables: %d" % ssys.unknown_vars.size())
 		rt.append_text("\n# of equations: %d" % ssys.equations.size())
@@ -92,7 +92,7 @@ static func _append_unsolved_summaries(
 
 static func _append_solved_summaries(
 		rt: RichTextLabel,
-		subsystems : Array[FSolver.SubSystem],
+		subsystems : Array[FSubSystem],
 		fsolve_results: Array[Math.FSolveResult]) -> void:
 	if subsystems.is_empty():
 		return
