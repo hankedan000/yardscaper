@@ -8,7 +8,6 @@ var _nodes : Array[FNode] = []
 
 var _next_pipe_id : int = 0
 var _next_node_id : int = 0
-var _max_el_ft : float = 0.0 # highest elevation of all nodes in the system
 
 func get_next_pipe_id() -> int:
 	var pid := _next_pipe_id
@@ -35,9 +34,6 @@ func get_node_count() -> int:
 func get_entity_count() -> int:
 	return get_pipe_count() + get_node_count()
 
-func max_el_ft() -> float:
-	return _max_el_ft
-
 func alloc_pipe() -> FPipe:
 	var pipe := FPipe.new(self, get_next_pipe_id())
 	_pipes.append(pipe)
@@ -46,7 +42,6 @@ func alloc_pipe() -> FPipe:
 func alloc_node() -> FNode:
 	var node := FNode.new(self, get_next_node_id())
 	_nodes.append(node)
-	_update_max_elevation()
 	return node
 
 func free_pipe(p: FPipe) -> void:
@@ -64,8 +59,10 @@ func free_node(n: FNode) -> void:
 func reset_solved_vars(clear_values: bool = false) -> void:
 	for node in _nodes:
 		node.reset_solved_vars(clear_values)
+		node.fsubsys = null
 	for pipe in _pipes:
 		pipe.reset_solved_vars(clear_values)
+		pipe.fsubsys = null
 
 func clear() -> void:
 	for p in _pipes:
@@ -76,17 +73,7 @@ func clear() -> void:
 		free_node(n)
 	_nodes.clear()
 	_next_node_id = 0
-
-func _update_max_elevation() -> void:
-	if _nodes.is_empty():
-		_max_el_ft = 0.0
-		return
-	
-	for i in range(_nodes.size()):
-		if i == 0:
-			_max_el_ft = _nodes[i].el_ft
-		else:
-			_max_el_ft = max(_max_el_ft, _nodes[i].el_ft)
+	reset_solved_vars()
 
 func _notification(what: int) -> void:
 	if what != NOTIFICATION_PREDELETE:

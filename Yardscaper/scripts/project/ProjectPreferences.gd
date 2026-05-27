@@ -9,12 +9,17 @@ const PROP_KEY_SHOW_POLYGONS = &"show_polygons"
 const PROP_KEY_SHOW_SPRINKLERS = &"show_sprinklers"
 const PROP_KEY_SHOW_PIPES = &"show_pipes"
 const PROP_KEY_SHOW_PIPE_FLOW_DIRECTION = &"show_pipe_flow_direction"
+const PROP_KEY_PIPE_COLORIZE_TYPE = &"pipe_colorize_type"
 const PROP_KEY_CAMERA_POS = &"camera_pos"
 const PROP_KEY_ZOOM = &"zoom"
 const PROP_KEY_GRID_MAJOR_SPACING = &"grid_major_spacing_ft"
 const PROP_KEY_LAST_IMG_EXPORT_PATH = &"last_img_export_path"
 
 signal view_show_state_changed(prop_key: StringName, new_value: bool)
+
+enum PipeColorizeType {
+	Normal, ByPressure, ByFlow
+}
 
 var show_grid = true:
 	set(value):
@@ -64,13 +69,14 @@ var show_pipe_flow_direction = false:
 			return
 		show_pipe_flow_direction = value
 		view_show_state_changed.emit(PROP_KEY_SHOW_PIPE_FLOW_DIRECTION, value)
+var pipe_colorize_type : PipeColorizeType = PipeColorizeType.Normal
 var camera_pos := Vector2()
 var zoom = 1.0
 var grid_major_spacing_ft := Vector2(5, 5)
 var last_img_export_path := ""
 
 func serialize() -> Dictionary:
-	return {
+	var data := {
 		PROP_KEY_SHOW_GRID : show_grid,
 		PROP_KEY_SHOW_ORIGIN : show_origin,
 		PROP_KEY_SHOW_IMAGES : show_images,
@@ -84,6 +90,8 @@ func serialize() -> Dictionary:
 		PROP_KEY_GRID_MAJOR_SPACING : Utils.vect2_to_pair(grid_major_spacing_ft),
 		PROP_KEY_LAST_IMG_EXPORT_PATH : last_img_export_path
 	}
+	DictUtils.put_enum(data, PROP_KEY_PIPE_COLORIZE_TYPE, PipeColorizeType, pipe_colorize_type)
+	return data
 
 func deserialize(obj: Dictionary) -> void:
 	show_grid = DictUtils.get_w_default(obj, PROP_KEY_SHOW_GRID, true)
@@ -94,6 +102,7 @@ func deserialize(obj: Dictionary) -> void:
 	show_sprinklers = DictUtils.get_w_default(obj, PROP_KEY_SHOW_SPRINKLERS, true)
 	show_pipes = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPES, true)
 	show_pipe_flow_direction = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPE_FLOW_DIRECTION, false)
+	pipe_colorize_type = DictUtils.get_enum_w_default(obj, PROP_KEY_PIPE_COLORIZE_TYPE, PipeColorizeType, PipeColorizeType.Normal)
 	camera_pos = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_CAMERA_POS, [0,0]))
 	zoom = DictUtils.get_w_default(obj, PROP_KEY_ZOOM, 1.0)
 	grid_major_spacing_ft = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_GRID_MAJOR_SPACING, [5,5]))

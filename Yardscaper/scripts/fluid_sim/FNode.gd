@@ -9,7 +9,8 @@ var q_ext_cfs       : Var = null   # external flow in(+) or out(-) ft^3/s
 var el_ft           : float = 0.0: # elevation of the node
 	set(value):
 		el_ft = value
-		fsys._update_max_elevation()
+		if is_instance_valid(fsubsys):
+			fsubsys._update_max_elevation()
 var connected_pipes : Array[FPipe] = []
 var K_s             : float = 0.0: # used only if type = Sprink. used to solve
 								   # for q_ext_cfs = K_s * sqrt(h_psi)
@@ -26,7 +27,10 @@ func _init(e_fsys: FSystem, e_id: int) -> void:
 	self.q_ext_cfs = Var.new(self, "q_ext_cfs")
 
 func delta_el_ft() -> float:
-	return fsys.max_el_ft() - el_ft
+	var max_el_ft := 0.0
+	if is_instance_valid(fsubsys):
+		max_el_ft = fsubsys.max_el_ft()
+	return max_el_ft - el_ft
 
 # static pressure due to node's elevation relative to system's max elevation
 func static_h_psi() -> float:

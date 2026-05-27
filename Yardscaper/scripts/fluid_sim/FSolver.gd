@@ -1,118 +1,28 @@
 class_name FSolver extends Object
 
-# Under constrained: unknown_vars > equation_count
-# Well constrained:  unknown_vars == equation_count
-# Over constrained:  unknown_vars < equation_count
-enum ConstrainType {
-	Under, Well, Over
-}
-
-# entities that are actually connected to each other within the full FSystem
-class SubSystem extends RefCounted:
-	var nodes : Array[FNode] = []
-	var pipes : Array[FPipe] = []
-	var unknown_vars : Array[Var] = []
-	var equations : Array[Callable] = []
-
-	static func get_entity_vars(e: FEntity) -> Array[Var]:
-		if e is FPipe:
-			return _get_pipe_vars(e)
-		elif e is FNode:
-			return [e.h_psi, e.q_ext_cfs]
-		push_error("unsupported FEntity type")
-		return []
-	
-	func add_entity(e: FEntity) -> void:
-		if e is FPipe:
-			if e in pipes:
-				return
-			pipes.push_back(e)
-			equations.push_back(_equation_pipe.bind(e))
-		elif e is FNode:
-			if e in nodes:
-				return
-			nodes.push_back(e)
-			equations.push_back(_equation_node.bind(e))
-		else:
-			push_error("unsupported entity type")
-			return
-		
-		var evars := get_entity_vars(e)
-		for evar in evars:
-			if evar.state == Var.State.Unknown and ! evar in unknown_vars:
-				unknown_vars.push_back(evar)
-	
-	func add_entities(arr: Array) -> void:
-		for e in arr:
-			add_entity(e as FEntity)
-	
-	func constrain_type() -> ConstrainType:
-		if unknown_vars.size() > equations.size():
-			return ConstrainType.Under
-		elif unknown_vars.size() == equations.size():
-			return ConstrainType.Well
-		return ConstrainType.Over
-
-	static func _get_pipe_vars(p: FPipe) -> Array[Var]:
-		var out_vars : Array[Var] = [p.q_cfs]
-		if ! is_instance_valid(p.src_node):
-			out_vars.push_back(Var.new(p, "src_node_h_psi"))
-			out_vars.push_back(Var.new(p, "src_node_q_ext_cfs"))
-		if ! is_instance_valid(p.sink_node):
-			out_vars.push_back(Var.new(p, "sink_node_h_psi"))
-			out_vars.push_back(Var.new(p, "sink_node_q_ext_cfs"))
-		return out_vars
-	
-	func _equation_pipe(p: FPipe) -> float:
-		# delta_h_psi is the net pressure drop across the pipe. we must
-		# subtract the static pressure due to gravity to get the net dynamic
-		# pressure due to losses accross the pipe.
-		var dynamic_h_psi := p._flt_delta_h_psi() - p._flt_delta_static_h_psi()
-		
-		# calculate our net losses
-		var _v_fps := p._flt_v_fps()
-		var _Re := p._flt_Re(_v_fps)
-		var _f_darcy := p._flt_f_darcy(_Re)
-		var major_loss_psi := p._flt_major_loss_psi(_v_fps, _f_darcy, p.l_ft)
-		var entry_minor_loss_psi := p._flt_entry_minor_loss_psi(_v_fps, _f_darcy)
-		var exit_minor_loss_psi := p._flt_exit_minor_loss_psi(_v_fps, _f_darcy)
-		var net_losses = major_loss_psi + entry_minor_loss_psi + exit_minor_loss_psi
-		
-		# all of our losses should equation to our dynamic_h across our pipe.
-		# calutate the final equation where ... dynamic_h + net_losses = 0
-		return dynamic_h_psi + net_losses
-	
-	func _equation_node(n: FNode) -> float:
-		# all of our net flow rates in/out of the node should equal 0
-		var net_flow := n.q_ext_cfs.value
-		for p in n.connected_pipes:
-			var flow_sign := 1.0 if n.is_inward_pipe(p) else -1.0
-			net_flow += p.q_cfs.value * flow_sign
-		return net_flow
-
-static func make_sub_systems(fsys: FSystem) -> Array[SubSystem]:
-	var systems : Array[SubSystem] = []
+static func make_sub_systems(fsys: FSystem) -> Array[FSubSystem]:
+	var systems : Array[FSubSystem] = []
 	
 	# make a frontier of unexplored entities. then recursively explore the
-	# nodes while building SubSystems of intra-connected entities.
-	var frontier := SubSystem.new()
+	# nodes while building FSubSystems of intra-connected entities.
+	var frontier := FSubSystem.new()
 	frontier.add_entities(fsys.get_pipes())
 	frontier.add_entities(fsys.get_nodes())
 	while frontier.nodes.size() > 0:
-		var subsys := SubSystem.new()
+		var subsys := FSubSystem.new()
 		_explore_node(frontier.nodes[0], frontier, subsys)
 		systems.push_back(subsys)
 	
-	# for completeness, add any unconnected pipes to their own SubSystem
+	# for completeness, add any unconnected pipes to their own FSubSystem
 	if frontier.pipes.size() > 0:
-		var subsys := SubSystem.new()
+		var subsys := FSubSystem.new()
 		for p in frontier.pipes:
 			subsys.pipes.push_back(p)
 		systems.push_back(subsys)
 	
 	return systems
 
-static func _basic_console_printer(iter: int, x: Array[float], ssys: SubSystem) -> void:
+static func _basic_console_printer(iter: int, x: Array[float], ssys: FSubSystem) -> void:
 	var dbg_str := "iter[%d] - " % iter
 	var comma := ""
 	for i in range(x.size()):
@@ -132,7 +42,7 @@ class Settings extends RefCounted:
 
 class FSystemSolveResult extends RefCounted:
 	var solved : bool = false
-	var sub_systems : Array[SubSystem] = []
+	var sub_systems : Array[FSubSystem] = []
 	var sub_system_results : Array[Math.FSolveResult] = []
 
 static func solve_system(fsys: FSystem, settings:=Settings.new()) -> FSystemSolveResult:
@@ -152,13 +62,13 @@ static func solve_system(fsys: FSystem, settings:=Settings.new()) -> FSystemSolv
 		res.sub_system_results.push_back(sres)
 	return res
 
-static func solve_sub_system(ssys: SubSystem, settings:=Settings.new()) -> Math.FSolveResult:
+static func solve_sub_system(ssys: FSubSystem, settings:=Settings.new()) -> Math.FSolveResult:
 	if ! is_instance_valid(ssys):
 		return Math.FSolveResult.new()
 	
 	# make sure system is Well constrainted
 	var ctype := ssys.constrain_type()
-	if ctype != ConstrainType.Well:
+	if ctype != FSubSystem.ConstrainType.Well:
 		return Math.FSolveResult.new()
 	
 	# solve the system of equations
@@ -179,13 +89,13 @@ static func solve_sub_system(ssys: SubSystem, settings:=Settings.new()) -> Math.
 			uvar.state = Var.State.Solved
 	return res
 
-static func _is_explored(fentity, frontier: SubSystem):
+static func _is_explored(fentity, frontier: FSubSystem):
 	if fentity is FNode:
 		return ! (fentity in frontier.nodes)
 	else:
 		return ! (fentity in frontier.pipes)
 
-static func _explore_node(node: FNode, frontier: SubSystem, subsys: SubSystem) -> void:
+static func _explore_node(node: FNode, frontier: FSubSystem, subsys: FSubSystem) -> void:
 	if ! is_instance_valid(node):
 		return
 	elif _is_explored(node, frontier):
@@ -196,7 +106,7 @@ static func _explore_node(node: FNode, frontier: SubSystem, subsys: SubSystem) -
 	for p in node.connected_pipes:
 		_explore_pipe(p, frontier, subsys)
 
-static func _explore_pipe(pipe: FPipe, frontier: SubSystem, subsys: SubSystem) -> void:
+static func _explore_pipe(pipe: FPipe, frontier: FSubSystem, subsys: FSubSystem) -> void:
 	if _is_explored(pipe, frontier):
 		return
 	
@@ -205,12 +115,12 @@ static func _explore_pipe(pipe: FPipe, frontier: SubSystem, subsys: SubSystem) -
 	_explore_node(pipe.src_node, frontier, subsys)
 	_explore_node(pipe.sink_node, frontier, subsys)
 
-static func _fsolve_subsystem(x: PackedFloat64Array, y_out: PackedFloat64Array, ssys: SubSystem) -> void:
+static func _fsolve_subsystem(x: PackedFloat64Array, y_out: PackedFloat64Array, ssys: FSubSystem) -> void:
 	# substitute our latest guesses into the unknown variables
 	for i in range(x.size()):
 		ssys.unknown_vars[i].value = x[i]
 	
-	# re-evaluate all of the equations in the SubSystem and returns results
+	# re-evaluate all of the equations in the FSubSystem and returns results
 	var n_eq := ssys.equations.size()
 	for e in range(n_eq):
 		y_out[e] = ssys.equations[e].call()

@@ -6,6 +6,10 @@
 [sub_resource type="GDScript" id="GDScript_4hxwg"]
 script/source = "extends Gizmo
 
+const GRADIENT_MAX_COLOR := Color.RED
+const GRADIENT_MIN_COLOR := Color.BLUE
+const GRADIENT_STEPS := 10
+
 var _pipe : Pipe = null
 var _outline_width : float = Globals.OUTLINE_BASE_WIDTH_PX
 
@@ -21,8 +25,64 @@ func _draw():
 		var indic_color = Globals.SELECT_COLOR if _pipe.picked else Globals.HOVER_COLOR
 		draw_line(_pipe.point_a, _pipe.point_b, indic_color, diameter_px + (_outline_width * 2))
 	
-	# draw the pipe body
-	draw_line(_pipe.point_a, _pipe.point_b, _pipe.pipe_color, diameter_px)
+	_draw_body(diameter_px)
+
+func _draw_body(diameter_px: float) -> void:
+	match TheProject.pref.pipe_colorize_type:
+		ProjectPreferences.PipeColorizeType.Normal:
+			_draw_normal_body(diameter_px, _pipe.pipe_color)
+		ProjectPreferences.PipeColorizeType.ByPressure:
+			_draw_colorized_by_pressure(diameter_px)
+		ProjectPreferences.PipeColorizeType.ByFlow:
+			_draw_colorized_by_flow(diameter_px)
+
+func _draw_normal_body(diameter_px: float, color: Color) -> void:
+	draw_line(_pipe.point_a, _pipe.point_b, color, diameter_px)
+
+func _draw_colorized_by_pressure(diameter_px: float) -> void:
+	var src_h_psi := _pipe.fpipe.src_h_psi()
+	var sink_h_psi := _pipe.fpipe.sink_h_psi()
+	
+	# default to drawing 'normal' body if we don't know enough about solved state
+	var do_normal_body := false
+	do_normal_body = do_normal_body || src_h_psi.state == Var.State.Unknown
+	do_normal_body = do_normal_body || sink_h_psi.state == Var.State.Unknown
+	do_normal_body = do_normal_body || ! is_instance_valid(_pipe.fpipe)
+	if do_normal_body:
+		_draw_normal_body(diameter_px, _pipe.pipe_color)
+		return
+	
+	var fsys_min_psi := _pipe.fpipe.fsubsys.min_h_psi()
+	var fsys_max_psi := _pipe.fpipe.fsubsys.max_h_psi()
+	var seg_step := (_pipe.point_b - _pipe.point_a) / GRADIENT_STEPS
+	var progress_step := 1.0 / GRADIENT_STEPS
+	var seg_start := _pipe.point_a
+	var progress := 0.0
+	for i in range(GRADIENT_STEPS):
+		var seg_end := seg_start + seg_step
+		var seg_h_psi := lerp(src_h_psi.value, sink_h_psi.value, progress) as float
+		var psi_ratio := Utils.ratio(fsys_min_psi, fsys_max_psi, seg_h_psi)
+		var seg_color := lerp(GRADIENT_MIN_COLOR, GRADIENT_MAX_COLOR, psi_ratio) as Color
+		draw_line(seg_start, seg_end, seg_color, diameter_px)
+		seg_start = seg_end
+		progress += progress_step
+
+func _draw_colorized_by_flow(diameter_px: float) -> void:
+	var q_cfs := _pipe.fpipe.q_cfs
+	
+	# default to drawing 'normal' body if we don't know enough about solved state
+	var do_normal_body := false
+	do_normal_body = do_normal_body || q_cfs.state == Var.State.Unknown
+	do_normal_body = do_normal_body || ! is_instance_valid(_pipe.fpipe)
+	if do_normal_body:
+		_draw_normal_body(diameter_px, _pipe.pipe_color)
+		return
+	
+	var fsys_min_cfs := _pipe.fpipe.fsubsys.min_q_cfs()
+	var fsys_max_cfs := _pipe.fpipe.fsubsys.max_q_cfs()
+	var cfs_ratio := Utils.ratio(fsys_min_cfs, fsys_max_cfs, q_cfs.value)
+	var flow_color := lerp(GRADIENT_MIN_COLOR, GRADIENT_MAX_COLOR, cfs_ratio) as Color
+	_draw_normal_body(diameter_px, flow_color)
 
 func on_zoom_changed(new_zoom: float, _inv_scale: Vector2) -> void:
 	_outline_width = Globals.OUTLINE_BASE_WIDTH_PX / new_zoom
