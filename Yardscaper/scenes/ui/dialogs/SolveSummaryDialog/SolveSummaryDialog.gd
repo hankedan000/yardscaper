@@ -8,7 +8,11 @@ signal entity_clicked(entity: FEntity)
 func show_summary(solve_time_msec: int, res: FSolver.FSystemSolveResult) -> void:
 	rich_text.clear()
 	_append_summary_text(rich_text, solve_time_msec, res)
-	popup()
+	
+	if visible:
+		return
+	
+	show()
 
 static func _append_summary_text(rt: RichTextLabel, solve_time_msec: int, res: FSolver.FSystemSolveResult) -> void:
 	# organize results so it easier to display
@@ -170,6 +174,10 @@ static func _make_block_separator(title_str: String, block_char: StringName = &"
 
 func _on_close_requested() -> void:
 	hide()
+	# use WINDOW_INITIAL_POSITION_ABSOLUTE after the first close event
+	# so that the window will open where the user previously moved it to,
+	# as opposed to always popping up in the center of the screen.
+	initial_position = Window.WINDOW_INITIAL_POSITION_ABSOLUTE
 
 func _on_close_button_pressed() -> void:
 	_on_close_requested()

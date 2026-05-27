@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://lmlsf61h6k62"]
+[gd_scene format=3 uid="uid://lmlsf61h6k62"]
 
 [ext_resource type="Script" uid="uid://baeh78m4nju5" path="res://scenes/ui/dialogs/SolveSummaryDialog/SolveSummaryDialog.gd" id="1_rab6b"]
 [ext_resource type="FontFile" uid="uid://dbc572y3do6t1" path="res://assets/fonts/RobotoMono-VariableFont_wght.ttf" id="2_v67a2"]
@@ -6,14 +6,15 @@
 [sub_resource type="Theme" id="Theme_b3hji"]
 RichTextLabel/fonts/mono_font = ExtResource("2_v67a2")
 
-[node name="SolveSummaryDialog" type="Window"]
+[node name="SolveSummaryDialog" type="Window" unique_id=1968668693]
+oversampling_override = 1.0
 title = "Solve Summary"
 initial_position = 4
 size = Vector2i(800, 500)
 transient = true
 script = ExtResource("1_rab6b")
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1918709269]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -22,14 +23,14 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=2113515463]
 layout_mode = 2
 
-[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBoxContainer" unique_id=1868352857]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="RichTextLabel" type="RichTextLabel" parent="PanelContainer/VBoxContainer/ScrollContainer"]
+[node name="RichTextLabel" type="RichTextLabel" parent="PanelContainer/VBoxContainer/ScrollContainer" unique_id=1938605483]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -61,14 +62,14 @@ Lorem ipsum"
 fit_content = true
 autowrap_mode = 0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=1958765260]
 layout_mode = 2
 
-[node name="Control" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+[node name="Control" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=1763346995]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CloseButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+[node name="CloseButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=321308783]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 text = "Close"
