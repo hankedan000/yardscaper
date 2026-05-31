@@ -13,6 +13,11 @@ const PROP_KEY_EXIT_CUSTOM_L_EQ_FT         := &'exit_custom_L_eq_ft'
 const DEFAULT_DIAMETER_FT := 0.0416666666667 # 0.5in
 const PVC_SURFACE_ROUGHNESS_FT := 0.000005
 
+@onready var point_a_indicators := $PointA_Indicators
+@onready var point_a_disconnect := $PointA_Indicators/Disconnected
+@onready var point_b_indicators := $PointB_Indicators
+@onready var point_b_disconnect := $PointB_Indicators/Disconnected
+
 var diameter_ft : float = DEFAULT_DIAMETER_FT:
 	set(value):
 		var old_value = fpipe.d_ft
@@ -123,6 +128,8 @@ func _draw() -> void:
 	elif _edit_mode == EditMode.NotEditing:
 		point_a_handle.visible = picked && ! position_locked
 		point_b_handle.visible = picked && ! position_locked
+	
+	_update_disconnect_indicator_visibility()
 	
 	# update position/shape of the collision rectangle
 	# probably not the best place to do this, but convenient and efficient
@@ -247,6 +254,14 @@ func _update_info_label_text() -> void:
 	#text += "; Q=%s" % Utils.pretty_fvar(fpipe.q_cfs, Utils.DISP_UNIT_GPM, Utils.cftps_to_gpm)
 	info_label.text = text
 
+func _update_disconnect_indicator_visibility() -> void:
+	var base_visibility := \
+		TheProject.pref.show_pipe_disconnects && \
+		_edit_mode != EditMode.PlacingPointA && \
+		_edit_mode != EditMode.PlacingPointB
+	point_a_disconnect.visible = base_visibility && ! is_instance_valid(fpipe.src_node)
+	point_b_disconnect.visible = base_visibility && ! is_instance_valid(fpipe.sink_node)
+
 func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 	handle.magnetic_physics_mask = 0x4 # TODO would be nice if could get mask by name from project settings
 	handle.get_magnet().is_collector = false
@@ -266,6 +281,16 @@ func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 func _set_point_position(handle: EditorHandle, new_position: Vector2, force_change:= false):
 	super._set_point_position(handle, new_position, force_change)
 	fpipe.l_ft = dist_ft()
+	
+	# update indicator position and rotate
+	var this_indicators : Node2D = point_b_indicators
+	var other_indicators : Node2D = point_a_indicators
+	if handle == point_a_handle:
+		this_indicators = point_a_indicators
+		other_indicators = point_b_indicators
+	this_indicators.global_position = handle.global_position
+	this_indicators.look_at(other_indicators.global_position)
+	other_indicators.rotation = this_indicators.rotation + PI
 
 func _update_fpipe_minor_loss(is_entry: bool) -> void:
 	var fitting_type := entry_fitting_type if is_entry else exit_fitting_type

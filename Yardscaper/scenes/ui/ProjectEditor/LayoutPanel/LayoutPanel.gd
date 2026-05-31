@@ -55,7 +55,8 @@ enum ViewMenuIds {
 
 enum PipeViewMenuIds {
 	ShowFlowDirection = 0,
-	Colorize = 1
+	Colorize = 1,
+	ShowDisconnects = 2
 }
 
 enum ObjectViewMenuIds {
@@ -557,6 +558,7 @@ func _on_TheProject_opened():
 	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Sprinklers, prefs.show_sprinklers)
 	Utils.set_item_checked_by_id(obj_view_popupmenu, ObjectViewMenuIds.Pipes, prefs.show_pipes)
 	Utils.set_item_checked_by_id(pipe_view_popupmenu, PipeViewMenuIds.ShowFlowDirection, prefs.show_pipe_flow_direction)
+	Utils.set_item_checked_by_id(pipe_view_popupmenu, PipeViewMenuIds.ShowDisconnects, prefs.show_pipe_disconnects)
 	Utils.set_item_checked_by_id(grid_view_popupmenu, GridViewMenuIds.ShowGrid, prefs.show_grid)
 	match prefs.pipe_colorize_type:
 		ProjectPreferences.PipeColorizeType.Normal:
@@ -763,6 +765,9 @@ func _on_pipe_view_popup_menu_id_pressed(id: int) -> void:
 	match id:
 		PipeViewMenuIds.ShowFlowDirection:
 			TheProject.pref.show_pipe_flow_direction = is_checked
+		PipeViewMenuIds.ShowDisconnects:
+			TheProject.pref.show_pipe_disconnects = is_checked
+	world_view.queue_redraw_pipes()
 
 func _on_pipe_colorize_popup_menu_id_pressed(id: int) -> void:
 	for item_idx in range(pipe_colorize_popupmenu.item_count):

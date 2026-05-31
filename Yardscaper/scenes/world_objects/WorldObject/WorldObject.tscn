@@ -1,23 +1,30 @@
-[gd_scene load_steps=5 format=3 uid="uid://yvp357wae8et"]
+[gd_scene format=3 uid="uid://yvp357wae8et"]
 
 [ext_resource type="Script" uid="uid://dyu5ncsul4lxi" path="res://scenes/world_objects/WorldObject/WorldObject.gd" id="1_2eqnw"]
-[ext_resource type="PackedScene" uid="uid://1dad06jhn1o3" path="res://scenes/ui/gizmos/LockIndicator/LockIndicator.tscn" id="2_akkxm"]
+[ext_resource type="PackedScene" uid="uid://c3pg0u3elofuy" path="res://scenes/ui/gizmos/GizmoSprite/GizmoSprite.tscn" id="2_akkxm"]
 [ext_resource type="PackedScene" uid="uid://c7fqgbd66tu6n" path="res://scenes/ui/gizmos/GizmoLabel/GizmoLabel.tscn" id="2_ctmgo"]
+[ext_resource type="Texture2D" uid="uid://dvsonuppgtdb7" path="res://assets/icons/Lock.svg" id="4_7km7u"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_7l7ai"]
 
-[node name="WorldObject" type="Node2D"]
+[node name="WorldObject" type="Node2D" unique_id=1092358124]
 script = ExtResource("1_2eqnw")
 
-[node name="InfoLabel" parent="." instance=ExtResource("2_ctmgo")]
+[node name="InfoLabel" parent="." unique_id=270338868 instance=ExtResource("2_ctmgo")]
 visible = false
 
-[node name="LockIndicator" parent="." instance=ExtResource("2_akkxm")]
+[node name="LockIndicator" parent="." unique_id=2136361816 instance=ExtResource("2_akkxm")]
 visible = false
+position_offset_factor = Vector2(0, -0.8)
 
-[node name="PickArea" type="Area2D" parent="."]
+[node name="Sprite" parent="LockIndicator" index="0" unique_id=1009026342]
+texture = ExtResource("4_7km7u")
+
+[node name="PickArea" type="Area2D" parent="." unique_id=476154221]
 collision_layer = 2
 monitoring = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PickArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PickArea" unique_id=1976175466]
 shape = SubResource("CircleShape2D_7l7ai")
+
+[editable path="LockIndicator"]

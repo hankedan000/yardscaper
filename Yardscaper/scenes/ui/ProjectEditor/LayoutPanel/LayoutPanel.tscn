@@ -244,12 +244,16 @@ item_4/id = 2
 [node name="PipeViewPopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton" unique_id=1530320898]
 auto_translate_mode = 1
 size = Vector2i(173, 116)
-item_count = 2
+item_count = 3
 item_0/text = "Show Flow Direction"
 item_0/checkable = 1
 item_0/id = 0
-item_1/text = "Colorize"
-item_1/id = 1
+item_0/disabled = true
+item_1/text = "Show Disconnects"
+item_1/checkable = 1
+item_1/id = 2
+item_2/text = "Colorize"
+item_2/id = 1
 
 [node name="PipeColorizePopupMenu" type="PopupMenu" parent="HSplitContainer/Layout/LayoutToolbar/HBox/ViewMenuButton" unique_id=296247692]
 auto_translate_mode = 1
