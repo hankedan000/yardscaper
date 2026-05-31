@@ -37,7 +37,7 @@ script = ExtResource("2_skq7c")
 [node name="ManualDrawLayer" parent="." index="0" unique_id=803222316 instance=ExtResource("3_ehygo")]
 script = SubResource("GDScript_ehygo")
 
-[node name="InfoLabel" parent="." index="1"]
+[node name="InfoLabel" parent="." index="1" unique_id=270338868]
 visible = true
 vert_alignment = 2
 
@@ -50,3 +50,5 @@ hover_type = 1
 visible = false
 pressed_type = 1
 hover_type = 1
+
+[editable path="LockIndicator"]

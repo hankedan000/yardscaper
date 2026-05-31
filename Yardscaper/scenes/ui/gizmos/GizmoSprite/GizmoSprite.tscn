@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://c3pg0u3elofuy"]
+
+[ext_resource type="PackedScene" uid="uid://d3g1sd8n6c5rd" path="res://scenes/ui/gizmos/Gizmo/Gizmo.tscn" id="1_leghn"]
+[ext_resource type="Script" uid="uid://m3bh8mwkybfd" path="res://scenes/ui/gizmos/GizmoSprite/GizmoSprite.gd" id="2_sybk5"]
+
+[node name="GizmoSprite" unique_id=1367166681 instance=ExtResource("1_leghn")]
+script = ExtResource("2_sybk5")
+position_offset_factor = Vector2(0, 0)
+
+[node name="Sprite" type="Sprite2D" parent="." index="0" unique_id=1009026342]
