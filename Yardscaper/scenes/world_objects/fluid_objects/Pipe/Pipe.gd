@@ -14,9 +14,11 @@ const DEFAULT_DIAMETER_FT := 0.0416666666667 # 0.5in
 const PVC_SURFACE_ROUGHNESS_FT := 0.000005
 
 @onready var point_a_indicators := $PointA_Indicators
-@onready var point_a_disconnect := $PointA_Indicators/Disconnected
+@onready var point_a_disconnect : GizmoSprite = $PointA_Indicators/Disconnected
+@onready var point_a_fitting_icon : GizmoSprite = $PointA_Indicators/Fitting
 @onready var point_b_indicators := $PointB_Indicators
-@onready var point_b_disconnect := $PointB_Indicators/Disconnected
+@onready var point_b_disconnect : GizmoSprite = $PointB_Indicators/Disconnected
+@onready var point_b_fitting_icon : GizmoSprite = $PointB_Indicators/Fitting
 
 var diameter_ft : float = DEFAULT_DIAMETER_FT:
 	set(value):
@@ -64,6 +66,7 @@ var entry_fitting_type : PipeTables.FittingType = PipeTables.FittingType.NONE:
 		var old_value = entry_fitting_type
 		entry_fitting_type = value
 		if _check_and_emit_prop_change(PROP_KEY_ENTRY_FITTING_TYPE, old_value):
+			_update_fitting_icon_type(point_a_fitting_icon, value)
 			_update_fpipe_minor_loss(true) # is_entry
 
 var entry_custom_L_eq_ft : float = 0.0:
@@ -78,6 +81,7 @@ var exit_fitting_type : PipeTables.FittingType = PipeTables.FittingType.NONE:
 		var old_value = exit_fitting_type
 		exit_fitting_type = value
 		if _check_and_emit_prop_change(PROP_KEY_EXIT_FITTING_TYPE, old_value):
+			_update_fitting_icon_type(point_b_fitting_icon, value)
 			_update_fpipe_minor_loss(false) # is_entry
 
 var exit_custom_L_eq_ft : float = 0.0:
@@ -112,6 +116,8 @@ func _init_world_obj() -> void:
 func _ready():
 	super._ready()
 	color = Color.WHITE
+	_update_fitting_icon_type(point_a_fitting_icon, entry_fitting_type)
+	_update_fitting_icon_type(point_b_fitting_icon, exit_fitting_type)
 	_setup_pipe_handle(point_a_handle, "Source")
 	_setup_pipe_handle(point_b_handle, "Sink")
 	
@@ -130,6 +136,8 @@ func _draw() -> void:
 		point_b_handle.visible = picked && ! position_locked
 	
 	_update_disconnect_indicator_visibility()
+	_update_fitting_icon_visibility()
+	_update_indicators_packing()
 	
 	# update position/shape of the collision rectangle
 	# probably not the best place to do this, but convenient and efficient
@@ -181,6 +189,7 @@ func set_edit_mode(new_mode: DistanceMeasurement.EditMode) -> void:
 		EditMode.NotEditing:
 			point_a_handle.visible = picked && ! position_locked
 			point_b_handle.visible = picked && ! position_locked
+	_update_indicators_packing()
 
 func finish_move(cancel: bool = false) -> bool:
 	if ! super.finish_move(cancel):
@@ -248,6 +257,12 @@ func deserialize(data: Dictionary) -> void:
 func is_magnet_from_src_handle(magnet: MagneticArea) -> bool:
 	return point_a_handle.get_magnet() == magnet
 
+func is_src_connected() -> bool:
+	return is_instance_valid(fpipe.src_node)
+
+func is_sink_connected() -> bool:
+	return is_instance_valid(fpipe.sink_node)
+
 # override from DistanceMeasurement
 func _update_info_label_text() -> void:
 	var text := "L=%.3f%s" % [dist_ft(), Utils.DISP_UNIT_FT]
@@ -258,9 +273,47 @@ func _update_disconnect_indicator_visibility() -> void:
 	var base_visibility := \
 		TheProject.pref.show_pipe_disconnects && \
 		_edit_mode != EditMode.PlacingPointA && \
-		_edit_mode != EditMode.PlacingPointB
-	point_a_disconnect.visible = base_visibility && ! is_instance_valid(fpipe.src_node)
-	point_b_disconnect.visible = base_visibility && ! is_instance_valid(fpipe.sink_node)
+		_edit_mode != EditMode.PlacingPointB as bool
+	point_a_disconnect.visible = base_visibility && ! is_src_connected()
+	point_b_disconnect.visible = base_visibility && ! is_sink_connected()
+
+func _update_fitting_icon_type(gizmo: GizmoSprite, fitting_type: PipeTables.FittingType) -> void:
+	if ! is_instance_valid(gizmo):
+		return
+	gizmo.set_sprite_texture(FittingIcons.from_type(fitting_type))
+
+func _update_fitting_icon_visibility() -> void:
+	var base_visibility := \
+		TheProject.pref.show_pipe_fittings && \
+		_edit_mode != EditMode.PlacingPointA && \
+		_edit_mode != EditMode.PlacingPointB as bool
+	point_a_fitting_icon.visible = base_visibility
+	point_b_fitting_icon.visible = base_visibility
+
+func _update_indicators_packing() -> void:
+	_pack_indicators(is_src_connected(), point_a_handle , point_a_disconnect, point_a_fitting_icon)
+	_pack_indicators(is_sink_connected(), point_b_handle, point_b_disconnect, point_b_fitting_icon)
+
+func _pack_indicators(do_prepad: bool, handle: EditorHandle, disconnect_gizmo: GizmoSprite, fitting_gizmo: GizmoSprite) -> void:
+	var offset_px : float = 0.0
+	if handle.visible:
+		var half_size := (handle.tex_button.size / 2.0).length()
+		offset_px += half_size
+		do_prepad = true
+	if disconnect_gizmo.visible:
+		var half_size := (disconnect_gizmo.sprite.get_rect().size / 2.0).length()
+		if do_prepad:
+			offset_px += half_size
+		disconnect_gizmo.sprite.position.x = offset_px
+		offset_px += half_size
+		do_prepad = true
+	if fitting_gizmo.visible:
+		var half_size := (fitting_gizmo.sprite.get_rect().size / 2.0).length()
+		if do_prepad:
+			offset_px += half_size
+		fitting_gizmo.sprite.position.x = offset_px
+		offset_px += half_size
+		do_prepad = true
 
 func _setup_pipe_handle(handle: EditorHandle, user_text: String) -> void:
 	handle.magnetic_physics_mask = 0x4 # TODO would be nice if could get mask by name from project settings
@@ -291,6 +344,8 @@ func _set_point_position(handle: EditorHandle, new_position: Vector2, force_chan
 	this_indicators.global_position = handle.global_position
 	this_indicators.look_at(other_indicators.global_position)
 	other_indicators.rotation = this_indicators.rotation + PI
+	point_a_fitting_icon.sprite.global_rotation = 0
+	point_b_fitting_icon.sprite.global_rotation = 0
 
 func _update_fpipe_minor_loss(is_entry: bool) -> void:
 	var fitting_type := entry_fitting_type if is_entry else exit_fitting_type

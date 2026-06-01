@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cr8e0efrpgn3e"]
+[gd_scene format=3 uid="uid://cr8e0efrpgn3e"]
 
 [ext_resource type="Texture2D" uid="uid://dgkiqgt4ta70u" path="res://assets/icons/FittingElbow90.svg" id="1_6dcqy"]
 [ext_resource type="Texture2D" uid="uid://dxxq3db5tva0w" path="res://assets/icons/FittingCustom.svg" id="1_ylrvj"]
@@ -18,9 +18,22 @@ script/source = "extends Node
 @export var TEE_BRANCH_OUT : Texture2D = null
 @export var TEE_BRANCH_IN  : Texture2D = null
 @export var TEE_RUN        : Texture2D = null
+
+func from_type(fitting_type: PipeTables.FittingType) -> Texture2D:
+	match fitting_type:
+		PipeTables.FittingType.NONE:           return null
+		PipeTables.FittingType.CUSTOM:         return CUSTOM
+		PipeTables.FittingType.COUPLING:       return COUPLING
+		PipeTables.FittingType.ELBOW_90:       return ELBOW_90
+		PipeTables.FittingType.ELBOW_45:       return ELBOW_45
+		PipeTables.FittingType.TEE_BRANCH_OUT: return TEE_BRANCH_OUT
+		PipeTables.FittingType.TEE_BRANCH_IN:  return TEE_BRANCH_IN
+		PipeTables.FittingType.TEE_RUN:        return TEE_RUN
+	push_warning(\"unsupported fitting type '%s'\" % [fitting_type])
+	return null
 "
 
-[node name="FittingIcons" type="Node"]
+[node name="FittingIcons" type="Node" unique_id=1969766493]
 script = SubResource("GDScript_i8r4u")
 CUSTOM = ExtResource("1_ylrvj")
 COUPLING = ExtResource("2_r1y3s")
