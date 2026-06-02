@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bjsrfinx8gffn"
-path="res://.godot/imported/FittingElbow45.svg-f87161a40550c2a44071eed822411494.ctex"
+uid="uid://wcqc56rbjgru"
+path="res://.godot/imported/FittingTeeBranchOutOutlined.svg-0beaa2167e8975ca375adae0627f336b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/icons/FittingElbow45.svg"
-dest_files=["res://.godot/imported/FittingElbow45.svg-f87161a40550c2a44071eed822411494.ctex"]
+source_file="res://assets/icons/FittingTeeBranchOutOutlined.svg"
+dest_files=["res://.godot/imported/FittingTeeBranchOutOutlined.svg-0beaa2167e8975ca375adae0627f336b.ctex"]
 
 [params]
 

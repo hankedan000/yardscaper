@@ -280,7 +280,7 @@ func _update_disconnect_indicator_visibility() -> void:
 func _update_fitting_icon_type(gizmo: GizmoSprite, fitting_type: PipeTables.FittingType) -> void:
 	if ! is_instance_valid(gizmo):
 		return
-	gizmo.set_sprite_texture(FittingIcons.from_type(fitting_type))
+	gizmo.set_sprite_texture(FittingIcons.from_type(fitting_type, true))
 
 func _update_fitting_icon_visibility() -> void:
 	var base_visibility := \
