@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://db8wvn8xh27x0" path="res://scenes/world_objects/DistanceMeasurement/DistanceMeasurement.tscn" id="1_m6rx2"]
 [ext_resource type="Script" uid="uid://bpl5kf4b2noyc" path="res://scenes/world_objects/fluid_objects/Pipe/Pipe.gd" id="2_y5374"]
 [ext_resource type="PackedScene" uid="uid://c3pg0u3elofuy" path="res://scenes/ui/gizmos/GizmoSprite/GizmoSprite.tscn" id="3_l3pq5"]
+[ext_resource type="Texture2D" uid="uid://dvsonuppgtdb7" path="res://assets/icons/Lock.svg" id="3_ltvt5"]
 [ext_resource type="Texture2D" uid="uid://c12tyudgifov5" path="res://assets/icons/DisconnectedPipe.svg" id="4_kv05d"]
 
 [sub_resource type="GDScript" id="GDScript_4hxwg"]
@@ -109,24 +110,29 @@ label_text_mode = 1
 label_show_mode = 5
 magnetic_physics_mask = 4
 
+[node name="LockIndicator" parent="." index="4" unique_id=2136361816]
+initial_texture = null
+offset_on_zoom_change = false
+
+[node name="Sprite" parent="LockIndicator" index="0" unique_id=1009026342]
+texture = ExtResource("3_ltvt5")
+
 [node name="PointA_Indicators" type="Node2D" parent="." index="6" unique_id=279355189]
 
 [node name="Disconnected" parent="PointA_Indicators" index="0" unique_id=1367166681 instance=ExtResource("3_l3pq5")]
 visible = false
-position_offset_factor = Vector2(1, 0)
+initial_texture = ExtResource("4_kv05d")
 
-[node name="Sprite" parent="PointA_Indicators/Disconnected" index="0" unique_id=1009026342]
-texture = ExtResource("4_kv05d")
+[node name="Fitting" parent="PointA_Indicators" index="1" unique_id=139245679 instance=ExtResource("3_l3pq5")]
+visible = false
 
 [node name="PointB_Indicators" type="Node2D" parent="." index="7" unique_id=1021989336]
 
 [node name="Disconnected" parent="PointB_Indicators" index="0" unique_id=1208720671 instance=ExtResource("3_l3pq5")]
 visible = false
-position_offset_factor = Vector2(1, 0)
+initial_texture = ExtResource("4_kv05d")
 
-[node name="Sprite" parent="PointB_Indicators/Disconnected" index="0" unique_id=1009026342]
-texture = ExtResource("4_kv05d")
+[node name="Fitting" parent="PointB_Indicators" index="1" unique_id=2110796502 instance=ExtResource("3_l3pq5")]
+visible = false
 
 [editable path="LockIndicator"]
-[editable path="PointA_Indicators/Disconnected"]
-[editable path="PointB_Indicators/Disconnected"]

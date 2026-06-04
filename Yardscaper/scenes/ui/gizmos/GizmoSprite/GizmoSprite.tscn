@@ -5,6 +5,8 @@
 
 [node name="GizmoSprite" unique_id=1367166681 instance=ExtResource("1_leghn")]
 script = ExtResource("2_sybk5")
+initial_texture = null
+offset_on_zoom_change = false
 position_offset_factor = Vector2(0, 0)
 
 [node name="Sprite" type="Sprite2D" parent="." index="0" unique_id=1009026342]

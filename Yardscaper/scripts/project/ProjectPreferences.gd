@@ -10,6 +10,7 @@ const PROP_KEY_SHOW_SPRINKLERS = &"show_sprinklers"
 const PROP_KEY_SHOW_PIPES = &"show_pipes"
 const PROP_KEY_SHOW_PIPE_FLOW_DIRECTION = &"show_pipe_flow_direction"
 const PROP_KEY_SHOW_PIPE_DISCONNECTS = &"show_pipe_disconnects"
+const PROP_KEY_SHOW_PIPE_FITTINGS = &"show_pipe_fittings"
 const PROP_KEY_PIPE_COLORIZE_TYPE = &"pipe_colorize_type"
 const PROP_KEY_CAMERA_POS = &"camera_pos"
 const PROP_KEY_ZOOM = &"zoom"
@@ -76,6 +77,12 @@ var show_pipe_disconnects = true:
 			return
 		show_pipe_disconnects = value
 		view_show_state_changed.emit(PROP_KEY_SHOW_PIPE_DISCONNECTS, value)
+var show_pipe_fittings = true:
+	set(value):
+		if show_pipe_fittings == value:
+			return
+		show_pipe_fittings = value
+		view_show_state_changed.emit(PROP_KEY_SHOW_PIPE_FITTINGS, value)
 var pipe_colorize_type : PipeColorizeType = PipeColorizeType.Normal
 var camera_pos := Vector2()
 var zoom = 1.0
@@ -93,6 +100,7 @@ func serialize() -> Dictionary:
 		PROP_KEY_SHOW_PIPES : show_pipes,
 		PROP_KEY_SHOW_PIPE_FLOW_DIRECTION : show_pipe_flow_direction,
 		PROP_KEY_SHOW_PIPE_DISCONNECTS : show_pipe_disconnects,
+		PROP_KEY_SHOW_PIPE_FITTINGS : show_pipe_fittings,
 		PROP_KEY_CAMERA_POS : Utils.vect2_to_pair(camera_pos),
 		PROP_KEY_ZOOM : zoom,
 		PROP_KEY_GRID_MAJOR_SPACING : Utils.vect2_to_pair(grid_major_spacing_ft),
@@ -111,6 +119,7 @@ func deserialize(obj: Dictionary) -> void:
 	show_pipes = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPES, true)
 	show_pipe_flow_direction = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPE_FLOW_DIRECTION, false)
 	show_pipe_disconnects = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPE_DISCONNECTS, true)
+	show_pipe_fittings = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPE_FITTINGS, false)
 	pipe_colorize_type = DictUtils.get_enum_w_default(obj, PROP_KEY_PIPE_COLORIZE_TYPE, PipeColorizeType, PipeColorizeType.Normal)
 	camera_pos = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_CAMERA_POS, [0,0]))
 	zoom = DictUtils.get_w_default(obj, PROP_KEY_ZOOM, 1.0)
