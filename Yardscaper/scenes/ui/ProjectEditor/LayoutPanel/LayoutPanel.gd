@@ -261,12 +261,8 @@ func _handle_left_click_release(pos_in_world_px: Vector2):
 			pipe_node_to_add = null
 			mode = Mode.Idle
 
-func _handle_held_obj_move(mouse_pos_in_world_px: Vector2) -> void:
-	if _mouse_move_start_pos_px == null:
-		_mouse_move_start_pos_px = mouse_pos_in_world_px
-	
+func _handle_held_obj_move(delta_px: Vector2) -> void:
 	# apply delta movement vector to all selected movable objects
-	var delta_px = mouse_pos_in_world_px - _mouse_move_start_pos_px
 	for obj in _selection_controller.selected_objs():
 		obj.update_move(delta_px)
 
@@ -660,6 +656,9 @@ func _on_world_view_gui_input(event: InputEvent):
 						event.pressed &&
 						mode != Mode.MovingObjects &&
 						! Input.is_key_pressed(MULTI_SELECT_KEY))
+					if _can_start_move:
+						_mouse_move_start_pos_px = pos_in_world_px
+					
 					if event.pressed:
 						if mode == Mode.Idle:
 							_selection_controller.on_select_button_pressed(_hovered_obj)
@@ -698,7 +697,6 @@ func _on_world_view_gui_input(event: InputEvent):
 		elif pipe_node_to_add:
 			pipe_node_to_add.position = pos_in_world_px
 		elif _can_start_move:
-			_can_start_move = false # clear flag once we started
 			# check if any selected objects are position locked
 			var all_movable = true
 			var selected_objs := _selection_controller.selected_objs()
@@ -707,16 +705,22 @@ func _on_world_view_gui_input(event: InputEvent):
 					all_movable = false
 					break
 			
+			var move_delta_px := pos_in_world_px - _mouse_move_start_pos_px as Vector2
+			var move_thresh_good := move_delta_px.length() >= 0.5
+			
 			# start move operations if all objects are movable
-			if all_movable && selected_objs.size() > 0:
+			if all_movable && selected_objs.size() > 0 && move_thresh_good:
 				for obj in selected_objs:
 					obj.start_move()
 				mode = Mode.MovingObjects
+				_can_start_move = false
 			elif ! all_movable && selected_objs.size() > 0:
 				Globals.push_cursor_shape(Input.CURSOR_FORBIDDEN)
+				_can_start_move = false
 		
 		if mode == Mode.MovingObjects:
-			_handle_held_obj_move(pos_in_world_px)
+			var move_delta_px = pos_in_world_px - _mouse_move_start_pos_px
+			_handle_held_obj_move(move_delta_px)
 
 func _on_world_view_mouse_entered() -> void:
 	_mouse_over_world_viewport = true
