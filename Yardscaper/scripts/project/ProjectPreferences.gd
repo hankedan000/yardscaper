@@ -119,7 +119,7 @@ func deserialize(obj: Dictionary) -> void:
 	show_pipes = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPES, true)
 	show_pipe_flow_direction = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPE_FLOW_DIRECTION, false)
 	show_pipe_disconnects = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPE_DISCONNECTS, true)
-	show_pipe_fittings = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPE_FITTINGS, false)
+	show_pipe_fittings = DictUtils.get_w_default(obj, PROP_KEY_SHOW_PIPE_FITTINGS, true)
 	pipe_colorize_type = DictUtils.get_enum_w_default(obj, PROP_KEY_PIPE_COLORIZE_TYPE, PipeColorizeType, PipeColorizeType.Normal)
 	camera_pos = Utils.pair_to_vect2(DictUtils.get_w_default(obj, PROP_KEY_CAMERA_POS, [0,0]))
 	zoom = DictUtils.get_w_default(obj, PROP_KEY_ZOOM, 1.0)
